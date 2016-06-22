@@ -10,6 +10,7 @@
 
     <modules>
         <module>main/dpa-api</module>
+        <module>main/dpa-verapdf</module>
     </modules>
 </project>
 
