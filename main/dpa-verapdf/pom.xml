@@ -3,7 +3,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+    <artifactId>dpa-verapdf</artifactId>
+    <version>master-SNAPSHOT</version>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>vera-dev</id>
+            <name>Vera development</name>
+            <url>http://artifactory.opf-labs.org/artifactory/vera-dev</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <!-- uberjar from veraPDF installer, see top README.md -->
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf</groupId>
+            <artifactId>gui</artifactId>
+            <version>0.16.1</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -11,11 +34,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-    <artifactId>dpa-verapdf</artifactId>
-    <version>master-SNAPSHOT</version>
-
 
     <build>
         <pluginManagement>
