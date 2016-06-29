@@ -3,6 +3,8 @@ Digital Pligtaflevering af Aviser, autonomous preservation tools.
 
 # VeraPDF workaround
 
+*CURRENTLY NOT NEEDED*!!
+
 There is as of 2016-06-23 no clear "use veraPDF as a library from Java" API,
 and therefore the uberjar installed by the VeraPDF installer is included, and
 needs to be manually installed with
