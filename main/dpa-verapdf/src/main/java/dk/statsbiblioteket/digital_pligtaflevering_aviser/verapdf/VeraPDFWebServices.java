@@ -1,12 +1,16 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.multipart.FormDataMultiPart;
+import com.sun.jersey.multipart.file.FileDataBodyPart;
+
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.InputStream;
+import javax.ws.rs.core.UriBuilder;
+import java.io.File;
 import java.util.Objects;
 
 /**
@@ -23,42 +27,45 @@ public class VeraPDFWebServices {
 
     final String baseURL;
 
-    public String getInfo() {
-        // https://jersey.java.net/documentation/latest/user-guide.html#d0e4152
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(baseURL).path("info");
-
-        Response response = target.request(MediaType.APPLICATION_JSON).get();
-        return response.readEntity(String.class);
-    }
+//    public String getInfo() {
+//        // https://jersey.java.net/documentation/latest/user-guide.html#d0e4152
+//        Client client = ClientBuilder.newClient();
+//        WebTarget target = client.target(baseURL).path("info");
+//
+//        Response response = target.request(MediaType.APPLICATION_JSON).get();
+//        return response.readEntity(String.class);
+//    }
 
     public String getIds() {
-        // https://jersey.java.net/documentation/latest/user-guide.html#d0e4152
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(baseURL).path("profiles").path("ids");
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
 
-        Response response = target.request(MediaType.APPLICATION_JSON).get();
-        return response.readEntity(String.class);
+        WebResource resource = client.resource(UriBuilder.fromUri(baseURL + "/profiles/ids").build());
+
+        ClientResponse response = resource.type(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+
+        return response.getEntity(String.class);
     }
 
     public static void main(String[] args) {
-        InputStream pdfInputStream = VeraPDFWebServices.class.getResourceAsStream("veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
+        File pdfFile = new File("/home/tra/git/digital-pligtaflevering-aviser-tools/main/dpa-verapdf/src/test/resources/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
         VeraPDFWebServices veraPDFWebServices = new VeraPDFWebServices("http://localhost:8080/api");
         System.out.println(veraPDFWebServices.getIds());
-        System.out.println(veraPDFWebServices.validate(pdfInputStream, "1b"));
+        System.out.println(veraPDFWebServices.validate(pdfFile, "1b"));
+        System.out.println(veraPDFWebServices.validate(pdfFile, "3b"));
     }
 
-    private String validate(InputStream pdfInputStream, String profileId) {
-        // https://jersey.java.net/documentation/latest/user-guide.html#d0e4152
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target(baseURL).path("validate").path("{id}");
-        target.resolveTemplate("id", profileId);
+    private String validate(File pdfFile, String profileId) {
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
 
-        Form form = new Form();
-        //form.param("file", );
+        WebResource resource = client.resource(UriBuilder.fromUri(baseURL + "/validate/" + profileId).build());
 
+        FormDataMultiPart multiPart = new FormDataMultiPart();
+        multiPart.bodyPart(new FileDataBodyPart("file", pdfFile, MediaType.APPLICATION_OCTET_STREAM_TYPE));
+        ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).post(ClientResponse.class, multiPart);
 
-        Response response = target.request(MediaType.APPLICATION_JSON).get();
-        return response.readEntity(String.class);
+        return response.getEntity(String.class);
     }
+
 }
