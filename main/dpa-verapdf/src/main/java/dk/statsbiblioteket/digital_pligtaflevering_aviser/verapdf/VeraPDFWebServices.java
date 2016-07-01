@@ -53,6 +53,7 @@ public class VeraPDFWebServices {
         System.out.println(veraPDFWebServices.getIds());
         System.out.println(veraPDFWebServices.validate(pdfFile, "1b"));
         System.out.println(veraPDFWebServices.validate(pdfFile, "3b"));
+        System.out.println(veraPDFWebServices.validate(pdfFile, "1a"));
     }
 
     private String validate(File pdfFile, String profileId) {
