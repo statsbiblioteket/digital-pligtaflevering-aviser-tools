@@ -1,28 +1,28 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Query;
-import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
-import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
-import dk.statsbiblioteket.medieplatform.autonomous.Item;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.*;
 
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
  *
  */
-public class DomsQuery<I extends Item> implements Query<QuerySpecification, Stream<I>> {
+public class DomsQuery<I extends Item> implements Query<QuerySpecification, Stream<DomsEventAdder>> {
 
+    private DomsEventStorage<I> domsEventStorage;
     private SBOIEventIndex<I> sboiEventIndex;
 
-    public DomsQuery(SBOIEventIndex<I> sboiEventIndex) {
+    public DomsQuery(DomsEventStorage<I> domsEventStorage, SBOIEventIndex<I> sboiEventIndex) {
+        this.domsEventStorage = domsEventStorage;
         this.sboiEventIndex = sboiEventIndex;
     }
 
     @Override
-    public Stream<I> query(QuerySpecification querySpecification) {
+    public Stream<DomsEventAdder> query(QuerySpecification querySpecification) {
 
         EventTrigger.Query<I> query = new EventTrigger.Query<>();
 
@@ -33,7 +33,7 @@ public class DomsQuery<I extends Item> implements Query<QuerySpecification, Stre
 
         // currently only ask once and stop.
 
-        boolean details = false; // false=summa information only, true=ask DOMS for everything.
+        boolean details = querySpecification.getDetails();
 
         try {
             // http://stackoverflow.com/a/24511534/53897
@@ -42,7 +42,8 @@ public class DomsQuery<I extends Item> implements Query<QuerySpecification, Stre
             Iterable<I> iterable = () -> searchIterator;
             Stream<I> targetStream = StreamSupport.stream(iterable.spliterator(), false);
 
-            return targetStream;
+            Function<I, DomsItem> function = item -> new DomsItem(item, domsEventStorage);
+            return targetStream.map(function);
         } catch (CommunicationException e) {
             // well?
             throw new RuntimeException("no clue how to handle", e);
