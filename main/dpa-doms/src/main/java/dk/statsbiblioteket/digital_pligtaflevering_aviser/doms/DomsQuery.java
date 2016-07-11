@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Query;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryQuery;
 import dk.statsbiblioteket.medieplatform.autonomous.*;
 
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import java.util.stream.StreamSupport;
 /**
  *
  */
-public class DomsQuery<I extends Item> implements Query<QuerySpecification, Stream<DomsEventAdder>> {
+public class DomsQuery<I extends Item> implements RepositoryQuery<QuerySpecification, Stream<DomsEventAdder>> {
 
     private DomsEventStorage<I> domsEventStorage;
     private SBOIEventIndex<I> sboiEventIndex;
