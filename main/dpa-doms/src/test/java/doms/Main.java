@@ -1,8 +1,16 @@
 package doms;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.*;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsQuery;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
-import dk.statsbiblioteket.medieplatform.autonomous.*;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.junit.Test;
 
 import javax.inject.Provider;
@@ -48,13 +56,14 @@ public class Main {
 
         DomsQuery<Item> q = new DomsQuery<>(domsEventStorage, index);
 
-        Stream<DomsEventAdder> itemStream = q.query(specification);
+        Stream<DomsItem> itemStream = q.query(specification);
 
-        Task<DomsEventAdder, String> task = item -> {
+        Task<DomsItem, String> task = item -> {
             DomsEvent event = new DomsEvent("agent", "details", item.toString(), false);
-            item.add(event);
+            item.events().add(event);
+            item.datastreams().put("VERAPDF", "SAMPLE DATA");
+            return item.getOriginalItem().getDomsID() + " - " + item; // FIXME
 
-            return item.toString();  // FIXME
         };
 
         List<String> result = itemStream.map(task).collect(Collectors.toList());
@@ -64,6 +73,7 @@ public class Main {
 
     public Provider<DomsEventStorage<Item>> getDomsEventStorageProvider(ItemFactory<Item> itemFactory, String
             fedoraLocation, String pidGeneratorLocation) {
+
         DomsEventStorageFactory<Item> domsEventStorageFactory = new DomsEventStorageFactory<>();
         domsEventStorageFactory.setFedoraLocation(fedoraLocation);
         domsEventStorageFactory.setPidGeneratorLocation(pidGeneratorLocation);

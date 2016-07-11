@@ -12,9 +12,7 @@
         <module>main/dpa-api</module>
         <module>main/dpa-verapdf</module>
         <module>main/dpa-harness</module>
-        <!--
         <module>main/dpa-doms</module>
-        -->
     </modules>
 </project>
 
