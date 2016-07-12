@@ -5,6 +5,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -21,7 +22,7 @@ public class DomsItem<I extends Item> implements RepositoryItem<DomsEvent> {
         this.item = item;
         this.domsEventStorage = domsEventStorage;
         this.domsEvents = new DomsEventAdderCollection<>(item, domsEventStorage);
-        this.domsItemDatastreams = new DomsItemDatastreams<I>(item, domsEventStorage);
+        this.domsItemDatastreams = new DomsItemDatastreams<I>(item, domsEventStorage, key -> "Added at " + new Date());
     }
 
     public Item getOriginalItem() {
