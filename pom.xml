@@ -13,6 +13,7 @@
         <module>main/dpa-verapdf</module>
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
+        <module>main/dpa-bitrepository</module>
     </modules>
 </project>
 

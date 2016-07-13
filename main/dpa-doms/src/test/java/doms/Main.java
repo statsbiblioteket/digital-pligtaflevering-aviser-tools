@@ -30,6 +30,8 @@ public class Main {
 
     @Test
     public void Main() throws Exception {
+        org.bitrepository.common.filestore.FileInfo fileInfo = new org.bitrepository.common.filestore.FileInfo();
+
         ItemFactory<Item> itemFactory = id -> new Item(id);
 
         final Provider<DomsEventStorage<Item>> domsEventStorageProvider = getDomsEventStorageProvider(
