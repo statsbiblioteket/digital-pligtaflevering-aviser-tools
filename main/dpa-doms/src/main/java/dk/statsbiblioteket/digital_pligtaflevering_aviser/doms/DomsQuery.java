@@ -4,6 +4,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryQuery;
 import dk.statsbiblioteket.medieplatform.autonomous.*;
 import org.apache.solr.client.solrj.SolrServerException;
 
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -17,6 +18,7 @@ public class DomsQuery<I extends Item> implements RepositoryQuery<QuerySpecifica
 
     private DomsEventStorage<I> domsEventStorage;
     private SBOIEventIndex<I> sboiEventIndex;
+    private Function<String, InputStream> inputStreamFor;
 
     public DomsQuery(DomsEventStorage<I> domsEventStorage, SBOIEventIndex<I> sboiEventIndex) {
         this.domsEventStorage = domsEventStorage;

@@ -4,9 +4,11 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  *
@@ -21,6 +23,7 @@ public class DomsItem<I extends Item> implements RepositoryItem<DomsEvent> {
     public DomsItem(I item, DomsEventStorage<I> domsEventStorage) {
         this.item = item;
         this.domsEventStorage = domsEventStorage;
+
         this.domsEvents = new DomsEventAdderCollection<>(item, domsEventStorage);
         this.domsItemDatastreams = new DomsItemDatastreams<I>(item, domsEventStorage, key -> "Added at " + new Date());
     }
@@ -43,4 +46,6 @@ public class DomsItem<I extends Item> implements RepositoryItem<DomsEvent> {
     public Collection<DomsEvent> events() {
         return domsEvents;
     }
+
+
 }

@@ -1,5 +1,6 @@
 package doms;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.bitrepository.LookupFileInfoForID;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsQuery;
@@ -11,10 +12,14 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import org.bitrepository.common.filestore.FileInfo;
 import org.junit.Test;
 
 import javax.inject.Provider;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +35,7 @@ public class Main {
 
     @Test
     public void Main() throws Exception {
-        org.bitrepository.common.filestore.FileInfo fileInfo = new org.bitrepository.common.filestore.FileInfo();
+        //org.bitrepository.common.filestore.FileInfo fileInfo = new org.bitrepository.common.filestore.FileInfo();
 
         ItemFactory<Item> itemFactory = id -> new Item(id);
 
@@ -48,6 +53,16 @@ public class Main {
                 10
         );
 
+        // get inputstream for an id in e.g. the bitrepository.
+        Function<String, InputStream> inputStreamFor = id -> {
+            try {
+                return new LookupFileInfoForID().apply(id).getInputstream();
+            } catch (IOException e) {
+                throw new RuntimeException("could not get inputstream for " + id, e);
+            }
+        };
+
+
         QuerySpecification specification = new QuerySpecification(
                 asList("Data_Received"),
                 emptyList(),
@@ -64,6 +79,10 @@ public class Main {
             DomsEvent event = new DomsEvent("agent", "details", item.toString(), false);
             item.events().add(event);
             item.datastreams().put("VERAPDF", "SAMPLE DATA");
+            String bitrepositoryId = "";  // FIXME
+            InputStream inputStream inputStreamFor.apply(bitrepositoryId);
+            // FIXME
+            
             return item.getOriginalItem().getDomsID() + " - " + item; // FIXME
 
         };

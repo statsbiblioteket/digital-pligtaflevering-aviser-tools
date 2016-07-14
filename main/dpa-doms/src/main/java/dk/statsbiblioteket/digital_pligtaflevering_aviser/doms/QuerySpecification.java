@@ -1,6 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  *
@@ -19,7 +21,8 @@ public class QuerySpecification {
                               List<String> futureEvents,
                               List<String> oldEvents,
                               List<String> types,
-                              boolean details) {
+                              boolean details
+                              ) {
         this.pastSuccessfulEvents = pastSuccessfulEvents;
         this.futureEvents = futureEvents;
         this.oldEvents = oldEvents;
