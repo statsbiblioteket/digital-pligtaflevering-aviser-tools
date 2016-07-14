@@ -2,6 +2,25 @@
 
 Digital Pligtaflevering af Aviser, autonomous preservation tools.
 
+
+# INVOCATION
+
+As of 2016-07-14 the only runnable code is the Main test in dpa-doms.
+TRA reached the milestone of actually storing VeraPDF output in the
+event and in the "VERAPDF" datastream today.  Note that both the doms-installer
+vagrant machine and the VeraPDF rest server must be running for the
+Main test to complete.
+
+Plan from here is slowly migrating the Main test to the dpa-harness
+module while building a Dependency Injection aware harness utilizing
+Dagger 2 injecting all the needed constant strings as well as joining
+the various components correctly.  When that work is done we should
+be able to flesh out much better how the deliveries will look
+and switch to work on one of those.
+
+
+
+
 # Flow
 
 Summarized discussion with KFC 2016-07-01:
@@ -79,4 +98,7 @@ From doms-installer/README.md: Access Fedora (fedoraAdmin/fedoraAdminPass):
 
 [http://localhost:7880/fedora/objects](http://localhost:7880/fedora/objects)
 
-
+The default DOMS content created contains two newspaper batches that is triggered
+by the search criteria, and is simulated to be run on dummy PDF files stored
+as test resources.  VeraPDF is invoked as a REST service, and the output stored
+in the event and as a datastream named VERAPDF on the newspaper roundtrip object.

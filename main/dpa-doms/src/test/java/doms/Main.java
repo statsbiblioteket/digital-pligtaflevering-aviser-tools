@@ -75,14 +75,17 @@ public class Main {
         Stream<DomsItem> itemStream = q.query(specification);
 
         Task<DomsItem, String> task = item -> {
-            DomsEvent event = new DomsEvent("agent", "details", item.toString(), false);
-            item.events().add(event);
             String bitrepositoryId = "";  // FIXME: bitrepository ingester must work first.
             InputStream inputStream = inputStreamFor.apply(bitrepositoryId);
 
             VeraPDFWebServices veraPDFWebServices = new VeraPDFWebServices("http://localhost:8080/api");
-            String outputFromVeraPDf = veraPDFWebServices.validate(inputStream, item.getOriginalItem().getDomsID(), "1b");
+            String fileName = "fake original filename.pdf"; // item.getOriginalItem().getDomsID();
+            String outputFromVeraPDf = veraPDFWebServices.validate(inputStream, fileName, "1b");
             item.datastreams().put("VERAPDF", outputFromVeraPDf);
+
+            DomsEvent event = new DomsEvent("dummy agent name for now", outputFromVeraPDf, item.toString(), false);
+            item.events().add(event);
+
             return outputFromVeraPDf;
         };
 

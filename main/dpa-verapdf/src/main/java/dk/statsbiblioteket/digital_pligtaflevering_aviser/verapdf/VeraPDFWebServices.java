@@ -68,6 +68,7 @@ public class VeraPDFWebServices {
         FormDataMultiPart multiPart = new FormDataMultiPart();
         multiPart.bodyPart(new StreamDataBodyPart("file", inputStream, fileName));
         ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).post(ClientResponse.class, multiPart);
+        // FIXME:  Get response on XML form instead of JSON.
 
         return response.getEntity(String.class);
     }
