@@ -12,9 +12,9 @@ import java.util.function.Function;
 
 public class LookupFileInfoForID implements Function<String, FileInfo> {
 
-    final AtomicInteger counter = new AtomicInteger();
+    static final AtomicInteger counter = new AtomicInteger();
 
-    File[] FILES = {new File(""), new File(""), new File("")};
+    File[] FILES = {new File("/home/tra/Downloads/Git_at_SB.pdf"), new File("/home/tra/Downloads/NOM20150807X13#0001.pdf")};
 
     @Override
     public FileInfo apply(final String s) {

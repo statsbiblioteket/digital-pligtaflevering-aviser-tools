@@ -22,14 +22,16 @@ public class DomsEventAdderCollection<I extends Item> extends ArrayList<DomsEven
     @Override
     public boolean add(DomsEvent event) {
         try {
+            Date timestamp = new Date();
+
             Date d = domsEventStorage.appendEventToItem(
                     item,
-                    event.getAgent(),
-                    new Date(),
-                    event.getDetails(),
+                    event.getLinkingAgentIdentifierValue(),
+                    timestamp,
+                    event.getEventOutcomeDetailNote(),
                     event.getEventType(),
                     event.getOutcome());
-            System.out.println(d);
+            System.out.println(d); // FIXME:  What daelen do we do?
             return true;
         } catch (RuntimeException e) {
             throw e;

@@ -6,24 +6,24 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event;
  *
  */
 public class DomsEvent implements Event {
-    private final String agent;
-    private final String details;
+    private final String linkingAgentIdentifierValue;
+    private final String eventOutcomeDetailNote;
     private final String eventType;
     private boolean outcome;
 
-    public DomsEvent(String agent, String details, String eventType, boolean outcome) {
-        this.agent = agent;
-        this.details = details;
+    public DomsEvent(String linkingAgentIdentifierValue, String eventOutcomeDetailNote, String eventType, boolean outcome) {
+        this.linkingAgentIdentifierValue = linkingAgentIdentifierValue;
+        this.eventOutcomeDetailNote = eventOutcomeDetailNote;
         this.eventType = eventType;
         this.outcome = outcome;
     }
 
-    public String getAgent() {
-        return agent;
+    public String getLinkingAgentIdentifierValue() {
+        return linkingAgentIdentifierValue;
     }
 
-    public String getDetails() {
-        return details;
+    public String getEventOutcomeDetailNote() {
+        return eventOutcomeDetailNote;
     }
 
     public String getEventType() {

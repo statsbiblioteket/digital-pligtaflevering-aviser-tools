@@ -73,3 +73,10 @@ Run it manually with
 
 By default it listens on port 8000.
 
+# DOMS
+
+From doms-installer/README.md: Access Fedora (fedoraAdmin/fedoraAdminPass):
+
+[http://localhost:7880/fedora/objects](http://localhost:7880/fedora/objects)
+
+

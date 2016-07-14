@@ -6,13 +6,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsQuery;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFWebServices;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import org.bitrepository.common.filestore.FileInfo;
 import org.junit.Test;
 
 import javax.inject.Provider;
@@ -62,7 +62,6 @@ public class Main {
             }
         };
 
-
         QuerySpecification specification = new QuerySpecification(
                 asList("Data_Received"),
                 emptyList(),
@@ -78,13 +77,13 @@ public class Main {
         Task<DomsItem, String> task = item -> {
             DomsEvent event = new DomsEvent("agent", "details", item.toString(), false);
             item.events().add(event);
-            item.datastreams().put("VERAPDF", "SAMPLE DATA");
-            String bitrepositoryId = "";  // FIXME
-            InputStream inputStream inputStreamFor.apply(bitrepositoryId);
-            // FIXME
-            
-            return item.getOriginalItem().getDomsID() + " - " + item; // FIXME
+            String bitrepositoryId = "";  // FIXME: bitrepository ingester must work first.
+            InputStream inputStream = inputStreamFor.apply(bitrepositoryId);
 
+            VeraPDFWebServices veraPDFWebServices = new VeraPDFWebServices("http://localhost:8080/api");
+            String outputFromVeraPDf = veraPDFWebServices.validate(inputStream, item.getOriginalItem().getDomsID(), "1b");
+            item.datastreams().put("VERAPDF", outputFromVeraPDf);
+            return outputFromVeraPDf;
         };
 
         List<String> result = itemStream.map(task).collect(Collectors.toList());
