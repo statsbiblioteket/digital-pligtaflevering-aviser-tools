@@ -1,9 +1,69 @@
 # digital-pligtaflevering-aviser-tools
 
-Digital Pligtaflevering af Aviser, autonomous preservation tools.
+Digital Pligtaflevering af Aviser (DPA), autonomous preservation tools.
 
+## Background
 
-# INVOCATION
+All Danish newspapers published are collected in physical form
+in two copies and preserved by Statens Avissamling (https://www.statsbiblioteket.dk/nationalbibliotek/adgang-til-samlingerne/aviser/StatensAvissamling).  
+The traditional procedure has then been microfilming the newspapers and make the
+microfilms available to the general public.   A separate project - https://blog.avisdigitalisering.dk/ - has digitized the
+old microfilms and made them available through http://www2.statsbiblioteket.dk/mediestream/avis 
+We now want to start collecting new newspapers as PDF's instead.  This is what DPA is about, and
+is based on the experiences gained.
+
+## Minimal Effort Ingest
+
+The traditional mindset for digital preservation is to do all the work for a given item, collecting metadata, normalizing
+files, ensuring consistency and so on, and THEN store the result for eternity.  We have found that the amount of work
+necessary to properly handle a given collection is rather large, regardless of the size of the collection, which mean
+that especially small collections are delayed much longer than originally expected.  
+
+Our conclusion has been that it is more important to get the collections preserved as they are and then doing the rest
+when we have the time, than getting everything done and tying a bow on the virtual box before being put on the digital shelf.
+
+Steps relevant for PDF's could be:
+
+* _Ingest_ PDF's (preserve them in Bitmagasinet)
+* Analyse if the PDF can be rendered to a series of images, one per page.
+* Check if the PDF is suitable for digital preservation.  An example could be if all fonts and images are present 
+inside the PDF
+or if any need to be retrieved from the internet.  Such a resource may go away at any time, making the PDF incomplete. 
+If we receive such PDF's a human must take action.
+* Create reports on deliveries to get an overview of how the process is going.
+
+The important part is that after the initial ingest the steps can be taken whenever the necessary resources are available,
+or re-taken if found necessary.   New steps can also be added and run as appropriate at any time later.
+
+This only modifies the OASIS model of digital preservation slightly.
+
+## Design
+
+At SB (Statsbiblioteket - _State and University Library_) we work with two backend systems:
+
+1. "DOMS" (_Digital Object Management System_) - our homegrown metadata repository based on Fedora Commons 3 (not the 
+operating system) for metadata storage in RDF form and Summa for searching.
+2. "Bitmagasinet" (_Bit Repository_) - our long term bit preservation system in collaboration with several other Danish 
+institutions which is where the actual files are stored.   
+https://sbforge.org/display/BITMAG/The+Bit+Repository+project
+
+All information _about_ the files is stored in DOMS.  All the _actual_ files are stored in Bitmagasinet,
+and - based on a discussion TRA had with KTC and ABR on 2016-07-14 - 
+we need to utilize the SB-specific implementation of the Bitmagasinet-pillar to access the physical
+files efficiently similar to what has been done in Avisprojektet.
+
+The steps taken so far on a given PDF is stored as metadata in the form of PREMIS events.  
+
+Each step taken is implemented as a traditional stand-alone Java application which regularily asks DOMS through Summa
+if there is any PDF's ready to be worked on, and if any, work on those.  The result of the work is added as an event and/or
+a datastream if appropriate for later.
+
+The workflow a PDF must pass
+through is defined by configuring the steps so if step B must run after step A, then step B looks for the PREMIS event
+that A has been run successfully.  This implicit assembly line way of thinking allows us to avoid a full blown 
+centralized workflow engine and keep the complexity lower.
+
+## Invocation
 
 As of 2016-07-14 the only runnable code is the Main test in dpa-doms.
 TRA reached the milestone of actually storing VeraPDF output in the
