@@ -1,6 +1,12 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
-import dk.statsbiblioteket.medieplatform.autonomous.*;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
+import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 
 import java.util.Arrays;
 import java.util.Date;

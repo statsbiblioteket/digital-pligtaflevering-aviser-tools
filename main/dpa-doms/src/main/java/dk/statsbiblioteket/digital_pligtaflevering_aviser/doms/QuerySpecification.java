@@ -1,8 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  *

@@ -4,11 +4,9 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  *

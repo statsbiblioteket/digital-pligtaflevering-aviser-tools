@@ -1,6 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.model;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 

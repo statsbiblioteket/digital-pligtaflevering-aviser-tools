@@ -1,7 +1,11 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryQuery;
-import dk.statsbiblioteket.medieplatform.autonomous.*;
+import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
+import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
+import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.InputStream;
