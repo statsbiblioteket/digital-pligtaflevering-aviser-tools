@@ -45,7 +45,7 @@ public class VeraPDFWebServices {
 
         WebResource resource = client.resource(UriBuilder.fromUri(baseURL + "/profiles/ids").build());
 
-        ClientResponse response = resource.type(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).accept(MediaType.APPLICATION_XML_TYPE).get(ClientResponse.class);
 
         return response.getEntity(String.class);
     }
@@ -67,8 +67,7 @@ public class VeraPDFWebServices {
 
         FormDataMultiPart multiPart = new FormDataMultiPart();
         multiPart.bodyPart(new StreamDataBodyPart("file", inputStream, fileName));
-        ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).post(ClientResponse.class, multiPart);
-        // FIXME:  Get response on XML form instead of JSON.
+        ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).accept(MediaType.APPLICATION_XML_TYPE).post(ClientResponse.class, multiPart);
 
         return response.getEntity(String.class);
     }
