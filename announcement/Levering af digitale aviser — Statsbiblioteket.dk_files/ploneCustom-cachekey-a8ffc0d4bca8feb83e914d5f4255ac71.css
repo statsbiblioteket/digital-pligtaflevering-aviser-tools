@@ -1,0 +1,41 @@
+
+/* - ploneCustom.css - */
+@media all {
+/* https://www.statsbiblioteket.dk/portal_css/ploneCustom.css?original=1 */
+/* */
+.alphaNav{
+margin: 0 0 .8em;
+}
+.databaseSearch{
+margin: .8em 0;
+}
+.databaseSearchText{
+margin-bottom: 1em;
+}
+/* */
+#portal-breadcrumbs .breadcrumbSeparator{
+background-position:  -242px -198px;
+}
+/* */
+.section-front-pagefront-page\.2 #portal-columns{
+margin-top: 40px;
+}
+/* */
+div.portletWrapper:first-child ul ul{
+margin-bottom: 0.5em;
+padding: 0 0 0 .7em;
+}
+/* */
+dl.portletEmbed iframe{
+max-width: 260px !important;
+}
+/* */
+#portal-breadcrumbs {
+line-height: 14px;
+margin: 8px 0 0 2px;
+}
+#portal-breadcrumbs #breadcrumbs-you-are-here{
+margin-right: 5px;
+}
+}
+

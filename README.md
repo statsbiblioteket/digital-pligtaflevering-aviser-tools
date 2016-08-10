@@ -12,6 +12,8 @@ old microfilms and made them available through http://www2.statsbiblioteket.dk/m
 We now want to start collecting new newspapers as PDF's instead.  This is what DPA is about, and
 is based on the experiences gained.
 
+Official documentation is at https://www.statsbiblioteket.dk/om-statsbiblioteket/udbud/levering-af-digitale-aviser
+
 ## Minimal Effort Ingest
 
 The traditional mindset for digital preservation is to do all the work for a given item, collecting metadata, normalizing
