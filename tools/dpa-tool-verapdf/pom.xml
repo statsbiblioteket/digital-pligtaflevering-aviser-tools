@@ -1,0 +1,101 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
+    <artifactId>dpa-tool-verapdf</artifactId>
+    <version>master-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <appassembler-maven-plugin.mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.verapdf.ToolVeraPdfMain</appassembler-maven-plugin.mainClass>
+        <appassembler-maven-plugin.id>dpa-tool-verapdf</appassembler-maven-plugin.id>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+            <artifactId>dpa-harness</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!-- create the deployment layout -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.10</version>
+                <configuration>
+                    <!-- http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html -->
+                    <platforms>
+                        <platform>all</platform>
+                    </platforms>
+                    <configurationDirectory>conf</configurationDirectory>
+                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                    <filterConfigurationDirectory>false</filterConfigurationDirectory>
+
+                    <repositoryLayout>flat</repositoryLayout>
+                    <repositoryName>libs</repositoryName>
+                    <!-- for logback -->
+                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+                    <logsDirectory>logs</logsDirectory>
+                    <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
+                    <preAssembleDirectory>for-deployment</preAssembleDirectory>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>assemble</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                        <configuration>
+                            <programs>
+                                <program>
+                                    <mainClass>${appassembler-maven-plugin.mainClass}</mainClass>
+                                    <id>${appassembler-maven-plugin.id}</id>
+                                </program>
+                            </programs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- create deployment tarball -->
+            <plugin>
+                <!-- https://maven.apache.org/plugins/maven-assembly-plugin/usage.html -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <archiveBaseDirectory>target/appassembler</archiveBaseDirectory>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

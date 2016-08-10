@@ -14,6 +14,8 @@
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
+
+        <module>tools/dpa-tool-verapdf</module>
     </modules>
 </project>
 
