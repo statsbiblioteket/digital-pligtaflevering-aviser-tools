@@ -1,0 +1,15 @@
+d41d8cd98f00b204e9800998ecf8427e  verapdf/udgave1/articles/20160811-verapdf-udgave1-article001.xml
+8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.xml
+0823642b5ba06284cd2b149dc11f480b  verapdf/udgave1/pages/20160811-verapdf-udgave1-page002.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page002.xml
+6ecb7e69d623dff42f0c0b8aea1994c6  verapdf/udgave1/pages/20160811-verapdf-udgave1-page003.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page003.xml
+1f194f04bd00e284f75414c996bb3fb4  verapdf/udgave1/pages/20160811-verapdf-udgave1-page004.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page004.xml
+5deec5b1af4ccf8859267371d889d898  verapdf/udgave1/pages/20160811-verapdf-udgave1-page005.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page005.xml
+e6d0349d514b7450e20c804fcc477ddc  verapdf/udgave1/pages/20160811-verapdf-udgave1-page006.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page006.xml
+53cedf65fe2771a4ec41b8683f24376a  verapdf/udgave1/pages/20160811-verapdf-udgave1-page007.pdf
+a9785e7ca062fefded8c1b01e283d003  verapdf/udgave1/pages/20160811-verapdf-udgave1-page007.xml
