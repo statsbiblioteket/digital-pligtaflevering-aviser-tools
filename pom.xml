@@ -15,6 +15,9 @@
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
 
+        <module>newspaper/newspaper-batch-trigger</module>
+        <module>newspaper/newspaper-prompt-doms-ingester</module>
+
         <module>tools/dpa-tool-verapdf</module>
     </modules>
 </project>
