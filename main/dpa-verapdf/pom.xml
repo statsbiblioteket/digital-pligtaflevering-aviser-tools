@@ -4,23 +4,49 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-    <artifactId>dpa-verapdf</artifactId>
-    <version>master-SNAPSHOT</version>
+
+        <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+        <artifactId>dpa-verapdf</artifactId>
+        <version>master-SNAPSHOT</version>
 
     <repositories>
         <repository>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
             <id>vera-dev</id>
             <name>Vera development</name>
-            <url>http://artifactory.opf-labs.org/artifactory/vera-dev</url>
+            <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
         </repository>
     </repositories>
 
+    <properties>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.language>java</sonar.language>
+        <maven.failsafe.version>2.18.1</maven.failsafe.version>
+        <verapdf.pdfbox.validation.version>[0.20.3]</verapdf.pdfbox.validation.version>
+    </properties>
+
     <dependencies>
-        <!-- as given by TEG -->
+        <!--<dependency>
+            <groupId>dk.statsbiblioteket.user.mmj</groupId>
+            <artifactId>core</artifactId>
+            <version>0.21.0-SNAPSHOT</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.verapdf</groupId>
+            <artifactId>pdfbox-validation-model</artifactId>
+            <version>${verapdf.pdfbox.validation.version}</version>
+        <!--<exclusions>
+            <exclusion>
+                <groupId>org.verapdf</groupId>
+                <artifactId>core</artifactId>
+            </exclusion>
+        </exclusions>-->
+    </dependency>
+
+
+    <!-- as given by TEG -->
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
@@ -42,12 +68,6 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-core</artifactId>
-            <version>1.19</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
             <version>1.19</version>
         </dependency>
 
