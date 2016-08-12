@@ -18,7 +18,9 @@
         <module>newspaper/newspaper-batch-trigger</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
 
-        <module>tools/dpa-tool-verapdf</module>
+        <!-- command line scripts - ->
+        -->
+        <module>tools/dpa-tools</module>
     </modules>
 </project>
 
