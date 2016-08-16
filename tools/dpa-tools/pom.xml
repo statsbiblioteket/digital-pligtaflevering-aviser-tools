@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
-    <artifactId>dpa-tool-verapdf</artifactId>
+    <artifactId>dpa-tools</artifactId>
     <version>master-SNAPSHOT</version>
     <packaging>jar</packaging>
 
