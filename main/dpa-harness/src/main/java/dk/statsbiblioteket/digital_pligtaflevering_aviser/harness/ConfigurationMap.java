@@ -1,22 +1,35 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
+import dagger.Module;
+import dagger.Provides;
 
-
+import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.TreeMap;
 
-
 /**
- * <p>
- * ConfigurationMap holds a map of string to string (i.e. the general form
- * of java properties).  The toString() method list the keys in alphabetical order.
- * </p>
+ * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
+ * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. FIXME:  Full technical
+ * explanation pending.</p>
  */
+@Module
 public class ConfigurationMap extends TreeMap<String, String> {
+
+    // Constructor must take arguments to ensure Dagger does not instantiate automatically.
+
+    public ConfigurationMap(Map<String, String> initialMap) {
+        this.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
+    }
+
+    @Provides @Singleton
+    public ConfigurationMap getConfigurationMap() {
+        return this;
+    }
 
     /**
      * Adds those system properties with the provided keys that actually exist (value != null) to the configuration map.
@@ -32,7 +45,8 @@ public class ConfigurationMap extends TreeMap<String, String> {
     }
 
     /**
-     * EventAdderValuePutter those environment variables with the provided keys that actually exist (value != null) to the configuration map.
+     * EventAdderValuePutter those environment variables with the provided keys that actually exist (value != null) to
+     * the configuration map.
      */
 
     public void addEnvironmentVariables(String... variableKeys) {
@@ -45,7 +59,8 @@ public class ConfigurationMap extends TreeMap<String, String> {
     }
 
     /**
-     * Buffers the reader, reads in the entries, and add them to the configuration map.  The reader is closed afterwards.  Values (but not keys) are trimmed.
+     * Buffers the reader, reads in the entries, and add them to the configuration map.  The reader is closed
+     * afterwards.  Values (but not keys) are trimmed.
      */
 
     public void addPropertyFile(Reader reader) throws IOException {

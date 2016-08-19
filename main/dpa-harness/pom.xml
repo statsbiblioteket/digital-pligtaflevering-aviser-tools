@@ -20,6 +20,24 @@
             <version>2.2</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+            <artifactId>dpa-api</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.21</version>
+            <!-- for now, use with unit tests later
+            <scope>test</scope>
+            -->
+        </dependency>
     </dependencies>
 
 

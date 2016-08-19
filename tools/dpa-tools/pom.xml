@@ -32,6 +32,11 @@
             <version>2.2</version>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+            <artifactId>dpa-doms</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
