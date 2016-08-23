@@ -5,18 +5,17 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.TaskComponent;
 
 import java.util.stream.Stream;
 
 /**
  *
  */
-public class VeraPdfMain {
+public class  VeraPdfMain {
 }
 
 @Component(modules = {ConfigurationMap.class, VeraPdfModule.class})
-interface VeraPdfTaskComponent extends TaskComponent<DomsItem, String> {
+interface VeraPdfTaskComponent { //extends TaskComponent<DomsItem, String> {
 };
 @Module
 class VeraPdfModule {
