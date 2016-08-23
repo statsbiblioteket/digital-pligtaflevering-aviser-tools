@@ -9,3 +9,37 @@ Autonomous Component that ingests a batch directory directly to a DOMS object tr
  are ingested as datastreams.
  * For the newspaper project there is factory method SimpleFedoraIngester.getNewspaperInstance() which returns an ingester
  configured for newspaper batch-ingest.
+ 
+The ingester uses the properties file config.properties for configuration of the application.
+The file config.properties.default is added for configuration suggestion during test.
+
+**Format expectation and application configuration**
+
+During ingestion the ingester expects that there is always delivered pdf and xml pair in the pages folder.
+It then ingests the name of the two files as, and the full file-name.
+
+Example:
+This source:
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.xml
+
+Is ingested as this:
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001
+
+
+Ind this source:
+B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002.xml
+
+Is ingested as this:
+B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002
+
+
+**Test setup**
+
+Start with a clean vagrant
+
+
+
+
+

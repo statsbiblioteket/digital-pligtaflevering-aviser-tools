@@ -25,9 +25,7 @@ public class SimpleFedoraIngester extends AbstractFedoraIngester {
      * @param fedora      the fedora instance in which to ingest.
      * @param collections the DOMS collections in which to ingest objects.
      */
-    public SimpleFedoraIngester(EnhancedFedora fedora,
-
-                                String[] collections) {
+    public SimpleFedoraIngester(EnhancedFedora fedora, String[] collections) {
         this.fedora = fedora;
         this.collections = collections;
     }
