@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 @Component
 public interface TaskComponent<I extends RepositoryItem, V> {
-    Stream<Stream<I>> provideItems();
+    Stream<I> provideItemSteam();
     Task<I, V> provideTask();
     // Consumer<V> - what to do with the result?
 }
