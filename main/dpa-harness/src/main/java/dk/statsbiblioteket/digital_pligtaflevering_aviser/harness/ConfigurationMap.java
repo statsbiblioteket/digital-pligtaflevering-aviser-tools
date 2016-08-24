@@ -3,6 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import dagger.Module;
 import dagger.Provides;
 
+import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -25,8 +26,8 @@ public class ConfigurationMap extends TreeMap<String, String> {
         this.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
     }
 
-    // @Provides Fixme: @Singleton
     @Provides
+    @Singleton
     public ConfigurationMap getConfigurationMap() {
         return this;
     }

@@ -12,6 +12,9 @@ import java.util.stream.Stream;
  *
  */
 public class  VeraPdfMain {
+    public static void main(String[] args) {
+
+    }
 }
 
 @Component(modules = {ConfigurationMap.class, VeraPdfModule.class})
@@ -19,6 +22,7 @@ interface VeraPdfTaskComponent { //extends TaskComponent<DomsItem, String> {
 };
 @Module
 class VeraPdfModule {
+
     @Provides
     Stream<Stream<DomsItem>> provideDomsItemStream() {
         //return Stream.of(Stream.of("Item 1", "Item 2"));
