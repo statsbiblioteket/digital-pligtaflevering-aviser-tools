@@ -13,6 +13,8 @@
 
     <properties>
         <failsafe.forkCount>1</failsafe.forkCount>
+        <integration.test.newspaper.properties>${basedir}/src/main/config/config.properties</integration.test.newspaper.properties>
+        <integration.test.newspaper.testdata>${basedir}/src/main/config/config.properties</integration.test.newspaper.testdata>
     </properties>
 
     <repositories>
