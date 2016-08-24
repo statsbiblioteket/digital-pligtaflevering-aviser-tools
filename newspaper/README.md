@@ -8,4 +8,8 @@ newspaper-prompt-doms-ingester sources copied from sha1
     
 /tra 2016-08-11
 
+newspaper-bitrepository-ingest sources copied from sha1
+
+    9282e46998619e41318aeec1c31bd0c91b8d7f1c
    
+/tra 2016-08-24
