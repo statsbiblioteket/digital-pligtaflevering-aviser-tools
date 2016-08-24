@@ -37,9 +37,14 @@ B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002
 
 **Test setup**
 
-Start with a clean vagrant
+1. Start with a clean vagrant
+2. Run the CreateBach with i.e. thease parameters:
+  B20160811 1 register-batch-trigger http://localhost:7880/fedora fedoraAdmin fedoraAdminPass http://localhost:7880/pidgenerator-service
 
+3. Update the doms by running 7880-doms/bin/doms.sh import
+4. Run PromptDomsIngesterComponent with a link to the file config.properties
 
+After that fedora should be updated
 
 
 
