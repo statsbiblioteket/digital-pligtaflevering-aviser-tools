@@ -6,6 +6,7 @@ import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,6 +27,7 @@ public class NamedStringExampleConstants {
         void printMsg(String msg);
     }
 
+    @Singleton // https://github.com/google/dagger/issues/107#issuecomment-71524636
     @Component(modules = {ConfigurationMap.class, ConsoleModule.class})
     interface Example2App {
         Printer getPrinter();
@@ -51,7 +53,7 @@ public class NamedStringExampleConstants {
         }
 
         @Provides
-        @Named(AFTER + BEFORE)
+        @Named(AFTER + BEFORE) // unused!
         String provideAfterBefore(ConfigurationMap map) {
             return map.get(AFTER + BEFORE);
         }
