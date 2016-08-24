@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>newspaper-bitrepository-ingester</artifactId>
+  <version>1.12-SNAPSHOT</version>
+
+  <parent>
+    <groupId>dk.statsbiblioteket.newspaper</groupId>
+    <artifactId>newspaper-parent</artifactId>
+    <version>1.5</version>
+  </parent>
+
+  <scm>
+    <url>https://github.com/statsbiblioteket/newspaper-bitrepository-ingester</url>
+    <connection>scm:git:https://github.com/statsbiblioteket/newspaper-bitrepository-ingester.git</connection>
+    <developerConnection>scm:git:git@github.com:statsbiblioteket/newspaper-bitrepository-ingester.git
+    </developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>sbforge-nexus</id>
+      <url>https://sbforge.org/nexus/content/groups/public</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bitrepository.reference</groupId>
+      <artifactId>bitrepository-client</artifactId>
+      <version>1.3</version>
+    </dependency>
+    <dependency>
+      <groupId>dk.statsbiblioteket.newspaper</groupId>
+      <artifactId>tree-processor-runnable-component</artifactId>
+      <version>2.11-SNAPSHOT</version>
+    </dependency>
+      <dependency>
+          <groupId>dk.statsbiblioteket.newspaper</groupId>
+          <artifactId>newspaper-autonomous-component</artifactId>
+          <version>2.11-SNAPSHOT</version>
+      </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/assembly.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+   
+    </plugins>
+  </build>
+</project>
