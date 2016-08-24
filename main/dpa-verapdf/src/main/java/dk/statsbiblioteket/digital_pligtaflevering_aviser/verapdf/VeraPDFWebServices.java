@@ -7,13 +7,25 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import com.sun.jersey.multipart.file.StreamDataBodyPart;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.verapdf.core.ModelParsingException;
+import org.verapdf.core.ValidationException;
+import org.verapdf.core.VeraPDFException;
+import org.verapdf.model.ModelParser;
+import org.verapdf.pdfa.PDFAValidator;
+import org.verapdf.pdfa.flavours.PDFAFlavour;
+import org.verapdf.pdfa.results.ParseResult2Xml;
+import org.verapdf.pdfa.results.ValidationResult;
+import org.verapdf.pdfa.validators.Validators;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import java.io.*;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.util.Objects;
 
 /**
@@ -71,5 +83,6 @@ public class VeraPDFWebServices {
 
         return response.getEntity(String.class);
     }
+
 
 }

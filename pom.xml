@@ -17,6 +17,7 @@
 
         <module>newspaper/newspaper-batch-trigger</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
+        <module>newspaper/newspaper-bitrepository-ingester</module>
 
         <!-- command line scripts - ->
         -->

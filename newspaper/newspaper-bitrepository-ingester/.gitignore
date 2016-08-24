@@ -1,0 +1,10 @@
+.classpath
+.project
+.settings/*
+target/
+test-output/
+*.ipr
+*.iws
+*.iml
+.idea/
+
