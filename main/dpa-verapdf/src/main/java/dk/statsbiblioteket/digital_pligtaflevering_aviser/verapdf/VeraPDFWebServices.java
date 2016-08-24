@@ -62,21 +62,27 @@ public class VeraPDFWebServices {
         return response.getEntity(String.class);
     }
 
-    public static void main(String[] args) throws Exception {
-        File pdfFile = new File("/home/mmj/projects/digital-pligtaflevering-aviser-tools/main/dpa-verapdf/src/test/resources/veraPDF test suite 6-8-t02-pass-a.pdf");
+    public static void main(String[] args) throws FileNotFoundException {
+        File pdfFile = new File("/home/tra/git/digital-pligtaflevering-aviser-tools/main/dpa-verapdf/src/test/resources/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
         VeraPDFWebServices veraPDFWebServices = new VeraPDFWebServices("http://localhost:8080/api");
         System.out.println(veraPDFWebServices.getIds());
-        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  PDFAFlavour.byFlavourId("1b")));
-        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  PDFAFlavour.byFlavourId("3b")));
-        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  PDFAFlavour.byFlavourId("1a")));
+        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  pdfFile.getName(), "1b"));
+        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  pdfFile.getName(), "3b"));
+        System.out.println(veraPDFWebServices.validate(new FileInputStream(pdfFile),  pdfFile.getName(), "1a"));
     }
 
+    public String validate(InputStream inputStream, String fileName, String profileId) {
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
 
-    public String validate(InputStream inputStream, PDFAFlavour profileId) throws Exception {
-        ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
-        PDFAValidator validator = Validators.createValidator(profileId, false);
-        ValidationResult result = validator.validate(toValidate);
-        return ParseResult2Xml.convert2Xml(result);
+        WebResource resource = client.resource(UriBuilder.fromUri(baseURL + "/validate/" + profileId).build());
+
+        FormDataMultiPart multiPart = new FormDataMultiPart();
+        multiPart.bodyPart(new StreamDataBodyPart("file", inputStream, fileName));
+        ClientResponse response = resource.type(MediaType.MULTIPART_FORM_DATA_TYPE).accept(MediaType.APPLICATION_XML_TYPE).post(ClientResponse.class, multiPart);
+
+        return response.getEntity(String.class);
     }
+
 
 }
