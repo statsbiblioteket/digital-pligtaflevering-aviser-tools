@@ -21,6 +21,8 @@ import java.util.stream.Stream;
  */
 public class LoggingFaultBarrier implements Runnable {
 
+    static LocalDateTime startTime = LocalDateTime.now(); // initialized at class load time
+
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected final Runnable runnable;
@@ -31,7 +33,6 @@ public class LoggingFaultBarrier implements Runnable {
 
     @Override
     public void run() {
-        LocalDateTime startTime = LocalDateTime.now();
         log.info("*** Started at {}", startTime);
 
         Runtime.getRuntime().addShutdownHook(new Thread(
