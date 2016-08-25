@@ -4,6 +4,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Validator for md5 validation of digital newspaper batches
@@ -23,25 +24,29 @@ public class BatchMD5Validation {
      * @throws NoSuchAlgorithmException
      */
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
-        HashMap<String, String> hmp = new HashMap<String, String>();
-        try(BufferedReader br = new BufferedReader(new FileReader(this.batchFolder+File.separator+batchName+File.separator+"MD5SUMS.txt"))) {
+        Map<String, String> md5Map = new HashMap<String, String>();
+        try(BufferedReader br = new BufferedReader(new FileReader(this.batchFolder + File.separator+batchName + File.separator + "MD5SUMS.txt"))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
             while (line != null) {
                 sb.append(line);
                 sb.append(System.lineSeparator());
+                //Each line in the file is stored in a String, a line consists of a checksum and a filename, they a seperated by 2 spaces.
+                //Example [8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf]
                 line = br.readLine();
                 if(line != null) {
                     String[] split = line.split("  ");
-                    hmp.put(split[1], split[0]);
+                    String filename = split[1];
+                    String checksum = split[0];
+                    md5Map.put(filename, checksum);
                 }
             }
         }
 
-        for(String file: hmp.keySet()) {
-            String expectedMd5 = hmp.get(file);
-            String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder+File.separator+batchName+File.separator+file));
+        for(String file: md5Map.keySet()) {
+            String expectedMd5 = md5Map.get(file);
+            String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder + File.separator + batchName + File.separator+file));
             if(!expectedMd5.equals(actualMd5)) {
                 return false;
             }
@@ -52,7 +57,7 @@ public class BatchMD5Validation {
 
     /**
      * Get the md5 checksum of a file
-     * Kopieret fra følgende link
+     * Copied from the following link
      * http://howtodoinjava.com/core-java/io/how-to-generate-sha-or-md5-file-checksum-hash-in-java/
      * @param digest
      * @param file
