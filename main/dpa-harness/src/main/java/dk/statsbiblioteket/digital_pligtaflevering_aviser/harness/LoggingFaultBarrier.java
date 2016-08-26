@@ -47,7 +47,7 @@ public class LoggingFaultBarrier implements Runnable {
         } catch (Throwable e) {
             // It is open for discussion what exactly should happen here.  Log at error
             // level for now so logger backend can do stuff.
-            log.error("Exception thrown, shutting down", e);
+            log.error("Runnable threw exception, shutting down:", e);
             exitCode = -1;
         }
         System.exit(exitCode);

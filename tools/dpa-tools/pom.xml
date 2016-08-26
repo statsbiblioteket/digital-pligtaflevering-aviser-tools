@@ -37,6 +37,11 @@
             <artifactId>dpa-doms</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <artifactId>slf4j-simple</artifactId>
+            <groupId>org.slf4j</groupId>
+            <version>1.7.9</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,4 +1,4 @@
-package xxx;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
 
 import dagger.Component;
 import dagger.Module;
@@ -15,6 +15,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -50,6 +52,10 @@ public class VeraPdfMain {
         map.put(DOMS_USERNAME, "not used");
         map.put(DOMS_PASSWORD, "not used");
 
+//        final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
+//        System.out.println(binder.getLoggerFactory());
+//        System.out.println(binder.getLoggerFactoryClassStr());
+
         VeraPdfTaskComponent taskComponent = DaggerVeraPdfTaskComponent.builder()
                 .configurationMap(new ConfigurationMap(map))
                 .build();
@@ -69,21 +75,21 @@ interface VeraPdfTaskComponent { //extends TaskComponent<DomsItem, String> {
 @Module
 class VeraPdfModule {
 
+    Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Provides
     Runnable provideRunnable(SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        //        return (EventTrigger.Query<Item> query) -> index.search(true, query);
-//        EventTrigger.Query<Item> query = new EventTrigger.Query<>();
-        //query.getFutureEvents().add("Metadata_Archived");
-        //      query.getPastSuccessfulEvents().add("Data_Received");
         return () -> queryStream
-                .peek(query -> System.out.println("Query: " + query))
+                .peek(query -> log.info("Query: {}", query))
                 .map(
                         query -> sboiEventIndexSearch(index, query)
-                                .peek(item -> System.out.println("Item: " + item))
+                                .peek(item -> log.info("Item: {}", item))
                                 .map(task)
-                                .peek(result -> System.out.println("Result: " + result))
+                                .peek(result -> log.info("Result: {}", result))
                                 .collect(Collectors.toList())
-                );
+                )
+                .forEach(result -> log.info("Result: {}", result))
+                ;
     }
 
     protected Stream<Item> sboiEventIndexSearch(SBOIEventIndex index, EventTrigger.Query query) {
@@ -202,9 +208,25 @@ class VeraPdfModule {
 
     @Provides
     Stream<EventTrigger.Query> provideQueryStream() {
-        EventTrigger.Query<Item> query = new EventTrigger.Query<>();
-        query.getPastSuccessfulEvents().add("Data_Received");
-        return Stream.of(query);
+        //System.out.println("In provideQueryStream()");
+        EventTrigger.Query<Item> query1 = new EventTriggerQuery<>("query1");
+        query1.getPastSuccessfulEvents().add("Data_Received");
+        EventTrigger.Query<Item> query2 = new EventTriggerQuery<>("query2");
+        query2.getPastSuccessfulEvents().add("Data_Received");
+        query2.getFutureEvents().add("Metadata_Archived");
+        return Stream.of(query1, query2);
     }
 
+    protected class EventTriggerQuery<I extends Item> extends EventTrigger.Query<I> {
+        private String description;
+
+        public EventTriggerQuery(String description) {
+            this.description = description;
+        }
+
+        @Override
+        public String toString() {
+            return description + ": " + super.toString();
+        }
+    }
 }
