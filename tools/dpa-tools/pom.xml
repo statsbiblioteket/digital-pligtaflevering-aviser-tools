@@ -9,10 +9,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <appassembler-maven-plugin.mainClass>
-            dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.verapdf.ToolVeraPdfMain
-        </appassembler-maven-plugin.mainClass>
-        <appassembler-maven-plugin.id>dpa-tool-verapdf</appassembler-maven-plugin.id>
+        <appassembler-maven-plugin.mainClass1>
+            dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
+        </appassembler-maven-plugin.mainClass1>
+        <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
     </properties>
 
     <dependencies>
@@ -56,7 +56,11 @@
                 </configuration>
             </plugin>
 
-            <!-- create the deployment layout -->
+            <!-- create the deployment layout
+
+             NOTE:  Consider cd'ing to the location where log files are to be generated.  This
+             will make it much easier to have a read-only code deployment.
+             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -70,13 +74,18 @@
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
 
+                    <!-- flat/default/legacy - consider what works best.  default may allow easy injection of libs in local repo when maintaining -->
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>libs</repositoryName>
                     <!-- for logback -->
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <logsDirectory>logs</logsDirectory>
+                    <!-- no logs directory -->
+                    <logsDirectory></logsDirectory>
                     <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
                     <preAssembleDirectory>for-deployment</preAssembleDirectory>
+
+                    <!-- JVM configuration flags - gc logging etc -->
+                    <extraJvmArguments>-verbose:gc</extraJvmArguments>
                 </configuration>
 
                 <executions>
@@ -89,8 +98,8 @@
                         <configuration>
                             <programs>
                                 <program>
-                                    <mainClass>${appassembler-maven-plugin.mainClass}</mainClass>
-                                    <id>${appassembler-maven-plugin.id}</id>
+                                    <mainClass>${appassembler-maven-plugin.mainClass1}</mainClass>
+                                    <id>${appassembler-maven-plugin.id1}</id>
                                 </program>
                             </programs>
                         </configuration>
