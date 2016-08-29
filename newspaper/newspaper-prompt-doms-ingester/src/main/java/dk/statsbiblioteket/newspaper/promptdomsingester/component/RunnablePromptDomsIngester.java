@@ -12,6 +12,7 @@ import dk.statsbiblioteket.util.Strings;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -37,15 +38,16 @@ public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableCom
     @Override
     public void doWorkOnItem(Batch batch, ResultCollector resultCollector) {
         try {
-            if(md5Validator.validation(batch.getFullID())) {
-                IngesterInterface ingester = SimpleFedoraIngester.getNewspaperInstance(
-                        eFedora, new String[]{getProperties().getProperty(
-                                ConfigConstants.DOMS_COLLECTION, "doms:Newspaper_Collection")}
-                );
-                ingester.ingest(createIterator(batch));
-            } else {
-                resultCollector.setPreservable(false);
-                resultCollector.addFailure("md5Validator", "md5Validator", "BatchMD5Validation", "md5Validator validation was not accepted");
+            IngesterInterface ingester = SimpleFedoraIngester.getNewspaperInstance(
+                    eFedora, new String[]{getProperties().getProperty(
+                            ConfigConstants.DOMS_COLLECTION, "doms:Newspaper_Collection")} );
+            ingester.ingest(createIterator(batch));
+
+            if(!md5Validator.validation(batch.getFullID())) {
+                List<String> validationFailureResult = md5Validator.getValidationReadableMessage();
+                for(String failure : validationFailureResult) {
+                    resultCollector.addFailure(batch.getFullID(), "md5Validator", this.getClass().getSimpleName(), "md5Validator validation was not accepted with message:" + md5Validator.getValidationReadableMessage());
+                }
             }
         } catch (Exception e) {
             resultCollector.addFailure(

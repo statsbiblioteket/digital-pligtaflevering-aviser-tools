@@ -3,7 +3,9 @@ package dk.statsbiblioteket.newspaper.promptdomsingester.util;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,6 +13,7 @@ import java.util.Map;
  */
 public class BatchMD5Validation {
     private String batchFolder;
+    private List<String> validationResult = new ArrayList<String>();
 
     public BatchMD5Validation(String batchFolder) {
         this.batchFolder = batchFolder;
@@ -24,6 +27,7 @@ public class BatchMD5Validation {
      * @throws NoSuchAlgorithmException
      */
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
+        boolean validationResponse = true;
         Map<String, String> md5Map = new HashMap<String, String>();
         try(BufferedReader br = new BufferedReader(new FileReader(this.batchFolder + File.separator+batchName + File.separator + "MD5SUMS.txt"))) {
             StringBuilder sb = new StringBuilder();
@@ -48,11 +52,17 @@ public class BatchMD5Validation {
             String expectedMd5 = md5Map.get(file);
             String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder + File.separator + batchName + File.separator+file));
             if(!expectedMd5.equals(actualMd5)) {
-                return false;
+                validationResult.add(this.validationResult + this.batchFolder + File.separator + batchName + File.separator + file + " - " + expectedMd5 + " " + actualMd5);
+                validationResponse = false;
             }
         }
-        return true;
+        return validationResponse;
     }
+
+    public List getValidationReadableMessage() {
+        return validationResult;
+    }
+
 
 
     /**
