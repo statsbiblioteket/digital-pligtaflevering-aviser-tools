@@ -3,9 +3,10 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.stream.Stream;
+
+import static java.lang.management.ManagementFactory.getRuntimeMXBean;
+import static java.time.LocalDateTime.now;
 
 /**
  * <p>Wrap invoking run() on the given Runnable which is expected to catch all recoverable exceptions so
@@ -14,14 +15,12 @@ import java.util.stream.Stream;
  * <li>try-catch catching everything and logging the throwable caught and shut down using System.exit(-1)</li>
  * <li>If run without exceptions to completion System.exit(0) is invoked.</ol>
  * </ol>
- *
+ * <p>
  * </p>
- *
+ * <p>
  * <p>Note:  Never returns</p>
  */
 public class LoggingFaultBarrier implements Runnable {
-
-    static LocalDateTime startTime = LocalDateTime.now(); // initialized at class load time
 
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -33,12 +32,11 @@ public class LoggingFaultBarrier implements Runnable {
 
     @Override
     public void run() {
-        log.info("*** Started at {}", startTime);
+
+        log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
 
         Runtime.getRuntime().addShutdownHook(new Thread(
-                () -> log.info("*** Stopped at {} - {} ms.",
-                        LocalDateTime.now(),
-                        ChronoUnit.MILLIS.between(startTime, LocalDateTime.now())
+                () -> log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime()
                 )));
 
         int exitCode = 0;
@@ -50,6 +48,7 @@ public class LoggingFaultBarrier implements Runnable {
             log.error("Runnable threw exception, shutting down:", e);
             exitCode = -1;
         }
+        // logger framework must be configured to shut down properly when jvm exits.
         System.exit(exitCode);
     }
 
