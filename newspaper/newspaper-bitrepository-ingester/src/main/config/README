@@ -1,0 +1,6 @@
+The component will need a set of configuration files that are not included here. 
+The files are:
+- RepositorySettings.xml - The file defining the concrete bitrepository system
+- ReferenceSettings.xml  - The configuration file needed by bitrepository.org reference client
+- client-cert.pem        - The certificate file that is constitutes the access credentials for the concrete bitrepository system. 
+                           The certificates needs to be of the PEM format with at least the "PRIVATEKEY" and "CERTIFICATE" sections
