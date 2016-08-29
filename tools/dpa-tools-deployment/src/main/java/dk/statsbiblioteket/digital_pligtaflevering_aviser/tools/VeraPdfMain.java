@@ -122,7 +122,7 @@ class VeraPdfModule {
 
     @Provides
     Task getTask() {
-        return item -> "ok"; // dummy task.
+        return item -> "ok"; // dummy getTask.
     }
 
     @Provides

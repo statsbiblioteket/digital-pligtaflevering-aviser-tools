@@ -5,7 +5,6 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.LoggingFaultBarrier;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
@@ -19,19 +18,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 
 /**
  *
@@ -39,31 +30,37 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 public class VeraPdfMain {
     public static void main(String[] args) {
         // initial testing map
-        Map<String, String> map = new HashMap<>();
-        map.put(AUTONOMOUS_SBOI_URL, "http://localhost:58608/newspapr/sbsolr/");
-        map.put(DOMS_URL, "http://localhost:7880/fedora");
-        map.put(DOMS_PIDGENERATOR_URL, "http://localhost:7880/pidgenerator-service");
-        map.put("pageSize", "10");
-        map.put(DOMS_USERNAME, "not used");
-        map.put(DOMS_PASSWORD, "not used");
+//        Map<String, String> map = new HashMap<>();
+//        map.put(AUTONOMOUS_SBOI_URL, "http://localhost:58608/newspapr/sbsolr/");
+//        map.put(DOMS_URL, "http://localhost:7880/fedora");
+//        map.put(DOMS_PIDGENERATOR_URL, "http://localhost:7880/pidgenerator-service");
+//        map.put("pageSize", "10");
+//        map.put(DOMS_USERNAME, "not used");
+//        map.put(DOMS_PASSWORD, "not used");
 
-        // first let dagger get up and running
-        VeraPdfTaskComponent taskComponent = DaggerVeraPdfTaskComponent.builder()
-                .configurationMap(new ConfigurationMap(map))
-                .build();
+//        // first let dagger get up and running
+//        VeraPdfTaskComponent taskComponent = DaggerVeraPdfTaskComponent.builder()
+//                .configurationMap(new ConfigurationMap(map))
+//                .build();
 
-        // then ask for the runnable constructed by dagger
-        Runnable runnable = taskComponent.getRunnableTask();
-
-        // and run it inside an appropriate fault barrier
-        new LoggingFaultBarrier(runnable).run();
+//        AutonomousPreservationTool.execute(args, map -> DaggerVeraPdfTaskComponent.builder()
+//                .configurationMap(map)
+//                .build().getTask()
+//        );
+//        Properties p = new Properties();
+//        p.putAll(map);
+//        p.list(System.out);
+        args = new String[]{"verapdf.properties"}; // FIXME:  Just while testing.
+        AutonomousPreservationTool.execute(
+                args,
+                m -> DaggerVeraPdfTaskComponent.builder().configurationMap(m).build().getTask()
+        );
     }
 }
 
 @Singleton // FIXME
 @Component(modules = {ConfigurationMap.class, DomsModule.class, VeraPdfModule.class})
-interface VeraPdfTaskComponent {
-    Runnable getRunnableTask();
+interface VeraPdfTaskComponent extends TaskComponent {
 };
 
 @Singleton // FIXME
@@ -122,7 +119,7 @@ class VeraPdfModule {
 
     @Provides
     Task getTask() {
-        return item -> "ok"; // dummy task.
+        return item -> "ok"; // dummy getTask.
     }
 
     @Provides

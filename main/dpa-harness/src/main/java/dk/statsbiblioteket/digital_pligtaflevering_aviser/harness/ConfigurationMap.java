@@ -75,5 +75,6 @@ public class ConfigurationMap extends TreeMap<String, String> {
             this.put(key, value);
         }
     }
+    // FIXME: toString should hide entries with "password".
 }
 
