@@ -94,13 +94,12 @@ public class DomsModule {
         domsEventStorageFactory.setUsername(domsUserName);
         domsEventStorageFactory.setPassword(domsPassword);
         domsEventStorageFactory.setItemFactory(itemFactory);
-        DomsEventStorage<Item> domsEventStorage = null;
         try {
-            domsEventStorage = domsEventStorageFactory.createDomsEventStorage();
+            DomsEventStorage<Item> domsEventStorage = domsEventStorageFactory.createDomsEventStorage();
+            return domsEventStorage;
         } catch (JAXBException | PIDGeneratorException | MalformedURLException e) {
             throw new RuntimeException("createDomsEventStorage()", e);
         }
-        return domsEventStorage;
     }
 
 }

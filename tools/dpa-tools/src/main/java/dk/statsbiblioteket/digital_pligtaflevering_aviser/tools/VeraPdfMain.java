@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
 
 import dagger.Component;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -37,8 +38,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
  */
 public class VeraPdfMain {
     public static void main(String[] args) {
-        //new LoggingFaultBarrier(null); // trigger class loading to set start time field.  FIXME: factory/provider?
-
+        // initial testing map
         Map<String, String> map = new HashMap<>();
         map.put(AUTONOMOUS_SBOI_URL, "http://localhost:58608/newspapr/sbsolr/");
         map.put(DOMS_URL, "http://localhost:7880/fedora");
@@ -47,22 +47,22 @@ public class VeraPdfMain {
         map.put(DOMS_USERNAME, "not used");
         map.put(DOMS_PASSWORD, "not used");
 
-//        final StaticLoggerBinder binder = StaticLoggerBinder.getSingleton();
-//        System.out.println(binder.getLoggerFactory());
-//        System.out.println(binder.getLoggerFactoryClassStr());
-
+        // first let dagger get up and running
         VeraPdfTaskComponent taskComponent = DaggerVeraPdfTaskComponent.builder()
                 .configurationMap(new ConfigurationMap(map))
                 .build();
 
+        // then ask for the runnable constructed by dagger
         Runnable runnable = taskComponent.getRunnableTask();
+
+        // and run it inside an appropriate fault barrier
         new LoggingFaultBarrier(runnable).run();
     }
 }
 
 @Singleton // FIXME
 @Component(modules = {ConfigurationMap.class, DomsModule.class, VeraPdfModule.class})
-interface VeraPdfTaskComponent { //extends TaskComponent<DomsItem, String> {
+interface VeraPdfTaskComponent {
     Runnable getRunnableTask();
 };
 
@@ -73,11 +73,11 @@ class VeraPdfModule {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Provides
-    Runnable provideRunnable(SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
+    Runnable provideRunnable(Lazy<SBOIEventIndex> index, Lazy<DomsEventStorage<Item>> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
         return () -> queryStream
                 .peek(query -> log.info("Query: {}", query))
-                .map(
-                        query -> sboiEventIndexSearch(index, query)
+                .map(  // apply to each item
+                        query -> sboiEventIndexSearch(index.get(), query)
                                 .peek(item -> log.info("Item: {}", item))
                                 .map(task)
                                 .peek(result -> log.info("Result: {}", result))
