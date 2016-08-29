@@ -8,7 +8,7 @@
         <version>1.5</version>
     </parent>
 
-    <artifactId>batch-trigger</artifactId>
+    <artifactId>dpa-batch-trigger</artifactId>
     <version>1.9-SNAPSHOT</version>
 
     <scm>

@@ -9,3 +9,42 @@ Autonomous Component that ingests a batch directory directly to a DOMS object tr
  are ingested as datastreams.
  * For the newspaper project there is factory method SimpleFedoraIngester.getNewspaperInstance() which returns an ingester
  configured for newspaper batch-ingest.
+ 
+The ingester uses the properties file config.properties for configuration of the application.
+The file config.properties.default is added for configuration suggestion during test.
+
+**Format expectation and application configuration**
+
+During ingestion the ingester expects that there is always delivered pdf and xml pair in the pages folder.
+It then ingests the name of the two files as, and the full file-name.
+
+Example:
+This source:
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.xml
+
+Is ingested as this:
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001
+
+
+Ind this source:
+B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002.xml
+
+Is ingested as this:
+B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002
+
+
+**Test setup**
+
+1. Start with a clean vagrant
+2. Run the CreateBach with i.e. thease parameters:
+  B20160811 1 register-batch-trigger http://localhost:7880/fedora fedoraAdmin fedoraAdminPass http://localhost:7880/pidgenerator-service
+
+3. Update the doms by running 7880-doms/bin/doms.sh import
+4. Run PromptDomsIngesterComponent with a link to the file config.properties
+
+After that fedora should be updated
+
+
+
