@@ -19,9 +19,10 @@
         <module>newspaper/newspaper-prompt-doms-ingester</module>
         <module>newspaper/newspaper-bitrepository-ingester</module>
 
-        <!-- command line scripts - ->
-        -->
+        <!-- command line launchers -->
         <module>tools/dpa-tools</module>
+        <!-- deployment creation module -->
+        <module>tools/dpa-tools-deployment</module>
     </modules>
 </project>
 
