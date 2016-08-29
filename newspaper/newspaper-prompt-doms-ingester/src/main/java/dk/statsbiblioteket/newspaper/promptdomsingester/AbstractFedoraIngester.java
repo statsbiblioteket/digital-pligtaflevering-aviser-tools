@@ -36,12 +36,17 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
     String hasPartRelation = "info:fedora/fedora-system:def/relations-external#hasPart";
     private Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Get the itemname, for this specific purpose the file is jus split into two elements, and the first one is returned
+     *
+     * @return Itemname
+     */
     private static String getDatastreamName(String attributeName) throws DomsIngesterException {
         String[] splitName = attributeName.split("\\.");
         if (splitName.length < 2) {
             throw new DomsIngesterException("Cannot find datastream name in " + attributeName);
         }
-        return splitName[splitName.length - 2].toUpperCase();
+        return splitName[splitName.length - 1].toUpperCase();
     }
 
     /**
@@ -155,7 +160,6 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
                         metadataText,
                         alternativeIdentifiers,
                         "Added by ingester.");
-
             }
         }
     }
@@ -216,5 +220,4 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
         String dir = event.getName();
         return "path:" + dir;
     }
-
 }
