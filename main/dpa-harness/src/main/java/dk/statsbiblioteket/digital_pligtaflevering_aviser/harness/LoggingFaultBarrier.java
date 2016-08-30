@@ -3,8 +3,6 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.stream.Stream;
-
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDateTime.now;
 
@@ -52,10 +50,10 @@ public class LoggingFaultBarrier implements Runnable {
         System.exit(exitCode);
     }
 
-    public static void main(String[] args) {
-        Logger mainLogger = LoggerFactory.getLogger(LoggingFaultBarrier.class);
-        new LoggingFaultBarrier(
-                () -> Stream.of("1", "2", "3").forEach(s -> mainLogger.info("{}", s))
-        ).run();
-    }
+//    public static void main(String[] args) {
+//        Logger mainLogger = LoggerFactory.getLogger(LoggingFaultBarrier.class);
+//        new LoggingFaultBarrier(
+//                () -> Stream.of("1", "2", "3").forEach(s -> mainLogger.info("{}", s))
+//        ).run();
+//    }
 }

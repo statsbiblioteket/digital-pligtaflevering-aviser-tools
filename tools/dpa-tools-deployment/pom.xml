@@ -9,10 +9,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <appassembler-maven-plugin.mainClass1>
-            dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
-        </appassembler-maven-plugin.mainClass1>
-        <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
         <output>${project.build.outputDirectory}/META-INF/maven/dependency-tree.txt</output>
     </properties>
 
@@ -120,8 +116,16 @@
                             <programs>
                                 <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
-                                    <mainClass>${appassembler-maven-plugin.mainClass1}</mainClass>
-                                    <id>${appassembler-maven-plugin.id1}</id>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CreateBatchMain</mainClass>
+                                    <id>dpa-create-batch</id>
+                                </program>
+                                <program>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsIngesterMain</mainClass>
+                                    <id>dpa-doms-ingester</id>
+                                </program>
+                                <program>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain</mainClass>
+                                    <id>dpa-tool-verapdf</id>
                                 </program>
                             </programs>
                         </configuration>
