@@ -3,21 +3,31 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
-    <artifactId>dpa-tool-verapdf</artifactId>
+    <artifactId>dpa-tools-deployment</artifactId>
     <version>master-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <appassembler-maven-plugin.mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.verapdf.ToolVeraPdfMain</appassembler-maven-plugin.mainClass>
-        <appassembler-maven-plugin.id>dpa-tool-verapdf</appassembler-maven-plugin.id>
+        <appassembler-maven-plugin.mainClass1>
+            dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
+        </appassembler-maven-plugin.mainClass1>
+        <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
+        <output>${project.build.outputDirectory}/META-INF/maven/dependency-tree.txt</output>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-            <artifactId>dpa-harness</artifactId>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
+            <artifactId>dpa-tools</artifactId>
             <version>master-SNAPSHOT</version>
+        </dependency>
+
+        <!-- slf4j production backend. -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.12</version>
         </dependency>
     </dependencies>
 
@@ -26,14 +36,52 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
 
-            <!-- create the deployment layout -->
+            <!-- http://stackoverflow.com/a/7957042/53897 -->
+            <plugin>
+                <groupId>org.apache.servicemix.tooling</groupId>
+                <artifactId>depends-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-depends-file</id>
+                        <goals>
+                            <goal>generate-depends-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- http://stackoverflow.com/a/11729432/53897 -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>dependency-tree</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>tree</goal>
+                        </goals>
+                        <configuration>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <!-- create the deployment layout
+
+             NOTE:  Consider cd'ing to the location where log files are to be generated.  This
+             will make it much easier to have a read-only code deployment.
+             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -47,13 +95,18 @@
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
 
+                    <!-- flat/default/legacy - consider what works best.  default may allow easy injection of libs in local repo when maintaining -->
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>libs</repositoryName>
                     <!-- for logback -->
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <logsDirectory>logs</logsDirectory>
+                    <!-- no logs directory -->
+                    <logsDirectory></logsDirectory>
                     <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
                     <preAssembleDirectory>for-deployment</preAssembleDirectory>
+
+                    <!-- JVM configuration flags - gc logging etc -->
+                    <extraJvmArguments>-verbose:gc</extraJvmArguments>
                 </configuration>
 
                 <executions>
@@ -65,9 +118,10 @@
                         </goals>
                         <configuration>
                             <programs>
+                                <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
-                                    <mainClass>${appassembler-maven-plugin.mainClass}</mainClass>
-                                    <id>${appassembler-maven-plugin.id}</id>
+                                    <mainClass>${appassembler-maven-plugin.mainClass1}</mainClass>
+                                    <id>${appassembler-maven-plugin.id1}</id>
                                 </program>
                             </programs>
                         </configuration>
