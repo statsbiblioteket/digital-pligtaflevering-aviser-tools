@@ -36,7 +36,7 @@ public class DomsJP2FileUrlRegisterTest {
     public static final String FILE_PATH = "path:B400022028241-RT1/400022028241-14/1795-06-13-01/foo";
     public static final String CHECKSUM = "abcd";
 
-    @Test
+    //@Test
     public void goodCaseRegistrationTest() throws BackendInvalidCredsException, BackendMethodFailedException,
             BackendInvalidResourceException, DomsObjectNotFoundException, InterruptedException, MalformedURLException {
         EnhancedFedora mockCentral = mock(EnhancedFedora.class);
@@ -60,7 +60,7 @@ public class DomsJP2FileUrlRegisterTest {
         verifyNoMoreInteractions(mockCentral);
     }
     
-    @Test
+    //@Test
     public void multiplePidTest() throws BackendInvalidCredsException, BackendMethodFailedException, BackendInvalidResourceException, 
     		InterruptedException, MalformedURLException {
         EnhancedFedora mockCentral = mock(EnhancedFedora.class);
