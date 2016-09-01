@@ -7,11 +7,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.LoggingFaultBa
 import java.util.Objects;
 import java.util.function.Function;
 
-/**
+/**<p>
  * This is the entry point in the scaffolding.  Reads in a configuration map (exact way depends on the method called) and
  * invokes a <code>Function&lt;ConfigurationMap, Runnable></code> responsible for generating a Runnable configured using the
  * ConfigurationMap.  The typical use case is invoking a generated Dagger builder, configure it using the map and ask it for a Runnable.
- *
+ *</p>
+ * <p>When launched from an appassembler generated script the "app.name" property contains the
+ * name of the program.</p>
  */
 public class AutonomousPreservationTool  {
     public static void execute(String[] args, Function<ConfigurationMap, Runnable> function) {

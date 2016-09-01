@@ -83,7 +83,9 @@
                 <artifactId>appassembler-maven-plugin</artifactId>
                 <version>1.10</version>
                 <configuration>
-                    <!-- http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html -->
+                    <!--
+                    http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html
+                    -->
                     <platforms>
                         <platform>all</platform>
                     </platforms>
@@ -91,18 +93,31 @@
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
 
-                    <!-- flat/default/legacy - consider what works best.  default may allow easy injection of libs in local repo when maintaining -->
+                    <!-- flat/default/legacy - consider what works best.  -->
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>libs</repositoryName>
                     <!-- for logback -->
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <!-- no logs directory -->
+                    <!-- no logs directory, logs should go relative to current working directory set before launch -->
                     <logsDirectory></logsDirectory>
                     <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
                     <preAssembleDirectory>for-deployment</preAssembleDirectory>
 
-                    <!-- JVM configuration flags - gc logging etc -->
-                    <extraJvmArguments>-verbose:gc</extraJvmArguments>
+                    <!-- JVM configuration flags - gc logging etc
+
+                    https://blog.codecentric.de/en/2014/01/useful-jvm-flags-part-8-gc-logging/
+
+                    FIXME: Consider if we need a full thread dump when task fails: http://stackoverflow.com/a/2788423/53897
+                    For OOM VisualVM can extract it from the hprof file.
+                    -->
+                    <extraJvmArguments>
+                        -verbose:gc
+                        -XX:+PrintGCDetails
+                        -XX:+PrintGCDateStamps
+                        -XX:+PrintGCTimeStamps
+                        -Xloggc:gc-$(date '+%Y-%m-%d-%H-%M-%S')-$$$$.log
+                        -XX:+HeapDumpOnOutOfMemoryError
+                    </extraJvmArguments>
                 </configuration>
 
                 <executions>
@@ -116,15 +131,20 @@
                             <programs>
                                 <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CreateBatchMain</mainClass>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CreateBatchMain
+                                    </mainClass>
                                     <id>dpa-create-batch</id>
                                 </program>
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsIngesterMain</mainClass>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsIngesterMain
+                                    </mainClass>
                                     <id>dpa-doms-ingester</id>
                                 </program>
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain</mainClass>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
+                                    </mainClass>
                                     <id>dpa-tool-verapdf</id>
                                 </program>
                             </programs>
