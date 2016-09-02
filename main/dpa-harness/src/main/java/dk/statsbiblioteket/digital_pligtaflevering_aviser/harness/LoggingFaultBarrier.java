@@ -3,6 +3,14 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MBeanServer;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDateTime.now;
 
@@ -47,6 +55,8 @@ public class LoggingFaultBarrier implements Runnable {
             exitCode = -1;
         }
         // logger framework must be configured to shut down properly when jvm exits.
+
+        HeapDumpHelper.dumpHeap(now -> "/tmp/x.hprof");
         System.exit(exitCode);
     }
 
