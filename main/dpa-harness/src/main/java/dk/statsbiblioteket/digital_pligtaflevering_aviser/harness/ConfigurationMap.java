@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -75,6 +76,26 @@ public class ConfigurationMap extends TreeMap<String, String> {
             this.put(key, value);
         }
     }
-    // FIXME: toString should hide entries with "password".
+
+    @Override
+    public String toString() {  // Adapted from AbstractMap
+        Iterator<Map.Entry<String, String>> i = entrySet().iterator();
+        if (!i.hasNext())
+            return "{}";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (; ; ) {
+            Map.Entry<String, String> e = i.next();
+            String key = e.getKey();
+            String value = e.getValue();
+            sb.append(key);
+            sb.append('=');
+            sb.append(key.contains("password") ? "***" : value);
+            if (!i.hasNext())
+                return sb.append('}').toString();
+            sb.append(',').append(' ');
+        }
+    }
 }
 
