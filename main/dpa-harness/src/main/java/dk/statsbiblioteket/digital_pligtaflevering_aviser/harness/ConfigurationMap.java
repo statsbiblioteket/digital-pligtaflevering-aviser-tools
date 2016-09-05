@@ -77,6 +77,12 @@ public class ConfigurationMap extends TreeMap<String, String> {
         }
     }
 
+    /**
+     * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their
+     * actual value.  Adapted from the AbstractMap implementation.
+     *
+     * @return Normal Map toString() but with password values given as "***"
+     */
     @Override
     public String toString() {  // Adapted from AbstractMap
         Iterator<Map.Entry<String, String>> i = entrySet().iterator();

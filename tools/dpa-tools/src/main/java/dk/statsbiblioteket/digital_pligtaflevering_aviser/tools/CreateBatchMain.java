@@ -17,13 +17,13 @@ public class CreateBatchMain {
         args = new String[]{"createbatch.properties"}; // FIXME: properly.
         AutonomousPreservationTool.execute(
                 args,
-                m -> DaggerCreateBatchMain_CreateBatchTaskComponent.builder().configurationMap(m).build().getTask()
+                m -> DaggerCreateBatchMain_CreateBatchTaskComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
     @Singleton // FIXME
-    @Component(modules = {ConfigurationMap.class, DomsModule.class, CreateBatchModule.class})
-    interface CreateBatchTaskComponent extends TaskComponent {
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateBatchModule.class})
+    interface CreateBatchTaskComponent extends ToolComponent {
     }
 
     @Singleton // FIXME

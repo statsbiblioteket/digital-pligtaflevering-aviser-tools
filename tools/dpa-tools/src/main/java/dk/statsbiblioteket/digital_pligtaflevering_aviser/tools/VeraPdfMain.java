@@ -32,13 +32,13 @@ public class VeraPdfMain {
         args = new String[]{"verapdf.properties"}; // FIXME:  Just while testing.
         AutonomousPreservationTool.execute(
                 args,
-                m -> DaggerVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTask()
+                m -> DaggerVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
     @Singleton // FIXME
-    @Component(modules = {ConfigurationMap.class, DomsModule.class, VeraPdfModule.class})
-    interface VeraPdfTaskComponent extends TaskComponent {
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class})
+    interface VeraPdfTaskComponent extends ToolComponent {
     }
 
     @Singleton // FIXME
@@ -87,7 +87,7 @@ public class VeraPdfMain {
 
         @Provides
         Task getTask() {
-            return item -> "ok"; // dummy getTask.
+            return item -> "ok"; // dummy getTool.
         }
 
         @Provides

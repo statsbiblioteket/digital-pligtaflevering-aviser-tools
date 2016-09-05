@@ -16,7 +16,7 @@ import java.util.function.Function;
  * name of the program.</p>
  */
 public class AutonomousPreservationTool  {
-    public static void execute(String[] args, Function<ConfigurationMap, Runnable> function) {
+    public static void execute(String[] args, Function<ConfigurationMap, LoggingFaultBarrier> function) {
         if (Objects.requireNonNull(args, "args == null").length < 1) {
             throw new IllegalArgumentException("required argument: configuration file/url");
         }
@@ -24,8 +24,8 @@ public class AutonomousPreservationTool  {
         execute(map, function);
     }
 
-    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Runnable> function) {
+    public static void execute(ConfigurationMap map, Function<ConfigurationMap, LoggingFaultBarrier> function) {
         Objects.requireNonNull(map, "map == null");
-        new LoggingFaultBarrier(function.apply(map)).run();  // Consider inlining LoggingFaultBarrier.
+        function.apply(map).run();
     }
 }

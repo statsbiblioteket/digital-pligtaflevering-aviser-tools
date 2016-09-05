@@ -3,13 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.MBeanServer;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDateTime.now;
@@ -21,19 +16,23 @@ import static java.time.LocalDateTime.now;
  * <li>try-catch catching everything and logging the throwable caught and shut down using System.exit(-1)</li>
  * <li>If run without exceptions to completion System.exit(0) is invoked.</ol>
  * </ol>
- * <p>
+ * <p>Optionally can dump Heap (when run in a Hotspot JVM) to a file named by a lambda expression based on dump time.
  * </p>
  * <p>
  * <p>Note:  Never returns</p>
  */
-public class LoggingFaultBarrier implements Runnable {
+public class LoggingFaultBarrier implements Runnable { // Implements Tool?
 
+    public static final String JVM_DUMPHEAP = "jvm.dumpheap";
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected final Runnable runnable;
+    private boolean dumpHeapOption;
 
-    public LoggingFaultBarrier(Runnable runnable) {
+    @Inject
+    public LoggingFaultBarrier(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
         this.runnable = runnable;
+        this.dumpHeapOption = dumpHeapOption;
     }
 
     @Override
@@ -56,14 +55,9 @@ public class LoggingFaultBarrier implements Runnable {
         }
         // logger framework must be configured to shut down properly when jvm exits.
 
-        HeapDumpHelper.dumpHeap(now -> "/tmp/x.hprof");
+        if (dumpHeapOption) {
+            JavaVirtualMachineHelper.dumpHeap(now -> now + ".hprof");
+        }
         System.exit(exitCode);
     }
-
-//    public static void main(String[] args) {
-//        Logger mainLogger = LoggerFactory.getLogger(LoggingFaultBarrier.class);
-//        new LoggingFaultBarrier(
-//                () -> Stream.of("1", "2", "3").forEach(s -> mainLogger.info("{}", s))
-//        ).run();
-//    }
 }

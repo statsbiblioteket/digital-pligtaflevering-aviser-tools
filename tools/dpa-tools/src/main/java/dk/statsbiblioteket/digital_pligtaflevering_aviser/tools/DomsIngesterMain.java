@@ -17,13 +17,13 @@ public class DomsIngesterMain {
         args = new String[]{"domsingester.properties"}; // FIXME: properly.
         AutonomousPreservationTool.execute(
                 args,
-                m -> DaggerDomsIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTask()
+                m -> DaggerDomsIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
     @Singleton // FIXME
-    @Component(modules = {ConfigurationMap.class, DomsModule.class, DomsIngesterModule.class})
-    protected interface DomsIngesterComponent extends TaskComponent {
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, DomsIngesterModule.class})
+    protected interface DomsIngesterComponent extends ToolComponent {
     }
 
     @Singleton // FIXME
