@@ -40,12 +40,13 @@ B20160811-RT1/verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
  
 **Test setup**
  
-1. Start with a clean vagrant
-2. Run the CreateBach with i.e. thease parameters:
+1. first copy the testnewspaper batch to /newspapr_batches
+2. Start with a clean vagrant
+3. Run the CreateBach with i.e. thease parameters:
    B20160811 1 register-batch-trigger http://localhost:7880/fedora fedoraAdmin fedoraAdminPass http://localhost:7880/pidgenerator-service
  
-3. Update the doms by running 7880-doms/bin/doms.sh import
-4. Run newspaper-prompt-doms-ingester/PromptDomsIngesterComponent
-5. Run BitrepositoryIngesterExecutable with a link to the file config.properties
+4. Update the doms by running 7880-doms/bin/doms.sh import
+5. Run newspaper-prompt-doms-ingester/PromptDomsIngesterComponent
+6. Run BitrepositoryIngesterExecutable with a link to the file config.vagrant.properties
  
 After that fedora should be updated
