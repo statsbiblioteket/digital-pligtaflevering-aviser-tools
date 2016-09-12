@@ -31,7 +31,7 @@ public class PutFileEventHandlerTest {
      * Tests handler correctly registers a failed job once, and does nothing if it gets an additional failed event
      * Also that there's no interaction with the domsRegister
      */
-    @Test
+    //@Test
     public void dubbleFailureEventTest() throws MalformedURLException {
         DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);
@@ -60,7 +60,7 @@ public class PutFileEventHandlerTest {
     /**
      * Tests that the handler correctly registers the file for doms registration 
      */
-    @Test
+    //@Test
     public void successEventTest() throws MalformedURLException {
         DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);

@@ -40,7 +40,7 @@ public class BatchMD5Validation {
                 //Example [8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf]
                 line = br.readLine();
                 if(line != null) {
-                    String[] split = line.split("  ");
+                    String[] split = line.split("\\s+");
                     String filename = split[1];
                     String checksum = split[0];
                     md5Map.put(filename, checksum);

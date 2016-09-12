@@ -70,7 +70,7 @@ public class TreeIngester implements AutoCloseable {
                     }
                 } catch (Exception e) {
                     log.error("Failed to ingest file '{}'", file, e);
-                    resultCollector.addFailure(file.getPath(), "jp2file", getClass().getSimpleName(), 
+                    resultCollector.addFailure(file.getPath(), "pdffile", getClass().getSimpleName(),
                             "Failed to ingest file. '" + e.toString() + "'");
                     
                 }
@@ -100,7 +100,7 @@ public class TreeIngester implements AutoCloseable {
                 log.info("Retrying file '{}' (attempt #{})", job.getIngestableFile().getFileID(), job.getPutAttempts());
             } else {
                 log.info("Failing file '{}' after {} attempts", job.getIngestableFile().getFileID(), job.getPutAttempts());
-                resultCollector.addFailure(job.getIngestableFile().getFileID(), "jp2file", 
+                resultCollector.addFailure(job.getIngestableFile().getFileID(), "pdffile",
                         getClass().getSimpleName(), job.getResultMessages().toString());
             }
         }
