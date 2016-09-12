@@ -1,11 +1,15 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 import dagger.Component;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
@@ -25,12 +29,12 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
+ * Unfinished
  */
 public class VeraPdfMain {
     public static void main(String[] args) {
         args = new String[]{"verapdf.properties"}; // FIXME:  Just while testing.
-        AutonomousPreservationTool.execute(
+        AutonomousPreservationToolHelper.execute(
                 args,
                 m -> DaggerVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTool()
         );
@@ -38,7 +42,7 @@ public class VeraPdfMain {
 
     @Singleton // FIXME
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class})
-    interface VeraPdfTaskComponent extends ToolComponent {
+    interface VeraPdfTaskComponent extends AutonomousPreservationToolComponent {
     }
 
     @Singleton // FIXME

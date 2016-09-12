@@ -41,7 +41,7 @@ public class PromptDomsIngesterComponent {
     }
 
     public static int doMain(String[] args) throws Exception {
-        log.info("Starting with args {}", args);
+        log.info("Starting with args {}", (Object) args);
         Properties properties = readProperties(args);
         Credentials creds = new Credentials(
                 properties.getProperty(ConfigConstants.DOMS_USERNAME),

@@ -21,22 +21,24 @@ import static java.time.LocalDateTime.now;
  * <p>
  * <p>Note:  Never returns</p>
  */
-public class LoggingFaultBarrier implements Runnable { // Implements Tool?
+public class LoggingFaultAutonomousPreservationTool implements AutonomousPreservationTool {
 
     public static final String JVM_DUMPHEAP = "jvm.dumpheap";
+
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected final Runnable runnable;
-    private boolean dumpHeapOption;
+
+    protected boolean dumpHeapOption;
 
     @Inject
-    public LoggingFaultBarrier(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
+    public LoggingFaultAutonomousPreservationTool(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
         this.runnable = runnable;
         this.dumpHeapOption = dumpHeapOption;
     }
 
     @Override
-    public void run() {
+    public void execute() {
 
         log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
 

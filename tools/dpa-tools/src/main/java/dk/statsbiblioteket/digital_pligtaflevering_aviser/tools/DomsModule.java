@@ -23,39 +23,74 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 
 /**
- *
+ *  DOMS configuration string lookup providers.
  */
 @Module
 public class DomsModule {
+    /**
+     * URL for accessing the DOMS repository.  No default value.
+     * @param map configuration map containing the value.
+     * @return
+     */
     @Provides
     @Named(DOMS_URL)
     String provideDomsURL(ConfigurationMap map) {
         return Objects.requireNonNull(map.get(DOMS_URL), DOMS_URL);
     }
 
+    /** Username for accessing DOMS.  No default.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
     @Provides
     @Named(DOMS_USERNAME)
     String provideDomsUserName(ConfigurationMap map) {
         return Objects.requireNonNull(map.get(DOMS_USERNAME), DOMS_USERNAME);
     }
 
+    /** URL for DOMS pid generator.  No default
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
     @Provides
     @Named(DOMS_PIDGENERATOR_URL)
     String provideDomsPidGeneratorURL(ConfigurationMap map) {
         return Objects.requireNonNull(map.get(DOMS_PIDGENERATOR_URL), DOMS_PIDGENERATOR_URL);
     }
 
+    /** Password for accessing DOMS.  No default.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
     @Provides
     @Named(DOMS_PASSWORD)
     String provideDomsPassword(ConfigurationMap map) {
         return Objects.requireNonNull(map.get(DOMS_PASSWORD), DOMS_PASSWORD);
     }
 
+    /** URL for accessing SBOI.  No default
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+
     @Provides
     @Named(AUTONOMOUS_SBOI_URL)
     String provideSummaLocation(ConfigurationMap map) {
         return Objects.requireNonNull(map.get(AUTONOMOUS_SBOI_URL), AUTONOMOUS_SBOI_URL);
     }
+
+    /**
+     * Create SBOIEventIndex from dependencies provided by Dagger.
+     * @param summaLocation URL for summa
+     * @param premisManipulatorFactory factory for premisManipulators
+     * @param domsEventStorage event storage
+     * @param pageSize items to get from summa at a time.
+     * @return
+     */
 
     @Provides
     SBOIEventIndex provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
@@ -70,17 +105,32 @@ public class DomsModule {
         }
     }
 
+    /** Provider to give PremisManipulatorFactory as we cannot modify the actual constructor with the Dagger annotations.
+     *
+     *
+     * @param itemFactory factory to create new, empty items.
+     * @return factory
+     */
     @Provides
     PremisManipulatorFactory providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
         try {
-            PremisManipulatorFactory<Item> premisManipulatorFactory;
-            premisManipulatorFactory = new PremisManipulatorFactory<>(PremisManipulatorFactory.TYPE, itemFactory);
-            return premisManipulatorFactory;
+            PremisManipulatorFactory<Item> factory;
+            factory = new PremisManipulatorFactory<>(PremisManipulatorFactory.TYPE, itemFactory);
+            return factory;
         } catch (JAXBException e) {
             throw new RuntimeException("new PremisManipulatorFactory()", e);
         }
     }
 
+    /** Create DomsEventStorage factory using appropriate
+     *
+     * @param domsURL URL to contact DOMS
+     * @param domsPidGeneratorURL URL to contact PID generator web service.
+     * @param domsUserName  DOMS user name
+     * @param domsPassword DOMS password
+     * @param itemFactory factory for new fresh items for JAXB to populate.
+     * @return
+     */
     @Provides
     DomsEventStorage<Item> provideDomsEventStorage(
             @Named(DOMS_URL) String domsURL,

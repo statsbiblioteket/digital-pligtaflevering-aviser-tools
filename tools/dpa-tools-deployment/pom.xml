@@ -132,18 +132,18 @@
                                 <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
                                     <mainClass>
-                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CreateBatchMain
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CreateBatchMain
                                     </mainClass>
                                     <id>dpa-create-batch</id>
                                 </program>
                                 <program>
                                     <mainClass>
-                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsIngesterMain
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain
                                     </mainClass>
                                     <id>dpa-doms-ingester</id>
                                 </program>
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPdfMain
                                     </mainClass>
                                     <id>dpa-tool-verapdf</id>
                                 </program>

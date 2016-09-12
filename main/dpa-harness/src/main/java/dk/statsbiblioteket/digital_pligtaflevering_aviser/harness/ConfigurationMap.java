@@ -27,6 +27,10 @@ public class ConfigurationMap extends TreeMap<String, String> {
         this.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
     }
 
+    /**
+     * Provider method needed to give Dagger a hook into accessing the configuration map.
+     * @return current configuration map
+     */
     @Provides
     @Singleton
     public ConfigurationMap getConfigurationMap() {
@@ -35,6 +39,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
 
     /**
      * Adds those system properties with the provided keys that actually exist (value != null) to the configuration map.
+     * Non-existing values silently ignored.
      */
 
     public void addSystemProperties(String... propertyKeys) {
@@ -48,7 +53,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
 
     /**
      * EventAdderValuePutter those environment variables with the provided keys that actually exist (value != null) to
-     * the configuration map.
+     * the configuration map. Non-existing values silently ignored.
      */
 
     public void addEnvironmentVariables(String... variableKeys) {
@@ -61,7 +66,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
     }
 
     /**
-     * Buffers the reader, reads in the entries, and add them to the configuration map.  The reader is closed
+     * Buffers the reader, reads in the entries, and add them to the configuration map.  The reader isn't closed
      * afterwards.  Values (but not keys) are trimmed.
      */
 
@@ -84,7 +89,8 @@ public class ConfigurationMap extends TreeMap<String, String> {
      * @return Normal Map toString() but with password values given as "***"
      */
     @Override
-    public String toString() {  // Adapted from AbstractMap
+    public String toString() {
+        // Adapted from AbstractMap
         Iterator<Map.Entry<String, String>> i = entrySet().iterator();
         if (!i.hasNext())
             return "{}";
@@ -104,4 +110,3 @@ public class ConfigurationMap extends TreeMap<String, String> {
         }
     }
 }
-
