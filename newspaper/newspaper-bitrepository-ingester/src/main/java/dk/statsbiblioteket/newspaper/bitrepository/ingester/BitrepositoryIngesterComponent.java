@@ -11,7 +11,7 @@ import javax.xml.bind.JAXBException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedoraImpl;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.MyPutFileClientStub;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
@@ -74,12 +74,12 @@ public class BitrepositoryIngesterComponent extends TreeProcessorAbstractRunnabl
                                                                             configuration.getMaxThreads(), 
                                                                             configuration.getDomsTimeout());
              TreeIngester ingester = new TreeIngester(configuration.getCollectionID(), 
-                                                     parallelOperationLimiter,
-                                                     urlRegister, 
-                                                     new BatchImageLocator(createIterator(batch), configuration.getUrlToBatchDir(), batch.getFullID()),
-                                                     ingestClient, 
-                                                     resultCollector,
-                                                     configuration.getMaxBitmagRetries(), batch)) {
+                     parallelOperationLimiter,
+                     urlRegister,
+                     new BatchImageLocator(createIterator(batch), configuration.getUrlToBatchDir(), batch.getFullID()),
+                     ingestClient,
+                     resultCollector,
+                     configuration.getMaxBitmagRetries(), batch)) {
       
             log.info("Starting ingest of batch '" + batch.getFullID() + "'");
             ingester.performIngest();
@@ -140,7 +140,7 @@ public class BitrepositoryIngesterComponent extends TreeProcessorAbstractRunnabl
     protected PutFileClient createPutFileClient(IngesterConfiguration configuration, Settings settings) {
 
         if(Boolean.parseBoolean(super.getProperties().getProperty("dpa.testmode", "false"))) {
-            return new MyPutFileClientStub();
+            return new BitrepositoryPutFileClientStub(super.getProperties().getProperty("dpa.putfile.destinationpath", ""));
         } else {
             PermissionStore permissionStore = new PermissionStore();
             MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);

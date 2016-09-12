@@ -97,12 +97,9 @@ public class BitrepositoryIngesterComponentIT {
 
     @BeforeMethod(alwaysRun = true)
     private void loadConfiguration() throws Exception {
-        //String generalPropertiesPath = System.getProperty("integration.test.newspaper.properties");
-
-        String generalPropertiesPath = "/home/mmj/projects/digital-pligtaflevering-aviser-tools/newspaper/newspaper-bitrepository-ingester/src/main/config";
-
-        //String propertiesDir = generalPropertiesPath.substring(0, generalPropertiesPath.lastIndexOf("/"));
-        pathToConfig = generalPropertiesPath /*+ "/newspaper-bitrepository-ingester-config"*/;
+        String generalPropertiesPath = System.getProperty("integration.test.newspaper.properties");
+        String propertiesDir = generalPropertiesPath.substring(0, generalPropertiesPath.lastIndexOf("/"));
+        pathToConfig = propertiesDir + "/newspaper-bitrepository-ingester-config";
         pathToTestBatch = System.getProperty("integration.test.newspaper.testdata");
         properties.load(new FileInputStream(pathToConfig + "/config.properties"));
         properties.setProperty(IngesterConfiguration.SETTINGS_DIR_PROPERTY, pathToConfig);

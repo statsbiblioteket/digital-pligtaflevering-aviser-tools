@@ -27,6 +27,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJo
 public class DomsJP2FileUrlRegister implements AutoCloseable {
     private final Logger log = LoggerFactory.getLogger(getClass());
     public static final String JP2_MIMETYPE = "image/jp2";
+    public static final String PDF_MIMETYPE = "application/pdf";
     public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     public static final String CONTENTS = "CONTENTS";
 
@@ -132,8 +133,8 @@ public class DomsJP2FileUrlRegister implements AutoCloseable {
             }
             String fileObjectPid = objects.get(0);
             String url = baseUrl + job.getIngestableFile().getFileID();
-            enhancedFedora.addExternalDatastream(fileObjectPid, CONTENTS, job.getIngestableFile().getFileID(), url, "application/octet-stream", 
-                    JP2_MIMETYPE, null, "Adding file after bitrepository ingest");
+            enhancedFedora.addExternalDatastream(fileObjectPid, CONTENTS, job.getIngestableFile().getFileID(), url, "application/octet-stream",
+                    PDF_MIMETYPE, null, "Adding file after bitrepository ingest");
             Date dsAdded = new Date();
             log.trace("It took {} ms to add external datastream to doms for path '{}'", dsAdded.getTime() - objFound.getTime(), path);
             String checksum = Base16Utils.decodeBase16(job.getIngestableFile().getChecksum().getChecksumValue());

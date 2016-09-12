@@ -1,6 +1,5 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -28,7 +27,7 @@ public class BatchImageLocator extends AbstractImageLocator {
         super(treeIterator);
         this.batchDirUrl = batchDirUrl;
         this.md5Validation = new BatchMD5Validation(this.batchDirUrl);
-        this.md5Validation.validation(batchFolder);
+        this.md5Validation.readChecksums(batchFolder);
     }
 
     protected boolean isIngestableNode(ParsingEvent event) {
@@ -37,13 +36,9 @@ public class BatchImageLocator extends AbstractImageLocator {
 
     @Override
     protected IngestableFile createIngestableFile(FileAttributeParsingEvent fileEvent) {
-        try {
-            return new IngestableFile(
-                    getFileID(fileEvent), getFileUrl(fileEvent), getChecksum(this.md5Validation.getExpectedMD5(getFileName(fileEvent))), null,
-                    "path:" + getFileName(fileEvent));
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
+        return new IngestableFile(
+                getFileID(fileEvent), getFileUrl(fileEvent), getChecksum(this.md5Validation.getExpectedMD5(getFileName(fileEvent))), null,
+                "path:" + getFileName(fileEvent));
     }
 
     /**
@@ -59,7 +54,7 @@ public class BatchImageLocator extends AbstractImageLocator {
      */
     private URL getFileUrl(FileAttributeParsingEvent event) {
         try {
-            return new URL("file:///"+batchDirUrl + "/" + getFileName(event));
+            return new URL("file:///" + batchDirUrl + "/" + getFileName(event));
         } catch (MalformedURLException e) {
             throw new RuntimeException("Unable to create ingest url based on string: " + batchDirUrl + "/" + event.getName());
         }
