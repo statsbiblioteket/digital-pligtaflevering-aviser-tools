@@ -3,7 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDateTime.now;
@@ -15,23 +16,29 @@ import static java.time.LocalDateTime.now;
  * <li>try-catch catching everything and logging the throwable caught and shut down using System.exit(-1)</li>
  * <li>If run without exceptions to completion System.exit(0) is invoked.</ol>
  * </ol>
- * <p>
+ * <p>Optionally can dump Heap (when run in a Hotspot JVM) to a file named by a lambda expression based on dump time.
  * </p>
  * <p>
  * <p>Note:  Never returns</p>
  */
-public class LoggingFaultBarrier implements Runnable {
+public class LoggingFaultAutonomousPreservationTool implements AutonomousPreservationTool {
+
+    public static final String JVM_DUMPHEAP = "jvm.dumpheap";
 
     protected Logger log = LoggerFactory.getLogger(this.getClass());
 
     protected final Runnable runnable;
 
-    public LoggingFaultBarrier(Runnable runnable) {
+    protected boolean dumpHeapOption;
+
+    @Inject
+    public LoggingFaultAutonomousPreservationTool(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
         this.runnable = runnable;
+        this.dumpHeapOption = dumpHeapOption;
     }
 
     @Override
-    public void run() {
+    public void execute() {
 
         log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
 
@@ -49,13 +56,10 @@ public class LoggingFaultBarrier implements Runnable {
             exitCode = -1;
         }
         // logger framework must be configured to shut down properly when jvm exits.
-        System.exit(exitCode);
-    }
 
-    public static void main(String[] args) {
-        Logger mainLogger = LoggerFactory.getLogger(LoggingFaultBarrier.class);
-        new LoggingFaultBarrier(
-                () -> Stream.of("1", "2", "3").forEach(s -> mainLogger.info("{}", s))
-        ).run();
+        if (dumpHeapOption) {
+            JavaVirtualMachineHelper.dumpHeap(now -> now + ".hprof");
+        }
+        System.exit(exitCode);
     }
 }

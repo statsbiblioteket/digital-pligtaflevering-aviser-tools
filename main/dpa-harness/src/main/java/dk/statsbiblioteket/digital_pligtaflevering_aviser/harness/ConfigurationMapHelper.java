@@ -13,18 +13,28 @@ import java.util.Collections;
 import java.util.Objects;
 
 /**
- *
+ * ConfigurationMapHelper has helper methods to create a configuration map from external resources.
  */
 public class ConfigurationMapHelper {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationMapHelper.class);
 
+    /**
+     * Loads a configuration map from the given configuration location.  First the location is considered as
+     * a file name and loaded from there and returned if found, next as a resource name and loaded from there
+     * and returned if found.  Otherwise an exception is thrown.1
+     * @param configurationLocation file name/resource name of properties to read.
+     * @return populated map with configuration strings.
+     */
     public static ConfigurationMap configurationMapFromProperties(String configurationLocation) {
+
         ConfigurationMap map = new ConfigurationMap(Collections.emptyMap());
 
         File configurationFile = new File(configurationLocation);
         try {
-            map.addPropertyFile(new FileReader(configurationFile));
+            FileReader fileReader = new FileReader(configurationFile);
+            map.addPropertyFile(fileReader);
+            fileReader.close();
             LOGGER.debug("read file {}: {}", configurationFile.getAbsolutePath(), map);
             return map;
         } catch (FileNotFoundException e) {
@@ -37,7 +47,9 @@ public class ConfigurationMapHelper {
         Objects.requireNonNull(stream, configurationLocation + " is not a valid file nor a valid resource");
 
         try {
-            map.addPropertyFile(new InputStreamReader(stream));
+            InputStreamReader inputStreamReader = new InputStreamReader(stream);
+            map.addPropertyFile(inputStreamReader);
+            inputStreamReader.close();
             LOGGER.debug("read resource {}: {}", configurationLocation, map);
             return map;
         } catch (IOException e) {
