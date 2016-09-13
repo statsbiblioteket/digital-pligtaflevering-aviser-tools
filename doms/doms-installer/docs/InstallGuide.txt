@@ -1,0 +1,477 @@
+= Install Guide =
+<<TableOfContents(10)>>
+
+== The System ==
+This is the DOMS System, Digital Object Management System System. It is a complete repository system, based on fedora.
+
+The doms system consist of a number of necessary components. At the core of doms, is the tomcat server, which everything runs in. Doms is a number of web applications, running in this tomcat. Primary of these webapplications is fedora. Fedora is a rather unusual webapp. It consist of a webapp, and an install dir on the side. This install dir, default in services/fedora, is where the fedora webapp reads it's configuration (and boy, does it have a lot of configuration). The fedora webapp is not a frontend to a fedora system, it is the fedora system.
+For fedora to run, it requires a database system. Either you can provide a postgresql system to it, or it can supply it's own derby database. Similarly, it requires a triple store, but can provide it's own mulgara instance. It also requires an activeMQ message broker, but again, can provide it's own. And lastly, it require a place to put the datafiles.
+
+There are three doms webservices, which need to be callable from the outside (ie. not localhost)
+
+ * CentralDomsWebservice is the interface to the doms system. The ingester goes through this, as does the summa integration, and the gui.
+ * authchecker The web dissemination frontend uses this webservice to work with the authentication system in doms
+ * Surveillance-surveyor - Monitors that everything is working and not reporting errors
+
+There is one further webservice, which is only used internally
+
+ * Pidgenerator - Generates pids for new objects
+
+== The release ==
+Due to the nature of Fedora, it is impossible to just generate an extractable zip. Rather, Fedora is based around an installer, and thus DOMS is required to be the same way. The doms release is this installer.
+
+The installer is invoked by the script install.sh in bin/. In bin, there are the following scripts
+ * install_basic_tomcat.sh
+ * package.sh
+ * install.sh
+ * setenv.sh
+ * common.sh
+ * doms.sh
+
+setenv.sh is the script that controls everything. It sets all the variables that determine the location of various folders, and port numbers.
+
+install.sh does several things:
+ - It installs a basic tomcat (by running install_basic_tomcat.sh)
+ - It packages doms up for use with this tomcat (by running package.sh)
+ - It installs base objects (by calling relevant scripts in the bundled basic object ingester)
+ - It installs a summa installation (by calling the summa installer with correct settings)
+ - It copies the doms.sh script to the installed system.
+
+It is ru nlike this:
+{{{
+./install.sh PATH_TO_INSTALLDIR
+}}}
+Where PATH_TO_INSTALLDIR is the location to install the doms system in. The DOMS system will never modify anything outside this path (unless you change the default values in setenv.sh)
+
+package.sh is the real workhorse of the install process. It copies and creates the entire installation, symlinks and replace stuff in config files, so the system works. It does not install a tomcat, but it does write the nessessary config files, so that if one is already installed, it will be configured.
+
+install_basic_tomcat.sh just extracts the included tomcat server.
+
+common.sh is only meant to be included from other scripts, not run on it's own
+
+doms.sh gives functionality for stopping and starting doms, as well as indexing contents in Summa. It is meant to be used in an installed system, not in the installer.
+
+== setenv.sh - configuring the install ==
+setenv.sh looks like this default
+
+{{{
+#!/bin/bash
+
+TOMCATZIP=`basename $BASEDIR/data/tomcat/*.zip`
+FEDORAJAR=`basename $BASEDIR/data/fedora/*.jar`
+INGESTERZIP=`basename $BASEDIR/ingester/*.zip`
+
+
+# The normal config values
+PORTRANGE=78
+SUMMA_PORTRANGE=576
+TOMCAT_SERVERNAME=localhost
+
+FEDORAADMIN=fedoraAdmin
+FEDORAADMINPASS=fedoraAdminPass
+
+FEDORAUSER=fedoraReadOnlyAdmin
+FEDORAUSERPASS=fedoraReadOnlyPass
+
+# The folders
+TOMCAT_DIR=$TESTBED_DIR/tomcat
+
+LOG_DIR=$TOMCAT_DIR/logs
+
+SERVICES_DIR=$TESTBED_DIR/services
+
+
+FEDORA_DIR=$SERVICES_DIR/fedora
+
+SCHEMA_DIR=$SERVICES_DIR/schemas
+
+TOMCAT_CONFIG_DIR=$SERVICES_DIR/conf
+
+WEBAPPS_DIR=$SERVICES_DIR/webapps
+
+TOMCAT_APPS_DIR=$SERVICES_DIR/tomcat-apps
+
+
+INGEST_DIR=$TESTBED_DIR/ingester
+
+DATA_DIR=$TESTBED_DIR/data
+
+CACHE_DIR=$TESTBED_DIR/cache
+
+BASEOBJS_DIR=$TESTBED_DIR/base-objects-ingester
+
+DOCS_DIR=$TESTBED_DIR/docs
+
+#Database
+E_POSTGRESQL=true
+USE_POSTGRESQL=false
+POSTGRESQL_SERVER=127.0.0.1:5433
+POSTGRESQL_DB=doms-test
+POSTGRESQL_USER=doms
+POSTGRESQL_PASS=faeTh9xa
+}}}
+
+Here is a selected set of parameters and what they control:
+
+First come the portranges. All the doms components are configured to use a port inside this range, so the tomcat server would run on 7880, when the PORTRANGE is set to 80. Use this to configere which set of 100 ports doms should have. Furthermore Summa uses another range of 100 ports.
+
+The tomcat servername can safely be kept as localhost. It is not used for much, but when fedora gives back an url, it will use the servername as prefix. At the moment fedora is completely shielded behind the services, so this will not be used.
+
+We have defined three standard users for fedora. All are allowed to view all the repository contains, but only two of them are allowed to change data. I am not entirely sure if the system would work if you change the FEDORAADMIN username to something else, but the other 5 parameters can be changed freely.
+
+The the big set of important directories for doms. Notice that all of them are relative to the $TESTBED_DIR. This is what prevents DOMS from modifying anything outside the TESTBED_DIR.
+
+LOG_DIR is where the webservices and fedora logs. It does not control where tomcat logs.
+
+TOMCAT_DIR is where tomcat should be installed (install_basic_tomcat.sh) or where we expect a tomcat to be (package.sh). Package.sh will create this folder if it does not exist, and populate it with only the tomcat config files we have changed.
+
+FEDORA_DIR is where fedora is to be installed. This is just the basic fedora instance, with config and client, not any of the dynamic content souch as data. Repository policies are stored in the FEDORA_DIR
+
+DATA_DIR is where fedora should store it's objects and datastreams.
+
+CACHE_DIR is where the activeMQ and mulgara triple store should store their files. This is not a cache in the sense that it can just be deleted, but it is a cache in the sence that it can be regenerated from the contents of the DATA_DIR
+
+TOMCAT_CONFIG_DIR is where the configuration files for services running in tomcat is placed. This is mostly used to place the log4j config files.
+
+WEBAPPS_DIR is where the webapps should go. Tomcat is configured to load the webapps from this location
+
+USE_POSTGRESQL is binary, ie true or false. If true, it will attempt to connect to a postgresql database running on localhost with the credentials below. If false fedora will use a java derby database. The derby database will be stored in CACHE_DIR
+
+These are, for now, the config parameters that control the doms, and which can be set before the install.
+
+== An installed system ==
+We now assume that you have installed the DOMS system, by using install.sh or package.sh. This section is a guide to what is controlled where, if you desire to make changes. I will write this guide based on the above defaults from setenv.sh. If you changed anything, it is fairly simple to figure out where the files will be instead.
+
+The directory structure, following an install will be thus. I have left out folders that does not contain anything to change, as they are not relevant to the current discussion
+
+ * cache/
+ * data/
+ * services/
+  * conf/
+   * log4j.*.xml
+   * context.xml.default (symlinked to tomcat/conf/Catalina/localhost/)
+   * setenv.sh (symlinked to tomcat/bin)
+  * fedora/
+   * server
+    * config/
+     * akubra-llstore.xml
+     * beSecurity.xml
+     * fedora.fcfg
+     * fedora-users.xml
+     * jaas.conf
+     * logback.xml
+  * webapps/
+ * tomcat/
+  * conf/
+   * server.xml
+   * web.xml
+   * context.xml
+
+=== log4j.*.xml ===
+These are the respective log4j config files for each of the deployed webservices As can be seen, they have a specific logappender, developed in dk.statsbiblioteket added. This logappender collects the "bad" messages, and is part of the surveillance system. Other than that, is is a standard config file, that logs to the LOG_DIR
+
+=== context.xml.default ===
+This is the big configuration file for all the doms services. The doms services are all built so that they take all their configuration from context params. The way this file is linked into tomcat enables the values to be overriden from the file tomcat/conf/context.xml
+
+The values in context.xml will default be something like this
+
+==== fedora ====
+{{{
+    <!--fedora-->
+    <Parameter
+            name="fedora.home"
+            value="services/fedora"
+            override="false"/>
+}}}
+This setting controls where the fedora instance is installed
+
+==== ecm ====
+{{{
+    <!--ecm-->
+    <Parameter name="dk.statsbiblioteket.doms.ecm.fedora.connector"
+               value="dk.statsbiblioteket.doms.ecm.repository.fedoraclient.FedoraClientConnector"
+               override="false"/>
+}}}
+Which implementation of a fedora connector to use. Do not change
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.ecm.fedora.location"
+               value="http://localhost:7880/fedora"
+               override="false"/>
+}}}
+Location of the fedora, in regards to the ECM service.
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.ecm.pidGenerator.client"
+               value="dk.statsbiblioteket.doms.ecm.repository.PidGeneratorImpl"
+               override="false"/>
+}}}
+Which implementation of the pidgenerator client to use. Do not change
+
+{{{
+    <Parameter
+            name="dk.statsbiblioteket.doms.ecm.pidgenerator.client.wsdllocation"
+            value="http://localhost:7880/pidgenerator/pidGenerator/?wsdl"
+            override="false"/>
+}}}
+Location of the pidGenerator service
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.ecm.log4jconfig"
+               value="${user.home}/services/conf/log4j.ecm.xml"
+               override="false"/>
+}}}
+log4j config for the ecm service
+
+==== centralDomsWebservice ====
+{{{
+    <!--centralDomsWebservice-->
+    <Parameter name="dk.statsbiblioteket.doms.central.fedoraLocation"
+               value="http://localhost:7880/fedora"
+               override="false"/>
+}}}
+Where the fedora webservice resides
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.central.log4jconfig"
+               value="${user.home}/services/conf/log4j.centralDomsWebservice.xml"
+               override="false"/>
+}}}
+log4j config for the centralDomsWebservice service
+
+==== authchecker ====
+{{{
+    <!--authchecker-->
+    <Parameter name="dk.statsbiblioteket.doms.authchecker.tickets.timeToLive"
+               value="1200000" override="false"/>
+}}}
+The authchecker is also the ticketissuer (relevant for summa). This param controls how long issued tickets should live, in ms.
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.authchecker.users.timeToLive"
+               value="1200000" override="false"/>
+}}}
+When summa tells doms that a given user is allowed to view something, a temp user account is created. This is the time before this user account is removed again
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.authchecker.fedoralocation"
+               value="http://localhost:7880/fedora"
+               override="false"/>
+}}}
+This is the location of Fedora, for the authchecker webservice
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.authchecker.log4jconfig"
+               value="${user.home}/services/conf/log4j.authchecker.xml"
+               override="false"/>
+}}}
+This is the log4j config for the authchecker webservice
+
+==== pidgenerator ====
+{{{
+    <!--pidgenerator-->
+    <Parameter name="dk.statsbiblioteket.doms.pidgenerator.log4jconfig"
+               value="${user.home}/services/conf/log4j.pidgenerator.xml"
+               override="false"/>
+}}}
+This is the log4j config for the pidgenerator webservice.
+
+==== surveillance-fedorasurveyor ====
+{{{
+    <Parameter
+            name="dk.statsbiblioteket.doms.surveillance.fedorasurveyor.fedoraUser"
+            value="fedoraReadOnlyAdmin" override="false"/>
+}}}
+This is the user account the surveillance system should use, when testing fedora. This should of course correspond to a user account from fedora-users.xml
+
+{{{
+    <!--surveillance-fedorasurveyor-->
+    <Parameter
+            name="dk.statsbiblioteket.doms.surveillance.fedorasurveyor.fedoraPassword"
+            value="2ZeMA1bN" override="false"/>
+}}}
+The password that goes with the user account above
+
+{{{
+    <Parameter
+            name="dk.statsbiblioteket.doms.surveillance.fedorasurveyor.fedoraUrl"
+            value="http://localhost:7880/fedora"
+            override="false"/>
+}}}
+Yet another specification of where to find fedora
+
+{{{
+    <Parameter
+            name="dk.statsbiblioteket.doms.surveillance.fedorasurveyor.log4jconfig"
+            value="${user.home}/services/conf/log4j.surveillance-fedorasurveyor.xml"
+            override="false"/>
+}}}
+log4j config for this webservice
+
+==== surveillance-surveyor ====
+{{{
+    <!--surveillance-surveyor-->
+    <Parameter
+            name="dk.statsbiblioteket.doms.surveillance.surveyor.ignoredMessagesFile"
+            value="ignored.txt" override="false"/>
+}}}
+File to use (path relative to WHAT??) for messages to ignore from the surveillance system. Example, every time fedora cannot find a datastream it logs this as an ERROR, despite it being a common occurrence in normal workflows.
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.surveillance.surveyor.restUrls"
+               value="
+               http://localhost:7880/surveillance-surveyor/surveyable/getStatusSince/{date};
+               http://localhost:7880/surveillance-fedorasurveyor/surveyable/getStatusSince/{date};
+               http://localhost:7880/authchecker/surveyable/getStatusSince/{date};
+               http://localhost:7880/fedora/surveyable/getStatusSince/{date}"
+               override="false"/>
+}}}
+All the doms rest webservices have a little extra servlet, that allows the surveillance system to poll them. This is the list of such servlets that can be contacted by rest.
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.surveillance.surveyor.soapUrls"
+               value="
+               http://localhost:7880/pidgenerator/surveyable/?wsdl;
+               http://localhost:7880/centralDomsWebservice/surveyable/?wsdl"
+               override="false"/>
+}}}
+Same as above, but for the soap webservices.
+
+{{{
+    <Parameter name="dk.statsbiblioteket.doms.surveillance.surveyor.log4jconfig"
+               value="${user.home}/services/conf/log4j.surveillance-surveyor.xml"
+               override="false"/>
+}}}
+log4j config for this webservice
+
+=== setenv.sh (in tomcat, not the one in the installer) ===
+The setenv.sh is used to set a few variables, that for some reason needs to be overridden thus, rather from context.xml.
+
+{{{
+export CATALINA_OPTS="-Dorg.apache.activemq.default.directory.prefix="$HOME/cache/" -XX:+HeapDumpOnOutOfMemoryError"
+export FEDORA_HOME=$HOME/services/fedora/
+}}}
+There are only two important variables here. org.apache.activemq.default.directory.prefix controls where activeMQ stores it's temp files. FEDORA_HOME needs to be set, I believe, but the context.xml fedora.home param might be sufficient. In older days, the FEDORA_HOME had to be set.
+
+=== akubra-llstore.xml ===
+This file controls where the fedora objects and datastreams are stored. For now, we do not store datastreams managed, so only objects are relevant. Still, this is the file to change, if the data dir should be moved
+
+=== beSecurity.xml ===
+When one fedora invocation make fedora call itself, it needs to do so with a certain set of credentials. Due to the nature of net communication, it will not be possible to reuse the credentails of the original call to fedora. Instead these backend calls use the credentials defined in this file. Note, this file does not define user accounts, so the credentails specified here must correspond to an accound in fedora-users.xml
+
+=== fedora-users.xml ===
+This is the simple file that handles fedora users. It should only be used for backend user accounts. Users that just want to access material will be given temporary user accounts that time out. Users of the future GUI, will use their account from the LDAP. So, this is for those users (ie. ingester, summa) which fall in neither category.
+
+=== jaas.conf ===
+java as a service. This is the config file for some part of fedoras authentification framework. Only the top section matters. What we have done is thrown in the authchecker webservice in the process. When summa needs to get credentials for a temporary user, it requests these from the authchecker. The authchecker then creates a new user account in memory. When the user tries to use the given credentials, he is subjected to the fedora authentification system, where we have injected the authchecker so it can respond that it knows the user, and let him in.
+
+When LDAP should be enabled with the doms, this would also be the file to edit for fedora to forward authentication to the LDAP server.
+
+=== logback.xml ===
+Fedora controls logging with the logback system. This is the config file. Like the log4j config files for the webservices, we have defined a special appender, that collects the logmessages for the surveillance system.
+
+=== fedora.fcfg ===
+Last, and most certainly longest. This is the config file that controls fedora.
+
+The top section section, before the first <module> tag controls params that are global for all of fedora. Most relevant of these are the portnumbers and the tomcat address. Fedora needs to know where it lives.
+
+Those of interest to us (ie, those where you can change something meaningful are)
+
+{{{
+     <module role="org.fcrepo.server.security.Authorization" class="org.fcrepo.server.security.DefaultAuthorization">
+        ....
+        <param name="REPOSITORY-POLICIES-DIRECTORY"
+               value="$FEDORA_DIR$/fedora-xacml-policies/repository-policies"
+               isFilePath="true"/>
+        ...
+    </module>
+}}}
+{{{
+    <module role="org.fcrepo.server.storage.DOManager" class="org.fcrepo.server.storage.DefaultDOManager">
+        ....
+        <param name="storagePool" value="localPostgreSQLPool">
+            <comment>The named connection pool from which read/write database
+                connections are to be provided for the storage subsystem (see the
+                ConnectionPoolManager module). Default is the default provided by the
+                ConnectionPoolManager.</comment>
+        </param>
+        ....
+    </module>
+}}}
+Choose between the two database systems defined below. The valid values are
+
+ . localPostgreSQLPool and localDerbyPool.
+
+{{{
+    <module role="org.fcrepo.server.management.Management" class="org.fcrepo.server.management.ManagementModule">
+        ....
+        <param name="decorator3" value="dk.statsbiblioteket.doms.ecm.fedoravalidatorhook.FedoraModifyObjectHook"/>
+        ....
+    </module>
+}}}
+This defines the hook we use inside fedora. Decorator3 is the ecm hook. When an object is published, it should be validated. if it fails, it should not be published.
+
+{{{
+    <module role="org.fcrepo.server.messaging.Messaging" class="org.fcrepo.server.messaging.MessagingModule">
+        ....
+        <param name="java.naming.provider.url" value="vm:(broker:(tcp://localhost:$PORTRANGE$16)?useJmx=false)"/>
+        ....
+    </module>
+}}}
+This controls the portrange for the activeMQ system, so that it stays inside the prescribed range. Jmx is disabled, as it cannot be pushed inside the  prescribed range, and is not currently needed
+
+{{{
+    <module role="org.fcrepo.server.storage.ConnectionPoolManager" class="org.fcrepo.server.storage.ConnectionPoolManagerImpl">
+        <comment>This module facilitates obtaining ConnectionPools</comment>
+        <param name="defaultPoolName" value="localPostgreSQLPool"/>
+        <param name="poolNames" value="localPostgreSQLPool"/>
+    </module>
+}}}
+This controls which database system to use for stuff. Legal values are localPostgreSQLPool and localDerbyPool.
+
+{{{
+    <datastore id="localDerbyPool">
+        ....
+        <param name="dbUsername" value="fedoraAdmin">
+            <comment>The database user name.</comment>
+        </param>
+        <param name="dbPassword" value="fedoraAdmin">
+            <comment>The database password.</comment>
+        </param>
+        <param name="jdbcURL" value="jdbc:derby:$CACHE_DIR$/derby/fedora3;create=true">
+            <comment>The JDBC connection URL.</comment>
+        </param>
+        ....
+    </datastore>
+}}}
+This is the config for the derby database system. If you do not use the derby system, ignore this section. Note, I have had problems with changing the  username and password.
+
+{{{
+    <datastore id="localPostgreSQLPool">
+        ....
+        <param name="dbUsername" value="$POSTGRESQL_USER$">
+            <comment>The database user name.</comment>
+        </param>
+        <param name="dbPassword" value="$POSTGRESQL_PASS$">
+            <comment>The database password.</comment>
+        </param>
+        <param name="jdbcURL" value="jdbc:postgresql://localhost/$POSTGRESQL_DB$">
+            <comment>The JDBC connection URL.</comment>
+        </param>
+        ....
+    </datastore>
+}}}
+This is the config for the postgresql database. Fedora needs this database to archive stuff along the way, so it must be there (or derby must). The referenced database (in postgresql) must exist, but fedora will populate it with the right tables upon startup.
+
+=== server.xml ===
+This is the tomcat config file. For our purposes, we use it to define the ports tomcat will use, and where it will look for war files.
+
+=== web.xml ===
+totally default except this bit
+
+{{{
+    <session-config>
+        <session-timeout>1</session-timeout>
+    </session-config>
+}}}
+We do not use sessions, and with a timeout of 30 mins, a great big pile of  sessions will assemble, to grab all the memory.

@@ -1,0 +1,9 @@
+
+dk.statsbiblioteket.xmltapes.migrator.sqlindex.driver=org.postgresql.Driver
+dk.statsbiblioteket.xmltapes.migrator.sqlindex.jdbcurl=$XMLTAPES_DATASTREAMS_JDBC$
+dk.statsbiblioteket.xmltapes.migrator.sqlindex.dbuser=$XMLTAPES_DBUSER$
+dk.statsbiblioteket.xmltapes.migrator.sqlindex.dbpass=$XMLTAPES_DBPASS$
+
+dk.statsbiblioteket.xmltapes.migrator.redis.host=$REDIS_HOST$
+dk.statsbiblioteket.xmltapes.migrator.redis.port=$REDIS_PORT$
+dk.statsbiblioteket.xmltapes.migrator.redis.database=1

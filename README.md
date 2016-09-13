@@ -156,7 +156,12 @@ By default it listens on port 8000.
 
 # DOMS
 
-From doms-installer/README.md: Access Fedora (fedoraAdmin/fedoraAdminPass):
+For development a full "server vagrant" with DOMS, Zookeeper etc has been
+adapted from the doms-installer project and is placed in doms/doms-installer.
+
+NOTE:  THIS IS NOT PRODUCTION QUALITY.  JUST ENOUGH TO ALLOW LOCAL WORK.
+
+From doms/doms-installer/README.md: Access Fedora (fedoraAdmin/fedoraAdminPass):
 
 [http://localhost:7880/fedora/objects](http://localhost:7880/fedora/objects)
 

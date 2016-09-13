@@ -1,0 +1,122 @@
+<PBCoreDescriptionDocument
+        xmlns="http://www.pbcore.org/PBCore/PBCoreNamespace.html"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.pbcore.org/PBCore/PBCoreNamespace.html pbcore.xsd">
+
+    <pbcoreIdentifier>
+        <identifier>INSERT_PROGRAM_ID</identifier>
+        <identifierSource></identifierSource>
+    </pbcoreIdentifier>
+
+    <pbcoreIdentifier>
+        <identifier>INSERT_MAIN_GENRE_ID</identifier>
+        <identifierSource></identifierSource>
+    </pbcoreIdentifier>
+
+    <pbcoreIdentifier>
+        <identifier>INSERT_SUB_GENRE_ID</identifier>
+        <identifierSource></identifierSource>
+    </pbcoreIdentifier>
+
+    <pbcoreIdentifier>
+        <identifier>INSERT_CHANNEL_ID</identifier>
+        <identifierSource></identifierSource>
+    </pbcoreIdentifier>
+
+    <pbcoreIdentifier>
+        <identifier>INSERT_PRODUCTION_LAND_ID</identifier>
+        <identifierSource></identifierSource>
+    </pbcoreIdentifier>
+
+    <pbcoreTitle>
+        <title>INSERT_TITLE</title>
+    </pbcoreTitle>
+
+    <pbcoreTitle>
+        <title>INSERT_ORIGINAL_TITLE</title>
+        <titleType>INSERT_TITLE_ORIGINAL</titleType>
+    </pbcoreTitle>
+
+    <pbcoreTitle>
+        <title>INSERT_EPISODE_TITLE_AND_NUMBER</title>
+        <titleType>INSERT_TITLE_EPISODE</titleType>
+    </pbcoreTitle>
+
+    <pbcoreDescription>
+        <description>
+            INSERT_SHORT_DESCRIPTION
+        </description>
+        <descriptionType>INSERT_DESCRIPTION_SHORT</descriptionType>
+    </pbcoreDescription>
+
+    <pbcoreDescription>
+        <description>
+            INSERT_LONG_DESCRIPTION_1
+        </description>
+        <descriptionType>INSERT_DESCRIPTION_LONG_1</descriptionType>
+    </pbcoreDescription>
+
+    <pbcoreDescription>
+        <description>
+            INSERT_LONG_DESCRIPTION_2
+        </description>
+        <descriptionType>INSERT_DESCRIPTION_LONG_2</descriptionType>
+    </pbcoreDescription>
+
+    <pbcoreGenre>
+        <genre>INSERT_MAIN_GENRE</genre>
+    </pbcoreGenre>
+
+    <pbcoreGenre>
+        <genre>INSERT_SUB_GENRE</genre>
+    </pbcoreGenre>
+
+    <pbcoreRelation>
+        <relationType>INSERT_RELATION_TYPE</relationType>
+        <relationIdentifier>INSERT_URL_LINK</relationIdentifier>
+    </pbcoreRelation>
+
+    <pbcoreRelation>
+        <relationType>INSERT_RELATION_TYPE</relationType>
+        <relationIdentifier>INSERT_SOUND_LINK</relationIdentifier>
+    </pbcoreRelation>
+
+    <pbcoreCreator>
+        <creator>INSERT_INSTRUCTION</creator>
+        <creatorRole>INSERT_CREATOR_INSTRUCTION</creatorRole>
+    </pbcoreCreator>
+
+    <pbcoreContributor>
+        <contributor>INSERT_AUTHOR</contributor>
+    </pbcoreContributor>
+
+    <pbcoreContributor>
+        <contributor>INSERT_CONTRIBUTOR</contributor>
+        <contributorRole>INSERT_CONTRIBUTOR_AUTHOR</contributorRole>
+    </pbcoreContributor>
+
+    <pbcorePublisher>
+        <publisher>INSERT_CHANNEL_NAME_AND_PRODUCTION_SOMETHING</publisher>
+    </pbcorePublisher>
+
+    <pbcoreInstantiation>
+        <dateCreated>INSERT_PRODUCTION_YEAR</dateCreated>
+        <dateIssued>INSERT_PREMIERE_OR_REPEAT_BROADCAST</dateIssued>
+        <formatLocation></formatLocation>
+        <formatDuration>INSERT_PROGRAM_LENGTH</formatDuration>
+        <formatColors>INSERT_SH</formatColors>
+        <alternativeModes>INSERT_TEXTED; INSERT_TH; INSERT_TTV
+        </alternativeModes>
+        <pbcoreDateAvailable>
+            <dateAvailableStart>INSERT_START_TIME</dateAvailableStart>
+            <dateAvailableEnd>INSERT_END_TIME</dateAvailableEnd>
+        </pbcoreDateAvailable>
+        <pbcoreFormatID>
+            <formatIdentifier></formatIdentifier>
+            <formatIdentifierSource></formatIdentifierSource>
+        </pbcoreFormatID>
+        <pbcoreAnnotation>
+            <annotation></annotation>
+        </pbcoreAnnotation>
+    </pbcoreInstantiation>
+</PBCoreDescriptionDocument>
