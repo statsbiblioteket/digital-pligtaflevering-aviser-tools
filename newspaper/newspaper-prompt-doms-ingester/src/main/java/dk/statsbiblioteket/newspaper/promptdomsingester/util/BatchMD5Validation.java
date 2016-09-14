@@ -1,6 +1,11 @@
 package dk.statsbiblioteket.newspaper.promptdomsingester.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -29,7 +34,7 @@ public class BatchMD5Validation {
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
         boolean validationResponse = true;
         Map<String, String> md5Map = new HashMap<String, String>();
-        try(BufferedReader br = new BufferedReader(new FileReader(this.batchFolder + File.separator+batchName + File.separator + "MD5SUMS.txt"))) {
+        try(BufferedReader br = new BufferedReader(new FileReader(Paths.get(this.batchFolder, batchName, "MD5SUMS.txt").toFile()))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
@@ -48,11 +53,17 @@ public class BatchMD5Validation {
             }
         }
 
-        for(String file: md5Map.keySet()) {
-            String expectedMd5 = md5Map.get(file);
-            String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder + File.separator + batchName + File.separator+file));
-            if(!expectedMd5.equals(actualMd5)) {
-                validationResult.add(this.validationResult + this.batchFolder + File.separator + batchName + File.separator + file + " - " + expectedMd5 + " " + actualMd5);
+        for(String fileName: md5Map.keySet()) {
+            File file = Paths.get(this.batchFolder, batchName, fileName).toFile();
+            if(file.exists()) {
+                String expectedMd5 = md5Map.get(fileName);
+                String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), file);
+                if (!expectedMd5.equals(actualMd5)) {
+                    validationResult.add(this.validationResult + this.batchFolder + File.separator + batchName + File.separator + file + " - " + expectedMd5 + " " + actualMd5);
+                    validationResponse = false;
+                }
+            } else {
+                validationResult.add("There is missing a file : " + file);
                 validationResponse = false;
             }
         }
