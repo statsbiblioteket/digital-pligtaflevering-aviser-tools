@@ -2,10 +2,10 @@
 <article>
     <administrativeData>
         <articleId>123e4567-e89b-12d3-a456-426655440001</articleId>
-        <filename>20160913-verapdf-udgave1-page002.xml</filename>
+        <filename>20160913-TestAvis-udgave1-page002.xml</filename>
     </administrativeData>
     <metadata>
-        <source>JyllandsPosten</source>
+        <source>TestAvis</source>
         <publishDate>20160913</publishDate>
         <sectionName>kultur</sectionName>
         <sectionNumber>2</sectionNumber>
@@ -13,7 +13,7 @@
         <pageNumber>2</pageNumber>
         <type></type>
         <links>
-            <link>http:\\jyllandsposten\fake\artikler\abc123</link>
+            <link>http:\\TestAvis\fake\artikler\abc123</link>
         </links>
         <classification>
             <term>
@@ -26,7 +26,7 @@
             </term>
         </classification>
         <journalists>
-            <journalist>Foo Bar</journalist>
+            <journalist>Foo Bar Hansen</journalist>
         </journalists>
     </metadata>
     <content>

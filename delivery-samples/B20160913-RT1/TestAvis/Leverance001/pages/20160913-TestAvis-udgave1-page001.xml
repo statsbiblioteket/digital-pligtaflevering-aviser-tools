@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pdfinfo>
-    <filename>20160913-jyllandsposten-udgave1-page001.pdf</filename>
+    <filename>20160913-TestAvis-udgave1-page001.pdf</filename>
     <publishing>
-        <source>Jyllandsposten</source>
+        <source>TestAvis</source>
         <edition>Udgave1</edition>
         <publishDate>20160913</publishDate>
     </publishing>
@@ -25,8 +25,8 @@
     </content>
     <articles>
         <article>
-            <filename>20160913-verapdf-udgave1-article001.xml</filename>
-            <filename>20160913-verapdf-udgave1-article002.xml</filename>
+            <filename>20160913-TestAvis-udgave1-article001.xml</filename>
+            <filename>20160913-TestAvis-udgave1-article002.xml</filename>
         </article>
     </articles>
 </pdfinfo>
