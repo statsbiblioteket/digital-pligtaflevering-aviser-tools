@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
 
 apt-get update > /dev/null
-apt-get install -y zip unzip
+apt-get install -y zip unzip openjdk-7-jdk zookeeperd
 
-# Download and install Oracle Java 7
-
-apt-get install -y python-software-properties
-add-apt-repository ppa:webupd8team/java
-apt-get update > /dev/null
-echo debconf shared/accepted-oracle-license-v1-1 select true |  sudo debconf-set-selections
-echo debconf shared/accepted-oracle-license-v1-1 seen true |  sudo debconf-set-selections
-apt-get install -yq oracle-java7-installer oracle-java7-set-default
-export JAVA_HOME=/usr/lib/jvm/java-7-oracle/
-
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 
 apt-get install -y redis-server
 
