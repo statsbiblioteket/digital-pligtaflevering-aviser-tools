@@ -158,10 +158,29 @@ By default it listens on port 8000.
 
 For development a full "server vagrant" with DOMS, Zookeeper etc has been
 adapted from the doms-installer project and is placed in doms/doms-installer.
+This is not integrated in the main pom.xml as this requires insane bandwidth
+and read access to the internal SB Nexus instance.  
 
 NOTE:  THIS IS NOT PRODUCTION QUALITY.  JUST ENOUGH TO ALLOW LOCAL WORK.
 
-From doms/doms-installer/README.md: Access Fedora (fedoraAdmin/fedoraAdminPass):
+See doms/doms-installer/README.md for full instructions.  The following are just the commands
+needed after initial configuration to get up and running.
+
+Clean and download necessary packages from internal build server:
+
+    mvn -f doms/doms-installer/pom.xml clean package
+
+Get vagrant services up and running:
+
+    cd doms/doms-installer/src/vagrant
+    vagrant up
+    vagrant ssh -c "nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh"
+
+DOMS with friends are now running.  Do NOT stop this virtual machine
+as the services do not come up propely.  Pause it and restart it as 
+needed.
+
+Access Fedora (fedoraAdmin/fedoraAdminPass):
 
 [http://localhost:7880/fedora/objects](http://localhost:7880/fedora/objects)
 
