@@ -21,13 +21,11 @@ import java.util.regex.Pattern;
  */
 public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableComponent {
     private final EnhancedFedora eFedora;
-    private BatchMD5Validation md5Validator;
     private final static String eventId = "Metadata_Archived";
 
     public RunnablePromptDomsIngester(Properties properties, EnhancedFedora eFedora) {
         super(properties);
         this.eFedora = eFedora;
-        md5Validator = new BatchMD5Validation(getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER));
     }
 
     @Override
@@ -38,15 +36,16 @@ public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableCom
     @Override
     public void doWorkOnItem(Batch batch, ResultCollector resultCollector) {
         try {
+            BatchMD5Validation md5Validator = new BatchMD5Validation(getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER), getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES));
             IngesterInterface ingester = SimpleFedoraIngester.getNewspaperInstance(
                     eFedora, new String[]{getProperties().getProperty(
                             ConfigConstants.DOMS_COLLECTION, "doms:Newspaper_Collection")} );
             ingester.ingest(createIterator(batch));
 
             if(!md5Validator.validation(batch.getFullID())) {
-                List<String> validationFailureResult = md5Validator.getValidationReadableMessage();
+                List<String> validationFailureResult = md5Validator.getValidationResult();
                 for(String failure : validationFailureResult) {
-                    resultCollector.addFailure(batch.getFullID(), "md5Validator", this.getClass().getSimpleName(), "md5Validator validation was not accepted with message:" + md5Validator.getValidationReadableMessage());
+                    resultCollector.addFailure(batch.getFullID(), "md5Validator", this.getClass().getSimpleName(), "md5Validator validation was not accepted with message:" + failure);
                 }
             }
         } catch (Exception e) {
