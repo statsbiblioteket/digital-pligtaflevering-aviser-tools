@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+    <property name="pattern" value="%p %d{yyyy-MM-dd' 'HH:mm:ss.SSS} [%t] \\(%c{0}\\) %m%n"/>
+
+    <property name="FEDORA_WARN_LOG_PATH"
+              value="$LOG_DIR$/fedora.warn${logfile.extension:-.log}"/>
+
+    <appender name="FEDORA_WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${FEDORA_WARN_LOG_PATH}</File>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>${pattern}</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>5</maxIndex>
+            <FileNamePattern>${FEDORA_WARN_LOG_PATH}.%i</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>20MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <property name="FEDORA_LOG_PATH"
+              value="$LOG_DIR$/fedora${logfile.extension:-.log}"/>
+
+
+    <appender name="FEDORA" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${FEDORA_LOG_PATH}</File>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>${pattern}</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>5</maxIndex>
+            <FileNamePattern>${FEDORA_LOG_PATH}.%i</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>20MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+
+    <property name="TAPES_LOG_PATH"
+              value="$LOG_DIR$/xmltapes${logfile.extension:-.log}"/>
+    <appender name="TAPES" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${TAPES_LOG_PATH}</file>
+        <encoder>
+            <Pattern>${pattern}</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>5</maxIndex>
+            <FileNamePattern>${TAPES_LOG_PATH}.%i</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>20MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <logger name="dk.statsbiblioteket.metadatarepository.xmltapes" additivity="false" level="DEBUG">
+        <appender-ref ref="TAPES"/>
+    </logger>
+
+
+
+    <logger name="org.mulgara.store.xa" additivity="false" level="WARN">
+        <appender-ref ref="FEDORA"/>
+        <appender-ref ref="FEDORA_WARN"/>
+    </logger>
+    <logger name="com.sun.xacml.finder" additivity="false" level="WARN">
+        <appender-ref ref="FEDORA"/>
+        <appender-ref ref="FEDORA_WARN"/>
+    </logger>
+
+
+
+    <root level="INFO">
+        <appender-ref ref="FEDORA"/>
+    </root>
+    <root level="WARN">
+        <appender-ref ref="FEDORA_WARN"/>
+    </root>
+
+</configuration>

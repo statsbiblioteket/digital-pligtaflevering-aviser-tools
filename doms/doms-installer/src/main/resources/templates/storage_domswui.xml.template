@@ -1,0 +1,200 @@
+<xproperties>
+    <xproperties>
+        <!-- Sample config for a generic Summa Storage -->
+
+        <!-- Port of the RMI registry used by the control service -->
+        <entry>
+            <key>summa.control.service.registry.port</key>
+            <value class="string">${site.portrange}00</value>
+        </entry>
+
+        <!-- Port for RMI communications for Service interface -->
+        <entry>
+            <key>summa.control.service.port</key>
+            <value class="string">${site.portrange}20</value>
+        </entry>
+
+
+        <!-- Name to register the storage service under -->
+        <entry>
+            <key>summa.storage.rmi.service.name</key>
+            <value class="string">${site.id}-storage-proxy</value>
+        </entry>
+
+        <!-- Port of the RMI registry used by the storage service -->
+        <entry>
+            <key>summa.storage.rmi.registry.port</key>
+            <value class="string">${site.portrange}00</value>
+        </entry>
+
+        <!-- Port for RMI communications for Storage interface -->
+        <entry>
+            <key>summa.storage.service.port</key>
+            <value class="string">${site.portrange}10</value>
+        </entry>
+
+        <!-- The class implementing the Service interface -->
+        <entry>
+            <key>control.launcher.service.class</key>
+            <value class="string">dk.statsbiblioteket.summa.control.service.StorageService</value>
+        </entry>
+
+        <!-- Main class to use for Storage -->
+        <entry>
+            <key>summa.storage.class</key>
+            <value class="string">dk.statsbiblioteket.summa.storage.rmi.RMIStorageProxy</value>
+        </entry>
+
+
+        <!-- Backend class for the RMI proxy -->
+        <entry>
+            <key>summa.storage.rmi.backend</key>
+            <value class="string">dk.statsbiblioteket.doms.integration.summa.DOMSReadableStorage</value>
+        </entry>
+
+
+        <!--
+                <entry>
+                    <key>summa.storage.database.username</key>
+                    <value class="string"></value>
+                </entry>
+                <entry>
+                    <key>summa.storage.database.password</key>
+                    <value class="string"></value>
+                </entry>
+        -->
+
+        <!--
+        * The location of the database to use/create. This will be relative to
+          the persistent-dir for the client. This also means that only one instance
+          of this service can be deployed at each client.
+        -->
+        <entry>
+            <key>summa.storage.database.location</key>
+            <value class="string">storage/${site.id}</value>
+        </entry>
+
+
+        <!--
+        * The property-key for the boolean value determining if a new database
+        * should be created is there is no existing database. If createnew is
+        * true and a database exists and forcenew is true, the existing database
+        * is deleted and a new one created. If createnew is true and a database
+        * exists and forcenew is false, the existing database is reused.
+        -->
+        <entry>
+            <key>summa.storage.database.createnew</key>
+            <value class="string">true</value>
+        </entry>
+
+        <!--
+        * The property-key for the boolean determining if a new database should
+        * be created, no matter is a database already exists.
+        -->
+        <entry>
+            <key>summa.storage.database.forcenew</key>
+            <value class="string">false</value>
+        </entry>
+
+
+        <!-- Disable tracking of relations on bases that do not use relations.
+This is not strictly necessary, but provides some optimization -->
+        <entry>
+            <key>summa.storage.database.disablerelationstracking</key>
+            <value class="string">silkeborg_cms_xhtml</value>
+        </entry>
+
+        <entry>
+            <key>DOMSUserName</key>
+            <value class="string">$FEDORAUSER$</value>
+        </entry>
+
+        <entry>
+            <key>DOMSPassword</key>
+            <value class="string">$FEDORAUSERPASS$</value>
+        </entry>
+
+        <entry>
+            <key>DOMSWebserviceURL</key>
+            <value class="string">http://$TOMCAT_SERVERNAME$:$PORTRANGE$80/centralWebservice-service/central/?wsdl</value>
+        </entry>
+
+        <entry>
+            <key>DomsRetrievalThreadCount</key>
+            <value class="int">4</value>
+        </entry>
+
+        <entry>
+            <key>accessibleCollectionBases</key>
+            <value class="list">
+                <!-- DANGER Will robinson!
+                     Specifying a non-existing collectionPID results in a ConcurrentModificationException -->
+
+                <xproperties>
+                    <entry>
+                        <key>collectionBaseID</key>
+                        <value class="string">doms_newspaprCollection</value>
+                    </entry>
+                    <entry>
+                        <key>collectionPID</key>
+                        <value class="string">doms:Newspaper_Collection</value>
+                    </entry>
+                    <entry>
+                        <key>viewID</key>
+                        <value class="string">GUI</value>
+                    </entry>
+                    <entry>
+                        <key>State</key>
+                        <value class="string">NotDeleted</value>
+                    </entry>
+                    <entry>
+                        <key>MaxSizePerRetrieval</key>
+                        <value class="string">1000000000</value>
+                    </entry>
+                </xproperties>
+                <xproperties>
+                    <entry>
+                        <key>collectionBaseID</key>
+                        <value class="string">doms_radioTVCollection</value>
+                    </entry>
+                    <entry>
+                        <key>collectionPID</key>
+                        <value class="string">doms:RadioTV_Collection</value>
+                    </entry>
+                    <entry>
+                        <key>viewID</key>
+                        <value class="string">GUI</value>
+                    </entry>
+                    <entry>
+                        <key>State</key>
+                        <value class="string">NotDeleted</value>
+                    </entry>
+                </xproperties>
+                <xproperties>
+                    <entry>
+                        <key>collectionBaseID</key>
+                        <value class="string">doms_reklamefilm</value>
+                    </entry>
+                    <entry>
+                        <key>collectionPID</key>
+                        <value class="string">doms:Collection_Reklamefilm</value>
+                        <!--                        <value class="string">doms:Reklamefilm_Collection</value>-->
+                    </entry>
+                    <entry>
+                        <key>viewID</key>
+                        <value class="string">GUI</value>
+                    </entry>
+                    <entry>
+                        <key>State</key>
+                        <value class="string">NotDeleted</value>
+                    </entry>
+                    <entry>
+                        <key>MaxSizePerRetrieval</key>
+                        <value class="string">1000000000</value>
+                    </entry>
+                </xproperties>
+            </value>
+        </entry>
+
+    </xproperties>
+</xproperties>

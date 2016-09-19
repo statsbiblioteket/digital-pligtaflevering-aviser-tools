@@ -1,0 +1,10 @@
+target/
+.project
+.settings/*
+.idea/
+*.iws
+*.iml
+*.ipr
+atlassian-ide-plugin.xml
+src/vagrant/.vagrant/
+src/vagrant/devel-config

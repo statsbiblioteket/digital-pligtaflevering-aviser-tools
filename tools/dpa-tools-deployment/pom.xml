@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
+    <artifactId>dpa-tools-deployment</artifactId>
+    <version>master-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <output>${project.build.outputDirectory}/META-INF/maven/dependency-tree.txt</output>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
+            <artifactId>dpa-tools</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
+
+        <!-- slf4j production backend. -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.12</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!-- http://stackoverflow.com/a/7957042/53897 -->
+            <plugin>
+                <groupId>org.apache.servicemix.tooling</groupId>
+                <artifactId>depends-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-depends-file</id>
+                        <goals>
+                            <goal>generate-depends-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- http://stackoverflow.com/a/11729432/53897 -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>dependency-tree</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>tree</goal>
+                        </goals>
+                        <configuration>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <!-- create the deployment layout
+
+             NOTE:  Consider cd'ing to the location where log files are to be generated.  This
+             will make it much easier to have a read-only code deployment.
+             -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.10</version>
+                <configuration>
+                    <!--
+                    http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html
+                    -->
+                    <platforms>
+                        <platform>all</platform>
+                    </platforms>
+                    <configurationDirectory>conf</configurationDirectory>
+                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                    <filterConfigurationDirectory>false</filterConfigurationDirectory>
+
+                    <!-- flat/default/legacy - consider what works best.  -->
+                    <repositoryLayout>flat</repositoryLayout>
+                    <repositoryName>libs</repositoryName>
+                    <!-- for logback -->
+                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+                    <!-- no logs directory, logs should go relative to current working directory set before launch -->
+                    <logsDirectory></logsDirectory>
+                    <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
+                    <preAssembleDirectory>for-deployment</preAssembleDirectory>
+
+                    <!-- JVM configuration flags - gc logging etc
+
+                    https://blog.codecentric.de/en/2014/01/useful-jvm-flags-part-8-gc-logging/
+
+                    FIXME: Consider if we need a full thread dump when task fails: http://stackoverflow.com/a/2788423/53897
+                    For OOM VisualVM can extract it from the hprof file.
+                    -->
+                    <extraJvmArguments>
+                        -verbose:gc
+                        -XX:+PrintGCDetails
+                        -XX:+PrintGCDateStamps
+                        -XX:+PrintGCTimeStamps
+                        -Xloggc:gc-$(date '+%Y-%m-%d-%H-%M-%S')-$$$$.log
+                        -XX:+HeapDumpOnOutOfMemoryError
+                    </extraJvmArguments>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>assemble</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                        <configuration>
+                            <programs>
+                                <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CreateBatchMain
+                                    </mainClass>
+                                    <id>dpa-create-batch</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain
+                                    </mainClass>
+                                    <id>dpa-doms-ingester</id>
+                                </program>
+                                <program>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPdfMain
+                                    </mainClass>
+                                    <id>dpa-tool-verapdf</id>
+                                </program>
+                            </programs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- create deployment tarball -->
+            <plugin>
+                <!-- https://maven.apache.org/plugins/maven-assembly-plugin/usage.html -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <archiveBaseDirectory>target/appassembler</archiveBaseDirectory>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

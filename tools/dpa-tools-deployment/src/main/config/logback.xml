@@ -1,0 +1,26 @@
+<!-- SB logback.xml configuration file.
+
+    Current copy adapted from Avisprojektet.
+-->
+<configuration debug="true" packagingData="true">
+    <timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss.SSS"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="LOG-FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${app.name:-unknown}-${timestamp}.log</file>
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="dk.statsbiblioteket" level="DEBUG"/>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="LOG-FILE"/>
+    </root>
+    <logger name="org.apache.zookeeper.ZooKeeper" level="WARN"/>
+
+</configuration>

@@ -1,0 +1,31 @@
+#Install Options
+#Mon Aug 23 13:55:42 CEST 2010
+ri.enabled=true
+messaging.enabled=true
+apia.auth.required=true
+ssl.available=false
+messaging.uri=vm:(broker:(tcp://localhost:$PORTRANGE$16)?useJmx=false)
+fesl.authz.enabled=false
+deploy.local.services=false
+xacml.enabled=true
+fedora.serverHost=localhost
+fedora.serverContext=fedora
+llstore.type=akubra-fs
+fesl.authn.enabled=true
+fedora.home=$FEDORA_DIR$
+install.type=custom
+servlet.engine=other
+fedora.admin.pass=$FEDORAADMINPASS$
+
+#doesnt matter below here, we replace the config file anyhow. Just needed because fedora is nasty in not including "unnessesary libs"
+database.driver=included
+database.jdbcDriverClass=org.postgresql.Driver
+database.jdbcURL=jdbc\:postgresql\://$POSTGRESQL_SERVER$/$POSTGRESQL_DB$
+database=postgresql
+database.postgresql.driver=included
+database.postgresql.jdbcDriverClass=org.postgresql.Driver
+database.postgresql.jdbcURL=jdbc\:postgresql\://$POSTGRESQL_SERVER$/$POSTGRESQL_DB$
+database.password=$POSTGRESQL_PASS$
+database.username=$POSTGRESQL_USER$
+
+
