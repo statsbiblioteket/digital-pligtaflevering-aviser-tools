@@ -1,0 +1,12 @@
+
+
+CREATE TABLE storeIndex (
+	id VARCHAR(255) PRIMARY KEY,
+	tapename VARCHAR(255) NOT NULL,
+	tapeoffset BIGINT NOT NULL
+);
+
+CREATE TABLE indexed (
+	tapename VARCHAR(255) NOT NULL PRIMARY KEY
+);
+

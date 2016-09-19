@@ -1,0 +1,40 @@
+<listener>
+    <listener-class>
+        dk.statsbiblioteket.sbutil.webservices.configuration.ConfigContextListener
+    </listener-class>
+</listener>
+<servlet>
+    <display-name>Fedora Log Surveillance Servlet</display-name>
+    <servlet-name>LogAppenderServlet</servlet-name>
+    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+    <init-param>
+        <param-name>com.sun.jersey.config.property.packages</param-name>
+        <param-value>dk.statsbiblioteket.doms.domsutil.surveyable</param-value>
+    </init-param>
+</servlet>
+<servlet-mapping>
+<servlet-name>LogAppenderServlet</servlet-name>
+<url-pattern>/surveyable/*</url-pattern>
+</servlet-mapping>
+<context-param>
+<description>The class that will be exposed for surveillance
+</description>
+<param-name>
+        dk.statsbiblioteket.doms.domsutil.surveyable.surveyableClass
+</param-name>
+<param-value>
+    dk.statsbiblioteket.doms.domsutil.surveillance.logappender.CachingLogRegistry
+</param-value>
+</context-param>
+<context-param>
+       <description>The name of the service for surveillance purposes
+       </description>
+       <param-name>
+               dk.statsbiblioteket.doms.surveillance.logappender.LoggerName
+       </param-name>
+       <param-value>
+           Fedora
+       </param-value>
+   </context-param>
+
+        

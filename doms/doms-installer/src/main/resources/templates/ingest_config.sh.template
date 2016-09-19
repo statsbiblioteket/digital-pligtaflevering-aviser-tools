@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Basic Parameters
+#
+COLDFOLDER=$BASEDIR/files/coldfolder
+LUKEFOLDER=$BASEDIR/files/lukewarm
+HOTFOLDER=$BASEDIR/files/hotfolder
+STOPFOLDER=$BASEDIR/files/stopfolder
+WSDL=http://$TOMCAT_SERVERNAME$:$PORTRANGE$80/centralWebservice-service/central/?wsdl
+USERNAME=$FEDORAADMIN$
+PASSWORD=$FEDORAADMINPASS$
+SCHEMA=$BASEDIR/resources/preingestedRadioTVProgram.xsd
+

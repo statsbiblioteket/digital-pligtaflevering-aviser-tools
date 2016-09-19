@@ -1,0 +1,282 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 https://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>testbed</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+
+    <dependencySets>
+
+        <dependencySet>
+            <outputDirectory>webservices</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>dk.statsbiblioteket.doms.*:*:war:*:*</include>
+            </includes>
+        </dependencySet>
+
+
+
+        <dependencySet>
+            <outputDirectory>fedoralib/xmltapes</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>false</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.metadatarepository:xmltapes</include>
+            </includes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>*/lib/*</include>
+                </includes>
+                <excludes>
+                    <exclude>**/sbutil-*</exclude>
+                    <exclude>**/log4j-*</exclude>
+                    <exclude>**/xstream-*</exclude>
+                    <exclude>**/xpp3_min-*</exclude>
+                </excludes>
+            </unpackOptions>
+
+        </dependencySet>
+        
+        <dependencySet>
+            <outputDirectory>extras/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>false</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.metadatarepository:xmltapes</include>
+            </includes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>**/sql/*.sql</include>
+                </includes>
+                <excludes>
+                    <exclude>**/sbutil-*</exclude>
+                    <exclude>**/log4j-*</exclude>
+                    <exclude>**/xstream-*</exclude>
+                    <exclude>**/xpp3_min-*</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>extras/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>false</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.metadatarepository:xmltapes-migrator</include>
+            </includes>
+            <unpack>true</unpack>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>fedoralib/fedoralogin</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>false</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.doms.authchecker:authchecker-fedoralogin</include>
+            </includes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>*/lib/*</include>
+                </includes>
+                <excludes>
+                    <exclude>**/sbutil-*</exclude>
+                    <exclude>**/log4j-*</exclude>
+                    <exclude>**/xstream-*</exclude>
+                    <exclude>**/xpp3_min-*</exclude>
+                </excludes>
+            </unpackOptions>
+
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>fedoralib/mulgara</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>false</useTransitiveFiltering>
+            <includes>
+                <include>org.fcrepo:mulgara-core</include>
+            </includes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>fedoralib/utils</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.doms.domsutil.surveyable:*:jar:*</include>
+                <include>dk.statsbiblioteket.sbutil:sbutil-*</include>
+            </includes>
+            <excludes>
+                <exclude>log4j:log4j</exclude>
+                <exclude>org.fcrepo:*</exclude>
+                <exclude>commons-*:*</exclude>
+                <exclude>com.thoughtworks.xstream:*</exclude>
+            </excludes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>fedoralib/validatorhook</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.doms.ecm:ecm-fedoravalidatorhook</include>
+            </includes>
+            <excludes>
+                <exclude>log4j:log4j</exclude>
+                <exclude>org.fcrepo:*</exclude>
+                <exclude>commons-*:*</exclude>
+                <exclude>com.thoughtworks.xstream:*</exclude>
+            </excludes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>fedoralib/fedoraSBadditions</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.metadatarepository:fedora-sb-additions</include>
+            </includes>
+            <excludes>
+                <exclude>log4j:log4j</exclude>
+                <exclude>org.fcrepo:*</exclude>
+                <exclude>commons-*:*</exclude>
+                <exclude>com.thoughtworks.xstream:*</exclude>
+            </excludes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>**/META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>fedoralib/updateTracker</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <includes>
+                <include>dk.statsbiblioteket.doms.updatetracker:updatetracker-fcrepo-decorator</include>
+            </includes>
+            <excludes>
+                <exclude>log4j:log4j</exclude>
+                <exclude>org.fcrepo:*</exclude>
+                <exclude>commons-*:*</exclude>
+                <exclude>com.thoughtworks.xstream:*</exclude>
+            </excludes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>data/fedora</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>org.fcrepo:fcrepo-installer</include>
+            </includes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>ingesters/digitv</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>dk.statsbiblioteket.doms.ingesters:radio-tv</include>
+            </includes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>ingesters/yousee</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>dk.statsbiblioteket.medieplatform:yousee-doms-ingester</include>
+            </includes>
+        </dependencySet>
+
+<!--
+        <dependencySet>
+            <outputDirectory>ingesters/vhs</outputDirectory>
+            <includes>
+                <include>dk.statsbiblioteket.medieplatform:vhs-doms-ingester</include>
+            </includes>
+        </dependencySet>
+-->
+
+        <dependencySet>
+            <outputDirectory>ingesters/reklame</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>dk.statsbiblioteket.medieplatform:reklame-doms-ingester</include>
+            </includes>
+        </dependencySet>
+
+
+        <dependencySet>
+            <outputDirectory>extras</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>dk.statsbiblioteket.doms.installer:base-objects-ingester</include>
+            </includes>
+            <!--<outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>-->
+            <!-- <outputFileNameMapping>${artifact.artifactId}</outputFileNameMapping>-->
+            <unpack>true</unpack>
+            <unpackOptions>
+                <filtered>true</filtered>
+            </unpackOptions>
+        </dependencySet>
+
+
+    </dependencySets>
+
+    <fileSets>
+        <fileSet>
+            <outputDirectory>data/policies</outputDirectory>
+            <directory>src/main/resources/policies</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>data/schemas</outputDirectory>
+            <directory>src/main/resources/schemas</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>data/preingestfiles</outputDirectory>
+            <directory>src/main/resources/preingestfiles</directory>
+        </fileSet>
+
+        <fileSet>
+            <outputDirectory>data/templates</outputDirectory>
+            <directory>src/main/resources/templates</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>data/tomcat</outputDirectory>
+            <directory>src/main/resources/tomcat</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>bin</outputDirectory>
+            <directory>src/main/scripts</directory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>docs</outputDirectory>
+            <directory>docs</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>data/sboi-summarise</outputDirectory>
+            <directory>${project.build.directory}/sboi-summarise</directory>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>data/domswui-summarise</outputDirectory>
+            <directory>${project.build.directory}/domswui-summarise</directory>
+        </fileSet>
+
+    </fileSets>
+
+
+</assembly>
+
