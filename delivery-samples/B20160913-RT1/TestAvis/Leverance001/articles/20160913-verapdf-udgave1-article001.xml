@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article>
+    <administrativeData>
+        <articleId>123e4567-e89b-12d3-a456-426655440000</articleId>
+        <filename>20160913-verapdf-udgave1-page001.xml</filename>
+    </administrativeData>
+    <metadata>
+        <source>JyllandsPosten</source>
+        <publishDate>20160913</publishDate>
+        <sectionName>kultur</sectionName>
+        <sectionNumber>2</sectionNumber>
+        <pageName>kultur</pageName>
+        <pageNumber>2</pageNumber>
+        <type></type>
+        <links>
+            <link>http:\\jyllandsposten\fake\artikler\abc123</link>
+        </links>
+        <classification>
+            <term>
+                <subject>Emner</subject>
+                <value>kultur</value>
+            </term>
+            <term>
+                <subject>Emner</subject>
+                <value>Litteratur</value>
+            </term>
+        </classification>
+        <journalists>
+            <journalist>Foo Bar</journalist>
+        </journalists>
+    </metadata>
+    <content>
+        <headline>This is the headline</headline>
+        <byline>This is the byline</byline>
+        <bodytext>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Curabitur tincidunt viverra mi vitae scelerisque. Donec congue, ligula eget
+            maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam id
+            mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
+            Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
+            condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
+            in auctor ipsum.</bodytext>
+    </content>
+</article>
