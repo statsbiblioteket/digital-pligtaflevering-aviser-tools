@@ -86,7 +86,7 @@ public class BatchMD5Validation {
                 }
             } else {
                 //If the file that is claimed to exist in the "MD5SUMS.txt" can not be found, raise an error
-                validationResult.add("There is missing a file : " + file);
+                validationResult.add("There is missing a file \"MD5SUMS.txt\" claims is existing  : " + file);
                 validationResponse = false;
             }
         }
@@ -96,6 +96,7 @@ public class BatchMD5Validation {
     /**
      * Get a list of files inside a directory, the function is implemented as a recursive function.
      * The result is written into the parameter delivered to the function, like the way it is normally done in functional programming languages
+     * The reason for usingf the functional programming way is that the function is recursively calling itselve.
      * @param directoryName The directory from where the files should be listed
      * @param files The list of files to get appended
      */
