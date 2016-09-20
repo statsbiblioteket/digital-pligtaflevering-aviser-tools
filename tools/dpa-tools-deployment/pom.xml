@@ -143,7 +143,7 @@
                                     <id>dpa-doms-ingester</id>
                                 </program>
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPdfMain
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain
                                     </mainClass>
                                     <id>dpa-tool-verapdf</id>
                                 </program>

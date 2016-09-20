@@ -3,7 +3,6 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -32,7 +31,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
      * @return current configuration map
      */
     @Provides
-    @Singleton
+    // @Singleton - FIXME, we only want a single, read-only copy.
     public ConfigurationMap getConfigurationMap() {
         return this;
     }
@@ -80,6 +79,18 @@ public class ConfigurationMap extends TreeMap<String, String> {
             String value = String.valueOf(entry.getValue()).trim();
             this.put(key, value);
         }
+    }
+
+    /** getRequired(key) returns the same as get(key) but throws a ConfigurationKeyNotSetException if the key is not present
+     * in the map.  This is to make @Provider methods simpler for the "key must be set"-case.
+     * @param key key to get value for
+     * @return value if present, throws exception if not.
+     */
+    public String getRequired(String key) {
+        if (containsKey(key)) {
+            return get(key);
+        }
+        throw new ConfigurationKeyNotSetException(key);
     }
 
     /**

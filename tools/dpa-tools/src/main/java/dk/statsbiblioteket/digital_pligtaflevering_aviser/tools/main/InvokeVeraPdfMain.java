@@ -7,9 +7,9 @@ import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
@@ -31,23 +30,20 @@ import java.util.stream.StreamSupport;
 /**
  * Unfinished
  */
-public class VeraPdfMain {
+public class InvokeVeraPdfMain {
     public static void main(String[] args) {
-        args = new String[]{"verapdf.properties"}; // FIXME:  Just while testing.
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerInvokeVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
-    @Singleton // FIXME
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class})
     interface VeraPdfTaskComponent extends AutonomousPreservationToolComponent {
     }
 
-    @Singleton // FIXME
     @Module
-    public static class VeraPdfModule { // FIXME:  Why is static needed in _this_ instance?!
+    public static class VeraPdfModule {
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 
