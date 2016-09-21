@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
+/** @noinspection WeakerAccess*/
 public class NamedStringExampleConstants {
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
