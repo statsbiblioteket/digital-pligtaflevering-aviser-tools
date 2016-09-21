@@ -8,6 +8,10 @@ import org.junit.Test;
 public class CreateBatchMainTest {
     @Test
     public void createB20160811_RT1() {
-        CreateBatchMain.main(new String[]{"create-batch-B20160811-RT1.properties"});
+        CreateBatchMain.main(new String[]{
+                "create-batch.properties",
+                "createbatch.batchid=20160913",
+                "createbatch.roundtrip=1",
+                "autonomous.agent=register-batch-trigger"});
     }
 }

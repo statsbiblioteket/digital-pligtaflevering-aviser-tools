@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
@@ -85,6 +86,14 @@ public class ConfigurationMap {
     }
 
     /**
+     * Adds all entries in mapToAdd to the current configuration map
+     */
+
+    public void addMap(Map<String, String> mapToAdd) {
+        map.putAll(mapToAdd);
+    }
+
+    /**
      * getRequired(key) returns the same as get(key) but throws a ConfigurationKeyNotSetException if the key is not
      * present in the map.  This is to make @Provider methods simpler for the "key must be set"-case.
      *
@@ -137,4 +146,7 @@ public class ConfigurationMap {
         }
     }
 
+    public void addCommandLineMap(Stream<String> skip) {
+
+    }
 }
