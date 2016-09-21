@@ -24,7 +24,7 @@ public class CommonModule {
     @Provides
     @Named(JVM_DUMPHEAP)
     boolean getJvmDumpheapFlag(ConfigurationMap map) {
-        return Boolean.parseBoolean(map.get(JVM_DUMPHEAP));
+        return Boolean.parseBoolean(map.getDefault(JVM_DUMPHEAP, Boolean.FALSE.toString()));
     }
 
     /**

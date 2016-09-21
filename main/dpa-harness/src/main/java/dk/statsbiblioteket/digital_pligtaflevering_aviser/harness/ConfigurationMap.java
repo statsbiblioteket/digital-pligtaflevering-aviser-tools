@@ -18,16 +18,19 @@ import java.util.TreeMap;
  * explanation pending.</p>
  */
 @Module
-public class ConfigurationMap extends TreeMap<String, String> {
+public class ConfigurationMap {
+
+    Map<String, String> map = new TreeMap<>();
 
     // Constructor must take arguments to ensure Dagger does not instantiate automatically.
 
     public ConfigurationMap(Map<String, String> initialMap) {
-        this.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
+        map.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
     }
 
     /**
      * Provider method needed to give Dagger a hook into accessing the configuration map.
+     *
      * @return current configuration map
      */
     @Provides
@@ -45,7 +48,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
         for (String key : propertyKeys) {
             String value = System.getProperty(key);
             if (value != null) {
-                this.put(key, value);
+                map.put(key, value);
             }
         }
     }
@@ -59,7 +62,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
         for (String key : variableKeys) {
             String value = System.getenv(key);
             if (value != null) {
-                this.put(key, value);
+                map.put(key, value);
             }
         }
     }
@@ -77,20 +80,33 @@ public class ConfigurationMap extends TreeMap<String, String> {
         for (Map.Entry<Object, Object> entry : p.entrySet()) {
             String key = String.valueOf(entry.getKey());
             String value = String.valueOf(entry.getValue()).trim();
-            this.put(key, value);
+            map.put(key, value);
         }
     }
 
-    /** getRequired(key) returns the same as get(key) but throws a ConfigurationKeyNotSetException if the key is not present
-     * in the map.  This is to make @Provider methods simpler for the "key must be set"-case.
+    /**
+     * getRequired(key) returns the same as get(key) but throws a ConfigurationKeyNotSetException if the key is not
+     * present in the map.  This is to make @Provider methods simpler for the "key must be set"-case.
+     *
      * @param key key to get value for
      * @return value if present, throws exception if not.
      */
     public String getRequired(String key) {
-        if (containsKey(key)) {
-            return get(key);
+        if (map.containsKey(key)) {
+            return map.get(key);
         }
         throw new ConfigurationKeyNotSetException(key);
+    }
+
+    /**
+     * returns the value for the key in the map if present.  If not, defaultValue is returned
+     */
+
+    public String getDefault(String key, String defaultValue) {
+        if (map.containsKey(key)) {
+            return map.get(key);
+        }
+        return defaultValue;
     }
 
     /**
@@ -102,7 +118,7 @@ public class ConfigurationMap extends TreeMap<String, String> {
     @Override
     public String toString() {
         // Adapted from AbstractMap
-        Iterator<Map.Entry<String, String>> i = entrySet().iterator();
+        Iterator<Map.Entry<String, String>> i = map.entrySet().iterator();
         if (!i.hasNext())
             return "{}";
 
@@ -120,4 +136,5 @@ public class ConfigurationMap extends TreeMap<String, String> {
             sb.append(',').append(' ');
         }
     }
+
 }

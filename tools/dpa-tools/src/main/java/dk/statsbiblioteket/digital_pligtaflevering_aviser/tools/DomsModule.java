@@ -14,7 +14,6 @@ import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import javax.inject.Named;
 import javax.xml.bind.JAXBException;
 import java.net.MalformedURLException;
-import java.util.Objects;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
@@ -35,7 +34,7 @@ public class DomsModule {
     @Provides
     @Named(DOMS_URL)
     String provideDomsURL(ConfigurationMap map) {
-        return Objects.requireNonNull(map.get(DOMS_URL), DOMS_URL);
+        return map.getRequired(DOMS_URL);
     }
 
     /** Username for accessing DOMS.  No default.
@@ -46,7 +45,7 @@ public class DomsModule {
     @Provides
     @Named(DOMS_USERNAME)
     String provideDomsUserName(ConfigurationMap map) {
-        return Objects.requireNonNull(map.get(DOMS_USERNAME), DOMS_USERNAME);
+        return map.getRequired(DOMS_USERNAME);
     }
 
     /** URL for DOMS pid generator.  No default
@@ -57,7 +56,7 @@ public class DomsModule {
     @Provides
     @Named(DOMS_PIDGENERATOR_URL)
     String provideDomsPidGeneratorURL(ConfigurationMap map) {
-        return Objects.requireNonNull(map.get(DOMS_PIDGENERATOR_URL), DOMS_PIDGENERATOR_URL);
+        return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
 
     /** Password for accessing DOMS.  No default.
@@ -68,7 +67,7 @@ public class DomsModule {
     @Provides
     @Named(DOMS_PASSWORD)
     String provideDomsPassword(ConfigurationMap map) {
-        return Objects.requireNonNull(map.get(DOMS_PASSWORD), DOMS_PASSWORD);
+        return map.getRequired(DOMS_PASSWORD);
     }
 
     /** URL for accessing SBOI.  No default
@@ -80,7 +79,7 @@ public class DomsModule {
     @Provides
     @Named(AUTONOMOUS_SBOI_URL)
     String provideSummaLocation(ConfigurationMap map) {
-        return Objects.requireNonNull(map.get(AUTONOMOUS_SBOI_URL), AUTONOMOUS_SBOI_URL);
+        return map.getRequired(AUTONOMOUS_SBOI_URL);
     }
 
     /**

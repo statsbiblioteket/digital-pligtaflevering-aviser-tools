@@ -43,19 +43,19 @@ public class NamedStringExampleConstants {
         @Provides
         @Named(BEFORE)
         String provideBefore(ConfigurationMap map) {
-            return map.get(BEFORE);
+            return map.getRequired(BEFORE);
         }
 
         @Provides
         @Named(AFTER)
         String provideAfter(ConfigurationMap map) {
-            return map.get(AFTER);
+            return map.getRequired(AFTER);
         }
 
         @Provides
         @Named(AFTER + BEFORE) // unused!
         String provideAfterBefore(ConfigurationMap map) {
-            return map.get(AFTER + BEFORE);
+            return map.getRequired(AFTER + BEFORE);
         }
     }
 

@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -77,7 +76,7 @@ public class InvokeVeraPdfMain {
         @Provides
         @Named("pageSize")
         Integer providePageSize(ConfigurationMap map) {
-            return Integer.valueOf(Objects.requireNonNull(map.get("pageSize"), "pageSize"));
+            return Integer.valueOf(map.getRequired("pageSize"));
         }
 
         @Provides
