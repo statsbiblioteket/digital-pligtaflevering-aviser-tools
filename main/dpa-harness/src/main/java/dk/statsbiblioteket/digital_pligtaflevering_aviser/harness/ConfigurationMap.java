@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
@@ -38,6 +37,17 @@ public class ConfigurationMap {
     // @Singleton - FIXME, we only want a single, read-only copy.
     public ConfigurationMap getConfigurationMap() {
         return this;
+    }
+
+    /**
+     * Get configuration map as properties - this is currently for interfacing
+     * with legacy code.
+     */
+
+    public Properties asProperties() {
+        Properties p = new Properties();
+        p.putAll(map);
+        return p;
     }
 
     /**
@@ -118,6 +128,20 @@ public class ConfigurationMap {
         return defaultValue;
     }
 
+    /** getRequiredInt returns a configuration map entry as a string.  If the
+     * value stored for the key is not a valid integer, a meaningful message is returned.
+     * @param key configuration key
+     * @return value stored in map converted with Integer.parseInt()
+     */
+    public int getRequiredInt(String key) {
+        String value = getRequired(key);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("key:" + key + " - invalid integer: " + value);
+        }
+    }
+
     /**
      * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their
      * actual value.  Adapted from the AbstractMap implementation.
@@ -146,7 +170,5 @@ public class ConfigurationMap {
         }
     }
 
-    public void addCommandLineMap(Stream<String> skip) {
 
-    }
 }

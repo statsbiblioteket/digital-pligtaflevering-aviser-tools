@@ -20,14 +20,17 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_DELAY_BETWEEN_RETRIES;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_RETRIES;
 
 /**
- *  DOMS configuration string lookup providers.
+ * DOMS configuration string lookup providers.
  */
 @Module
 public class DomsModule {
     /**
      * URL for accessing the DOMS repository.  No default value.
+     *
      * @param map configuration map containing the value.
      * @return
      */
@@ -37,7 +40,8 @@ public class DomsModule {
         return map.getRequired(DOMS_URL);
     }
 
-    /** Username for accessing DOMS.  No default.
+    /**
+     * Username for accessing DOMS.  No default.
      *
      * @param map configuration map containing the value.
      * @return
@@ -48,7 +52,8 @@ public class DomsModule {
         return map.getRequired(DOMS_USERNAME);
     }
 
-    /** URL for DOMS pid generator.  No default
+    /**
+     * URL for DOMS pid generator.  No default
      *
      * @param map configuration map containing the value.
      * @return
@@ -59,7 +64,8 @@ public class DomsModule {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
 
-    /** Password for accessing DOMS.  No default.
+    /**
+     * Password for accessing DOMS.  No default.
      *
      * @param map configuration map containing the value.
      * @return
@@ -70,7 +76,8 @@ public class DomsModule {
         return map.getRequired(DOMS_PASSWORD);
     }
 
-    /** URL for accessing SBOI.  No default
+    /**
+     * URL for accessing SBOI.  No default
      *
      * @param map configuration map containing the value.
      * @return
@@ -83,14 +90,34 @@ public class DomsModule {
     }
 
     /**
-     * Create SBOIEventIndex from dependencies provided by Dagger.
-     * @param summaLocation URL for summa
-     * @param premisManipulatorFactory factory for premisManipulators
-     * @param domsEventStorage event storage
-     * @param pageSize items to get from summa at a time.
-     * @return
+     * Number of retries for retrieving data from DOMS Fedora before giving up.
      */
 
+    @Provides
+    @Named(FEDORA_RETRIES)
+    int getFedoraRetries(ConfigurationMap map) {
+        return map.getRequiredInt(FEDORA_RETRIES);
+    }
+
+    /**
+     * Delay between retries for retrieving data from DOMS Fedora before giving up.
+     */
+
+    @Provides
+    @Named(FEDORA_DELAY_BETWEEN_RETRIES)
+    int getFedoraDelayBetweenRetries(ConfigurationMap map) {
+        return map.getRequiredInt(FEDORA_DELAY_BETWEEN_RETRIES);
+    }
+
+    /**
+     * Create SBOIEventIndex from dependencies provided by Dagger.
+     *
+     * @param summaLocation            URL for summa
+     * @param premisManipulatorFactory factory for premisManipulators
+     * @param domsEventStorage         event storage
+     * @param pageSize                 items to get from summa at a time.
+     * @return
+     */
     @Provides
     SBOIEventIndex provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
                                          PremisManipulatorFactory premisManipulatorFactory,
@@ -104,8 +131,8 @@ public class DomsModule {
         }
     }
 
-    /** Provider to give PremisManipulatorFactory as we cannot modify the actual constructor with the Dagger annotations.
-     *
+    /**
+     * Provider to give PremisManipulatorFactory as we cannot modify the actual constructor with the Dagger annotations.
      *
      * @param itemFactory factory to create new, empty items.
      * @return factory
@@ -121,13 +148,14 @@ public class DomsModule {
         }
     }
 
-    /** Create DomsEventStorage factory using appropriate
+    /**
+     * Create DomsEventStorage factory using appropriate
      *
-     * @param domsURL URL to contact DOMS
+     * @param domsURL             URL to contact DOMS
      * @param domsPidGeneratorURL URL to contact PID generator web service.
-     * @param domsUserName  DOMS user name
-     * @param domsPassword DOMS password
-     * @param itemFactory factory for new fresh items for JAXB to populate.
+     * @param domsUserName        DOMS user name
+     * @param domsPassword        DOMS password
+     * @param itemFactory         factory for new fresh items for JAXB to populate.
      * @return
      */
     @Provides

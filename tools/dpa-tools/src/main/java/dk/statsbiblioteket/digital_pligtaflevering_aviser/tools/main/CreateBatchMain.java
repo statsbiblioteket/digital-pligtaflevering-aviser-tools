@@ -39,6 +39,7 @@ public class CreateBatchMain {
         public static final String CREATEBATCH_BATCHID = "createbatch.batchid";
         public static final String CREATEBATCH_ROUNDTRIP = "createbatch.roundtrip";
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
+
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides

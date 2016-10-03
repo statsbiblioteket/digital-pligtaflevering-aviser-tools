@@ -21,6 +21,7 @@
 
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
+        <module>tools/dpa-tools-test</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>
     </modules>
