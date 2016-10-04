@@ -63,7 +63,7 @@ public class DomsIngesterMain {
         {
             // Adapted from PromptDomsIngesterComponent.doWork(...)
             return () -> {
-                // Ensure that these properties are defined as legacy code needs them.
+                // Ensure that these properties are defined as legacy code needs them to be present.
                 configurationMap.getRequired(AUTONOMOUS_MAXTHREADS);
                 configurationMap.getRequired(AUTONOMOUS_LOCKSERVER_URL);
                 configurationMap.getRequired(AUTONOMOUS_SBOI_URL);
