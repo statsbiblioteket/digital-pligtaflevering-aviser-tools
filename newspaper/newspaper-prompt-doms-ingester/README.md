@@ -47,4 +47,8 @@ B20160811-RT1/verapdf/udgave1/articles/20160811-verapdf-udgave1-article002
 After that fedora should be updated
 
 
+TIP:  For easy rollback to an earlier snapshot "createbatch" use something similar to:
 
+    VBoxManage controlvm vagrant_default_1475672637969_89753 poweroff && VBoxManage snapshot vagrant_default_1475672637969_89753 restore createbatch && VBoxManage startvm vagrant_default_1475672637969_89753
+
+(replace name of virtual machine as appropriate)

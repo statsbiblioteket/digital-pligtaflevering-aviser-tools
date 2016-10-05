@@ -46,10 +46,12 @@
             <version>0.5.29</version>
         </dependency>
 
+        <!-- choose slf4j backend at deployment time.
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
+        -->
 
         <dependency>
             <groupId>org.slf4j</groupId>
