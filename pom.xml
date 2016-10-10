@@ -15,6 +15,7 @@
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
 
+        <!-- folder names, not modules -->
         <module>newspaper/newspaper-batch-trigger</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
         <module>newspaper/newspaper-bitrepository-ingester</module>

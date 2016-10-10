@@ -123,3 +123,9 @@ Access DOMS Wui Solr:
 Local pid generator:
 
     http://localhost:7880/pidgenerator-service/rest/pids/generatePid
+
+If for some reason Solr or Fedora is not running or responding, restart it inside vagrant with:
+
+    ~/7880-doms/bin/doms.sh restart
+
+
