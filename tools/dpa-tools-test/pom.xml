@@ -37,13 +37,7 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <!-- takeWhile() requires Java 9, until then use streamex -->
-        <dependency>
-            <groupId>one.util</groupId>
-            <artifactId>streamex</artifactId>
-            <version>0.6.2</version>
-        </dependency>
-    </dependencies>
+     </dependencies>
 
     <build>
         <plugins>

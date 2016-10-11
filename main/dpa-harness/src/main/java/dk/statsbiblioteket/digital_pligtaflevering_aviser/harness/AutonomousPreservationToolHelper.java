@@ -1,5 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
+import one.util.streamex.StreamEx;
+
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -64,5 +67,24 @@ public class AutonomousPreservationToolHelper {
     public static void execute(ConfigurationMap map, Function<ConfigurationMap, AutonomousPreservationTool> function) {
         Objects.requireNonNull(map, "map == null");
         function.apply(map).execute();
+    }
+
+    /**
+     * A launcher may have to locate a given path in a project. We traverse from startDir to the root using getParent()
+     * looking for the path.  If not found, throw runtime exception.
+     *
+     * @param startPath  path where to start
+     * @param pathToFind relative path name which must resolve from current path
+     * @return
+     */
+    public static Path getRequiredPathTowardsRoot(Path startPath, String pathToFind) {
+        return StreamEx // to get 3-arg iterate
+                .iterate(startPath, p -> p != null, p -> p.getParent()) // walk up to root
+                .map(p -> p.resolve(pathToFind))
+                .filter(p -> p.toFile().exists())
+                .findFirst()
+                .orElseThrow(() ->
+                        new RuntimeException(pathToFind + " not found towards root of " + startPath.toAbsolutePath())
+                );
     }
 }
