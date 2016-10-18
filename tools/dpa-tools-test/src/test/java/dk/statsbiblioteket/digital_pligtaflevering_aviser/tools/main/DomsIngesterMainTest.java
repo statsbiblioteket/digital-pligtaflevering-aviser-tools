@@ -29,6 +29,5 @@ public class DomsIngesterMainTest {
                 "doms-ingester.properties",
                 "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath()
         });
-        System.exit(1);
     }
 }

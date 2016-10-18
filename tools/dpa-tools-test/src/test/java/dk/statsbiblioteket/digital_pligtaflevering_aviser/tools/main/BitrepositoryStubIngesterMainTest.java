@@ -29,7 +29,6 @@ public class BitrepositoryStubIngesterMainTest {
                 "bitrepository-stub-ingester.properties",
                 "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath()
         });
-        System.exit(1);
     }
 
 }

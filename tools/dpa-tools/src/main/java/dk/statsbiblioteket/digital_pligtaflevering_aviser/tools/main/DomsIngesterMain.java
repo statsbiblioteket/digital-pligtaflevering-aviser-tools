@@ -13,6 +13,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGenera
 import dk.statsbiblioteket.medieplatform.autonomous.CallResult;
 import dk.statsbiblioteket.medieplatform.autonomous.NewspaperBatchAutonomousComponentUtils;
 import dk.statsbiblioteket.medieplatform.autonomous.RunnableComponent;
+import dk.statsbiblioteket.newspaper.promptdomsingester.component.RunnablePromptDomsIngester;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class DomsIngesterMain {
                 }
 
                 Properties properties = configurationMap.asProperties();
-                RunnableComponent component = null; //new RunnablePromptDomsIngester(properties, eFedora);
+                RunnableComponent component = new RunnablePromptDomsIngester(properties, eFedora);
                 CallResult result = NewspaperBatchAutonomousComponentUtils.startAutonomousComponent(properties, component);
 
                 log.info("result was: " + result);
