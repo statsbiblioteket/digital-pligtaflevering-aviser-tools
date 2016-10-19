@@ -129,3 +129,10 @@ If for some reason Solr or Fedora is not running or responding, restart it insid
     ~/7880-doms/bin/doms.sh restart
 
 
+Manually running the "restore vagrant box to snapshot" looks similar to: (please improve)
+
+    VBoxManage controlvm  vagrant_default_1476814652886_57099 poweroff
+    sleep 4
+    VBoxManage snapshot vagrant_default_1476814652886_57099 restore "doms ingested"
+    VBoxManage startvm vagrant_default_1476814652886_57099 --type headless
+

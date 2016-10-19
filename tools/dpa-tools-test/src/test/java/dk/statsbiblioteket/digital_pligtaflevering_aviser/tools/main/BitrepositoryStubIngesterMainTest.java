@@ -27,8 +27,8 @@ public class BitrepositoryStubIngesterMainTest {
 
         BitRepositoryIngesterMain.main(new String[]{
                 "bitrepository-stub-ingester.properties",
-                "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath()
+                "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath(),
+                "bitrepository.ingester.urltobatchdir=" + batchPath.toAbsolutePath()
         });
     }
-
 }

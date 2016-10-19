@@ -7,7 +7,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.filesystem.transfor
 import dk.statsbiblioteket.newspaper.promptdomsingester.IngesterInterface;
 import dk.statsbiblioteket.newspaper.promptdomsingester.SimpleFedoraIngester;
 import dk.statsbiblioteket.newspaper.promptdomsingester.util.ArticleTransformingIteratorForFileSystems;
-import dk.statsbiblioteket.newspaper.promptdomsingester.util.BatchMD5Validation;
+import dk.statsbiblioteket.newspaper.promptdomsingester.util.BatchMD5SUMSValidation;
 import dk.statsbiblioteket.util.Strings;
 
 import java.io.File;
@@ -21,13 +21,13 @@ import java.util.regex.Pattern;
  */
 public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableComponent {
     private final EnhancedFedora eFedora;
-    private BatchMD5Validation md5Validator;
+    private BatchMD5SUMSValidation md5Validator;
     private final static String eventId = "Metadata_Archived";
 
     public RunnablePromptDomsIngester(Properties properties, EnhancedFedora eFedora) {
         super(properties);
         this.eFedora = eFedora;
-        md5Validator = new BatchMD5Validation(getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER));
+        md5Validator = new BatchMD5SUMSValidation(getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER));
     }
 
     @Override

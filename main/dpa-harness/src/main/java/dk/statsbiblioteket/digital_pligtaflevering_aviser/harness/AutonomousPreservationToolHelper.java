@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
 import one.util.streamex.StreamEx;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -38,6 +39,8 @@ public class AutonomousPreservationToolHelper {
         // "config.properties"
         String configurationFileName = args[0];
 
+        ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties(configurationFileName);
+
         // remainingArgs: ["a=1", "b=2", "c=3"]
         String[] remainingArgs = Arrays.copyOfRange(args, 1, args.length);
         Map<String, String> argsMap = new TreeMap<>();
@@ -50,7 +53,6 @@ public class AutonomousPreservationToolHelper {
             }
         }
 
-        ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties(configurationFileName);
         map.addMap(argsMap);
 
         execute(map, function);
@@ -66,6 +68,7 @@ public class AutonomousPreservationToolHelper {
      */
     public static void execute(ConfigurationMap map, Function<ConfigurationMap, AutonomousPreservationTool> function) {
         Objects.requireNonNull(map, "map == null");
+        LoggerFactory.getLogger(AutonomousPreservationToolHelper.class).debug("configuration: {}", map);
         function.apply(map).execute();
     }
 
@@ -78,7 +81,7 @@ public class AutonomousPreservationToolHelper {
      * @return
      */
     public static Path getRequiredPathTowardsRoot(Path startPath, String pathToFind) {
-        return StreamEx // to get 3-arg iterate
+        return StreamEx // to get 3-arg iterate before Java 9
                 .iterate(startPath, p -> p != null, p -> p.getParent()) // walk up to root
                 .map(p -> p.resolve(pathToFind))
                 .filter(p -> p.toFile().exists())

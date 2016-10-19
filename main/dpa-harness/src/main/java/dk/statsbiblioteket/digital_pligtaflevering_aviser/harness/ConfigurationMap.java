@@ -2,6 +2,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
 import dagger.Module;
 import dagger.Provides;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
  */
 @Module
 public class ConfigurationMap {
+
+    final Logger log = LoggerFactory.getLogger(ConfigurationMap.class);
 
     Map<String, String> map = new TreeMap<>();
 
@@ -65,7 +69,21 @@ public class ConfigurationMap {
      */
 
     public Properties asProperties() {
-        Properties p = new Properties();
+        Properties p = new Properties() {
+            @Override
+            public String getProperty(String key) {
+                String property = super.getProperty(key);
+                log.trace("Property: {} = {}", key, property);
+                return property;
+            }
+
+            @Override
+            public String getProperty(String key, String defaultValue) {
+                String property = super.getProperty(key, defaultValue);
+                log.trace("Property: {} = {} (default {})", key, property, defaultValue);
+                return property;
+            }
+        };
         p.putAll(map);
         return p;
     }

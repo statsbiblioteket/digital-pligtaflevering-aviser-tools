@@ -11,11 +11,11 @@ import java.util.Map;
 /**
  * Validator for md5 validation of digital newspaper batches
  */
-public class BatchMD5Validation {
+public class BatchMD5SUMSValidation {
     private String batchFolder;
     private List<String> validationResult = new ArrayList<String>();
 
-    public BatchMD5Validation(String batchFolder) {
+    public BatchMD5SUMSValidation(String batchFolder) {
         this.batchFolder = batchFolder;
     }
 
@@ -50,7 +50,7 @@ public class BatchMD5Validation {
 
         for(String file: md5Map.keySet()) {
             String expectedMd5 = md5Map.get(file);
-            String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder + File.separator + batchName + File.separator+file));
+            String actualMd5 = this.getFileChecksum(MessageDigest.getInstance("md5"), new File(this.batchFolder + File.separator + batchName + File.separator + file));
             if(!expectedMd5.equals(actualMd5)) {
                 validationResult.add(this.validationResult + this.batchFolder + File.separator + batchName + File.separator + file + " - " + expectedMd5 + " " + actualMd5);
                 validationResponse = false;

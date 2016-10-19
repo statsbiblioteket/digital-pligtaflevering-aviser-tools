@@ -35,7 +35,7 @@ public class ConfigurationMapHelper {
             FileReader fileReader = new FileReader(configurationFile);
             map.addPropertyFile(fileReader);
             fileReader.close();
-            LOGGER.debug("read file {}: {}", configurationFile.getAbsolutePath(), map);
+            LOGGER.trace("read file {}: {}", configurationFile.getAbsolutePath(), map);
             return map;
         } catch (FileNotFoundException e) {
             // fall through if not present!
@@ -50,7 +50,7 @@ public class ConfigurationMapHelper {
             InputStreamReader inputStreamReader = new InputStreamReader(stream);
             map.addPropertyFile(inputStreamReader);
             inputStreamReader.close();
-            LOGGER.debug("read resource {}: {}", configurationLocation, map);
+            LOGGER.trace("read resource {}: {}", configurationLocation, map);
             return map;
         } catch (IOException e) {
             throw new RuntimeException("resource " + configurationLocation + " cannot be read", e);
