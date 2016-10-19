@@ -3,6 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.EnhancedFedoraImpl;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
@@ -10,6 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
 import javax.inject.Named;
 import javax.xml.bind.JAXBException;
@@ -36,7 +39,7 @@ public class DomsModule {
      */
     @Provides
     @Named(DOMS_URL)
-    String provideDomsURL(ConfigurationMap map) {
+    public String provideDomsURL(ConfigurationMap map) {
         return map.getRequired(DOMS_URL);
     }
 
@@ -48,7 +51,7 @@ public class DomsModule {
      */
     @Provides
     @Named(DOMS_USERNAME)
-    String provideDomsUserName(ConfigurationMap map) {
+    public String provideDomsUserName(ConfigurationMap map) {
         return map.getRequired(DOMS_USERNAME);
     }
 
@@ -60,7 +63,7 @@ public class DomsModule {
      */
     @Provides
     @Named(DOMS_PIDGENERATOR_URL)
-    String provideDomsPidGeneratorURL(ConfigurationMap map) {
+    public String provideDomsPidGeneratorURL(ConfigurationMap map) {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
 
@@ -72,7 +75,7 @@ public class DomsModule {
      */
     @Provides
     @Named(DOMS_PASSWORD)
-    String provideDomsPassword(ConfigurationMap map) {
+    public String provideDomsPassword(ConfigurationMap map) {
         return map.getRequired(DOMS_PASSWORD);
     }
 
@@ -85,7 +88,7 @@ public class DomsModule {
 
     @Provides
     @Named(AUTONOMOUS_SBOI_URL)
-    String provideSummaLocation(ConfigurationMap map) {
+    public String provideSummaLocation(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_SBOI_URL);
     }
 
@@ -95,7 +98,7 @@ public class DomsModule {
 
     @Provides
     @Named(FEDORA_RETRIES)
-    int getFedoraRetries(ConfigurationMap map) {
+    public int getFedoraRetries(ConfigurationMap map) {
         return map.getRequiredInt(FEDORA_RETRIES);
     }
 
@@ -105,7 +108,7 @@ public class DomsModule {
 
     @Provides
     @Named(FEDORA_DELAY_BETWEEN_RETRIES)
-    int getFedoraDelayBetweenRetries(ConfigurationMap map) {
+    public int getFedoraDelayBetweenRetries(ConfigurationMap map) {
         return map.getRequiredInt(FEDORA_DELAY_BETWEEN_RETRIES);
     }
 
@@ -119,10 +122,10 @@ public class DomsModule {
      * @return
      */
     @Provides
-    SBOIEventIndex provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                         PremisManipulatorFactory premisManipulatorFactory,
-                                         DomsEventStorage<Item> domsEventStorage,
-                                         @Named("pageSize") int pageSize) {
+    public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+                                                PremisManipulatorFactory premisManipulatorFactory,
+                                                DomsEventStorage<Item> domsEventStorage,
+                                                @Named("pageSize") int pageSize) {
         try {
             SBOIEventIndex sboiEventIndex = new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
             return sboiEventIndex;
@@ -138,7 +141,7 @@ public class DomsModule {
      * @return factory
      */
     @Provides
-    PremisManipulatorFactory providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
+    public PremisManipulatorFactory providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
         try {
             PremisManipulatorFactory<Item> factory;
             factory = new PremisManipulatorFactory<>(PremisManipulatorFactory.TYPE, itemFactory);
@@ -159,7 +162,7 @@ public class DomsModule {
      * @return
      */
     @Provides
-    DomsEventStorage<Item> provideDomsEventStorage(
+    public DomsEventStorage<Item> provideDomsEventStorage(
             @Named(DOMS_URL) String domsURL,
             @Named(DOMS_PIDGENERATOR_URL) String domsPidGeneratorURL,
             @Named(DOMS_USERNAME) String domsUserName,
@@ -179,4 +182,28 @@ public class DomsModule {
         }
     }
 
+    // FIXME:  Reinline
+    @Provides
+    public EnhancedFedora provideEnhancedFedora(
+            @Named(DOMS_USERNAME) String domsUserName,
+            @Named(DOMS_PASSWORD) String domsPassword,
+            @Named(DOMS_URL) String fedoraLocation,
+            @Named(DOMS_PIDGENERATOR_URL) String domsPidgeneratorUrl,
+            @Named(FEDORA_RETRIES) int fedoraRetries,
+            @Named(FEDORA_DELAY_BETWEEN_RETRIES) int fedoraDelayBetweenRetries) {
+        Credentials creds = new Credentials(domsUserName, domsPassword);
+
+        EnhancedFedoraImpl eFedora;
+        try {
+            eFedora = new EnhancedFedoraImpl(
+                    creds,
+                    fedoraLocation,
+                    domsPidgeneratorUrl,
+                    null, fedoraRetries, fedoraDelayBetweenRetries);
+        } catch (JAXBException | PIDGeneratorException |
+                MalformedURLException e) {
+            throw new RuntimeException("EnhancedFedoraImpl constructor failed");
+        }
+        return eFedora;
+    }
 }
