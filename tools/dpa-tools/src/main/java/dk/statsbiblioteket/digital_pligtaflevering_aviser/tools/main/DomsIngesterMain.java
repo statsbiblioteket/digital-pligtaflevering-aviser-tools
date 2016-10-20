@@ -43,7 +43,7 @@ public class DomsIngesterMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTask(EnhancedFedora eFedora,
+        Tool provideTool(EnhancedFedora eFedora,
                              ConfigurationMap configurationMap) {
             // Adapted from PromptDomsIngesterComponent.doWork(...)
             return () -> {

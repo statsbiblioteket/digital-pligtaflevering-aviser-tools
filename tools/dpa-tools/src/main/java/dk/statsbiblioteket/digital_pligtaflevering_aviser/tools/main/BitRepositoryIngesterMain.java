@@ -42,7 +42,7 @@ public class BitRepositoryIngesterMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTask(ConfigurationMap configurationMap) {
+        Tool provideTool(ConfigurationMap configurationMap) {
             return () -> {
                 // Ensure that these properties are defined
                 configurationMap.getRequired("dpa.testmode");

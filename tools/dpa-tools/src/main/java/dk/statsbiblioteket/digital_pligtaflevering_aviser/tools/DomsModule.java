@@ -10,8 +10,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.Modified_SBOIEventIndex;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
 import javax.inject.Named;
@@ -113,7 +113,7 @@ public class DomsModule {
     }
 
     /**
-     * Create SBOIEventIndex from dependencies provided by Dagger.
+     * Create Modified_SBOIEventIndex from dependencies provided by Dagger.
      *
      * @param summaLocation            URL for summa
      * @param premisManipulatorFactory factory for premisManipulators
@@ -122,15 +122,15 @@ public class DomsModule {
      * @return
      */
     @Provides
-    public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                                PremisManipulatorFactory premisManipulatorFactory,
-                                                DomsEventStorage<Item> domsEventStorage,
-                                                @Named("pageSize") int pageSize) {
+    public Modified_SBOIEventIndex provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+                                                         PremisManipulatorFactory premisManipulatorFactory,
+                                                         DomsEventStorage<Item> domsEventStorage,
+                                                         @Named("pageSize") int pageSize) {
         try {
-            SBOIEventIndex sboiEventIndex = new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
+            Modified_SBOIEventIndex sboiEventIndex = new Modified_SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
             return sboiEventIndex;
         } catch (MalformedURLException e) {
-            throw new RuntimeException("new SBOIEventIndex(...)", e);
+            throw new RuntimeException("new Modified_SBOIEventIndex(...)", e);
         }
     }
 
@@ -182,7 +182,6 @@ public class DomsModule {
         }
     }
 
-    // FIXME:  Reinline
     @Provides
     public EnhancedFedora provideEnhancedFedora(
             @Named(DOMS_USERNAME) String domsUserName,
@@ -199,7 +198,9 @@ public class DomsModule {
                     creds,
                     fedoraLocation,
                     domsPidgeneratorUrl,
-                    null, fedoraRetries, fedoraDelayBetweenRetries);
+                    null, // FIXME:  What is this?  Goes in the description?
+                    fedoraRetries,
+                    fedoraDelayBetweenRetries);
         } catch (JAXBException | PIDGeneratorException |
                 MalformedURLException e) {
             throw new RuntimeException("EnhancedFedoraImpl constructor failed");

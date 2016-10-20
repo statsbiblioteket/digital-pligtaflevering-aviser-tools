@@ -44,7 +44,7 @@ public class CreateBatchMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTask(@Named(CREATEBATCH_BATCHID) String batchId,
+        Tool provideTool(@Named(CREATEBATCH_BATCHID) String batchId,
                          @Named(CREATEBATCH_ROUNDTRIP) String roundTrip,
                          @Named(AUTONOMOUS_AGENT) String premisAgent,
                          @Named(DOMS_URL) String domsUrl,

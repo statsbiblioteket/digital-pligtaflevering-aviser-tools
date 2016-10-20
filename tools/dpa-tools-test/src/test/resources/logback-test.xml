@@ -9,7 +9,9 @@
         </encoder>
     </appender>
 
-    <root level="trace">
+    <logger name="dk.statsbiblioteket" level="trace" />
+
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
