@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateBatch;
@@ -26,12 +26,13 @@ public class CreateBatchMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerCreateBatchMain_CreateBatchTaskComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerCreateBatchMain_CreateBatchComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateBatchModule.class})
-    interface CreateBatchTaskComponent extends AutonomousPreservationToolComponent {
+    interface CreateBatchComponent {
+        Tool getTool();
     }
 
     @Module
@@ -43,13 +44,13 @@ public class CreateBatchMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Runnable provideTask(@Named(CREATEBATCH_BATCHID) String batchId,
-                             @Named(CREATEBATCH_ROUNDTRIP) String roundTrip,
-                             @Named(AUTONOMOUS_AGENT) String premisAgent,
-                             @Named(DOMS_URL) String domsUrl,
-                             @Named(DOMS_USERNAME) String domsUser,
-                             @Named(DOMS_PASSWORD) String domsPass,
-                             @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen) {
+        Tool provideTask(@Named(CREATEBATCH_BATCHID) String batchId,
+                         @Named(CREATEBATCH_ROUNDTRIP) String roundTrip,
+                         @Named(AUTONOMOUS_AGENT) String premisAgent,
+                         @Named(DOMS_URL) String domsUrl,
+                         @Named(DOMS_USERNAME) String domsUser,
+                         @Named(DOMS_PASSWORD) String domsPass,
+                         @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen) {
             return () -> CreateBatch.main(new String[]{batchId, roundTrip, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen});
         }
 

@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
@@ -34,7 +34,8 @@ public class DomsIngesterMain {
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, DomsIngesterModule.class})
-    protected interface DomsIngesterComponent extends AutonomousPreservationToolComponent {
+    protected interface DomsIngesterComponent {
+        Tool getTool();
     }
 
     @Module
@@ -42,7 +43,7 @@ public class DomsIngesterMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Runnable provideTask(EnhancedFedora eFedora,
+        Tool provideTask(EnhancedFedora eFedora,
                              ConfigurationMap configurationMap) {
             // Adapted from PromptDomsIngesterComponent.doWork(...)
             return () -> {

@@ -5,8 +5,8 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
@@ -30,12 +30,13 @@ public class InvokeVeraPdfMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerInvokeVeraPdfMain_VeraPdfTaskComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerInvokeVeraPdfMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class})
-    interface VeraPdfTaskComponent extends AutonomousPreservationToolComponent {
+    interface VeraPdfTaskDaggerComponent {
+        Tool getTool();
     }
 
     @Module
@@ -45,7 +46,7 @@ public class InvokeVeraPdfMain {
 
         @Provides
 //        Runnable provideRunnable(SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        Runnable provideRunnable(SBOIEventIndex<Item> index, Stream<EventTrigger.Query<Item>> queryStream, Task task) {
+        Tool provideRunnable(SBOIEventIndex<Item> index, Stream<EventTrigger.Query<Item>> queryStream, Task task) {
             return () -> queryStream
                     .peek(query -> log.info("Query: {}", query))
                     .map(  // apply to each item

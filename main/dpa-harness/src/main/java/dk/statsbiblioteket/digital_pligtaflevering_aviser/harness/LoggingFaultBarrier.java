@@ -21,7 +21,7 @@ import static java.time.LocalDateTime.now;
  * <p>
  * <p>Note:  Never returns</p>
  */
-public class LoggingFaultAutonomousPreservationTool implements AutonomousPreservationTool {
+public class LoggingFaultBarrier { // implements Tool {
 
     public static final String JVM_DUMPHEAP = "jvm.dumpheap";
 
@@ -32,13 +32,13 @@ public class LoggingFaultAutonomousPreservationTool implements AutonomousPreserv
     protected boolean dumpHeapOption;
 
     @Inject
-    public LoggingFaultAutonomousPreservationTool(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
+    public LoggingFaultBarrier(Runnable runnable, @Named(JVM_DUMPHEAP) boolean dumpHeapOption) {
         this.runnable = runnable;
         this.dumpHeapOption = dumpHeapOption;
     }
 
-    @Override
-    public void execute() {
+    //@Override
+    public String call() {
 
         log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
 
@@ -57,5 +57,6 @@ public class LoggingFaultAutonomousPreservationTool implements AutonomousPreserv
         if (dumpHeapOption) {
             JavaVirtualMachineHelper.dumpHeap(now -> now + ".hprof");
         }
+        return null;
     }
 }

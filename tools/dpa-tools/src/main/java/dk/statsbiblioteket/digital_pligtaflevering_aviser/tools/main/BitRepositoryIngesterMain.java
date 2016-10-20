@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.AutonomousPreservationToolComponent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CallResult;
@@ -23,20 +23,26 @@ public class BitRepositoryIngesterMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerBitRepositoryIngesterMain_BitRepositoryIngesterDaggerComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerBitRepositoryIngesterMain_BitRepositoryIngesterComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
+    // ---
+
     @Component(modules = {ConfigurationMap.class, CommonModule.class, BitRepositoryIngesterModule.class})
-    protected interface BitRepositoryIngesterDaggerComponent extends AutonomousPreservationToolComponent {
+    protected interface BitRepositoryIngesterComponent {
+        Tool getTool();
     }
+
+    // ---
 
     @Module
     protected static class BitRepositoryIngesterModule {
+
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Runnable provideTask(ConfigurationMap configurationMap) {
+        Tool provideTask(ConfigurationMap configurationMap) {
             return () -> {
                 // Ensure that these properties are defined
                 configurationMap.getRequired("dpa.testmode");
