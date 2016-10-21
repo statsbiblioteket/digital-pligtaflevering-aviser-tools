@@ -10,8 +10,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.Modified_SBOIEventIndex;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
 import javax.inject.Named;
@@ -122,12 +122,12 @@ public class DomsModule {
      * @return
      */
     @Provides
-    public Modified_SBOIEventIndex provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                                         PremisManipulatorFactory premisManipulatorFactory,
-                                                         DomsEventStorage<Item> domsEventStorage,
-                                                         @Named("pageSize") int pageSize) {
+    public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+                                                PremisManipulatorFactory premisManipulatorFactory,
+                                                DomsEventStorage<Item> domsEventStorage,
+                                                @Named("pageSize") int pageSize) {
         try {
-            Modified_SBOIEventIndex sboiEventIndex = new Modified_SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
+            SBOIEventIndex sboiEventIndex = new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
             return sboiEventIndex;
         } catch (MalformedURLException e) {
             throw new RuntimeException("new Modified_SBOIEventIndex(...)", e);

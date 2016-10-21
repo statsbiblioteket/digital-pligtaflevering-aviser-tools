@@ -9,13 +9,13 @@ import java.util.Date;
 /**
  *
  */
-public class DomsEventAdderCollection<I extends Item> extends ArrayList<DomsEvent> {
+public class DomsEventAdderCollection extends ArrayList<DomsEvent> {
 
-    private final I item;
-    private DomsEventStorage<I> domsEventStorage;
+    private DomsId domsId;
+    private DomsEventStorage<Item> domsEventStorage;
 
-    public DomsEventAdderCollection(I item, DomsEventStorage<I> domsEventStorage) {
-        this.item = item;
+    public DomsEventAdderCollection(DomsId domsId, DomsEventStorage<Item> domsEventStorage) {
+        this.domsId = domsId;
         this.domsEventStorage = domsEventStorage;
     }
 
@@ -24,14 +24,16 @@ public class DomsEventAdderCollection<I extends Item> extends ArrayList<DomsEven
         try {
             Date timestamp = new Date();
 
+            Item fakeItemToGetThroughAPI = new Item(domsId.id());
+
             Date d = domsEventStorage.appendEventToItem(
-                    item,
+                    fakeItemToGetThroughAPI,
                     event.getLinkingAgentIdentifierValue(),
                     timestamp,
                     event.getEventOutcomeDetailNote(),
                     event.getEventType(),
                     event.getOutcome());
-            System.out.println(d); // FIXME:  What daelen do we do?
+            System.out.println(d); // FIXME:  Do we need the date?
             return true;
         } catch (RuntimeException e) {
             throw e;

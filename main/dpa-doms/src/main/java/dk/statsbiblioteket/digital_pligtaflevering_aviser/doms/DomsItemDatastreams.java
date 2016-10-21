@@ -24,15 +24,15 @@ import java.util.function.Function;
  * </p>
  * // https://github.com/statsbiblioteket/newspaper-batch-event-framework/issues/1
  */
-public class DomsItemDatastreams<I extends Item> extends HashMap<String, String> {
+public class DomsItemDatastreams extends HashMap<String, String> {
 
-    private final I item;
-    private final DomsEventStorage<I> domsEventStorage;
+    private final DomsId domsId;
+    private final DomsEventStorage<Item> domsEventStorage;
     private Function<String, String> commentFor;
     private final EnhancedFedora fedora;
 
-    public DomsItemDatastreams(I item, DomsEventStorage<I> domsEventStorage, Function<String, String> commentFor) {
-        this.item = item;
+    public DomsItemDatastreams(DomsId domsId, DomsEventStorage<Item> domsEventStorage, Function<String, String> commentFor) {
+        this.domsId = domsId;
         this.domsEventStorage = domsEventStorage;
         this.commentFor = commentFor;
 
@@ -51,7 +51,8 @@ public class DomsItemDatastreams<I extends Item> extends HashMap<String, String>
         // semantics are save value immediately
 
         try {
-            fedora.modifyDatastreamByValue(item.getDomsID(),
+            // FIXME:  Is this exposed in ObjectProfile?
+            fedora.modifyDatastreamByValue(domsId.id(),
                     key,
                     null, // no checksum
                     null, // no checksum

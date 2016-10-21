@@ -3,26 +3,27 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.InfomediaBatch;
+import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.NotFoundException;
-import dk.statsbiblioteket.medieplatform.autonomous.Modified_SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import java.util.Iterator;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -49,30 +50,28 @@ public class InvokeVeraPdfMain {
 
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        Tool provideTool(Modified_SBOIEventIndex<Item> index, Stream<EventTrigger.Query<Item>> queryStream, Task task) {
-            return () -> queryStream
-                    .peek(
-                            query -> log.info("Query: {}", query)
-                    )
-                    .map(  // apply to each item
-                            query -> {
-                                return sboiEventIndexSearch(index, query)
-                                        .peek(item ->
-                                                log.info("Item: {}", item)
-                                        )
-                                        .map(task)
-                                        .peek(result -> log.info("Result: {}", result))
-                                        .collect(Collectors.toList());
-                            }
-                    )
-                    .forEach(result -> log.info("Result: {}", result))
-                    ;
+        Tool provideTool(SBOIEventIndex<Item> index, Stream<EventTrigger.Query<Item>> queryStream,
+                         Function<String, DomsItem> domsItemMapper, Task<DomsItem, ObjectProfile> task) {
+            return () -> {};
+//            return () -> queryStream
+//                    .peek(query -> log.info("Query: {}", query))
+//                    .map(query -> {
+//                                return sboiEventIndexSearch(index, query)
+//                                        .peek(item -> log.info("Item: {}", item))
+//                                        .map(item -> domsItemMapper.apply(item.getDomsID()))
+//                                        .map(task)
+//                                        .peek(result -> log.info("Result: {}", result))
+//                                        .collect(Collectors.toList());
+//                            }
+//                    )
+//                    .forEach(result -> log.info("Result: {}", result));
         }
 
-        protected Stream<Item> sboiEventIndexSearch(Modified_SBOIEventIndex<Item> index, EventTrigger.Query<Item> query) {
+        protected Stream<Item> sboiEventIndexSearch(SBOIEventIndex<Item> index, EventTrigger.Query<Item> query) {
             Iterator iterator;
             try {
-                iterator = index.search(true, query);
+                final boolean details = false;
+                iterator = index.search(details, query);
             } catch (CommunicationException e) {
                 throw new RuntimeException("index.search(...)", e);
             }
@@ -89,23 +88,26 @@ public class InvokeVeraPdfMain {
 
         @Provides
         ItemFactory<Item> provideItemFactory() {
-            return id -> {
-                final InfomediaBatch batch = new InfomediaBatch(id);
-
-                return batch;
-            };
+            return id -> new Item();
         }
 
         @Provides
-        Task getTask(DomsEventStorage<Item> domsEventStorage) {
-            return item -> {
-                try {
-                    final Item itemFromDomsID = domsEventStorage.getItemFromDomsID("uuid:a58ed278-e20f-4505-84a2-59ae8d8a8777");
-                    return itemFromDomsID;
-                } catch (CommunicationException | NotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            };
+//        Task getTask(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
+        Function<String, DomsItem> getDomsItemMapper(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
+//            return item -> new DomsItem(item, domsEventStorage);
+//            final Task<DomsItem, ObjectProfile> domsItemObjectProfileTask = item -> {
+//                try {
+//                    final String domsId = "uuid:a58ed278-e20f-4505-84a2-59ae8d8a8777";
+//                    final Item itemFromDomsID = domsEventStorage.getItemFromDomsID(domsId);
+//                    final ObjectProfile objectProfile = efedora.getObjectProfile(domsId, null);
+//                    return objectProfile;
+//                } catch (CommunicationException | NotFoundException | BackendInvalidCredsException
+//                        | BackendMethodFailedException | BackendInvalidResourceException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            };
+//            return domsItemObjectProfileTask;
+            throw new RuntimeException("commented out");
         }
 
         @Provides
