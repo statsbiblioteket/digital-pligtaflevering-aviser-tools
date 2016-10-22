@@ -3,13 +3,18 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Task;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.InfomediaBatch;
+import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
+import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
+import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
@@ -24,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import java.util.Iterator;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -31,6 +37,8 @@ import java.util.stream.StreamSupport;
  * Unfinished
  */
 public class InvokeVeraPdfMain {
+    protected static final Logger log = LoggerFactory.getLogger(InvokeVeraPdfMain.class);
+
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
@@ -46,38 +54,50 @@ public class InvokeVeraPdfMain {
     @Module
     public static class VeraPdfModule {
 
-        Logger log = LoggerFactory.getLogger(this.getClass());
-
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        Tool provideTool(SBOIEventIndex<Item> index, Stream<EventTrigger.Query<Item>> queryStream,
-                         Function<String, DomsItem> domsItemMapper, Task<DomsItem, ObjectProfile> task) {
-            return () -> {};
-//            return () -> queryStream
-//                    .peek(query -> log.info("Query: {}", query))
-//                    .map(query -> {
-//                                return sboiEventIndexSearch(index, query)
-//                                        .peek(item -> log.info("Item: {}", item))
-//                                        .map(item -> domsItemMapper.apply(item.getDomsID()))
-//                                        .map(task)
-//                                        .peek(result -> log.info("Result: {}", result))
-//                                        .collect(Collectors.toList());
-//                            }
-//                    )
-//                    .forEach(result -> log.info("Result: {}", result));
+        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora){ //}, Task<DomsItem, ObjectProfile> task) {
+
+            Object result = domsIdStream
+                    .peek(System.out::println)
+                    .map(domsId -> new InfomediaBatch(domsId, efedora))
+                    .flatMap(batch -> batch.getSingleDayNewspaperStream()
+                        .map(singleDay -> singleDay.getInfomediaSinglePagePDFStream().collect(Collectors.toList())
+                        ))
+                    .peek(System.out::println)
+                    .collect(Collectors.toList());
+            return () -> log.info("Result: {}", result);
         }
 
-        protected Stream<Item> sboiEventIndexSearch(SBOIEventIndex<Item> index, EventTrigger.Query<Item> query) {
+        protected ObjectProfile processSingleDomsId(DomsId domsId, EnhancedFedora efedora) {
+            try {
+                ObjectProfile xxx = efedora.getObjectProfile(domsId.id(), null);
+                return xxx;
+            } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Provides
+        protected Stream<DomsId> sboiEventIndexSearch(QuerySpecification query, SBOIEventIndex<Item> index) {
             Iterator iterator;
             try {
-                final boolean details = false;
-                iterator = index.search(details, query);
+                EventTrigger.Query<Item> q = new EventTrigger.Query<>();
+                q.getPastSuccessfulEvents().addAll(query.getPastSuccessfulEvents());
+                q.getOldEvents().addAll(query.getOldEvents());
+                q.getFutureEvents().addAll(query.getFutureEvents());
+                q.getTypes().addAll(query.getTypes());
+                iterator = index.search(false, q);
             } catch (CommunicationException e) {
-                throw new RuntimeException("index.search(...)", e);
+                throw new RuntimeException("sboiEventIndexSearch()", e);
             }
             // http://stackoverflow.com/a/29010716/53897
             Iterable iterable = () -> iterator;
-            return StreamSupport.stream(iterable.spliterator(), false);
+            Stream<Item> itemStream = StreamSupport.stream(iterable.spliterator(), false);
+            // convert to DomsID("....") stream.
+            Stream<DomsId> domsIdStream = itemStream.map(i -> new DomsId(i.getDomsID()));
+            return domsIdStream;
         }
 
         @Provides

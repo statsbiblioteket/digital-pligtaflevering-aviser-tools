@@ -17,4 +17,11 @@ public class DomsId implements Id {
     public String id() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "DomsId{" +
+                "id='" + id + '\'' +
+                '}';
+    }
 }

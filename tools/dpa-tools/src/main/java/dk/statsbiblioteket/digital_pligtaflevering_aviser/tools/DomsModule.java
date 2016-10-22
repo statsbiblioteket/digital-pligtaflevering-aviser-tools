@@ -2,6 +2,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
 
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedoraImpl;
@@ -18,6 +19,10 @@ import javax.inject.Named;
 import javax.xml.bind.JAXBException;
 import java.net.MalformedURLException;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_FUTURE_EVENTS;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_ITEM_TYPES;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_OLD_EVENTS;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_PAST_SUCCESSFUL_EVENTS;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
@@ -25,6 +30,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_DELAY_BETWEEN_RETRIES;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_RETRIES;
+import static java.util.Arrays.asList;
 
 /**
  * DOMS configuration string lookup providers.
@@ -207,4 +213,74 @@ public class DomsModule {
         }
         return eFedora;
     }
+
+    /**
+     * Extracts a QuerySpecification from configuration parameters.  The semantics are the same as
+     * for the Newspaper Autonomous components.
+     *
+     * @param pastSuccessfulEvents
+     * @param futureEvents
+     * @param oldEvents
+     * @param itemTypes
+     * @return
+     */
+    @Provides
+    QuerySpecification providesQuerySpecification(
+            @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS) String pastSuccessfulEvents,
+            @Named(AUTONOMOUS_FUTURE_EVENTS) String futureEvents,
+            @Named(AUTONOMOUS_OLD_EVENTS) String oldEvents,
+            @Named(AUTONOMOUS_ITEM_TYPES) String itemTypes) {
+        // http://stackoverflow.com/a/7488676/53897
+        return new QuerySpecification(
+                asList(pastSuccessfulEvents.split("\\s*,\\s*")),
+                asList(futureEvents.split("\\s*,\\s*")),
+                asList(oldEvents.split("\\s*,\\s*")),
+                asList(itemTypes.split("\\s*,\\s*")), false);
+    }
+
+    /**
+     * Comma separated list of events which must have been completed successfully for item to be considered.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+    @Provides
+    @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS)
+    public String providePastSuccesfulEvents(ConfigurationMap map) {
+        return map.getRequired(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS);
+    }
+    /**
+     * Comma separated list of events which must not yet have happened (FIXME:  Successfully?) for item to be considered.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+    @Provides
+    @Named(AUTONOMOUS_FUTURE_EVENTS)
+    public String provideFutureEvents(ConfigurationMap map) {
+        return map.getRequired(AUTONOMOUS_FUTURE_EVENTS);
+    }
+    /**
+     * Comma separated list of events which (FIXME:  what exactly?) for item to be considered.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+    @Provides
+    @Named(AUTONOMOUS_OLD_EVENTS)
+    public String provideOldEvents(ConfigurationMap map) {
+        return map.getRequired(AUTONOMOUS_OLD_EVENTS);
+    }
+    /**
+     * Comma separated list of types which item must have to be considere.
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+    @Provides
+    @Named(AUTONOMOUS_ITEM_TYPES)
+    public String provideItemTypes(ConfigurationMap map) {
+        return map.getRequired(AUTONOMOUS_ITEM_TYPES);
+    }
+
 }
