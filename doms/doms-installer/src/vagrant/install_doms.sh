@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export JAVA_HOME=/usr/lib/jvm/java-7-oracle/
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 
 INSTALL_DIR="$HOME/7880-doms"
 

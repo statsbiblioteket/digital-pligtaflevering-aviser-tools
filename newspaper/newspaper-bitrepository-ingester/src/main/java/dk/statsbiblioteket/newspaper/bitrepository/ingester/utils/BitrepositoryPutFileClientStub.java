@@ -1,15 +1,5 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester.utils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.security.MessageDigest;
-import java.util.Arrays;
-
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.client.eventhandler.CompleteEvent;
@@ -19,6 +9,19 @@ import org.bitrepository.modify.putfile.PutFileClient;
 import org.bitrepository.protocol.OperationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.util.Arrays;
 
 /**
  * Used for stubbing a actual bitrepository, thereby avoiding all the complications associated with
@@ -32,6 +35,13 @@ public class BitrepositoryPutFileClientStub implements PutFileClient {
 
     public BitrepositoryPutFileClientStub(String destinationPath) {
         this.destinationPath = destinationPath;
+        // Fail up front if not there!
+        Path absolutePath = Paths.get(destinationPath).toAbsolutePath();
+        if (absolutePath.toFile().exists() == false) {
+            throw new RuntimeException("destinationPath",
+                    new FileNotFoundException(absolutePath.toString())
+            );
+        }
     }
 
     @Override

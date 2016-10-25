@@ -1,7 +1,7 @@
 /**
  * <p>Basic interfaces for DPA.
  * </p>
- * <p>The core model of DPA is:
+ * <p>The model model of DPA is:
  * <dl>
  * <dt><b>Repository</b>:</dt>
  * <dd>An collection of Items which can be selected with a RepositoryQuery.

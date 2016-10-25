@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryQuery;
+import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
@@ -8,7 +9,6 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.apache.solr.client.solrj.SolrServerException;
 
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -17,44 +17,43 @@ import java.util.stream.StreamSupport;
 
 /**
  *
+ * @noinspection WeakerAccess
  */
-public class DomsQuery<I extends Item> implements RepositoryQuery<QuerySpecification, Stream<DomsItem>> {
+public class DomsQuery implements RepositoryQuery<QuerySpecification, Stream<DomsId>> {
 
-    private DomsEventStorage<I> domsEventStorage;
-    private SBOIEventIndex<I> sboiEventIndex;
-    private Function<String, InputStream> inputStreamFor;
+    private DomsEventStorage<Item> domsEventStorage;
+    private SBOIEventIndex<Item> sboiEventIndex;
+    private EnhancedFedora efedora;
 
-    public DomsQuery(DomsEventStorage<I> domsEventStorage, SBOIEventIndex<I> sboiEventIndex) {
+    public DomsQuery(DomsEventStorage<Item> domsEventStorage, SBOIEventIndex<Item> sboiEventIndex, EnhancedFedora efedora) {
         this.domsEventStorage = domsEventStorage;
         this.sboiEventIndex = sboiEventIndex;
+        this.efedora = efedora;
     }
 
     @Override
-    public Stream<DomsItem> query(QuerySpecification querySpecification) {
+    public Stream<DomsId> query(QuerySpecification querySpecification) {
 
-        // Create and populate avisprojekt DOMS query and wrap the result as DomsItems.
+        // -- Create and populate SBIO query and return the DOMS ids found as a stream.
 
-        EventTrigger.Query<I> query = new EventTrigger.Query<>();
+        EventTrigger.Query<Item> query = new EventTrigger.Query<>();
 
         query.getPastSuccessfulEvents().addAll(querySpecification.getPastSuccessfulEvents());
         query.getFutureEvents().addAll(querySpecification.getFutureEvents());
         query.getOldEvents().addAll(querySpecification.getOldEvents());
         query.getTypes().addAll(querySpecification.getTypes());
 
-        // currently only ask once and stop.
-
         boolean details = querySpecification.getDetails();
 
+
         try {
-            // Convert Iterator<I> to Stream<I> - http://stackoverflow.com/a/24511534/53897
+            // Convert Iterator<Item> to Stream<Item> - http://stackoverflow.com/a/24511534/53897
 
-            Iterator<I> searchIterator = sboiEventIndex.search(details, query);
-            Iterable<I> iterable = () -> searchIterator;
-            Stream<I> targetStream = StreamSupport.stream(iterable.spliterator(), false);
+            Iterator<Item> searchIterator = sboiEventIndex.search(details, query);
+            Iterable<Item> iterable = () -> searchIterator;
+            Stream<Item> targetStream = StreamSupport.stream(iterable.spliterator(), false);
 
-            // create a DomsItem from each item returned from DOMS.
-
-            Function<I, DomsItem> function = item -> new DomsItem(item, domsEventStorage);
+            Function<Item, DomsId> function = item -> new DomsId(item.getDomsID());
             return targetStream.map(function);
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();

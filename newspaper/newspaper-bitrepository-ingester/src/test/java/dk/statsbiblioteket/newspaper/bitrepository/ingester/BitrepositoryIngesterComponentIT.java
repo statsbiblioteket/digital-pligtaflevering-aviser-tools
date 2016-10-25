@@ -1,8 +1,5 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester;
 
-import java.io.FileInputStream;
-import java.util.Properties;
-
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
@@ -11,7 +8,12 @@ import org.bitrepository.common.settings.Settings;
 import org.bitrepository.modify.putfile.PutFileClient;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import static org.testng.Assert.*;
+
+import java.io.FileInputStream;
+import java.util.Properties;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class BitrepositoryIngesterComponentIT {
     private final static String TEST_BATCH_ID = "400022028241";
@@ -80,6 +82,7 @@ public class BitrepositoryIngesterComponentIT {
     private class StubbedBitrepositoryIngesterComponent extends BitrepositoryIngesterComponent {
         PutFileClientStub clientStub = new PutFileClientStub();
 
+        /** @noinspection WeakerAccess*/
         public StubbedBitrepositoryIngesterComponent(Properties properties) {
             super(properties);
         }

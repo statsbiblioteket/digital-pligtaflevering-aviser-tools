@@ -48,7 +48,7 @@ Do not use the VirtualBox gui to save and restore snapshots.  The
 file system mappings will not be properly handled.
 
 
-Adding batches:
+Adding batches placed inside vagrant:
 ===
 
 Use something along these lines for copying in an existing, unpacked delivery into `/newspapr_batches` 
@@ -73,6 +73,24 @@ query routines to see any updates.  Repeat after each change to DOMS data.
 Repeat several times until both batches have been ingested.  This is indicated with log
 lines on the form
 `2016-07-12 ... PromptDomsIngesterComponent - result was: Worked on ... successfully`
+
+
+Adding batches placed outside vagrant: 
+===
+
+This is typical when developing code.
+
+1. Ensure vagrant machine is running.
+
+2. Invoke Java code inside e.g. IntelliJ adding events to DOMS.
+ 
+3. Update SBOI to ensure that search indexes are up to date.
+
+.
+
+    vagrant ssh -c 'JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 bash -x 7880-doms/bin/doms.sh update'
+
+
 
 
 Notes:
@@ -105,3 +123,16 @@ Access DOMS Wui Solr:
 Local pid generator:
 
     http://localhost:7880/pidgenerator-service/rest/pids/generatePid
+
+If for some reason Solr or Fedora is not running or responding, restart it inside vagrant with:
+
+    ~/7880-doms/bin/doms.sh restart
+
+
+Manually running the "restore vagrant box to snapshot" looks similar to: (please improve)
+
+    VBoxManage controlvm  vagrant_default_1476814652886_57099 poweroff
+    sleep 4
+    VBoxManage snapshot vagrant_default_1476814652886_57099 restore "doms ingested"
+    VBoxManage startvm vagrant_default_1476814652886_57099 --type headless
+

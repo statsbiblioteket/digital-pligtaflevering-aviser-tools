@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
+/** @noinspection WeakerAccess*/
 public class NamedStringExampleConstants {
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
@@ -43,19 +44,19 @@ public class NamedStringExampleConstants {
         @Provides
         @Named(BEFORE)
         String provideBefore(ConfigurationMap map) {
-            return map.get(BEFORE);
+            return map.getRequired(BEFORE);
         }
 
         @Provides
         @Named(AFTER)
         String provideAfter(ConfigurationMap map) {
-            return map.get(AFTER);
+            return map.getRequired(AFTER);
         }
 
         @Provides
         @Named(AFTER + BEFORE) // unused!
         String provideAfterBefore(ConfigurationMap map) {
-            return map.get(AFTER + BEFORE);
+            return map.getRequired(AFTER + BEFORE);
         }
     }
 

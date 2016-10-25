@@ -11,7 +11,7 @@ public class QuerySpecification {
     private final List<String> oldEvents;
     private final List<String> types;
     /**
-     * false = get information from Summa indexes only, true = ask DOMS for all details.
+     * false = get information from Summa indexes only, true = populate events in answer.
      */
     private boolean details;
 

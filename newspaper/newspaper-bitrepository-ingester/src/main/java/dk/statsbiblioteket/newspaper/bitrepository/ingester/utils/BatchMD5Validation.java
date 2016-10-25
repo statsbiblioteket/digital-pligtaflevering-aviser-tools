@@ -44,6 +44,7 @@ public class BatchMD5Validation {
                 }
             }
         } catch(Exception e) {
+            // FIXME:  https://sbprojects.statsbiblioteket.dk/jira/browse/DPA-31
             log.error(e.getMessage());
         }
     }

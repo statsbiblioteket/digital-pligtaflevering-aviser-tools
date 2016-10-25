@@ -15,6 +15,12 @@
             <version>master-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>dk.statsbiblioteket.newspaper</groupId>
+            <artifactId>dpa-prompt-doms-ingester</artifactId>
+            <version>1.12-SNAPSHOT</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
         <dependency>
             <groupId>javax.inject</groupId>

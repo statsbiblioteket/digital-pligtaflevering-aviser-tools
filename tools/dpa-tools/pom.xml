@@ -13,6 +13,8 @@
             dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
         </appassembler-maven-plugin.mainClass1>
         <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
+        <!-- we are currently using junit tests as IntelliJ launchers, so don't run tests automatically -->
+        <skipTests>false</skipTests>
     </properties>
 
     <dependencies>
@@ -32,17 +34,40 @@
             <version>2.2</version>
             <optional>true</optional>
         </dependency>
+        <!-- FIXME: TEMPORARY HACK TO MAKE DOMSINGESTERMAIN WORK -->
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
             <artifactId>dpa-doms</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <!-- use simple logging for IDE use but not for deployment -->
             <artifactId>slf4j-simple</artifactId>
             <groupId>org.slf4j</groupId>
             <version>1.7.9</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.newspaper</groupId>
+            <artifactId>dpa-batch-trigger</artifactId>
+            <version>1.9-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.newspaper</groupId>
+            <artifactId>dpa-prompt-doms-ingester</artifactId>
+            <version>1.9-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.newspaper</groupId>
+            <artifactId>dpa-bitrepository-ingester</artifactId>
+            <version>1.12-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -57,7 +82,14 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
-         </plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
