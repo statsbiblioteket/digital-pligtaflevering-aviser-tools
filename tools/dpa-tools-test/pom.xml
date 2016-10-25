@@ -14,7 +14,7 @@
         </appassembler-maven-plugin.mainClass1>
         <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
         <!-- we are currently using junit tests as IntelliJ launchers, so don't run tests automatically -->
-        <skipTests>false</skipTests>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>

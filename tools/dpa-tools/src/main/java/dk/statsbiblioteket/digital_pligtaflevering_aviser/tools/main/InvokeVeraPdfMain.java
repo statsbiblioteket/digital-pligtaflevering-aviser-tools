@@ -96,7 +96,9 @@ public class InvokeVeraPdfMain {
             Iterable iterable = () -> iterator;
             Stream<Item> itemStream = StreamSupport.stream(iterable.spliterator(), false);
             // convert to DomsID("....") stream.
-            Stream<DomsId> domsIdStream = itemStream.map(i -> new DomsId(i.getDomsID()));
+            Stream<DomsId> domsIdStream = itemStream
+                    .peek(i -> System.out.println(i))
+                    .map(i -> new DomsId(i.getDomsID()));
             return domsIdStream;
         }
 
