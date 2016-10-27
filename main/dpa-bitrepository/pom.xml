@@ -18,7 +18,7 @@
         <dependency>
             <groupId>dk.statsbiblioteket.newspaper</groupId>
             <artifactId>dpa-prompt-doms-ingester</artifactId>
-            <version>1.12-SNAPSHOT</version>
+            <version>1.9-SNAPSHOT</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/javax.inject/javax.inject -->
