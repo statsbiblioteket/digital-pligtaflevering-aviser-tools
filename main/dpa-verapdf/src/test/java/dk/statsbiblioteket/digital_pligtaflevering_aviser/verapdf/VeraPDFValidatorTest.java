@@ -37,7 +37,7 @@ public class VeraPDFValidatorTest {
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
                 "<validationResult flavour=\"PDFA_1_A\" totalAssertions=\"254\" isCompliant=\"false\" xmlns=\"http://www.verapdf.org/ValidationProfile\">" +
                 "<assertions>" +
-                "<assertion ordinal=\"6\" status=\"FAILED\">" +
+                "<assertion ordinal=\"1\" status=\"FAILED\">" +
                 "<ruleId specification=\"ISO_19005_1\" clause=\"6.8.2\" testNumber=\"1\"/>" +
                 "<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>" +
                 "<location>" +
