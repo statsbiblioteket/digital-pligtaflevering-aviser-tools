@@ -37,7 +37,7 @@
          <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>pdfbox-validation-model</artifactId>
-            <version>${verapdf.pdfbox.validation.version}</version>
+            <version>RELEASE</version>
         </dependency>
 
         <dependency>
