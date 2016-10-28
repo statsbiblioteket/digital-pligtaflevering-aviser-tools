@@ -9,7 +9,8 @@
     </parent>
 
     <artifactId>dpa-prompt-doms-ingester</artifactId>
-    <version>1.9-SNAPSHOT</version>
+    <!-- updated as 1.12-SNAPSHOT was incorrectly available at a time -->
+    <version>1.9999-SNAPSHOT</version>
 
     <properties>
         <failsafe.forkCount>1</failsafe.forkCount>

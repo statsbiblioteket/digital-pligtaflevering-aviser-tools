@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
+import org.verapdf.core.EncryptedPdfException;
 import org.verapdf.core.ModelParsingException;
 import org.verapdf.core.ValidationException;
 import org.verapdf.model.ModelParser;
@@ -40,12 +41,12 @@ public class VeraPDFValidator implements Function<InputStream, String> {
             return apply0(inputStream);
         } catch (RuntimeException e) {
             throw e;
-        } catch (ModelParsingException | ValidationException | JAXBException e) {
+        } catch (ModelParsingException | ValidationException | JAXBException | EncryptedPdfException e) {
             throw new RuntimeException("invoking VeraPDF validation", e);
         }
     }
 
-    private String apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException {
+    private String apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
         PDFAFlavour profileId = PDFAFlavour.byFlavourId(flavorId);
         ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
         PDFAValidator validator = Validators.createValidator(profileId, false);
