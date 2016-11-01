@@ -8,7 +8,7 @@ import org.verapdf.pdfa.PDFAValidator;
 import org.verapdf.pdfa.flavours.PDFAFlavour;
 import org.verapdf.pdfa.results.ValidationResult;
 import org.verapdf.pdfa.results.ValidationResults;
-import org.verapdf.pdfa.validators.Validators;
+import org.verapdf.pdfa.validation.validators.ValidatorFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.InputStream;
@@ -49,7 +49,7 @@ public class VeraPDFValidator implements Function<InputStream, String> {
     private String apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
         PDFAFlavour profileId = PDFAFlavour.byFlavourId(flavorId);
         ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
-        PDFAValidator validator = Validators.createValidator(profileId, false);
+        PDFAValidator validator = ValidatorFactory.createValidator(profileId, false);
         ValidationResult result = validator.validate(toValidate);
 
         Writer writer = new StringWriter();
