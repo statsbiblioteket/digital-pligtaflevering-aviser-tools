@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 
 import java.util.stream.Stream;
 

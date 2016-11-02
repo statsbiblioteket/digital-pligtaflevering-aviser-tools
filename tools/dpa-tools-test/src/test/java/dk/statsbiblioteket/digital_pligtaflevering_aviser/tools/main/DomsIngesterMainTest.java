@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+
 /**
  *
  */
@@ -27,7 +29,7 @@ public class DomsIngesterMainTest {
 
         DomsIngesterMain.main(new String[]{
                 "doms-ingester.properties",
-                "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath()
+                ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + batchPath.toAbsolutePath()
         });
     }
 }

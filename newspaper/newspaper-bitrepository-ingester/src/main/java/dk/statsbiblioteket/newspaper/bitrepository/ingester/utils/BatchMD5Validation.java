@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,8 @@ public class BatchMD5Validation {
      */
     public void readChecksums(String batchName) {
         //try(BufferedReader br = new BufferedReader(new FileReader(this.batchFolder + File.separator+batchName + File.separator + "MD5SUMS.txt"))) {
-        try(BufferedReader br = new BufferedReader(new FileReader(Paths.get(this.batchFolder, batchName, "MD5SUMS.txt").toFile()))) {
+        final Path md5sumsPath = Paths.get(this.batchFolder, batchName, "MD5SUMS.txt");
+        try(BufferedReader br = new BufferedReader(new FileReader(md5sumsPath.toFile()))) {
             String line = br.readLine();
 
             while (line != null) {
