@@ -21,12 +21,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Class containing the actual logic for traversing the directory tree and ingesting the data to
@@ -202,12 +200,8 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
             oldIds.add(id);
             String logMessage = "Created object with DC id " + id;
             currentNodePid = fedora.newEmptyObject(oldIds, getCollections(), logMessage);
-
             //Add a title to the object in Fedora
-            String dcDatastream = fedora.getXMLDatastreamContents(currentNodePid, "DC");
-            dcDatastream = dcDatastream.replaceFirst(Pattern.quote("</oai_dc:dc>"), "<dc:title>" + id + "</dc:title>\n</oai_dc:dc>");
-            fedora.modifyDatastreamByValue(currentNodePid,"DC",dcDatastream, Collections.<String>emptyList(),"Setting title");
-
+            fedora.modifyObjectLabel(currentNodePid,id, "Adding label to Object");
             log.debug(logMessage + " / " + currentNodePid);
         }
         String parentPid = pidStack.peekFirst();
