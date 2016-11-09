@@ -1,5 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -11,11 +14,11 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.InfomediaBatch;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamProfile;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
@@ -27,7 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,21 +64,76 @@ public class InvokeVeraPdfMain {
 
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora){ //}, Task<DomsItem, ObjectProfile> task) {
+        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora) { //}, Task<DomsItem, ObjectProfile> task) {
 
             Object result = domsIdStream
                     .peek(System.out::println)
-                    .map(domsId -> new InfomediaBatch(domsId, efedora))
+                    .flatMap(domsId -> findAllChildrenFor(domsId).stream())
                     .peek(System.out::println)
-                    .flatMap(batch -> batch.getSingleDayNewspaperStream()
-                        .map(singleDay -> singleDay.getInfomediaSinglePagePDFStream().collect(Collectors.toList())
-                        ))
-                    .peek(System.out::println)
+                    .map(domsId -> getObjectProfileFor(domsId, efedora))
+                    // Does object profile have a PDF typed stream?
+                    .filter(op -> op.getDatastreams().stream().filter(ds -> ds.getMimeType().equals("application/pdf")).count() > 0)
+                    // We now have the ObjectProfiles for which there is an PDF datastream.
+                    .map(x -> {
+                        for (DatastreamProfile ds : x.getDatastreams()) {
+                            if (ds.getMimeType().equals("application/pdf")) {
+                                return Arrays.asList(x, ds.getLabel());
+                            }
+                        }
+                        throw new RuntimeException("hey");
+                    })
                     .collect(Collectors.toList());
             return () -> log.info("Result: {}", result);
         }
 
-        protected ObjectProfile processSingleDomsId(DomsId domsId, EnhancedFedora efedora) {
+        private Set<DomsId> findAllChildrenFor(DomsId rootDomsId) {
+            Set<DomsId> found = new HashSet<>();
+            List<DomsId> unprocessed = new ArrayList<>(); // Does DOMS prefer a given order?
+            unprocessed.add(rootDomsId);
+            while (unprocessed.isEmpty() == false) {
+                DomsId currentId = unprocessed.remove(0);
+                found.add(currentId);
+                log.trace("Processing {}", currentId);
+                //
+                String restUrl = "http://localhost:7880/fedora/objects";
+
+                Client client = Client.create();
+                client.addFilter(new HTTPBasicAuthFilter("fedoraAdmin", "fedoraAdminPass"));
+
+                // https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
+                final WebResource webResource = client.resource(restUrl).path(currentId.id()).path("relationships").queryParam("format", "ntriples");
+
+                log.trace("WebResource: {}", webResource.getURI());
+                //webResource.addFilter(new LoggingFilter(System.err));
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/relations-external#hasPart> <info:fedora/uuid:5cfa5459-c553-4894-980e-b2b7b37b37d3> .
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/doms:ContentModel_DOMS> .
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <http://doms.statsbiblioteket.dk/relations/default/0/1/#isPartOfCollection> <info:fedora/doms:Newspaper_Collection> .
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/doms:ContentModel_Item> .
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/doms:ContentModel_RoundTrip> .
+//<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/fedora-system:FedoraObject-3.0> .
+                String result = webResource.get(String.class);
+                for (String s : result.split("\n")) {
+                    //<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/relations-external#hasPart> <info:fedora/uuid:5cfa5459-c553-4894-980e-b2b7b37b37d3> .
+                    String[] tuple = s.split(" ");
+                    if (tuple.length >= 3 && tuple[2].startsWith("<info:fedora/")) {
+                        String predicate = tuple[1].substring(1, tuple[1].length() - ">".length());
+                        String child = tuple[2].substring("<info:fedora/".length(), tuple[2].length() - ">".length());
+                        // ConfigConstants.ITERATOR_DOMS_PREDICATENAMES
+                        if (predicate.equals("info:fedora/fedora-system:def/relations-external#hasPart")) {
+                            final DomsId childDomsId = new DomsId(child);
+                            if (found.contains(childDomsId)) {
+                                // seen before - should not happen in a tree, but just to be certain
+                            } else {
+                                unprocessed.add(childDomsId);
+                            }
+                        }
+                    }
+                }
+            }
+            return found;
+        }
+
+        protected ObjectProfile getObjectProfileFor(DomsId domsId, EnhancedFedora efedora) {
             try {
                 ObjectProfile xxx = efedora.getObjectProfile(domsId.id(), null);
                 return xxx;
