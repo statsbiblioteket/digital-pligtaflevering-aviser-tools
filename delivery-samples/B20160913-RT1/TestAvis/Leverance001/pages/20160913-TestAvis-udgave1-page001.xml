@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pdfinfo>
+    <filename>20160913-TestAvis-udgave1-page001.pdf</filename>
+    <publishing>
+        <source>TestAvis</source>
+        <edition>Udgave1</edition>
+        <publishDate>20160913</publishDate>
+    </publishing>
+    <positional>
+        <sectionName>Kultur</sectionName>
+        <sectionNumber>1</sectionNumber>
+        <pageName>Side 1</pageName>
+        <pageNumber>1</pageNumber>
+    </positional>
+    <content>
+        <text>
+            <raw>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Curabitur tincidunt viverra mi vitae scelerisque. Donec congue, ligula eget
+            maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam id
+            mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
+            Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
+            condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
+            in auctor ipsum.</raw>
+        </text>
+    </content>
+    <articles>
+        <article>
+            <filename>20160913-TestAvis-udgave1-article001.xml</filename>
+            <filename>20160913-TestAvis-udgave1-article002.xml</filename>
+        </article>
+    </articles>
+</pdfinfo>
+
