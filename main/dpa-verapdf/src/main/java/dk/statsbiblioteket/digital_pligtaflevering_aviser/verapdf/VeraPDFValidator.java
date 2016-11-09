@@ -3,11 +3,11 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 import org.verapdf.core.EncryptedPdfException;
 import org.verapdf.core.ModelParsingException;
 import org.verapdf.core.ValidationException;
+import org.verapdf.core.XmlSerialiser;
 import org.verapdf.model.ModelParser;
 import org.verapdf.pdfa.PDFAValidator;
 import org.verapdf.pdfa.flavours.PDFAFlavour;
 import org.verapdf.pdfa.results.ValidationResult;
-import org.verapdf.pdfa.results.ValidationResults;
 import org.verapdf.pdfa.validation.validators.ValidatorFactory;
 
 import javax.xml.bind.JAXBException;
@@ -51,9 +51,8 @@ public class VeraPDFValidator implements Function<InputStream, String> {
         ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
         PDFAValidator validator = ValidatorFactory.createValidator(profileId, false);
         ValidationResult result = validator.validate(toValidate);
-
         Writer writer = new StringWriter();
-        ValidationResults.toXml(result, writer, prettyXml);
+        XmlSerialiser.toXml(result, writer, prettyXml, false);
         return writer.toString();
     }
 }
