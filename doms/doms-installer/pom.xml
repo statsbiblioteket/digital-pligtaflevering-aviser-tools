@@ -314,6 +314,34 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- ensure that developer-config/ is present! -->
+            <!-- http://maven.apache.org/enforcer/enforcer-rules/requireFilesExist.html -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-files-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireFilesExist>
+                                    <message>*** devel-config not present - check README.md for cloning instructions ***</message>
+                                    <files>
+                                        <file>${project.basedir}/src/vagrant/devel-config</file>
+                                    </files>
+                                </requireFilesExist>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
         </plugins>
     </build>
 </project>
