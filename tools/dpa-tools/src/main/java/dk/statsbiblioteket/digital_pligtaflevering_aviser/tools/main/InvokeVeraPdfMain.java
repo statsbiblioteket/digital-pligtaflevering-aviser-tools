@@ -7,13 +7,14 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.TaskResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
@@ -30,13 +31,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -66,41 +71,92 @@ public class InvokeVeraPdfMain {
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
         protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora) { //}, Task<DomsItem, ObjectProfile> task) {
 
-            Object result = domsIdStream
+            Stream<DomsId> childrenStream = domsIdStream
                     .peek(System.out::println)
-                    .flatMap(domsId -> findAllChildrenFor(domsId).stream())
+                    .flatMap(domsId -> findAllChildrenFor(domsId).stream());
+
+            Object result = childrenStream
                     .peek(System.out::println)
-                    .map(domsId -> getObjectProfileFor(domsId, efedora))
-                    // Does object profile have a PDF typed stream?
-                    .filter(op -> op.getDatastreams().stream().filter(ds -> ds.getMimeType().equals("application/pdf")).count() > 0)
-                    // We now have the ObjectProfiles for which there is an PDF datastream.
-                    .map(x -> {
-                        for (DatastreamProfile ds : x.getDatastreams()) {
-                            if (ds.getMimeType().equals("application/pdf")) {
-                                return Arrays.asList(x, ds.getLabel());
-                            }
-                        }
-                        throw new RuntimeException("hey");
-                    })
+                    .flatMap(domsId -> analyzePDF(domsId, efedora))
                     .collect(Collectors.toList());
+            // FIXME:  Aggregate results and store in event on batch(?)/newspaper(?) DOMS node?
             return () -> log.info("Result: {}", result);
         }
 
-        private Set<DomsId> findAllChildrenFor(DomsId rootDomsId) {
-            Set<DomsId> found = new HashSet<>();
-            List<DomsId> unprocessed = new ArrayList<>(); // Does DOMS prefer a given order?
+        private Stream<TaskResult> analyzePDF(DomsId domsId, EnhancedFedora efedora) {
+
+            ObjectProfile op = getObjectProfileFor(domsId, efedora);
+
+            Optional<DatastreamProfile> profileOptional = op.getDatastreams().stream()
+                    .filter(ds -> ds.getMimeType().equals("application/pdf"))
+                    .findAny();
+
+            if (profileOptional.isPresent() == false) {
+                return Stream.of();
+            }
+
+            DatastreamProfile ds = profileOptional.get();
+            // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste prefix: http://bitfinder.statsbiblioteket.dk/<collection>/
+            String prefix = "http://localhost:58709/";
+            final String url = ds.getUrl();
+            if (url.startsWith(prefix) == false) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " url '" + url + " does not start with '" + prefix + "'"));
+            }
+            String filename = url.substring(prefix.length());  // FIXME:  Sanity check input
+
+            Path path = Paths.get("/home/tra/git/digital-pligtaflevering-aviser-tools/bitrepositorystub-storage", filename);
+            File file = path.toFile();
+            log.trace("validating pdf:  {}", file.getAbsolutePath());
+
+            String veraPDF_output;
+            VeraPDFValidator validator = new VeraPDFValidator("1a", true);
+            try {
+                veraPDF_output = validator.apply(new FileInputStream(file));
+
+            } catch (FileNotFoundException e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
+            } catch (Exception e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
+            }
+            // We have now run VeraPDF on the PDF file and has the output in hand.
+            // Store it in the "VERAPDF" datastream for the object.
+            // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
+
+            String comment = file.getAbsolutePath() + " at " + new java.util.Date();
+            try {
+                efedora.modifyDatastreamByValue(domsId.id(),
+                        "VERAPDF",
+                        null, // no checksum
+                        null, // no checksum
+                        veraPDF_output.getBytes(StandardCharsets.UTF_8),  // FIXME:  ENSURE CHARACTER ENCODING IS CORRECT!
+                        null,
+                        "text/xml",
+                        comment,
+                        null);
+            } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
+            }
+
+            // FIXME:  Set event on this DOMS node (for the individual page) saying VERAPDF datastream is available.
+
+            return Stream.of(new TaskResult(true, "id: " + domsId + " " + comment));
+        }
+
+        protected List<DomsId> findAllChildrenFor(DomsId rootDomsId) {
+            List<DomsId> found = new ArrayList<>();  // maintain the order found in
+            List<DomsId> unprocessed = new ArrayList<>();
             unprocessed.add(rootDomsId);
             while (unprocessed.isEmpty() == false) {
                 DomsId currentId = unprocessed.remove(0);
                 found.add(currentId);
-                log.trace("Processing {}", currentId);
+                log.debug("Finding children for {}", currentId);
                 //
                 String restUrl = "http://localhost:7880/fedora/objects";
 
                 Client client = Client.create();
                 client.addFilter(new HTTPBasicAuthFilter("fedoraAdmin", "fedoraAdminPass"));
 
-                // https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
+                // Logic lifted from https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
                 final WebResource webResource = client.resource(restUrl).path(currentId.id()).path("relationships").queryParam("format", "ntriples");
 
                 log.trace("WebResource: {}", webResource.getURI());
@@ -116,13 +172,14 @@ public class InvokeVeraPdfMain {
                     //<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/relations-external#hasPart> <info:fedora/uuid:5cfa5459-c553-4894-980e-b2b7b37b37d3> .
                     String[] tuple = s.split(" ");
                     if (tuple.length >= 3 && tuple[2].startsWith("<info:fedora/")) {
+                        // To be compatible with existing configuration files
                         String predicate = tuple[1].substring(1, tuple[1].length() - ">".length());
                         String child = tuple[2].substring("<info:fedora/".length(), tuple[2].length() - ">".length());
                         // ConfigConstants.ITERATOR_DOMS_PREDICATENAMES
                         if (predicate.equals("info:fedora/fedora-system:def/relations-external#hasPart")) {
                             final DomsId childDomsId = new DomsId(child);
                             if (found.contains(childDomsId)) {
-                                // seen before - should not happen in a tree, but just to be certain
+                                // seen before - should not happen in a tree, but ignore it just to be certain
                             } else {
                                 unprocessed.add(childDomsId);
                             }
@@ -135,12 +192,11 @@ public class InvokeVeraPdfMain {
 
         protected ObjectProfile getObjectProfileFor(DomsId domsId, EnhancedFedora efedora) {
             try {
-                ObjectProfile xxx = efedora.getObjectProfile(domsId.id(), null);
-                return xxx;
+                ObjectProfile objectProfile = efedora.getObjectProfile(domsId.id(), null);
+                return objectProfile;
             } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
-                e.printStackTrace();
+                throw new RuntimeException("could not getObjectProfile() for domsId " + domsId, e);
             }
-            return null;
         }
 
         @Provides
@@ -178,25 +234,6 @@ public class InvokeVeraPdfMain {
         }
 
         @Provides
-//        Task getTask(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
-        Function<String, DomsItem> getDomsItemMapper(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
-//            return item -> new DomsItem(item, domsEventStorage);
-//            final Task<DomsItem, ObjectProfile> domsItemObjectProfileTask = item -> {
-//                try {
-//                    final String domsId = "uuid:a58ed278-e20f-4505-84a2-59ae8d8a8777";
-//                    final Item itemFromDomsID = domsEventStorage.getItemFromDomsID(domsId);
-//                    final ObjectProfile objectProfile = efedora.getObjectProfile(domsId, null);
-//                    return objectProfile;
-//                } catch (CommunicationException | NotFoundException | BackendInvalidCredsException
-//                        | BackendMethodFailedException | BackendInvalidResourceException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            };
-//            return domsItemObjectProfileTask;
-            throw new RuntimeException("commented out");
-        }
-
-        @Provides
         Stream<EventTrigger.Query<Item>> provideQueryStream() {
             //System.out.println("In provideQueryStream()");
 
@@ -225,13 +262,15 @@ public class InvokeVeraPdfMain {
         }
     }
 
-//    private static Date appendEventToItem(DomsEventStorage<Item> domsEventStorage, Item item) {
-//        try {
-//            return domsEventStorage.appendEventToItem(item, "agent", new Date(), "details", "T" + item.getEventList().size(), false);
-//        } catch (RuntimeException e) {
-//            throw e;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    private static Date appendTaskResultToItem(DomsEventStorage<Item> domsEventStorage, DomsId domsID, TaskResult taskResult, String eventType) {
+        try {
+            final Item item = new Item(domsID.id());
+            item.setEventList(new ArrayList<>());
+            return domsEventStorage.appendEventToItem(item, "agent", new Date(), taskResult.getResult(), eventType, taskResult.isSuccess());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
