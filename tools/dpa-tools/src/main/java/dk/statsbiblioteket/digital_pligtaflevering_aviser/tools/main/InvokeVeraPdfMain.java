@@ -34,7 +34,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -108,7 +107,7 @@ public class InvokeVeraPdfMain {
             File file = path.toFile();
             log.trace("validating pdf:  {}", file.getAbsolutePath());
 
-            String veraPDF_output;
+            byte[] veraPDF_output;
             VeraPDFValidator validator = new VeraPDFValidator("1a", true);
             try {
                 veraPDF_output = validator.apply(new FileInputStream(file));
@@ -128,7 +127,7 @@ public class InvokeVeraPdfMain {
                         "VERAPDF",
                         null, // no checksum
                         null, // no checksum
-                        veraPDF_output.getBytes(StandardCharsets.UTF_8),  // FIXME:  ENSURE CHARACTER ENCODING IS CORRECT!
+                        veraPDF_output,
                         null,
                         "text/xml",
                         comment,
