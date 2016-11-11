@@ -70,7 +70,7 @@ public class BatchMD5SUMSValidation {
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
             String fileName=filePath.getFileName().toString();
-            String relativePath=Paths.get(batchFolder, batchName).toFile().toURI().relativize(filePath.toFile().toURI()).getPath();
+            String relativePath=Paths.get(batchFolder, batchName).relativize(filePath).toString();
 
             if (ignoredFiles.contains(fileName)) {
                 //This file is one of the ignored files, just contionue without doing anything
