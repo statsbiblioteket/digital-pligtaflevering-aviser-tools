@@ -52,7 +52,10 @@ public class CreateBatchMain {
                          @Named(DOMS_PASSWORD) String domsPass,
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen) {
             // FIXME:  Rewrite to watch folder.
-            return () -> CreateBatch.main(new String[]{batchId, roundTrip, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen});
+            return () -> {
+                CreateBatch.main(new String[]{batchId, roundTrip, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen});
+                return "created batch for " + batchId;
+            };
         }
 
         @Provides

@@ -82,7 +82,8 @@ public class AutonomousPreservationToolHelper {
                 () -> log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime()
                 )));
         try {
-            function.apply(map).run();
+            String result = function.apply(map).call();
+            log.trace("Result: {}", result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);
         }

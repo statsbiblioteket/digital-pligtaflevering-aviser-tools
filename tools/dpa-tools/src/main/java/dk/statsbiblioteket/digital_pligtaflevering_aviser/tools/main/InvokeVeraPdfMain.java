@@ -26,6 +26,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.NotFoundException;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -68,18 +70,51 @@ public class InvokeVeraPdfMain {
 
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora) { //}, Task<DomsItem, ObjectProfile> task) {
+        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage) { //}, Task<DomsItem, ObjectProfile> task) {
 
-            Stream<DomsId> childrenStream = domsIdStream
+            Tool f = () -> domsIdStream
                     .peek(System.out::println)
-                    .flatMap(domsId -> findAllChildrenFor(domsId).stream());
+                    .map(domsId -> {
+                        // Single doms item
+                        List<TaskResult> taskResults = findAllChildrenFor(domsId).stream()
+                                .peek(System.out::println)
+                                .flatMap(childDomsId -> analyzePDF(childDomsId, efedora))
+                                .collect(Collectors.toList());
 
-            Object result = childrenStream
+                        List<String> failedTaskResults = taskResults.stream()
+                                .filter(t -> t.isSuccess() == false)
+                                .map(t -> t.getResult())
+                                .collect(Collectors.toList());
+
+                        final boolean success = failedTaskResults.size() == 0;
+                        String eventDetails;
+                        String eventFullDetails;
+                        if (success) {
+                            eventDetails = "All " + taskResults.size() + " successful.";
+                            eventFullDetails = eventDetails;
+                        } else {
+                            eventDetails = failedTaskResults.size() + " failed out of " + taskResults.size();
+                            eventFullDetails = eventDetails + "\n\n" + String.join("\n", failedTaskResults);
+                        }
+
+                        log.info("DomsID {}: {}", domsId, eventDetails);
+
+                        final Item fakeItemToGetAroundAPI = new Item(domsId.id());
+                        fakeItemToGetAroundAPI.setEventList(Collections.emptyList());
+                        final Date timestamp = new Date();
+                        String eventType = "EVENTTYPE";
+                        try {
+                            domsEventStorage.appendEventToItem(fakeItemToGetAroundAPI, "agent", timestamp, eventFullDetails, eventType, success);
+                        } catch (CommunicationException | NotFoundException e) {
+                            throw new RuntimeException("Could not store event for domsId " + domsId, e);
+                        }
+                        return domsId + " " + eventDetails;
+                    })
+                    // Collect results for each domsId
                     .peek(System.out::println)
-                    .flatMap(domsId -> analyzePDF(domsId, efedora))
-                    .collect(Collectors.toList());
-            // FIXME:  Aggregate results and store in event on batch(?)/newspaper(?) DOMS node?
-            return () -> log.info("Result: {}", result);
+                    .collect(Collectors.toList())
+                    .toString();
+            return f;
         }
 
         private Stream<TaskResult> analyzePDF(DomsId domsId, EnhancedFedora efedora) {
@@ -135,8 +170,6 @@ public class InvokeVeraPdfMain {
             } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
                 return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
             }
-
-            // FIXME:  Set event on this DOMS node (for the individual page) saying VERAPDF datastream is available.
 
             return Stream.of(new TaskResult(true, "id: " + domsId + " " + comment));
         }
