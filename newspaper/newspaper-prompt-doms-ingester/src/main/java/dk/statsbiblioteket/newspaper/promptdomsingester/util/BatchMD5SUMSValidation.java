@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +14,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Validator for md5 validation of digital newspaper batches
@@ -39,13 +39,11 @@ public class BatchMD5SUMSValidation {
      * @throws NoSuchAlgorithmException
      */
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
-        boolean validationResponse = true;
         //Read the checksums from the file "MD5SUMS.txt" and insert it into a hashmap with filenames as keys and checksums as values
         File checksumFile = Paths.get(batchFolder, batchName, "MD5SUMS.txt").toFile();
         if(!checksumFile.exists()) {
-            validationResponse = false;
-            validationResult.add("The checksumfile \"MD5SUMS.txt\" is missing");
-            return validationResponse;
+            validationResult.add("The checksumfile " + checksumFile.getAbsolutePath() + " is missing");
+            return false;
         }
 
         //Start reading the checksum-file, and store all checksums in a hashmap
@@ -64,20 +62,22 @@ public class BatchMD5SUMSValidation {
                 line = br.readLine();
             }
         }
+        String test;
 
-        //Validate that all files in the folder does exist in "MD5SUMS.txt" except the ignored files
-        Set<String> files = new HashSet<String>();
-        listFiles(Paths.get(batchFolder, batchName).toFile().getAbsolutePath(), files);
-        for(String ignoredFile : ignoredFiles) {
-            files.remove(Paths.get(batchFolder, batchName).toFile().getAbsolutePath() + File.separator + ignoredFile);
-        }
-        for(String fileInBatchFolder : files) {
-            //It is only a fail if
-            if(!md5Map.containsKey(fileInBatchFolder.replaceFirst(Paths.get(batchFolder, batchName).toFile().getAbsolutePath() + File.separator, ""))) {
-                validationResult.add("There is missing a file reference in \"MD5SUMS.txt\" : " + fileInBatchFolder);
-                validationResponse = false;
+        //Walk through the filesystem in tha batch and confirm that all files inside the batch is also mentioned in the checksum-file
+        //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
+        Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
+                .filter(Files::isRegularFile)
+                .forEach(filePath -> {
+            String fileName=filePath.getFileName().toString();
+            String relativePath=Paths.get(batchFolder, batchName).toFile().toURI().relativize(filePath.toFile().toURI()).getPath();
+
+            if (ignoredFiles.contains(fileName)) {
+                //This file is one of the ignored files, just contionue without doing anything
+            } else if(!md5Map.containsKey(relativePath)) {
+                validationResult.add("There is missing a file reference in \"MD5SUMS.txt\" : " + filePath.toFile().getAbsolutePath());
             }
-        }
+        });
 
         //Make sure that all files listed in "MD5SUMS.txt" exists and has the correct checksum
         for(String fileName: md5Map.keySet()) {
@@ -88,36 +88,13 @@ public class BatchMD5SUMSValidation {
                 if(!expectedMd5.equals(actualMd5)) {
                     //If the checksum of the delivered file and the checksum of the file in "MD5SUMS.txt" does not match, raise an error
                     validationResult.add(file.getAbsolutePath() + " expectedMd5: " + expectedMd5 + " actualMd5:" + actualMd5);
-                    validationResponse = false;
                 }
             } else {
                 //If the file that is claimed to exist in the "MD5SUMS.txt" can not be found, raise an error
-                validationResult.add("There is missing a file \"MD5SUMS.txt\" claims is existing  : " + file);
-                validationResponse = false;
+                validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() +" claims is existing  : " + file);
             }
         }
-        return validationResponse;
-    }
-
-    /**
-     * Get a list of files inside a directory, the function is implemented as a recursive function.
-     * The result is written into the parameter delivered to the function, like the way it is normally done in functional programming languages
-     * The reason for usingf the functional programming way is that the function is recursively calling itselve.
-     * @param directoryName The directory from where the files should be listed
-     * @param files The list of files to get appended
-     */
-    public void listFiles(String directoryName, Set<String> files) {
-        File directory = new File(directoryName);
-
-        // get all the files from a directory
-        File[] fList = directory.listFiles();
-        for (File file : fList) {
-            if (file.isFile()) {
-                files.add(file.getAbsolutePath());
-            } else if (file.isDirectory()) {
-                listFiles(file.getAbsolutePath(), files);
-            }
-        }
+        return validationResult.size()==0;
     }
 
     /**
