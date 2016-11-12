@@ -10,11 +10,11 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
-        <bean id="org.fcrepo.server.security.ContextRegistry"
+        <bean domsId="org.fcrepo.server.security.ContextRegistry"
               class="org.fcrepo.server.security.impl.HashtableContextRegistry" />
 
-  <util:set id="policyFinderModules">
-    <bean id="LegacyPolicyFinderModule"
+  <util:set domsId="policyFinderModules">
+    <bean domsId="LegacyPolicyFinderModule"
           class="org.fcrepo.server.security.PolicyFinderModule">
       <constructor-arg><ref bean="org.fcrepo.server.Server" /></constructor-arg>
       <constructor-arg>
@@ -27,12 +27,12 @@
     </bean>
   </util:set>
 
-  <bean id="org.fcrepo.server.security.ContextAttributeFinderModule"
+  <bean domsId="org.fcrepo.server.security.ContextAttributeFinderModule"
         class="org.fcrepo.server.security.ContextAttributeFinderModule"
         autowire-candidate="true">
     <constructor-arg><ref bean="org.fcrepo.server.security.ContextRegistry" /></constructor-arg>
   </bean>
-  <bean id="org.fcrepo.server.security.ResourceAttributeFinderModule"
+  <bean domsId="org.fcrepo.server.security.ResourceAttributeFinderModule"
         class="org.fcrepo.server.security.ResourceAttributeFinderModule"
         factory-method="getInstance" autowire-candidate="true">
         <property name="ownerIdSeparator" value="," />
@@ -44,13 +44,13 @@
         </property>
   </bean>
         <!-- TESTONLY
-  <bean id="org.fcrepo.server.security.TestAttributeFinderModule"
+  <bean domsId="org.fcrepo.server.security.TestAttributeFinderModule"
       class="org.fcrepo.server.security.TestAttributeFinderModule"
       factory-method="getInstance" autowire-candidate="true">
   </bean>
         /TESTONLY -->
 
-  <util:list id="attributeFinderModules">
+  <util:list domsId="attributeFinderModules">
     <ref bean="org.fcrepo.server.security.ContextAttributeFinderModule" />
     <ref bean="org.fcrepo.server.security.ResourceAttributeFinderModule" />
         <!-- Uncomment the bean below to enable the use of relationship index triples in XACML policies -->
@@ -62,12 +62,12 @@
         /TESTONLY -->
   </util:list>
 
-  <util:list id="resourceFinderModules">
+  <util:list domsId="resourceFinderModules">
   </util:list>
 
-  <bean id="PDPConfigurationFactory" class="org.fcrepo.server.security.PDPConfigurationFactory" />
+  <bean domsId="PDPConfigurationFactory" class="org.fcrepo.server.security.PDPConfigurationFactory" />
 
-  <bean id="LegacyPDPConfig" factory-bean="PDPConfigurationFactory" factory-method="getPDPConfig">
+  <bean domsId="LegacyPDPConfig" factory-bean="PDPConfigurationFactory" factory-method="getPDPConfig">
     <constructor-arg ref="attributeFinderModules" />
     <constructor-arg ref="policyFinderModules" />
     <constructor-arg ref="resourceFinderModules" />
@@ -75,7 +75,7 @@
 
           <!-- Uncomment the bean below to enable the use of relationship index triples in XACML policies -->
         <!--
-        <bean id="org.fcrepo.server.security.xacml.pdp.finder.attribute.RITriplesAttributeFinder"
+        <bean domsId="org.fcrepo.server.security.xacml.pdp.finder.attribute.RITriplesAttributeFinder"
               class="org.fcrepo.server.security.xacml.pdp.finder.attribute.RITriplesAttributeFinder"
               init-method="init">
               <constructor-arg>
@@ -94,7 +94,7 @@
               </property>
         </bean>
          -->
-        <bean id="org.fcrepo.server.security.PolicyEnforcementPoint"
+        <bean domsId="org.fcrepo.server.security.PolicyEnforcementPoint"
               class="org.fcrepo.server.security.impl.DefaultPolicyEnforcementPoint"
               init-method="init"
               autowire-candidate="true">

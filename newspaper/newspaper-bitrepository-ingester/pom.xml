@@ -21,7 +21,7 @@
 
   <repositories>
     <repository>
-      <id>sbforge-nexus</id>
+      <domsId>sbforge-nexus</domsId>
       <url>https://sbforge.org/nexus/content/groups/public</url>
       <releases>
         <enabled>true</enabled>

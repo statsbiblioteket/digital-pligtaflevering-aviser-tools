@@ -14,7 +14,7 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-            <id>vera-dev</id>
+            <domsId>vera-dev</domsId>
             <name>Vera development</name>
             <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
         </repository>

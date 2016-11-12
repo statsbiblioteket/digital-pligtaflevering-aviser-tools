@@ -51,10 +51,10 @@
             have it provided when download=true is specified, in which case the content disposition
             of &quot;attachment&quot; will be used; which is generally supported.</comment>
     </param>
-    <param name="datastreamFilenameSource" value="rels label id">
+    <param name="datastreamFilenameSource" value="rels label domsId">
         <comment>determines the source of the filename generated when download=true
             on a datastream dissemination.  Value is space separated list of label: use the datastream label;
-            id: use the datastream ID; rels: use the value defined in RELS-INT.  Each
+            domsId: use the datastream ID; rels: use the value defined in RELS-INT.  Each
             source is checked in order, and the first containing a value is used.  Omit
             any of the sources if that source is never to be used.  If no sources are to be used,
             and just the default filename and extension below are to be used, specify &quot; &quot;.</comment>
@@ -157,7 +157,7 @@
             writing to the objects stored in the repository. It also provides
             methods for reflecting on the contents of the repository as a whole..</comment>
         <param name="pidNamespace" value="doms">
-            <comment>This is the namespace id for pids of newly-created objects.
+            <comment>This is the namespace domsId for pids of newly-created objects.
                 This should be unique for a repository. It can be from 1 to 17
                 characters, and may only contain A-Z, a-z, 0-9, &apos;.&apos;, or &apos;-&apos; (dash).</comment>
         </param>
@@ -482,7 +482,7 @@
     <module role="org.fcrepo.server.storage.ExternalContentManager" class="org.fcrepo.server.storage.DefaultExternalContentManager">
         <comment>This module facilitates obtaining external content via HTTP</comment>
     </module>
-    <datastore id="localDerbyPool">
+    <datastore domsId="localDerbyPool">
         <comment>Derby database on localhost running on port 1527 Each
             connection pool instance has several configuration parameter that
             can be used to tune the options for the connection pool. It is
@@ -555,7 +555,7 @@
                 2 (grow i.e., increase the size of the pool).</comment>
         </param>
     </datastore>
-    <datastore id="localPostgreSQLPool">
+    <datastore domsId="localPostgreSQLPool">
         <comment>PostgreSQL database on localhost with db name of fedora3. Each
             connection pool instance has several configuration parameter that
             can be used to tune the options for the connection pool. It is
@@ -636,7 +636,7 @@
                 2 (grow i.e., increase the size of the pool).</comment>
         </param>
     </datastore>
-    <datastore id="localMulgaraTriplestore">
+    <datastore domsId="localMulgaraTriplestore">
         <comment>local Mulgara Triplestore used by the Resource Index</comment>
         <param name="connectorClassName" value="org.trippi.impl.mulgara.MulgaraConnector">
             <comment>The name of the Trippi Connector class used to communicate
@@ -709,7 +709,7 @@
                 finished. This should be larger than autoFlushBufferSize.</comment>
         </param>
     </datastore>
-    <datastore id="localPostgresMPTTriplestore">
+    <datastore domsId="localPostgresMPTTriplestore">
         <comment>
             Example local MPTStore backed by Postgres.
             To use this triplestore for the Resource Index:
@@ -744,7 +744,7 @@
         <param name="bufferFlushBatchSize" value="1000"/>
         <param name="bufferSafeCapacity" value="2000"/>
     </datastore>
-    <datastore id="apimUpdateMessages">
+    <datastore domsId="apimUpdateMessages">
         <comment>Messaging Destination for API-M events which update the repository</comment>
         <param name="messageTypes" value="apimUpdate">
             <comment>A space-separated list of message types that will be
@@ -756,7 +756,7 @@
             <comment>Optional, defaults to topic.</comment>
         </param>
     </datastore>
-    <datastore id="apimAccessMessages">
+    <datastore domsId="apimAccessMessages">
         <comment>Messaging Destination for API-M events which did not make changes to the repository</comment>
         <param name="messageTypes" value="apimAccess">
             <comment>A space-separated list of message types that will be

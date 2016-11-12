@@ -18,7 +18,7 @@
         <!-- Name to register the storage service under -->
         <entry>
             <key>summa.storage.rmi.service.name</key>
-            <value class="string">${site.id}-storage-proxy</value>
+            <value class="string">${site.domsId}-storage-proxy</value>
         </entry>
 
         <!-- Port of the RMI registry used by the storage service -->
@@ -71,7 +71,7 @@
         -->
         <entry>
             <key>summa.storage.database.location</key>
-            <value class="string">storage/${site.id}</value>
+            <value class="string">storage/${site.domsId}</value>
         </entry>
 
 

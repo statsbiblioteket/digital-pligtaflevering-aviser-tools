@@ -45,7 +45,7 @@
                 <artifactId>depends-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>generate-depends-file</id>
+                        <domsId>generate-depends-file</domsId>
                         <goals>
                             <goal>generate-depends-file</goal>
                         </goals>
@@ -61,7 +61,7 @@
                 <version>2.10</version>
                 <executions>
                     <execution>
-                        <id>dependency-tree</id>
+                        <domsId>dependency-tree</domsId>
                         <phase>package</phase>
                         <goals>
                             <goal>tree</goal>
@@ -122,7 +122,7 @@
 
                 <executions>
                     <execution>
-                        <id>assemble</id>
+                        <domsId>assemble</domsId>
                         <phase>package</phase>
                         <goals>
                             <goal>assemble</goal>
@@ -134,18 +134,18 @@
                                     <mainClass>
                                         dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CreateBatchMain
                                     </mainClass>
-                                    <id>dpa-create-batch</id>
+                                    <domsId>dpa-create-batch</domsId>
                                 </program>
                                 <program>
                                     <mainClass>
                                         dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain
                                     </mainClass>
-                                    <id>dpa-doms-ingester</id>
+                                    <domsId>dpa-doms-ingester</domsId>
                                 </program>
                                 <program>
                                     <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain
                                     </mainClass>
-                                    <id>dpa-tool-verapdf</id>
+                                    <domsId>dpa-tool-verapdf</domsId>
                                 </program>
                             </programs>
                         </configuration>

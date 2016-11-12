@@ -35,7 +35,7 @@
 
     <profiles>
         <profile>
-            <id>sshkey</id>
+            <domsId>sshkey</domsId>
             <activation>
                 <property>
                     <name>!env.SSH_KEY</name>
@@ -220,7 +220,7 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <id>sboi summa</id>
+                        <domsId>sboi summa</domsId>
                         <goals>
                             <goal>run</goal>
                         </goals>
@@ -242,7 +242,7 @@
                     </execution>
                     <execution>
                         <phase>package</phase>
-                        <id>domswui summa</id>
+                        <domsId>domswui summa</domsId>
                         <goals>
                             <goal>run</goal>
                         </goals>
@@ -275,7 +275,7 @@
                 <version>2.2-beta-4</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
+                        <domsId>make-assembly</domsId>
                         <configuration>
                             <descriptors>
                                 <descriptor>src/main/assembly/assembly.xml</descriptor>
@@ -303,7 +303,7 @@
                             <ignoreMissingDescriptor>true</ignoreMissingDescriptor>
                         </configuration>
 
-                        <id>make-assembly-testbed</id>
+                        <domsId>make-assembly-testbed</domsId>
                         <!-- this is used for inheritance merges -->
                         <phase>package</phase>
                         <!-- append to the packaging phase. -->
@@ -323,7 +323,7 @@
                 <version>1.4.1</version>
                 <executions>
                     <execution>
-                        <id>enforce-files-exist</id>
+                        <domsId>enforce-files-exist</domsId>
                         <goals>
                             <goal>enforce</goal>
                         </goals>

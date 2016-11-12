@@ -20,7 +20,7 @@
 
     <repositories>
         <repository>
-            <id>sbforge-nexus</id>
+            <domsId>sbforge-nexus</domsId>
             <url>https://sbforge.org/nexus/content/groups/public</url>
             <releases>
                 <enabled>true</enabled>
@@ -166,7 +166,7 @@
 
     <profiles>
         <profile>
-            <id>standAloneTestDoms</id>
+            <domsId>standAloneTestDoms</domsId>
             <build>
                 <plugins>
                     <plugin>
@@ -175,7 +175,7 @@
                         <version>2.8</version>
                         <executions>
                             <execution>
-                                <id>unpack</id>
+                                <domsId>unpack</domsId>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>unpack</goal>
@@ -220,7 +220,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <id>stop Tomcat</id>
+                                <domsId>stop Tomcat</domsId>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
@@ -240,7 +240,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <id>stop redis</id>
+                                <domsId>stop redis</domsId>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
@@ -258,7 +258,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <id>delete doms</id>
+                                <domsId>delete doms</domsId>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>

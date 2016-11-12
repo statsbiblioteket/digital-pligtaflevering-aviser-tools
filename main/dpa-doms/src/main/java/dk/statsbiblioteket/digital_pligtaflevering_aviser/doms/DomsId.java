@@ -2,15 +2,17 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 
+import java.util.Objects;
+
 /**
- *
+ * A DomsId is a typed string uniquely identifying an object in DOMS.  It does not know of anything else.
  */
 public class DomsId implements Id {
 
     private String id;
 
     public DomsId(String id) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id, "id");
     }
 
     @Override
@@ -32,12 +34,12 @@ public class DomsId implements Id {
 
         DomsId domsId = (DomsId) o;
 
-        return id.equals(domsId.id);
+        return id != null ? id.equals(domsId.id) : domsId.id == null;
 
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id != null ? id.hashCode() : 0;
     }
 }

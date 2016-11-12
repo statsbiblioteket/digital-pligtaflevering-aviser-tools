@@ -14,9 +14,9 @@
     <Actions>
       <Action>
         <ActionMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:id-reloadPolicies</AttributeValue>
+          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:domsId-reloadPolicies</AttributeValue>
           <ActionAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string"
-            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
+            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
         </ActionMatch>
       </Action>
     </Actions>
