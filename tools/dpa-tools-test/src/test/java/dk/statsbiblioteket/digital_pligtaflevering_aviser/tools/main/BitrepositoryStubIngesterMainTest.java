@@ -8,6 +8,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
+
 /**
  *
  */
@@ -15,6 +19,7 @@ public class BitrepositoryStubIngesterMainTest {
     @Test
     public void bitrepositoryIngestB20160811_RT1() throws URISyntaxException {
         String batchDirPathInWorkspace = "delivery-samples";
+        String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
 
         // http://stackoverflow.com/a/320595/53897
         URI l = BitrepositoryStubIngesterMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
@@ -25,10 +30,14 @@ public class BitrepositoryStubIngesterMainTest {
 
         Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
 
+        Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, bitrepoDirPathInWorkspace);
+
         BitRepositoryIngesterMain.main(new String[]{
                 "bitrepository-stub-ingester.properties",
-                "iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath(),
-                "bitrepository.ingester.urltobatchdir=" + batchPath.toAbsolutePath()
+                ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + batchPath.toAbsolutePath(),
+                URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath(),
+                "dpa.putfile.destinationpath=" + bitrepoPath.toAbsolutePath(),
+                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/"
         });
     }
 }

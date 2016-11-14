@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -30,5 +30,14 @@ public class InfomediaBatch extends DomsItem {
 
     public Stream<InfomediaSingleDayNewspaper> getSingleDayNewspaperStream() {
         return Stream.of(new InfomediaSingleDayNewspaper("1"), new InfomediaSingleDayNewspaper("2"));
+    }
+
+    @Override
+    public String toString() {
+        return "InfomediaBatch{" +
+                "objectProfile=" + objectProfile +
+                ", domsId=" + domsId +
+                ", efedora=" + efedora +
+                '}';
     }
 }
