@@ -6,8 +6,8 @@ import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,7 @@ public class CreateBatchMain {
                          @Named(DOMS_USERNAME) String domsUser,
                          @Named(DOMS_PASSWORD) String domsPass,
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen) {
+            // FIXME:  Rewrite to watch folder.
             return () -> CreateBatch.main(new String[]{batchId, roundTrip, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen});
         }
 

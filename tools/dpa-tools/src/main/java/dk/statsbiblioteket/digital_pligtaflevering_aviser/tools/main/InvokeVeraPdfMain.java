@@ -9,9 +9,9 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecificatio
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.CommonModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.InfomediaBatch;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.InfomediaBatch;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
@@ -61,6 +61,7 @@ public class InvokeVeraPdfMain {
             Object result = domsIdStream
                     .peek(System.out::println)
                     .map(domsId -> new InfomediaBatch(domsId, efedora))
+                    .peek(System.out::println)
                     .flatMap(batch -> batch.getSingleDayNewspaperStream()
                         .map(singleDay -> singleDay.getInfomediaSinglePagePDFStream().collect(Collectors.toList())
                         ))
