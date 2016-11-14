@@ -33,7 +33,7 @@ Start vagrant (using virtualbox provider):
 
 (may take 5-10 minutes and download quite a bit the first time).
 
-    vagrant ssh -c "nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh"
+    vagrant ssh -c "nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
 
 SBOI and DOMS Wui Solr will take a while to initialize.  Check
 the URLs below to see when they are ready and responsive.
@@ -129,10 +129,8 @@ If for some reason Solr or Fedora is not running or responding, restart it insid
     ~/7880-doms/bin/doms.sh restart
 
 
-Manually running the "restore vagrant box to snapshot" looks similar to: (please improve)
+Manually running the "restore the only currently running vagrant box to snapshot" looks similar to: (please improve)
 
-    VBoxManage controlvm  vagrant_default_1476814652886_57099 poweroff
-    sleep 4
-    VBoxManage snapshot vagrant_default_1476814652886_57099 restore "doms ingested"
-    VBoxManage startvm vagrant_default_1476814652886_57099 --type headless
+    export V=$(VBoxManage list runningvms | cut -d\" -f2 | grep vagrant); VBoxManage controlvm $V poweroff ; sleep 4 ; VBoxManage snapshot $V restore "doms ingested"; VBoxManage startvm $V --type headless
+
 
