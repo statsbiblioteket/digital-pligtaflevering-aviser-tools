@@ -5,13 +5,12 @@
         <filename>20160913_testavis_e5591250.xml</filename>
     </administrativeData>
     <metadata>
-        <source>TestAvis</source>
+        <source>testavis</source>
         <publishDate>20160913</publishDate>
         <sectionName>kultur</sectionName>
         <sectionNumber>2</sectionNumber>
         <pageName>kultur</pageName>
         <pageNumber>2</pageNumber>
-        <type></type>
         <links>
             <link>http://www.example.com/test3</link>
         </links>

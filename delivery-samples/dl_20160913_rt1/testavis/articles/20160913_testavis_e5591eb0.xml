@@ -5,39 +5,106 @@
         <filename>20160913_testavis_e5591eb0.xml</filename>
     </administrativeData>
     <metadata>
-        <source>TestAvis</source>
-        <publishDate>20160913</publishDate>
-        <sectionName>kultur</sectionName>
-        <sectionNumber>2</sectionNumber>
-        <pageName>kultur</pageName>
+        <source>testavis</source>
+        <publishDate>20160908</publishDate>
+        <sectionName>NYHEDER</sectionName>
+        <sectionNumber>1</sectionNumber>
+        <pageName>NYHEDER</pageName>
         <pageNumber>2</pageNumber>
-        <type></type>
         <links>
-            <link>http://www.example.com/test1</link>
+            <link>http://www.example.com/test5</link>
         </links>
         <classification>
-            <term>
-                <subject>Emner</subject>
-                <value>kultur</value>
-            </term>
-            <term>
-                <subject>Emner</subject>
-                <value>Litteratur</value>
-            </term>
-        </classification>
-        <journalists>
-            <journalist>Foo Bar Petersen</journalist>
-        </journalists>
+            <subject>Organisationer</subject>
+            <value>Aarhus Kommune</value>
+            <subject>Organisationer</subject>
+            <value>Facebook</value>
+            <subject>Organisationer</subject>
+            <value>Foo Bar</value>
+            <subject>Organisationer</subject>
+            <value>TV 2 (tv-kanal)</value>
+            <subject>Organisationer</subject>
+            <value>Venstre</value>
+            <subject>Personer</subject>
+            <value>Foo Bar (politiker)</value>
+            <subject>Personer</subject>
+            <value>Foo Bar (politiker)</value>
+            <subject>Personer</subject>
+            <value>Foo Bar (politiker)</value>
+            <subject>Emner</subject>
+            <value>Befolkning</value>
+            <subject>Emner</subject>
+            <value>Etik</value>
+            <subject>Emner</subject>
+            <value>Gymnasiale uddannelser</value>
+            <subject>Emner</subject>
+            <value>Kultur</value>
+            <subject>Emner</subject>
+            <value>Ligebehandling</value>
+            <subject>Emner</subject>
+            <value>Politik</value>
+            <subject>Emner</subject>
+            <value>Sprog</value>
+            <subject>Emner</subject>
+            <value>Tro, etik og filosofi</value>
+            <subject>Emner</subject>
+            <value>Uddannelse</value>
+            <subject>Emner</subject>
+            <value>Ungdomsuddannelser</value>
+            <subject>Steder</subject>
+            <value>Aarhus</value>
+            <subject>Steder</subject>
+            <value>Danmark</value>
+            <subject>Steder</subject>
+            <value>Jylland</value>
+            <subject>Steder</subject>
+            <value>Sydafrika</value>
+            <subject>Steder</subject>
+            <value>Udland</value>
+    </classification>
+    <journalists>
+        <journalist>Foo Bar</journalist>
+    </journalists>
     </metadata>
     <content>
-        <headline>This is the headline</headline>
-        <byline>This is the byline</byline>
-        <bodytext>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Curabitur tincidunt viverra mi vitae scelerisque. Donec congue, ligula eget
-            maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam id
-            mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
-            Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
-            condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
-            in auctor ipsum.</bodytext>
+        <headline>ØKONOMIEN: LANGE SKYGGER OVER SK VEN</headline>
+        <byline>ØKONOMIEN: LANGE SKYGGER OVER SK VEN</byline>
+        <bodytext>
+            <body.head>
+                <hedline>
+                    <hl1 />
+                    <hl2>HALTER: Bendtner kommer til en klub, hvor problemerne uden for kridtstregerne i årevis ofte har oversteget det kritisable spil indenfor</hl2>
+                </hedline>
+                <abstract />
+            </body.head>
+            <body.content>
+                <block style="" id="block1">
+                    <p id="p1">Foo Bar Da skotske Foo Bar efter et fremragende ryk bankede bolden ind bag Rudolf Kargus i Hamburgermålet og sikrede Nottingham Forest sejren i mesterholdenes Europa Cup-finale i 1980, sikrede angriberen den engelske klub en helt speciel plads i fodbold-historien.</p><p id="p2">Forest, der var med i turneringen som forsvarende mester, blev den første - og hidtil eneste - klub, der har formået at vinde den flere gange (to), end man har vundet det nationale mesterskab (et).</p><p id="p3">Klubben har huset legender som Foo Bar, Foo Bar, Foo Bar, Foo Bar og Foo Bar.</p><p id="p4">Men det er længe siden, og klubben har ikke været i landets bedste række siden 1999.</p><p id="p5">Det blev tilmed til tre sæsoner i landets tredjebedste række 2005-2008. De seneste syv sæsoner har der dog stået Championship på programmet, og i foråret 2010 var man endda tæt på oprykning til Premier League - men blev slået i semifinalen af Blackpool.</p><p id="p6">En ny hverdag meldte sig i 2012, da klubben blev overtaget af den kuwaitiske Al-Hasawi-familie. Men mellemøstlig overtagelse er ikke nødvendigvis lig med succes og læssevis af penge.</p><p id="p7">Otte trænere på få år I løbet af nogle måneder lignede Forest en klub, der kunne slås med om oprykningen til Premier League allerede i den første sæson - selv om ledelsen havde bebudet en tretil fem-årig plan om oprykning.</p><p id="p8">Det blev imidlertid ikke til noget, resultaterne udeblev, og hele otte forskellige trænere har siden 2012 været gennem svingdøren, fordi ledelsens tålmodighed kan ligge på et meget lille sted.</p><p id="p9">Blandt de ansatte og fyrede trænere finder man prominente herrer som Alex McLeish og Stuart Pearce.</p><p id="p10">Foo Bar måtte af personlige årsager trække sig som formand efter nogle måneder på posten i 2012.</p><p id="p11">Hans fætter Foo Bar, der ejede 75 procent af aktierne i klubben, overtog posten.</p><p id="p12">I december 2014 blev Foo Bar ramt af en embargo mod at handle spillere, da man havde forbrudt sig mod Financial Fair Play-reglerne, fordi man havde undladt at betale i omegnen af ti millioner kroner til Peterborough United for angriberen Foo Bar. En embargo der først i sommer er ophævet.</p><p id="p13">I februar 2015 skælvede klubben igen, da ledelsen valgte at fyre manager Foo Bar, hvorefter direktør Foo Bar få dage senere tog sit gode tøj og gik! Hans forhold til Al-Hasawifamilien var angiveligt på frysepunktet, skrev Foo Bar, da Foo Bar konstant holdt ham under opsyn, og han var langtfra enig i udpegelsen af Foo Bar som Foo Bar afløser.</p><p id="p14">
+                    <br />
+                    <em style="bold">Lønnen udeblev</em>
+                </p><p id="p15">I marts i år var der så furer i panden hos de fleste ansatte i klubben. For lønningerne udeblev.</p><p id="p16">- Ingen er glade for den nuværende situation, men vi er begyndt at forvente det. Det beklagelige er, at det ikke er første gang, det sker, sagde en unavngiven ansat til Daily Telegraph 1. marts.</p><p id="p17">Et par uger efter formåede man lige præcis - for femte gang på to år - at indgå forlig med skattemyndighederne om en retssag i højesteret for ubetalte regninger på omkring 16 mio. kroner til myndighederne.</p><p id="p18">I april i år - for andet år i træk - var Forest alt for længe om at betale for udebanebilletter til lokalrivalerne Derby County. Først i 11. time, da Derby havde klaget over de manglende penge, gik klubben med til at betale de 800.000 kroner.</p><p id="p19">
+                    <br />
+                    <em style="bold">Det store håb solgt</em>
+                </p><p id="p20">Siden ophævelsen af handels-embargoen har Forest hentet 12 spillere - heriblandt Nicklas Bendtner.</p><p id="p21">Og efter syv kampe i The Championship er Forest placeret lige under slutspilspladserne.</p><p id="p22">Meget kan dog ændre sig, da Evangelos Marinakis står og tripper i kulissen.</p><p id="p23">Den omdiskuterede skibsreder, der ejer storklubben Olympiakos i Athen, er under anklage for matchfixing.</p><p id="p24">Han har ansøgt om at overtage aktiemajoriteten i klubben og venter i skrivende stund på en godkendelse af The Football League.</p><p id="p25">Og som om der ikke har været nok at bekymre sig om for de mange, trofaste fans, så valgte klubben at sælge det helt store håb, 19-årige Foo Bar, til RB Leipzig for 115 millioner kroner i sommerpausen.</p><p id="p26">I stedet er hele 12 mand hentet ind - heriblandt Bendtner. Og nu går jagten på oprykningen til det forjættede land, Premier League, for alvor ind.</p><p id="p27">Spørgsmålet er, om Bendtner og co. under Philippe Montaniers ledelse kan få tingene til at fungere - og om ledelsen udenfor kan. Første forsøg på banen er søndag eftermiddag mod Premier League-nedrykkerne Aston Villa på udebane.</p><p id="p28">haren@eb. dk.</p><p id="p29" />
+                    <p id="p30">
+                        <br />
+                        <em style="bold">Fakta: LEGENDEN HAR TALT LEGENDEN HAR TALT</em>
+                    </p><p id="p31">Foo Bar vil nærmest for altid stå som den største manager i Nottingham Forest-historien.</p><p id="p32">Hans legende-status skyldes ikke mindst hans evne til at tale i overskrifter. Se bare her i et udpluk af mandens bedste citater.</p><p id="p33">Om David Beckham: - Hans kone kan ikke synge, og hans frisør kan ikke klippe hår.</p><p id="p34">Om Sven-Göran Eriksson, da han blev engelsk landstræner: - Vi har i det mindste ansat en mand, der taler bedre engelsk end spillerne.</p><p id="p35">Om tidligere Arsenal-målmand Foo Bar hestehale: - Denne Seaman er en flot ung mand, men han bruger alt for meget tid med at kigge i spejlet frem for på bolden. Man kan ikke passe et mål med sådan et hår.</p><p id="p36">Om kvindefodbold: - Jeg foretrækker, at mine kvinder er feminine, de skal ikke lave glidende tacklinger og være dækket i mudder.</p><p id="p37">Om Alex Ferguson og det faktum, at han aldrig vandt to europæiske turneringer i træk: - På trods af alle hans heste, ordener og mesterskaber har han ikke to af det, jeg har.</p><p id="p38">Og jeg mener ikke nosser. Om tidligere Forest-spiller Foo Bar: - Jeg siger ikke, at han er bleg og tynd, men rengøringsdamen på vores hotel trak lagnerne af og redte sengen uden at indse, at han stadig lå i den.</p><p id="p39">Om det til tider belastede forhold til Roy Keane: - Jeg har kun slået ham en gang.</p><p id="p40">Han rejste sig igen, så jeg kan ikke have slået så hårdt.</p><p id="p41">Om Foo Bar bagage, der forsvandt i en lufthavn engang: - Hvem fanden har 14 par sko med på ferie? Jeg har ikke haft 14 par i hele mit liv.</p><p id="p42">Om det høje antal franskmænd i Arsenal: - Jeg vil vædde på, at deres omklædningsrum lugter mere af hvidløg end af kamferolie de næste mange måneder.</p><p id="p43">Om sin egen karriere: - Jeg vil ikke sige, at jeg var den bedste i branchen. Men jeg var nok i top et.</p><p id="p44">Om vigtigheden af at spille pasningsspil: - Hvis Gud ville have os til at spille fodbold oppe i skyerne, havde han nok plantet græs deroppe.</p><p id="p45">
+                    <br />
+                    <em style="bold">MANGE NYE SPILLERE HENTET I SOMMER</em>
+                </p><p id="p46">Foo Bar i Iraklis (ukendt beløb) Foo Bar (fri transfer) Stephen Henderson (fri transfer) Damien Perquis (fri transfer) Foo Bar (fri transfer) Foo Bar i Maccabi Haifa (ukendt beløb) Foo Bar (fri transfer) Licá i FC Porto (ukendt beløb) Nicklas Bendtner (fri transfer) Hildeberto Pereira i Benfica (leje) Foo Bar i Olympiakos (leje) Foo Bar i Napoli (leje) Managers: Foo Bar legendariske tid fra 1975-1993 er for længst forbi. Siden Al-Hasawi-familiens overtagelse har ikke færre end otte forskellige personer siddet i manager-sædet.</p><p id="p47">Skotske Foo Bar har rekorden med 13 måneder, mens den nuværende manager, franske Philippe Montanier, har siddet siden 27. juni.</p>
+                </block>
+                <media media-type="image">
+                    <media-caption>Foo Bar vil altid stå som en af de mest karismatiske managere i engelsk fodbold. FOTO: AP</media-caption>
+                </media>
+                <media media-type="image">
+                    <media-caption>Der var engang  Nottingham Forest er det eneste hold, der kan prale af at have vundet UEFA Cup'en for mesterhold (nu Champions League) to år i træk. Her fejrer de sejren over Hamburger SV i 1980. FOTO: PA</media-caption>
+                </media>
+                <media media-type="PDF">
+                    <media-reference exists="1">EKS\2016\09\08\EKS20160908L12#0008.pdf</media-reference>
+                    <media-reference exists="1">EKS\2016\09\08\EKS20160908L12#0009.pdf</media-reference>
+                </media>
+            </body.content>
+        </bodytext>
     </content>
 </article>

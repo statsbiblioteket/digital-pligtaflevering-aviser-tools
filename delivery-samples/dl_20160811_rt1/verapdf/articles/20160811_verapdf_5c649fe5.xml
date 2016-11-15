@@ -5,15 +5,14 @@
         <filename>20160811_verapdf_5c649fe5.xml</filename>
     </administrativeData>
     <metadata>
-        <source>JyllandsPosten</source>
-        <publishDate>20160105</publishDate>
-        9<sectionName>kultur</sectionName>
+        <source>verapdf</source>
+        <publishDate>20160811</publishDate>
+        <sectionName>kultur</sectionName>
         <sectionNumber>2</sectionNumber>
         <pageName>kultur</pageName>
         <pageNumber>2</pageNumber>
-        <type></type>
         <links>
-            <link>http:\\jyllandsposten\fake\artikler\abc123</link>
+            <link>http://www.example.com/test3</link>
         </links>
         <classification>
             <term>
