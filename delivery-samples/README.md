@@ -8,6 +8,9 @@ A small batch conforming to `announcement/Bilag B Kravsspecifikation Levering af
 the files in  `$HOME/verapdf/corpus/veraPDF-corpus-staging/PDF_A-1b/6.1 File structure/6.1.2 File header` which
 has been renamed to conform to the specification but is otherwise unchanged.
 
+Two small batches that is as close as possible to the delivery format that we expect to recieve from Infomedia.
+
+
 These are copyrighted by the VeraPDF consortium and licenced under CC-BY-4.0.  See http://verapdf.org/home/#licensing for details.
 
 MD5SUMS.txt generated with
