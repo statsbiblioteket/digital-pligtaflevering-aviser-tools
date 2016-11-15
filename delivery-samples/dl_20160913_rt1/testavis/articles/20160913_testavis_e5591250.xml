@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article>
     <administrativeData>
-        <articleId>123e4567-e89b-12d3-a456-426655440000</articleId>
-        <filename>20160913-TestAvis-udgave1-page001.xml</filename>
+        <articleId>123e4567-e89b-12d3-a456-426655440001</articleId>
+        <filename>20160913_testavis_e5591250.xml</filename>
     </administrativeData>
     <metadata>
         <source>TestAvis</source>
@@ -13,7 +13,7 @@
         <pageNumber>2</pageNumber>
         <type></type>
         <links>
-            <link>http:\\TestAvis\fake\artikler\abc123</link>
+            <link>http://www.example.com/test3</link>
         </links>
         <classification>
             <term>
@@ -26,7 +26,7 @@
             </term>
         </classification>
         <journalists>
-            <journalist>Foo Bar Petersen</journalist>
+            <journalist>Foo Bar Hansen</journalist>
         </journalists>
     </metadata>
     <content>
