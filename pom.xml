@@ -25,6 +25,7 @@
         <module>tools/dpa-tools-test</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>
+        <module>main/dpa-delivery-trigger</module>
     </modules>
 </project>
 
