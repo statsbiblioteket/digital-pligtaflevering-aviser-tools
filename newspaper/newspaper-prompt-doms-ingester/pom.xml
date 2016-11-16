@@ -183,7 +183,7 @@
                         <version>2.8</version>
                         <executions>
                             <execution>
-                                <domsId>unpack</domsId>
+                                <id>unpack</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>unpack</goal>
