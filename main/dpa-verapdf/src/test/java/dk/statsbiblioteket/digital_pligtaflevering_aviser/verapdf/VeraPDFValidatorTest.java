@@ -1,6 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,22 +41,11 @@ public class VeraPDFValidatorTest {
         // For some reason the number in <code><assertion ordinal="..."</code> varies depending on context.
         // For now, do a simple replacement on string level to get a passable test.
 
-        String fixedResponse = actualResponse.replaceFirst("<assertion ordinal=\"\\d+\"", "**DELETED**");
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("<validationResult flavour=\"PDFA_1_A\" totalAssertions=\"254\" isCompliant=\"false\" xmlns=\"http://www.verapdf.org/ValidationProfile\">"));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>"));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("<ruleId specification=\"ISO_19005_1\" clause=\"6.8.2\" testNumber=\"1\"/>"));
 
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-                "<validationResult xmlns=\"http://www.verapdf.org/ValidationProfile\" flavour=\"PDFA_1_A\" totalAssertions=\"254\" isCompliant=\"false\">" +
-                "<assertions>" +
-                // "<assertion ordinal=\"10\" status=\"FAILED\">" +
-                "**DELETED** status=\"FAILED\">" +
-                "<ruleId specification=\"ISO_19005_1\" clause=\"6.8.2\" testNumber=\"1\"/>" +
-                "<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>" +
-                "<location>" +
-                "<level>CosDocument</level>" +
-                "<context>root</context>" +
-                "</location>" +
-                "</assertion>" +
-                "</assertions>" +
-                "</validationResult>", fixedResponse);
     }
 
     private String validateResource1b(String resourceName) {
