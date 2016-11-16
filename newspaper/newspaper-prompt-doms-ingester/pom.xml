@@ -20,7 +20,7 @@
 
     <repositories>
         <repository>
-            <domsId>sbforge-nexus</domsId>
+            <id>sbforge-nexus</id>
             <url>https://sbforge.org/nexus/content/groups/public</url>
             <releases>
                 <enabled>true</enabled>
@@ -174,7 +174,7 @@
 
     <profiles>
         <profile>
-            <domsId>standAloneTestDoms</domsId>
+            <id>standAloneTestDoms</id>
             <build>
                 <plugins>
                     <plugin>
@@ -228,7 +228,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <domsId>stop Tomcat</domsId>
+                                <id>stop Tomcat</id>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
@@ -248,7 +248,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <domsId>stop redis</domsId>
+                                <id>stop redis</id>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
@@ -266,7 +266,7 @@
                             </execution>
                             <execution>
                                 <phase>post-integration-test</phase>
-                                <domsId>delete doms</domsId>
+                                <id>delete doms</id>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>

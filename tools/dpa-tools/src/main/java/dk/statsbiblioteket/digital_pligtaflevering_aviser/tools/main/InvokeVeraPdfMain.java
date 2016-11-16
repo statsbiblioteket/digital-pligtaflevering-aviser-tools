@@ -3,6 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -133,7 +134,7 @@ public class InvokeVeraPdfMain {
         private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
 
             DomsItem domsItem = domsRepository.lookup(domsId);
-            Optional<DatastreamProfile> profileOptional = domsItem.datastreams().stream()
+            Optional<DomsDatastream> profileOptional = domsItem.datastreams().stream()
                     .filter(ds -> ds.getMimeType().equals("application/pdf"))
                     .findAny();
 
@@ -141,7 +142,7 @@ public class InvokeVeraPdfMain {
                 return Stream.of();
             }
 
-            DatastreamProfile ds = profileOptional.get();
+            DomsDatastream ds = profileOptional.get();
             // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste
             // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
             final String url = ds.getUrl();

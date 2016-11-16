@@ -2,14 +2,13 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
-import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamProfile;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @noinspection WeakerAccess
@@ -36,9 +35,11 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      * FIXME:  Currently the underlying DatastreamProfile class leaks through.  When we know what we need, hide it.
      */
 
-    public List<DatastreamProfile> datastreams() {
+    public List<DomsDatastream> datastreams() {
         reloadIfNeeded();
-        return Collections.unmodifiableList(objectProfile.getDatastreams());
+        return objectProfile.getDatastreams().stream()
+                .map(DomsDatastream::new)
+                .collect(Collectors.toList());
     }
 
     /**
