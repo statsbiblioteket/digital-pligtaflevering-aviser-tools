@@ -70,6 +70,11 @@
             <artifactId>dpa-bitrepository-ingester</artifactId>
             <version>1.12-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+            <artifactId>dpa-verapdf</artifactId>
+            <version>master-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -11,15 +11,14 @@ import org.verapdf.pdfa.results.ValidationResult;
 import org.verapdf.pdfa.validation.validators.ValidatorFactory;
 
 import javax.xml.bind.JAXBException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.function.Function;
 
 /**
  *
  */
-public class VeraPDFValidator implements Function<InputStream, String> {
+public class VeraPDFValidator implements Function<InputStream, byte[]> {
     private String flavorId;
     private Boolean prettyXml;
 
@@ -36,7 +35,7 @@ public class VeraPDFValidator implements Function<InputStream, String> {
     }
 
     @Override
-    public String apply(InputStream inputStream) {
+    public byte[] apply(InputStream inputStream) {
         try {
             return apply0(inputStream);
         } catch (RuntimeException e) {
@@ -46,14 +45,18 @@ public class VeraPDFValidator implements Function<InputStream, String> {
         }
     }
 
-    private String apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
+    private byte[] apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
         PDFAFlavour profileId = PDFAFlavour.byFlavourId(flavorId);
         ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
         PDFAValidator validator = ValidatorFactory.createValidator(profileId, false);
         ValidationResult result = validator.validate(toValidate);
-        Writer writer = new StringWriter();
-        XmlSerialiser.toXml(result, writer, prettyXml, false);
-        return writer.toString();
+
+        // as of 0.25 ValidationResult can be marshalled using JAXB to XML
+        // for now do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XmlSerialiser.toXml(result, baos, prettyXml, false);
+        return baos.toByteArray();
     }
 }
 

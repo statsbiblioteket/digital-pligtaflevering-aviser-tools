@@ -20,6 +20,7 @@ public class JavaVirtualMachineHelper {
             // dump everything or only live objects?  For post-mortem everything is interesting.
             boolean onlyLiveVariables = false;
             String heapDumpFileName = heapDumpFileNameFunction.apply(LocalDateTime.now());
+            //noinspection ConstantConditions
             dumpHeap0(heapDumpFileName, onlyLiveVariables);
             LoggerFactory.getLogger(JavaVirtualMachineHelper.class).info("Wrote {}", heapDumpFileName);
         } catch (RuntimeException e) {

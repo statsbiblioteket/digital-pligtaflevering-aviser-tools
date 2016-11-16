@@ -1,5 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -129,11 +132,11 @@ public class DomsModule {
      */
     @Provides
     public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                                PremisManipulatorFactory premisManipulatorFactory,
-                                                DomsEventStorage<Item> domsEventStorage,
-                                                @Named("pageSize") int pageSize) {
+                                                      PremisManipulatorFactory premisManipulatorFactory,
+                                                      DomsEventStorage<Item> domsEventStorage,
+                                                      @Named("pageSize") int pageSize) {
         try {
-            SBOIEventIndex sboiEventIndex = new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
+            SBOIEventIndex<Item> sboiEventIndex = new SBOIEventIndex<>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
             return sboiEventIndex;
         } catch (MalformedURLException e) {
             throw new RuntimeException("new Modified_SBOIEventIndex(...)", e);
@@ -249,8 +252,10 @@ public class DomsModule {
     public String providePastSuccesfulEvents(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS);
     }
+
     /**
-     * Comma separated list of events which must not yet have happened (FIXME:  Successfully?) for item to be considered.
+     * Comma separated list of events which must not yet have happened (FIXME:  Successfully?) for item to be
+     * considered.
      *
      * @param map configuration map containing the value.
      * @return
@@ -260,6 +265,7 @@ public class DomsModule {
     public String provideFutureEvents(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_FUTURE_EVENTS);
     }
+
     /**
      * Comma separated list of events which (FIXME:  what exactly?) for item to be considered.
      *
@@ -271,11 +277,12 @@ public class DomsModule {
     public String provideOldEvents(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_OLD_EVENTS);
     }
+
     /**
      * Comma separated list of types which item must have to be considere.
      *
      * @param map configuration map containing the value.
-     * @return
+     * @return configuration value (mandatory)
      */
     @Provides
     @Named(AUTONOMOUS_ITEM_TYPES)
@@ -283,4 +290,25 @@ public class DomsModule {
         return map.getRequired(AUTONOMOUS_ITEM_TYPES);
     }
 
+    /**
+     * This creates a configured WebResource which can talk to Fedora based on the
+     * credentials given in the configuration map.  For historical reasons
+     * (meaning to be compatible with the existing configuration files) we do the same silent adding
+     * on "/objects/" as was done in IteratorForFedora3 constructor in item-event-framework-common.
+     *
+     * @param domsUrl url to Fedora Commons instance
+     * @param domsUsername username for Fedora Commons instance
+     * @param domsPassword password for Fedora Commons instance
+     * @return ready-to-use WebResource for Fedora Commons interaction.
+     */
+    @Provides
+    public WebResource provideConfiguredFedoraWebResource(
+            @Named(DOMS_URL) String domsUrl,
+            @Named(DOMS_USERNAME) String domsUsername,
+            @Named(DOMS_PASSWORD) String domsPassword) {
+        Client client = Client.create();
+        client.addFilter(new HTTPBasicAuthFilter(domsUsername, domsPassword));
+        WebResource webResource = client.resource(domsUrl.endsWith("/objects/") ? domsUrl : domsUrl + "/objects/");
+        return webResource;
+    }
 }

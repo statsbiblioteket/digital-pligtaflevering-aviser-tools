@@ -94,7 +94,7 @@ addClass-value: kssActive;
 }
 ul.contentViews li a:plone-formProtectionChecked {
 action-server: replaceContentRegion;
-replaceContentRegion-tabid: nodeAttr(id, true);
+replaceContentRegion-tabid: nodeAttr(domsId, true);
 replaceContentRegion-url: nodeAttr(href);
 replaceContentRegion-error: plone-followLink;
 action-client: plone-removeLockProtection;
