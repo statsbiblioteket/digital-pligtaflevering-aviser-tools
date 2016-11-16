@@ -32,7 +32,8 @@ public class VeraPDFValidatorTest {
 
     }
 
-    @Test
+    // FIXME:  DPA-47
+    // DISABLED @Test
     public void test6_8_2_2_t01_fail_a() {
         assertEquals(PDF1B_SUCCESS, validateResource1b("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf"));
         final String actualResponse = validateResource1a("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
