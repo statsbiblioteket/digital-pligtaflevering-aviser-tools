@@ -78,12 +78,12 @@
         <dependency>
             <groupId>dk.statsbiblioteket.newspaper</groupId>
             <artifactId>tree-processor-runnable-component</artifactId>
-            <version>2.11-SNAPSHOT</version>
+            <version>2.10</version>
         </dependency>
         <dependency>
             <groupId>dk.statsbiblioteket.newspaper</groupId>
             <artifactId>newspaper-autonomous-component</artifactId>
-            <version>2.11-SNAPSHOT</version>
+            <version>2.10</version>
         </dependency>
 
     </dependencies>
@@ -159,6 +159,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
 
         </plugins>
@@ -274,7 +282,6 @@
                             </execution>
                         </executions>
                         <configuration>
-
                         </configuration>
                     </plugin>
 
