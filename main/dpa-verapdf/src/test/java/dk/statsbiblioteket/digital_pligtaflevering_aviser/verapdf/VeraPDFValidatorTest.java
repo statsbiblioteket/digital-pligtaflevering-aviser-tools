@@ -42,9 +42,13 @@ public class VeraPDFValidatorTest {
         // For now, do a simple replacement on string level to get a passable test.
 
         Assert.assertThat(actualResponse, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("<validationResult flavour=\"PDFA_1_A\" totalAssertions=\"254\" isCompliant=\"false\" xmlns=\"http://www.verapdf.org/ValidationProfile\">"));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("flavour=\"PDFA_1_A\""));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("totalAssertions=\"254\""));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("isCompliant=\"false\""));
         Assert.assertThat(actualResponse, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>"));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("<ruleId specification=\"ISO_19005_1\" clause=\"6.8.2\" testNumber=\"1\"/>"));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("specification=\"ISO_19005_1\""));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("clause=\"6.8.2\""));
+        Assert.assertThat(actualResponse, CoreMatchers.containsString("testNumber=\"1\"/>"));
 
     }
 
