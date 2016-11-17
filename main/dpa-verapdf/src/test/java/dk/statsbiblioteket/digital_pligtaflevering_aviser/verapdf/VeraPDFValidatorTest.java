@@ -36,19 +36,22 @@ public class VeraPDFValidatorTest {
 
     @Test
     public void test6_8_2_2_t01_fail_a() {
-        assertEquals(PDF1B_SUCCESS, validateResource1b("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf"));
-        final String actualResponse = validateResource1a("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
+        final String actualResponseb = validateResource1b("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
+        Assert.assertThat(actualResponseb, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
+        Assert.assertThat(actualResponseb, CoreMatchers.containsString("flavour=\"PDFA_1_B\""));
+        Assert.assertThat(actualResponseb, CoreMatchers.containsString("isCompliant=\"true\""));
+
+        final String actualResponsea = validateResource1a("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
         // For some reason the number in <code><assertion ordinal="..."</code> varies depending on context.
         // For now, do a simple replacement on string level to get a passable test.
 
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("flavour=\"PDFA_1_A\""));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("totalAssertions=\"254\""));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("isCompliant=\"false\""));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>"));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("specification=\"ISO_19005_1\""));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("clause=\"6.8.2\""));
-        Assert.assertThat(actualResponse, CoreMatchers.containsString("testNumber=\"1\"/>"));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("flavour=\"PDFA_1_A\""));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("isCompliant=\"false\""));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>"));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("specification=\"ISO_19005_1\""));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("clause=\"6.8.2\""));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("testNumber=\"1\"/>"));
 
     }
 
