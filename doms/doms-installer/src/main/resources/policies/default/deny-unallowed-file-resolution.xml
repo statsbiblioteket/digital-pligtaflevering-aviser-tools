@@ -14,13 +14,13 @@
     <Actions> 
       <Action> 
         <ActionMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal"> 
-          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:id-retrieveFile</AttributeValue>  
-          <ActionAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="urn:fedora:names:fedora:2.1:action:id"/> 
+          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:domsId-retrieveFile</AttributeValue>
+          <ActionAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string" AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
         </ActionMatch> 
       </Action> 
     </Actions> 
   </Target>
-  <!-- uncomment (and change the deny rule id) if access via the file protocol is desired.
+  <!-- uncomment (and change the deny rule domsId) if access via the file protocol is desired.
    The regular expression determines the locations and files allowed for retrieval; it must match the canonical file URI for a resource.
    Restricting access to administrators will allow datastreams in control group 'M' to be ingested from the file system.
    Restricting access by URI only will allow datastreams in control group 'E' to be located on the file system.

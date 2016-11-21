@@ -7,7 +7,7 @@
      http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util-3.1.xsd">
 
 
-    <bean class="dk.statsbiblioteket.metadatarepository.xmltapes.common.XmlTapesConfig" id="tapeObjectConfig">
+    <bean class="dk.statsbiblioteket.metadatarepository.xmltapes.common.XmlTapesConfig" domsId="tapeObjectConfig">
         <property name="tempDir" value="$DATA_DIR$/cacheTempObjectStore"/>
         <property name="cachingDir" value="$DATA_DIR$/cacheObjectStore"/>
         <property name="tapingDir" value="$DATA_DIR$/tapingObjectStore"/>
@@ -29,7 +29,7 @@
         <property name="dbPass" value="$XMLTAPES_DBPASS$"/>
     </bean>
 
-    <bean class="dk.statsbiblioteket.metadatarepository.xmltapes.common.XmlTapesConfig" id="tapeDatastreamConfig">
+    <bean class="dk.statsbiblioteket.metadatarepository.xmltapes.common.XmlTapesConfig" domsId="tapeDatastreamConfig">
         <property name="tempDir" value="$DATA_DIR$/cacheTempDatastreamStore"/>
         <property name="cachingDir" value="$DATA_DIR$/cacheDatastreamStore"/>
         <property name="tapingDir" value="$DATA_DIR$/tapingDatastreamStore"/>

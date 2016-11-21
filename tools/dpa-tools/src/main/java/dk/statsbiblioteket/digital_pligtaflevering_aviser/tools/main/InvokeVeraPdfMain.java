@@ -3,35 +3,48 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.TaskResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.InfomediaBatch;
-import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
-import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
-import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
-import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
+import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.NotFoundException;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 
 /**
  * Unfinished
@@ -46,7 +59,7 @@ public class InvokeVeraPdfMain {
         );
     }
 
-    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class})
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPdfModule.class, BitRepositoryModule.class})
     interface VeraPdfTaskDaggerComponent {
         Tool getTool();
     }
@@ -54,35 +67,132 @@ public class InvokeVeraPdfMain {
     @Module
     public static class VeraPdfModule {
 
+        public static final String EVENTTYPE = "EVENTTYPE";
+        public static final String AGENT = "agent";
+        public static final String DPA_PUTFILE_DESTINATIONPATH = "dpa.putfile.destinationpath";
+        public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
+
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
-        protected Tool provideTool(Stream<DomsId> domsIdStream, EnhancedFedora efedora){ //}, Task<DomsItem, ObjectProfile> task) {
+        protected Tool provideTool(QuerySpecification query, DomsRepository domsRepository,
+                                   EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
+                                   @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryUrlPrefix,
+                                   @Named(DPA_PUTFILE_DESTINATIONPATH) String bitrepositoryMountpoint,
+                                   @Named(DPA_VERAPDF_FLAVOR) String flavorId) {
 
-            Object result = domsIdStream
-                    .peek(System.out::println)
-                    .map(domsId -> new InfomediaBatch(domsId, efedora))
-                    .peek(System.out::println)
-                    .flatMap(batch -> batch.getSingleDayNewspaperStream()
-                        .map(singleDay -> singleDay.getInfomediaSinglePagePDFStream().collect(Collectors.toList())
-                        ))
-                    .peek(System.out::println)
-                    .collect(Collectors.toList());
-            return () -> log.info("Result: {}", result);
+            Tool f = () -> Stream.of(query)
+                    .flatMap(domsRepository::query)
+                    .peek(o -> log.trace("{}", o))
+                    .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId).apply(domsId))
+                    // Collect results for each domsId
+                    .peek(o -> log.trace("{}", o))
+                    .collect(Collectors.toList())
+                    .toString();
+
+            return f;
         }
 
-        protected ObjectProfile processSingleDomsId(DomsId domsId, EnhancedFedora efedora) {
-            try {
-                ObjectProfile xxx = efedora.getObjectProfile(domsId.id(), null);
-                return xxx;
-            } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
-                e.printStackTrace();
+        private static Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
+            return domsId -> {
+                // Single doms item
+                List<TaskResult> taskResults = domsRepository.allChildrenFor(domsId).stream()
+                        .peek(System.out::println)
+                        .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId))
+                        .collect(Collectors.toList());
+
+                List<String> failedTaskResults = taskResults.stream()
+                        .filter(t -> t.isSuccess() == false)
+                        .map(t -> t.getResult())
+                        .collect(Collectors.toList());
+
+                final boolean success = failedTaskResults.size() == 0;
+                String eventDetails;
+                String eventFullDetails;
+                if (success) {
+                    eventDetails = "All " + taskResults.size() + " successful.";
+                    eventFullDetails = eventDetails;
+                } else {
+                    eventDetails = failedTaskResults.size() + " failed out of " + taskResults.size();
+                    eventFullDetails = eventDetails + "\n\n" + String.join("\n", failedTaskResults);
+                }
+
+                log.info("DomsID {}: {}", domsId, eventDetails);
+
+                final Item fakeItemToGetAroundAPI = new Item(domsId.id());
+                fakeItemToGetAroundAPI.setEventList(Collections.emptyList());
+                final Date timestamp = new Date();
+                try {
+                    // FIXME:  Migrate events into API.
+                    domsEventStorage.appendEventToItem(fakeItemToGetAroundAPI, AGENT, timestamp, eventFullDetails, EVENTTYPE, success);
+                } catch (CommunicationException | NotFoundException e) {
+                    throw new RuntimeException("Could not store event for domsId " + domsId, e);
+                }
+                return domsId + " " + eventDetails;
+            };
+        }
+
+        private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
+
+            DomsItem domsItem = domsRepository.lookup(domsId);
+            Optional<DomsDatastream> profileOptional = domsItem.datastreams().stream()
+                    .filter(ds -> ds.getMimeType().equals("application/pdf"))
+                    .findAny();
+
+            if (profileOptional.isPresent() == false) {
+                return Stream.of();
             }
-            return null;
+
+            DomsDatastream ds = profileOptional.get();
+            // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste
+            // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
+            final String url = ds.getUrl();
+            if (url.startsWith(bitrepositoryUrlPrefix) == false) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+            }
+            String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
+
+            Path path = Paths.get(bitrepositoryMountpoint, filename);
+            File file = path.toFile();
+            log.trace("validating pdf:  {}", file.getAbsolutePath());
+
+            byte[] veraPDF_output;
+            try {
+                VeraPDFValidator validator = new VeraPDFValidator(flavorId, true);
+                veraPDF_output = validator.apply(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
+            } catch (Exception e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
+            }
+            // We have now run VeraPDF on the PDF file and has the output in hand.
+            // Store it in the "VERAPDF" datastream for the object.
+            // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
+
+            String comment = file.getAbsolutePath() + " at " + new java.util.Date();
+            try {
+                domsItem.modifyDatastreamByValue(
+                        "VERAPDF",
+                        null, // no checksum
+                        null, // no checksum
+                        veraPDF_output,
+                        null,
+                        "text/xml",
+                        comment,
+                        null);
+            } catch (Exception e) {
+                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
+            }
+            // FIXME:  Do we need to store an event on the individual PDF node?
+            return Stream.of(new TaskResult(true, "id: " + domsId + " " + comment));
         }
 
         @Provides
-        protected Stream<DomsId> sboiEventIndexSearch(QuerySpecification query, SBOIEventIndex<Item> index) {
-            Iterator iterator;
+        protected Function<QuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
+            return query -> sboiEventIndexSearch(query, index).stream();
+        }
+
+        private List<DomsId> sboiEventIndexSearch(QuerySpecification query, SBOIEventIndex<Item> index) {
+            Iterator<Item> iterator;
             try {
                 EventTrigger.Query<Item> q = new EventTrigger.Query<>();
                 q.getPastSuccessfulEvents().addAll(query.getPastSuccessfulEvents());
@@ -93,14 +203,11 @@ public class InvokeVeraPdfMain {
             } catch (CommunicationException e) {
                 throw new RuntimeException("sboiEventIndexSearch()", e);
             }
-            // http://stackoverflow.com/a/29010716/53897
-            Iterable iterable = () -> iterator;
-            Stream<Item> itemStream = StreamSupport.stream(iterable.spliterator(), false);
-            // convert to DomsID("....") stream.
-            Stream<DomsId> domsIdStream = itemStream
-                    .peek(i -> System.out.println(i))
-                    .map(i -> new DomsId(i.getDomsID()));
-            return domsIdStream;
+            // http://stackoverflow.com/a/28491752/53897
+            // To keep this simple we simply read in the whole result in a list.
+            List<DomsId> l = new ArrayList<>();
+            iterator.forEachRemaining(item -> l.add(new DomsId(item.getDomsID())));
+            return l;
         }
 
         @Provides
@@ -115,60 +222,15 @@ public class InvokeVeraPdfMain {
         }
 
         @Provides
-//        Task getTask(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
-        Function<String, DomsItem> getDomsItemMapper(DomsEventStorage<Item> domsEventStorage, EnhancedFedora efedora) {
-//            return item -> new DomsItem(item, domsEventStorage);
-//            final Task<DomsItem, ObjectProfile> domsItemObjectProfileTask = item -> {
-//                try {
-//                    final String domsId = "uuid:a58ed278-e20f-4505-84a2-59ae8d8a8777";
-//                    final Item itemFromDomsID = domsEventStorage.getItemFromDomsID(domsId);
-//                    final ObjectProfile objectProfile = efedora.getObjectProfile(domsId, null);
-//                    return objectProfile;
-//                } catch (CommunicationException | NotFoundException | BackendInvalidCredsException
-//                        | BackendMethodFailedException | BackendInvalidResourceException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            };
-//            return domsItemObjectProfileTask;
-            throw new RuntimeException("commented out");
+        @Named(DPA_PUTFILE_DESTINATIONPATH)
+        String getPutfileDestinationPath(ConfigurationMap map) {
+            return map.getRequired(DPA_PUTFILE_DESTINATIONPATH);
         }
 
         @Provides
-        Stream<EventTrigger.Query<Item>> provideQueryStream() {
-            //System.out.println("In provideQueryStream()");
-
-            EventTrigger.Query<Item> query1 = new EventTriggerQuery<>("query1");
-            // Metadata_Archived,Data_Archived
-            query1.getPastSuccessfulEvents().add("Metadata_Archived");
-            query1.getPastSuccessfulEvents().add("Data_Archived");
-            query1.getTypes().add("doms:ContentModel_RoundTrip");
-//            EventTrigger.Query<Item> query2 = new EventTriggerQuery<>("query2");
-//            query2.getPastSuccessfulEvents().add("Data_Received");
-//            query2.getFutureEvents().add("Metadata_Archived");
-            return Stream.of(query1);
-        }
-
-        protected class EventTriggerQuery<I extends Item> extends EventTrigger.Query<I> {
-            private String description;
-
-            public EventTriggerQuery(String description) {
-                this.description = description;
-            }
-
-            @Override
-            public String toString() {
-                return description + ": " + super.toString();
-            }
+        @Named(DPA_VERAPDF_FLAVOR)
+        String getVeraPDFFlavor(ConfigurationMap map) {
+            return map.getRequired(DPA_VERAPDF_FLAVOR);
         }
     }
-
-//    private static Date appendEventToItem(DomsEventStorage<Item> domsEventStorage, Item item) {
-//        try {
-//            return domsEventStorage.appendEventToItem(item, "agent", new Date(), "details", "T" + item.getEventList().size(), false);
-//        } catch (RuntimeException e) {
-//            throw e;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

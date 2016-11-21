@@ -51,7 +51,7 @@ public class BitRepositoryIngesterMain {
                 RunnableComponent<Batch> component = new dk.statsbiblioteket.newspaper.bitrepository.ingester.BitrepositoryIngesterComponent(properties);
 
                 CallResult<Batch> result = NewspaperBatchAutonomousComponentUtils.startAutonomousComponent(properties, component);
-                log.debug("result was: " + result);
+                return String.valueOf(result);
             };
         }
     }
