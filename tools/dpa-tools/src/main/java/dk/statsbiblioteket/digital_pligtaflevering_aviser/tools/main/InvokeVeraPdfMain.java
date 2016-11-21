@@ -17,7 +17,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonMo
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
-import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
@@ -69,7 +68,6 @@ public class InvokeVeraPdfMain {
 
         public static final String EVENTTYPE = "EVENTTYPE";
         public static final String AGENT = "agent";
-        public static final String DPA_PUTFILE_DESTINATIONPATH = "dpa.putfile.destinationpath";
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
 
         @Provides
@@ -77,7 +75,7 @@ public class InvokeVeraPdfMain {
         protected Tool provideTool(QuerySpecification query, DomsRepository domsRepository,
                                    EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                                    @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryUrlPrefix,
-                                   @Named(DPA_PUTFILE_DESTINATIONPATH) String bitrepositoryMountpoint,
+                                   @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint,
                                    @Named(DPA_VERAPDF_FLAVOR) String flavorId) {
 
             Tool f = () -> Stream.of(query)
@@ -219,12 +217,6 @@ public class InvokeVeraPdfMain {
         @Provides
         ItemFactory<Item> provideItemFactory() {
             return id -> new Item();
-        }
-
-        @Provides
-        @Named(DPA_PUTFILE_DESTINATIONPATH)
-        String getPutfileDestinationPath(ConfigurationMap map) {
-            return map.getRequired(DPA_PUTFILE_DESTINATIONPATH);
         }
 
         @Provides

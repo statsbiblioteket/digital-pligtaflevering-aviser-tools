@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain.DPA_DELIVERIES_FOLDER;
 
 /**
  *
@@ -29,7 +29,8 @@ public class DomsIngesterMainTest {
 
         DomsIngesterMain.main(new String[]{
                 "doms-ingester.properties",
-                ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + batchPath.toAbsolutePath()
+                DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
+                "pageSize=9999"
         });
     }
 }
