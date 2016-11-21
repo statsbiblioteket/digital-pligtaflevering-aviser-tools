@@ -1,7 +1,7 @@
 
 
 CREATE TABLE storeIndex (
-	id VARCHAR(255) PRIMARY KEY,
+	domsId VARCHAR(255) PRIMARY KEY,
 	tapename VARCHAR(255) NOT NULL,
 	tapeoffset BIGINT NOT NULL
 );

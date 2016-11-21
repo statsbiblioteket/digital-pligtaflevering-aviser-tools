@@ -57,7 +57,7 @@ public class DomsIngesterMain {
                 RunnableComponent component = new RunnablePromptDomsIngester(properties, eFedora);
                 CallResult result = NewspaperBatchAutonomousComponentUtils.startAutonomousComponent(properties, component);
 
-                log.info("result was: " + result);
+                return String.valueOf(result);
             };
         }
     }

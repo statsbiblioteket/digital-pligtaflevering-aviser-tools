@@ -47,4 +47,15 @@ public class QuerySpecification {
     public boolean getDetails() {
         return details;
     }
+
+    @Override
+    public String toString() {
+        return "QuerySpecification{" +
+                "pastSuccessfulEvents=" + pastSuccessfulEvents +
+                ", futureEvents=" + futureEvents +
+                ", oldEvents=" + oldEvents +
+                ", types=" + types +
+                ", details=" + details +
+                '}';
+    }
 }

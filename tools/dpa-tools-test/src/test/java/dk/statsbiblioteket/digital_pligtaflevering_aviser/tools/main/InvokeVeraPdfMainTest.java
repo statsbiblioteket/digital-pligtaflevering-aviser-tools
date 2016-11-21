@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain.VeraPdfModule.DPA_PUTFILE_DESTINATIONPATH;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
+
 /**
  *
  */
@@ -14,6 +17,8 @@ import java.nio.file.Paths;
 public class InvokeVeraPdfMainTest {
     @org.junit.Test
     public void invocationTest() throws URISyntaxException {
+
+        String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
         String batchDirPathInWorkspace = "delivery-samples";
 
         // http://stackoverflow.com/a/320595/53897
@@ -24,11 +29,12 @@ public class InvokeVeraPdfMainTest {
         // This will work anywhere in the source tree.  StreamEx provide three argument iterate() in Java 8.
 
         Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
+        Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, bitrepoDirPathInWorkspace);
 
         InvokeVeraPdfMain.main(new String[]{
                 "invoke-verapdf-vagrant.properties",
-                //"iterator.filesystem.batches.folder=" + batchPath.toAbsolutePath(),
-                "bitrepository.ingester.urltobatchdir=" + batchPath.toAbsolutePath()
+                DPA_PUTFILE_DESTINATIONPATH + "=" + bitrepoPath.toAbsolutePath(),
+                URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });
     }
 }

@@ -430,7 +430,7 @@ This controls the portrange for the activeMQ system, so that it stays inside the
 This controls which database system to use for stuff. Legal values are localPostgreSQLPool and localDerbyPool.
 
 {{{
-    <datastore id="localDerbyPool">
+    <datastore domsId="localDerbyPool">
         ....
         <param name="dbUsername" value="fedoraAdmin">
             <comment>The database user name.</comment>
@@ -447,7 +447,7 @@ This controls which database system to use for stuff. Legal values are localPost
 This is the config for the derby database system. If you do not use the derby system, ignore this section. Note, I have had problems with changing the  username and password.
 
 {{{
-    <datastore id="localPostgreSQLPool">
+    <datastore domsId="localPostgreSQLPool">
         ....
         <param name="dbUsername" value="$POSTGRESQL_USER$">
             <comment>The database user name.</comment>
