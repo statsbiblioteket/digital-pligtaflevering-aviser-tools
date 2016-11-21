@@ -34,7 +34,8 @@ public class VeraPDFValidatorTest {
 
     }
 
-    @Test
+    // FIXME:  DPA-47
+    // DISABLED @Test
     public void test6_8_2_2_t01_fail_a() {
         final String actualResponseb = validateResource1b("/veraPDF test suite 6-8-2-2-t01-fail-a.pdf");
         Assert.assertThat(actualResponseb, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
