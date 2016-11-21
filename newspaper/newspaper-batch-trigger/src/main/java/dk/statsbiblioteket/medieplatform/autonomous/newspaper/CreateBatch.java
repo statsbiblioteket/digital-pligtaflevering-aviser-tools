@@ -36,6 +36,7 @@ public class CreateBatch {
         String domsUser;
         String domsPass;
         String urlToPidGen;
+        //Starting to refactor Batch into something that is specifically for "digital pligtaflevering"
         NewspaperDomsEventStorageFactory domsEventStorageFactory = new NewspaperDomsEventStorageFactory();
         NewspaperDomsEventStorage domsEventClient;
         Date now = new Date();

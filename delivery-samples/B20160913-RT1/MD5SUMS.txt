@@ -1,7 +1,0 @@
-72a49ea5754542d42cf330a574b76aec  TestAvis/Leverance001/articles/20160913-TestAvis-udgave1-article001.xml
-1dab0caf2cd17157593f369fc5038da2  TestAvis/Leverance001/articles/20160913-TestAvis-udgave1-article002.xml
-3f01fc2dc583a2db036b983abd32e8e0  TestAvis/Leverance001/articles/20160913-TestAvis-udgave1-article003.xml
-60b296424db6a4dec5cfa0ffaa1336b0  TestAvis/Leverance001/pages/20160913-TestAvis-udgave1-page001.pdf
-819d0aa2f0922e105eb3e5f0782c766f  TestAvis/Leverance001/pages/20160913-TestAvis-udgave1-page001.xml
-60b296424db6a4dec5cfa0ffaa1336b0  TestAvis/Leverance001/pages/20160913-TestAvis-udgave1-page002.pdf
-5e4dd0407c6155e52c0f4bf7bad3bfa4  TestAvis/Leverance001/pages/20160913-TestAvis-udgave1-page002.xml
