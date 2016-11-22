@@ -78,7 +78,7 @@ public class CreateBatchMain {
                 File[] directories = new File(batchFolder).listFiles(new FileFilter() {
                     @Override
                     public boolean accept(File file) {
-                        return file.isDirectory() && !Paths.get(file.getPath(), "delete_ok").toFile().exists();
+                        return file.isDirectory()/* && !Paths.get(file.getPath(), file.getName()).toFile().exists()*/;
                     }
                 });
 
@@ -92,7 +92,7 @@ public class CreateBatchMain {
                     String roundtripValue = batchName.substring(14);
 
                     CreateBatch.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
-                    touch(Paths.get(batchItem.getAbsolutePath(), "delete_ok").toFile());
+                    //touch(Paths.get(batchItem.getAbsolutePath(), batchItem.getName()).toFile());
                 }
 
             } catch (Exception e) {
