@@ -2,15 +2,14 @@ package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
+import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
+import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
+import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Event;
-import dk.statsbiblioteket.medieplatform.autonomous.NewspaperDomsEventStorage;
-import dk.statsbiblioteket.medieplatform.autonomous.NewspaperDomsEventStorageFactory;
 
 import org.slf4j.Logger;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
@@ -37,11 +36,11 @@ public class CreateBatch {
         String domsPass;
         String urlToPidGen;
         //Starting to refactor Batch into something that is specifically for "digital pligtaflevering"
-        NewspaperDomsEventStorageFactory domsEventStorageFactory = new NewspaperDomsEventStorageFactory();
-        NewspaperDomsEventStorage domsEventClient;
+        DeliveryDomsEventStorageFactory domsEventStorageFactory = new DeliveryDomsEventStorageFactory();
+        DeliveryDomsEventStorage domsEventClient;
         Date now = new Date();
 
-        if (args.length != 7) {
+        if (args.length != 8) {
             System.out.println("Not the right amount of arguments");
             System.out.println("Receives the following arguments (in this order) to create a batch object in DOMS:");
             System.out.println(
@@ -56,15 +55,15 @@ public class CreateBatch {
         domsUser = args[4];
         domsPass = args[5];
         urlToPidGen = args[6];
-        log.info("Entered main for batch B{}-RT{}",batchId,roundTrip);
+        log.info("Entered main for batch dl_{}_rt{}",batchId,roundTrip);
         domsEventStorageFactory.setFedoraLocation(domsUrl);
         domsEventStorageFactory.setUsername(domsUser);
         domsEventStorageFactory.setPassword(domsPass);
         domsEventStorageFactory.setPidGeneratorLocation(urlToPidGen);
         try {
-            domsEventClient = domsEventStorageFactory.createDomsEventStorage();
+            domsEventClient = domsEventStorageFactory.createDeliveryDomsEventStorage();
             final int roundTripNumber = Integer.parseInt(roundTrip);
-            doWork(new Batch(batchId, roundTripNumber), premisAgent, domsEventClient, now);
+            doWork(new Delivery(batchId, roundTripNumber), premisAgent, domsEventClient, now);
         } catch (Exception e) {
             System.err.println("Failed adding event to batch, due to: " + e.getMessage());
             log.error("Caught exception: ", e);
@@ -83,14 +82,14 @@ public class CreateBatch {
      * @param now The timestamp to use.
      * @throws CommunicationException On trouble registering event.
      */
-    public static void doWork(Batch batch, String premisAgent, NewspaperDomsEventStorage domsEventClient, Date now) throws CommunicationException {
+    public static void doWork(Delivery batch, String premisAgent, DeliveryDomsEventStorage domsEventClient, Date now) throws CommunicationException {
         boolean alreadyApproved = false;
         boolean newerRoundTripAlreadyReceived = false;
 
 
         String message = "";
 
-        List<Batch> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
+        /*List<Batch> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
         if(roundtrips == null) {
             roundtrips = Collections.EMPTY_LIST;
         }
@@ -107,10 +106,29 @@ public class CreateBatch {
                 alreadyApproved = true;
 
             }
-        }
+        }*/
+
+
         domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received",
                                        !newerRoundTripAlreadyReceived);
-        if (alreadyApproved){
+
+        //Inlining to replace above
+        /*String itemID = batch.getDomsID();
+        if (itemID == null) {
+            itemID = "dl_" + batch.getBatchID() + "_rt" + batch.getRoundTripNumber();
+            domsEventClient.createBatchRoundTrip(itemID);
+            batch.setDomsID(itemID);
+        }
+        domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received", !newerRoundTripAlreadyReceived);
+*/
+
+
+
+
+
+
+
+        /*if (alreadyApproved){
             domsEventClient.appendEventToItem(batch, premisAgent, now,
                                            "Another Roundtrip is already approved, so this batch should be stopped",
                                            STOPPED_STATE, true);
@@ -124,8 +142,13 @@ public class CreateBatch {
                     log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), batch.getFullID());
                 }
             }
-        }
+        }*/
     }
+
+
+
+
+
 
     private static boolean isApproved(Batch olderRoundtrip) {
         for (Event event : olderRoundtrip.getEventList()) {
