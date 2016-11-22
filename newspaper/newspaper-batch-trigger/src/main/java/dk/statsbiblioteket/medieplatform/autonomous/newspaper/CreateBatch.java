@@ -75,6 +75,8 @@ public class CreateBatch {
      * This will add the state Data_Received for a given batch and roundtrip.
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
+     * TODO: Decide about the functionality that has been marked out. CreateBatchMain is now handling to iterate through deliveries
+     *
      *
      * @param batch The batch to register
      * @param premisAgent The string used as premis agent id
