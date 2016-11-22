@@ -8,7 +8,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateBatch;
+import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
@@ -29,35 +29,22 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  * Unfinished create batch trigger main.
  */
-public class CreateBatchMain {
+public class CreateDeliveryMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerCreateBatchMain_CreateBatchComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerCreateDeliveryMain_CreateDeliveryComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
-    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateBatchModule.class})
-    interface CreateBatchComponent {
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateDeliveryModule.class})
+    interface CreateDeliveryComponent {
         Tool getTool();
     }
 
-    /**
-     * Create an empty file to indicate that the batch has been run
-     * @param file
-     * @throws IOException
-     */
-    public static void touch(File file) throws IOException{
-        if (!file.exists()) {
-            new FileOutputStream(file).close();
-        }
-        file.setLastModified(System.currentTimeMillis());
-    }
-
-
 
     @Module
-    static class CreateBatchModule {
+    static class CreateDeliveryModule {
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
 
         Logger log = LoggerFactory.getLogger(this.getClass());
@@ -71,36 +58,26 @@ public class CreateBatchMain {
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen,
                          @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String batchFolder) {
 
+            //Look in filesystem and find all deliveries that has not yet been seen by "CreateDelivery"
+            File[] directories = new File(batchFolder).listFiles(File::isDirectory);
 
-            try {
 
-                //Look in filesystem and find all deliveries that has not yet been seen by "CreateBatch"
-                File[] directories = new File(batchFolder).listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        return file.isDirectory()/* && !Paths.get(file.getPath(), file.getName()).toFile().exists()*/;
-                    }
-                });
 
+            return () -> {
+                final String batchResponse = "";
                 //Iterate through the deliveries
                 for (File batchItem : directories) {
-                    //touch(Paths.get(batchItem.getAbsolutePath(), batchItem.getName()).toFile());
-
                     //TODO: quick and dirty way of splitting up the batchname
                     String batchName = batchItem.getName();
                     String batchIdValue = batchName.substring(3, 11);
                     String roundtripValue = batchName.substring(14);
 
-                    CreateBatch.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
-                    //touch(Paths.get(batchItem.getAbsolutePath(), batchItem.getName()).toFile());
+                    CreateDelivery.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
                 }
+                String joinedString = StringUtils.join(directories, " ");
 
-            } catch (Exception e) {
-                log.error("Failed creating delivery", e.fillInStackTrace());
-            }
 
-            return () -> {
-                return "created batch for deliveries";
+                return "created batch for the folowing deliveries" + joinedString;
             };
         }
 

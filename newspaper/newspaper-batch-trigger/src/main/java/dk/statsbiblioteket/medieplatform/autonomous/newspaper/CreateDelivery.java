@@ -16,9 +16,9 @@ import java.util.Date;
  *
  * @author jrg
  */
-public class CreateBatch {
+public class CreateDelivery {
     private static final String STOPPED_STATE = "Manually_stopped";
-    public static Logger log = org.slf4j.LoggerFactory.getLogger(CreateBatch.class);
+    public static Logger log = org.slf4j.LoggerFactory.getLogger(CreateDelivery.class);
 
     /**
      * Receives the following arguments to create a batch object in DOMS:

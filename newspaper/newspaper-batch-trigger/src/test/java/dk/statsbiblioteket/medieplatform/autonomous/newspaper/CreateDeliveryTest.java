@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class CreateBatchTest {
+public class CreateDeliveryTest {
 
     /**
      * Test normal case: RT1 received, no other roundtrips exist.
@@ -36,7 +36,7 @@ public class CreateBatchTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(null);
 
-        CreateBatch.doWork(new Delivery("1234", 1), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1)), eq("premisAgent"), Matchers.<Date>any(),
                                                       anyString(), eq("Data_Received"), eq(true));
@@ -57,7 +57,7 @@ public class CreateBatchTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(batch1));
 
-        CreateBatch.doWork(new Delivery("1234", 2), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2)), eq("premisAgent"), Matchers.<Date>any(),
                                                       anyString(), eq("Data_Received"), eq(true));
@@ -79,7 +79,7 @@ public class CreateBatchTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(batch2));
 
-        CreateBatch.doWork(new Delivery("1234", 1), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1)), eq("premisAgent"), Matchers.<Date>any(),
                                                       contains("Roundtrip (2) is newer than this roundtrip (1)"), eq("Data_Received"), eq(false));
@@ -103,7 +103,7 @@ public class CreateBatchTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(batch1));
 
-        CreateBatch.doWork(new Delivery("1234", 2), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2)), eq("premisAgent"), Matchers.<Date>any(),
                                                       contains("Roundtrip (1) is already approved, so this roundtrip (2)"), eq("Data_Received"), eq(true));

@@ -13,11 +13,11 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  *
  */
-public class CreateBatchMainTest {
+public class CreateDeliveryMainTest {
     @Test
     public void createPendingBatches() {
         // Look for delivery samples and invoke for each folder there
-        CreateBatchMain.main(new String[]{
+        CreateDeliveryMain.main(new String[]{
                 "create-batch.properties",
                 "autonomous.agent=register-batch-trigger",
                 ITERATOR_FILESYSTEM_BATCHES_FOLDER+"="+getBatchFolder()});
@@ -33,7 +33,7 @@ public class CreateBatchMainTest {
         // http://stackoverflow.com/a/320595/53897
         URI l = null;
         try {
-            l =CreateBatchMain.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            l =CreateDeliveryMain.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

@@ -4,7 +4,7 @@ package dk.statsbiblioteket.medieplatform.autonomous;
  * Quick extraction of logic from Batch
  * TODO: Needs to decide what to do about all this
  */
-public class Delivery extends Batch {
+public class Delivery extends Item {
 
     /**
      * The batch id as a long, ie. without the B in the start of the string
@@ -87,29 +87,22 @@ public class Delivery extends Batch {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Delivery)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-        Delivery batch = (Delivery) o;
+        Delivery delivery = (Delivery) o;
 
-        if (!batchID.equals(batch.batchID)) {
-            return false;
-        }
-        if (!roundTripNumber.equals(batch.roundTripNumber)) {
-            return false;
-        }
+        if (batchID != null ? !batchID.equals(delivery.batchID) : delivery.batchID != null) return false;
+        return roundTripNumber != null ? roundTripNumber.equals(delivery.roundTripNumber) : delivery.roundTripNumber == null;
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = batchID.hashCode();
-        result = 31 * result + roundTripNumber.hashCode();
+        int result = super.hashCode();
+        result = 31 * result + (batchID != null ? batchID.hashCode() : 0);
+        result = 31 * result + (roundTripNumber != null ? roundTripNumber.hashCode() : 0);
         return result;
     }
 
