@@ -26,6 +26,9 @@ Vagrant.configure("2") do |config|
   # Be able to get the artifacts from host Maven build.
   config.vm.synced_folder "../target/", "/target"
 
+  # Share the delivery samlpes with the vagrant image
+  config.vm.synced_folder "../../../delivery-samples/", "/delivery-samples"
+
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 4096
