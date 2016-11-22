@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <pdfinfo>
-    <filename>20160913-TestAvis-udgave1-page001.pdf</filename>
+    <filename>20160913_testavis_page002.pdf</filename>
     <publishing>
-        <source>TestAvis</source>
+        <source>testavis</source>
         <edition>Udgave1</edition>
         <publishDate>20160913</publishDate>
     </publishing>
     <positional>
         <sectionName>Kultur</sectionName>
-        <sectionNumber>1</sectionNumber>
-        <pageName>Side 1</pageName>
-        <pageNumber>1</pageNumber>
+        <sectionNumber>2</sectionNumber>
+        <pageName>Side 2</pageName>
+        <pageNumber>2</pageNumber>
     </positional>
     <content>
         <text>
@@ -25,8 +25,7 @@
     </content>
     <articles>
         <article>
-            <filename>20160913-TestAvis-udgave1-article001.xml</filename>
-            <filename>20160913-TestAvis-udgave1-article002.xml</filename>
+            <filename>20160913_testavis_e5591250.xml</filename>
         </article>
     </articles>
 </pdfinfo>

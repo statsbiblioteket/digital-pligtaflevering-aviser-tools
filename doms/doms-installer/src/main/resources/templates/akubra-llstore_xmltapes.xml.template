@@ -9,7 +9,7 @@
     <import resource="xmlTapesConfig.xml"/>
 
     <!--see http://biasedbit.com/redis-jedispool-configuration/-->
-    <bean domsId="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <!-- Action to take when trying to acquire a connection and all connections are taken -->
         <property name="whenExhaustedAction">
             <!-- Default behaviour, block the caller until a resource becomes available -->
@@ -185,7 +185,7 @@
         <!--The database password-->
         <constructor-arg value="#{tapeObjectConfig.dbPass}" index="3"/>
     </bean>
-    
+
     <!--This is the tape store Akubra Implementation-->
     <bean name="tapeDatastreamStore"
           class="dk.statsbiblioteket.metadatarepository.xmltapes.akubra.XmlTapesBlobStore"
