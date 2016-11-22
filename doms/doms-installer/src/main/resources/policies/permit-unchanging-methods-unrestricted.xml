@@ -18,10 +18,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-export</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-export</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -29,10 +29,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDatastream</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDatastream</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -40,10 +40,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDatastreamHistory</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDatastreamHistory</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -51,10 +51,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDatastreams</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDatastreams</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -62,10 +62,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDisseminator</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDisseminator</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -73,10 +73,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDisseminators</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDisseminators</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -84,10 +84,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDisseminatorHistory</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDisseminatorHistory</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -95,10 +95,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getObjectProperties</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getObjectProperties</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -106,10 +106,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getObjectXML</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getObjectXML</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -117,10 +117,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-compareDatastreamChecksum</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-compareDatastreamChecksum</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -128,10 +128,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-describeRepository</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-describeRepository</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -139,10 +139,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-findObjects</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-findObjects</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -150,10 +150,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-riFindObjects</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-riFindObjects</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -161,10 +161,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDatastreamDissemination</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDatastreamDissemination</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -172,10 +172,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getDissemination</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getDissemination</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -183,10 +183,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getObjectHistory</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getObjectHistory</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -194,10 +194,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getObjectProfile</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getObjectProfile</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -205,10 +205,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-listDatastreams</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-listDatastreams</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -216,10 +216,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-listMethods</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-listMethods</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -227,10 +227,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-listObjectInFieldSearchResults</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-listObjectInFieldSearchResults</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -238,10 +238,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-listObjectInResourceIndexResults</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-listObjectInResourceIndexResults</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -249,10 +249,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-serverStatus</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-serverStatus</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -260,10 +260,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-oai</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-oai</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -271,10 +271,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-dsstate</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-dsstate</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -282,10 +282,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-resolveDatastream</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-resolveDatastream</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -293,10 +293,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-getRelationships</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-getRelationships</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -304,10 +304,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-retrieveFile</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-retrieveFile</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
             <Action>
@@ -315,10 +315,10 @@
                         MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            >urn:fedora:names:fedora:2.1:action:domsId-validate</AttributeValue>
+                    >urn:fedora:names:fedora:2.1:action:id-validate</AttributeValue>
                     <ActionAttributeDesignator
                             DataType="http://www.w3.org/2001/XMLSchema#string"
-                            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                            AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
                 </ActionMatch>
             </Action>
         </Actions>
