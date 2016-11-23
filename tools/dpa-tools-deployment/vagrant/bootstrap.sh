@@ -12,3 +12,6 @@ sudo cp /target/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz /home/vagran
 tar -xf dpa-tools-deployment-master-SNAPSHOT-package.tar.gz
 
 
+cp -R /vagrant/properties properties
+
+cp  /vagrant/runningTheStuff.sh runningTheStuff.sh
