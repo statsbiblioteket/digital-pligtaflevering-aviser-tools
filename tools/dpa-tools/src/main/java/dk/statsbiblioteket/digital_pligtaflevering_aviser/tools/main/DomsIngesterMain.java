@@ -21,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
+
 /**
  * Unfinished
  */
@@ -48,8 +50,9 @@ public class DomsIngesterMain {
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          QuerySpecification query,
                          DomsRepository repository,
-                         DomsFilesystemIngester ingester) {
-            // Adapted from PromptDomsIngesterComponent.doWork(...)
+                         DomsFilesystemIngester ingester
+        ) {
+
             return () -> {
                 List<String> result = repository.query(query)
                         .map(id -> ingester.apply(id, Paths.get(deliveriesFolder)))
@@ -82,8 +85,18 @@ public class DomsIngesterMain {
             return Integer.valueOf(map.getRequired("pageSize"));
         }
 
-
-
+        /**
+         * returns a comma-separated set of filenames (without path) to ignore when traversing the file tree.
+         * Naming is kept the same as in Avisprojektet to keep configuration files similar
+         *
+         * @param map configuration map
+         * @return string with comma separated file names.
+         */
+        @Provides
+        @Named(ITERATOR_FILESYSTEM_IGNOREDFILES)
+        String provideFilesystemIgnoredFiles(ConfigurationMap map) {
+            return map.getRequired(ITERATOR_FILESYSTEM_IGNOREDFILES);
+        }
 
     }
 }

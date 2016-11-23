@@ -55,7 +55,9 @@ public class PromptDomsIngesterComponent {
                 properties.getProperty(ConfigConstants.DOMS_PIDGENERATOR_URL),
                 null, fedoraRetries, fedoraDelayBetweenRetries);
 
+        @SuppressWarnings("unchecked")
         RunnableComponent component = new RunnablePromptDomsIngester(properties, eFedora);
+        @SuppressWarnings("unchecked")
         CallResult result = NewspaperBatchAutonomousComponentUtils.startAutonomousComponent(properties, component);
 
         log.info("result was: " + result);

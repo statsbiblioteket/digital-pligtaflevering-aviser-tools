@@ -101,7 +101,7 @@ public class BatchMD5SUMSValidation {
      * Get the result af validating checksums of all files in the Batch
      * @return Validation result as a list of messages
      */
-    public List getValidationResult() {
+    public List<String> getValidationResult() {
         return validationResult;
     }
 
