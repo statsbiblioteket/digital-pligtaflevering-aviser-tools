@@ -16,10 +16,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
@@ -61,23 +57,22 @@ public class CreateDeliveryMain {
             //Look in filesystem and find all deliveries that has not yet been seen by "CreateDelivery"
             File[] directories = new File(batchFolder).listFiles(File::isDirectory);
 
-
-
             return () -> {
                 final String batchResponse = "";
                 //Iterate through the deliveries
                 for (File batchItem : directories) {
-                    //TODO: quick and dirty way of splitting up the batchname
-                    String batchName = batchItem.getName();
-                    String batchIdValue = batchName.substring(3, 11);
-                    String roundtripValue = batchName.substring(14);
+                    //quick and dirty way of splitting up the batchname
+                    String batchName = batchItem.getName().replaceAll("[dl_]+[^-?0-9]+", " ");
+                    String[] batchContent =  batchName.trim().split(" ");
+                    String batchIdValue = batchContent[0];
+                    String roundtripValue = batchContent[1];
 
                     CreateDelivery.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
                 }
                 String joinedString = StringUtils.join(directories, " ");
 
 
-                return "created batch for the folowing deliveries" + joinedString;
+                return "created batch for " + joinedString;
             };
         }
 
