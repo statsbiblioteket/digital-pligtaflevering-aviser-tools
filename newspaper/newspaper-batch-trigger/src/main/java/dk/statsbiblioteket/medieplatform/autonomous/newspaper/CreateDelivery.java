@@ -9,7 +9,9 @@ import dk.statsbiblioteket.medieplatform.autonomous.Event;
 
 import org.slf4j.Logger;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
@@ -75,7 +77,6 @@ public class CreateDelivery {
      * This will add the state Data_Received for a given batch and roundtrip.
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
-     * TODO: Decide about the functionality that has been marked out. CreateBatchMain is now handling to iterate through deliveries
      *
      *
      * @param batch The batch to register
@@ -91,11 +92,11 @@ public class CreateDelivery {
 
         String message = "";
 
-        /*List<Batch> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
+        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
         if(roundtrips == null) {
             roundtrips = Collections.EMPTY_LIST;
         }
-        for (Batch roundtrip : roundtrips) {
+        for (Delivery roundtrip : roundtrips) {
             if (roundtrip.getRoundTripNumber() > batch.getRoundTripNumber()) {
                 message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is newer than this roundtrip ("+batch.getRoundTripNumber()+"), so this roundtrip will not be triggered here\n";
                 log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", batch.getFullID(), roundtrip.getRoundTripNumber());
@@ -108,34 +109,19 @@ public class CreateDelivery {
                 alreadyApproved = true;
 
             }
-        }*/
+        }
 
 
         domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received",
                                        !newerRoundTripAlreadyReceived);
 
-        //Inlining to replace above
-        /*String itemID = batch.getDomsID();
-        if (itemID == null) {
-            itemID = "dl_" + batch.getBatchID() + "_rt" + batch.getRoundTripNumber();
-            domsEventClient.createBatchRoundTrip(itemID);
-            batch.setDomsID(itemID);
-        }
-        domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received", !newerRoundTripAlreadyReceived);
-*/
 
-
-
-
-
-
-
-        /*if (alreadyApproved){
+        if (alreadyApproved){
             domsEventClient.appendEventToItem(batch, premisAgent, now,
                                            "Another Roundtrip is already approved, so this batch should be stopped",
                                            STOPPED_STATE, true);
         } else if (!newerRoundTripAlreadyReceived){
-            for (Batch roundtrip : roundtrips) {
+            for (Delivery roundtrip : roundtrips) {
                 if (!roundtrip.getRoundTripNumber().equals(batch.getRoundTripNumber())) {
                     domsEventClient.appendEventToItem(roundtrip, premisAgent, now,
                                                    "Newer roundtrip (" + batch.getRoundTripNumber()
@@ -144,7 +130,7 @@ public class CreateDelivery {
                     log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), batch.getFullID());
                 }
             }
-        }*/
+        }
     }
 
 
@@ -152,7 +138,7 @@ public class CreateDelivery {
 
 
 
-    private static boolean isApproved(Batch olderRoundtrip) {
+    private static boolean isApproved(Delivery olderRoundtrip) {
         for (Event event : olderRoundtrip.getEventList()) {
             if (event.getEventID().equals("Roundtrip_Approved") && event.isSuccess()) {
                 return true;

@@ -11,6 +11,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
