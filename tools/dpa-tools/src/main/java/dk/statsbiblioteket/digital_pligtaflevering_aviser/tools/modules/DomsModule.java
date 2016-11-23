@@ -33,6 +33,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_DELAY_BETWEEN_RETRIES;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_RETRIES;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 import static java.util.Arrays.asList;
 
 /**
@@ -74,6 +75,19 @@ public class DomsModule {
     @Named(DOMS_PIDGENERATOR_URL)
     public String provideDomsPidGeneratorURL(ConfigurationMap map) {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
+    }
+
+
+    /**
+     * Patht to the folder containing batches
+     *
+     * @param map configuration map containing the value.
+     * @return
+     */
+    @Provides
+    @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER)
+    public String provideBatcFolderPath(ConfigurationMap map) {
+        return map.getRequired(ITERATOR_FILESYSTEM_BATCHES_FOLDER);
     }
 
     /**
