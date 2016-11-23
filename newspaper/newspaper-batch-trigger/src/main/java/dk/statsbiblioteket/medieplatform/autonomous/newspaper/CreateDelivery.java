@@ -2,9 +2,10 @@ package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
+import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
+import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
+import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Event;
-import dk.statsbiblioteket.medieplatform.autonomous.NewspaperDomsEventStorage;
-import dk.statsbiblioteket.medieplatform.autonomous.NewspaperDomsEventStorageFactory;
 
 import org.slf4j.Logger;
 
@@ -17,9 +18,9 @@ import java.util.List;
  *
  * @author jrg
  */
-public class CreateBatch {
+public class CreateDelivery {
     private static final String STOPPED_STATE = "Manually_stopped";
-    public static Logger log = org.slf4j.LoggerFactory.getLogger(CreateBatch.class);
+    public static Logger log = org.slf4j.LoggerFactory.getLogger(CreateDelivery.class);
 
     /**
      * Receives the following arguments to create a batch object in DOMS:
@@ -37,11 +38,11 @@ public class CreateBatch {
         String domsPass;
         String urlToPidGen;
         //Starting to refactor Batch into something that is specifically for "digital pligtaflevering"
-        NewspaperDomsEventStorageFactory domsEventStorageFactory = new NewspaperDomsEventStorageFactory();
-        NewspaperDomsEventStorage domsEventClient;
+        DeliveryDomsEventStorageFactory domsEventStorageFactory = new DeliveryDomsEventStorageFactory();
+        DeliveryDomsEventStorage domsEventClient;
         Date now = new Date();
 
-        if (args.length != 7) {
+        if (args.length != 8) {
             System.out.println("Not the right amount of arguments");
             System.out.println("Receives the following arguments (in this order) to create a batch object in DOMS:");
             System.out.println(
@@ -56,15 +57,15 @@ public class CreateBatch {
         domsUser = args[4];
         domsPass = args[5];
         urlToPidGen = args[6];
-        log.info("Entered main for batch B{}-RT{}",batchId,roundTrip);
+        log.info("Entered main for batch dl_{}_rt{}",batchId,roundTrip);
         domsEventStorageFactory.setFedoraLocation(domsUrl);
         domsEventStorageFactory.setUsername(domsUser);
         domsEventStorageFactory.setPassword(domsPass);
         domsEventStorageFactory.setPidGeneratorLocation(urlToPidGen);
         try {
-            domsEventClient = domsEventStorageFactory.createDomsEventStorage();
+            domsEventClient = domsEventStorageFactory.createDeliveryDomsEventStorage();
             final int roundTripNumber = Integer.parseInt(roundTrip);
-            doWork(new Batch(batchId, roundTripNumber), premisAgent, domsEventClient, now);
+            doWork(new Delivery(batchId, roundTripNumber), premisAgent, domsEventClient, now);
         } catch (Exception e) {
             System.err.println("Failed adding event to batch, due to: " + e.getMessage());
             log.error("Caught exception: ", e);
@@ -77,24 +78,25 @@ public class CreateBatch {
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
      *
+     *
      * @param batch The batch to register
      * @param premisAgent The string used as premis agent id
      * @param domsEventClient The doms event client used for registering events.
      * @param now The timestamp to use.
      * @throws CommunicationException On trouble registering event.
      */
-    public static void doWork(Batch batch, String premisAgent, NewspaperDomsEventStorage domsEventClient, Date now) throws CommunicationException {
+    public static void doWork(Delivery batch, String premisAgent, DeliveryDomsEventStorage domsEventClient, Date now) throws CommunicationException {
         boolean alreadyApproved = false;
         boolean newerRoundTripAlreadyReceived = false;
 
 
         String message = "";
 
-        List<Batch> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
+        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
         if(roundtrips == null) {
             roundtrips = Collections.EMPTY_LIST;
         }
-        for (Batch roundtrip : roundtrips) {
+        for (Delivery roundtrip : roundtrips) {
             if (roundtrip.getRoundTripNumber() > batch.getRoundTripNumber()) {
                 message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is newer than this roundtrip ("+batch.getRoundTripNumber()+"), so this roundtrip will not be triggered here\n";
                 log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", batch.getFullID(), roundtrip.getRoundTripNumber());
@@ -108,14 +110,18 @@ public class CreateBatch {
 
             }
         }
+
+
         domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received",
                                        !newerRoundTripAlreadyReceived);
+
+
         if (alreadyApproved){
             domsEventClient.appendEventToItem(batch, premisAgent, now,
                                            "Another Roundtrip is already approved, so this batch should be stopped",
                                            STOPPED_STATE, true);
         } else if (!newerRoundTripAlreadyReceived){
-            for (Batch roundtrip : roundtrips) {
+            for (Delivery roundtrip : roundtrips) {
                 if (!roundtrip.getRoundTripNumber().equals(batch.getRoundTripNumber())) {
                     domsEventClient.appendEventToItem(roundtrip, premisAgent, now,
                                                    "Newer roundtrip (" + batch.getRoundTripNumber()
@@ -127,7 +133,12 @@ public class CreateBatch {
         }
     }
 
-    private static boolean isApproved(Batch olderRoundtrip) {
+
+
+
+
+
+    private static boolean isApproved(Delivery olderRoundtrip) {
         for (Event event : olderRoundtrip.getEventList()) {
             if (event.getEventID().equals("Roundtrip_Approved") && event.isSuccess()) {
                 return true;
