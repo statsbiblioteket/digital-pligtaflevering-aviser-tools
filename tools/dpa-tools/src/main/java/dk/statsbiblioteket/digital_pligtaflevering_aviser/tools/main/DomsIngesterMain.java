@@ -11,16 +11,23 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 
 /**
@@ -54,8 +61,9 @@ public class DomsIngesterMain {
         ) {
 
             return () -> {
+                final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
                 List<String> result = repository.query(query)
-                        .map(id -> ingester.apply(id, Paths.get(deliveriesFolder)))
+                        .map(id -> ingester.apply(id, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
                 return String.valueOf(result);
@@ -96,6 +104,17 @@ public class DomsIngesterMain {
         @Named(ITERATOR_FILESYSTEM_IGNOREDFILES)
         String provideFilesystemIgnoredFiles(ConfigurationMap map) {
             return map.getRequired(ITERATOR_FILESYSTEM_IGNOREDFILES);
+        }
+
+        @Provides
+        DBSearchRest provideDBSearchRest(@Named(DOMS_URL) String domsUrl,
+                                         @Named(DOMS_USERNAME) String domsUsername,
+                                         @Named(DOMS_PASSWORD) String domsPassword) {
+            try {
+                return new DBSearchRest(new Credentials(domsUsername, domsPassword), domsUrl);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("domsUsername: " + domsUsername + " domsUrl: " + domsUrl, e);
+            }
         }
 
     }
