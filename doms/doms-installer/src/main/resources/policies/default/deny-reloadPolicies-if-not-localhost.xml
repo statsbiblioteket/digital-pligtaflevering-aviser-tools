@@ -3,20 +3,20 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         PolicyId="deny-reloadPolicies-if-not-localhost"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable">
-  <Description>deny reload policies access if client ip address is not 127.0.0.1 (or IPv6 equivalent)</Description>                                                    
+  <Description>deny reload policies access if client ip address is not 127.0.0.1 (or IPv6 equivalent)</Description>
   <Target>
     <Subjects>
       <AnySubject/>
     </Subjects>
     <Resources>
       <AnyResource/>
-    </Resources>    
+    </Resources>
     <Actions>
       <Action>
         <ActionMatch MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:domsId-reloadPolicies</AttributeValue>
+          <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:id-reloadPolicies</AttributeValue>
           <ActionAttributeDesignator DataType="http://www.w3.org/2001/XMLSchema#string"
-            AttributeId="urn:fedora:names:fedora:2.1:action:domsId"/>
+                                     AttributeId="urn:fedora:names:fedora:2.1:action:id"/>
         </ActionMatch>
       </Action>
     </Actions>

@@ -205,7 +205,7 @@ The datastore parameter for the resource index should be set to MPTStore:
 
 And the following should be added to enable the MPTStore:
 
-    <datastore domsId="localPostgresMPTTriplestore">
+    <datastore id="localPostgresMPTTriplestore">
         <comment>
             Example local MPTStore backed by Postgres.
             To use this triplestore for the Resource Index:
