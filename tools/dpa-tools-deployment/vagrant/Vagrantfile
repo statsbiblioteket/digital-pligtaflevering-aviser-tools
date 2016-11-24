@@ -14,7 +14,8 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "sb-centos7-vanilla"
 
-
+  # Tomcat med DOMS + Central Web-service.
+  config.vm.network :forwarded_port, :host => 17880, :guest => 7880
 
 
   # Share an additional folder to the guest VM. The first argument is
@@ -75,6 +76,9 @@ Vagrant.configure("2") do |config|
   # SHELL
 
   #config.vm.network :public_network, :nictype => 'virtio', :type => "dhcp", :use_dhcp_assigned_default_route => true
+
+  # For shared virtual network when running along DOMS Gui-installer vagrant.
+  config.vm.network :private_network, :ip => "192.168.50.3", :virtualbox__intnet => "localvagrantnetwork"
 
 
 
