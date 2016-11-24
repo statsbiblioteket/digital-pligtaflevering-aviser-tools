@@ -153,7 +153,6 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
      * "DIRECTORYOBJECT". This will work because the subdirectories are processed first. </li> </ul>
      *
      * @param dcIdentifier
-     * @param deliveryPath
      */
 
     protected void createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath) {
@@ -161,6 +160,7 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
         log.trace("Dir: {}", dcIdentifier);
 
         // see if DOMS object exist for this directory
+
         List<String> founds = lookupObjectFromDCIdentifier(dcIdentifier);
 
         final String directoryObjectPid; // "uuid:...."
@@ -180,14 +180,54 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
         }
 
         // for each file in directory, create a child object.
+
+        List<String> childFileObjectIds;
         try {
-            List<String> childFileObjectIds = Files.walk(absoluteFileSystemPath, 1)
+            childFileObjectIds = Files.walk(absoluteFileSystemPath, 1)
                     .filter(Files::isRegularFile)
                     .map(path -> createFileObjectInDOMS("path:" + rootPath.relativize(path), path))
                     .collect(Collectors.toList());
+            log.trace("childFileObjectIds {}", childFileObjectIds);
         } catch (IOException e) {
             throw new RuntimeException("directoryToBeDOMSObjectPath=" + dcIdentifier, e);
         }
+
+        // For each "FILEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "FILEOBJECT")-relation on "DIRECTORYOBJECT"
+
+        childFileObjectIds.stream().forEach(id -> {
+            try {
+                efedora.addRelation(directoryObjectPid, directoryObjectPid, "info:fedora/fedora-system:def/relations-external#hasPart", id, false, "comment");
+            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+                throw new RuntimeException("addRelations " + childFileObjectIds, e);
+            }
+        });
+
+        /**
+         * NOTE: FedoraRest.addRelations has a bug occasionally invoking addRelation several times more than necessary.  FOr
+         * instance when called with just one object id.  This leads to duplications of relations.  Therefore we loop ourselves causing
+         * a new REL-EXT datastream version for every write.  See ABR for details.
+         */
+
+        // For each subdirectory in this directory, lookup the child DOMS id using its relative Path and create
+        // a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the subdirectories are processed first.
+
+        List<String> childDirectoryObjectIds = null;
+        try {
+            Files.walk(absoluteFileSystemPath, 1)
+                    .skip(1) // Skip the parent directory itself.
+                    .filter(Files::isDirectory)
+                    .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // HACK!
+                    .forEach(id -> {
+                        try {
+                            efedora.addRelation(directoryObjectPid, directoryObjectPid, "info:fedora/fedora-system:def/relations-external#hasPart", id, false, "comment");
+                        } catch (Exception e) {
+                            throw new RuntimeException("addRelations child dirs", e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException("addRelations child dirs", e);
+        }
+        log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
 
     }
 
@@ -223,7 +263,7 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
         String comment = "Added datastream for file " + domsFileObjectPath.toString();
 
         if (goesInBitrepository) {
-
+            // FIXME!
         } else {
             if (domsFileObjectPath.toString().endsWith(".xml")) { // FIXME
                 final String mimeType = "text/xml"; // FIXME:  text/plain for others
