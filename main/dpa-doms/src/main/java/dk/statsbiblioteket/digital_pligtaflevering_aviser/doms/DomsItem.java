@@ -48,7 +48,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      *
      * The synchronization mechanism is not optimized.
      */
-    private synchronized void reloadIfNeeded() {
+    protected synchronized void reloadIfNeeded() {
         if (objectProfile == null) {
             objectProfile = domsRepository.getObjectProfile(domsId.id(), null);
             Objects.requireNonNull(objectProfile, "objectProfile not set");
