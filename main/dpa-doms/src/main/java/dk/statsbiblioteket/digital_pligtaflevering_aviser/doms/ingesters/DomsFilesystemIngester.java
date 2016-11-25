@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -88,6 +89,7 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
     @Override
     public String apply(DomsId domsId, Path rootPath) {
         Set<String> ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+        log.trace("Ignored files: {}", ignoredFilesSet);
 
         try {
             final DomsItem item = repository.lookup(domsId);
@@ -128,13 +130,20 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
 
             log.trace("{}", deliveryPath);
 
+            // Original in BatchMD5Validation.readChecksums()
+            // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+
+            Map<String, String> md5map = Files.lines(deliveryPath.resolve("MD5SUMS.txt"))
+                    .map(s -> s.split(" "))
+                    .collect(Collectors.toMap(a -> a[1], a -> a[0]));
+
             /* walk() guarantees that we have always seen the parent of a directory before we
              see the directory itself.  This mean that we can rely of the parent being in DOMS */
 
             walk(deliveryPath)
                     .filter(Files::isDirectory)
                     .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                    .forEach(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path));
+                    .forEach(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map));
         } catch (IOException e) {
             throw new RuntimeException("domsId: " + domsId + ", rootPath: " + rootPath, e);
         }
@@ -153,9 +162,10 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
      * "DIRECTORYOBJECT". This will work because the subdirectories are processed first. </li> </ul>
      *
      * @param dcIdentifier
+     * @param md5map
      */
 
-    protected void createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath) {
+    protected void createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) {
 
         log.trace("Dir: {}", dcIdentifier);
 
@@ -183,8 +193,14 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
 
         List<String> childFileObjectIds;
         try {
-            childFileObjectIds = Files.walk(absoluteFileSystemPath, 1)
+            List<Path> childFilesInThisDirectory = Files.walk(absoluteFileSystemPath, 1)
                     .filter(Files::isRegularFile)
+                    .filter(path -> ignoredFiles.contains(path.toString()) == false)
+                    .collect(Collectors.toList());
+
+
+
+            childFileObjectIds = childFilesInThisDirectory.stream()
                     .map(path -> createFileObjectInDOMS("path:" + rootPath.relativize(path), path))
                     .collect(Collectors.toList());
             log.trace("childFileObjectIds {}", childFileObjectIds);
