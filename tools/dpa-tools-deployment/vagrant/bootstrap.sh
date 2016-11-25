@@ -6,6 +6,8 @@ sudo mkdir dpa
 sudo chmod 777 dpa
 cd dpa
 
+sudo mkdir logs
+sudo chmod 777 logs
 
 
 sudo cp /target/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz /home/vagrant/dpa/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz
@@ -18,6 +20,8 @@ sudo chmod +x /etc/init.d/initiateAutonomousComponents.sh
 
 cp  /vagrant/runningTheStuff.sh runningTheStuff.sh
 sudo chmod +x runningTheStuff.sh
+
+cd logs
 
 cp  /vagrant/startCreateBatch.sh startCreateBatch.sh
 sudo chmod +x startCreateBatch.sh
