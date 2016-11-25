@@ -14,10 +14,6 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "sb-centos7-vanilla"
 
-  # Tomcat med DOMS + Central Web-service.
-  config.vm.network :forwarded_port, :host => 17880, :guest => 7880
-
-
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third

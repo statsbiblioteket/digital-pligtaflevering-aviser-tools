@@ -21,13 +21,22 @@ sudo chmod +x /etc/init.d/initiateAutonomousComponents.sh
 cp  /vagrant/runningTheStuff.sh runningTheStuff.sh
 sudo chmod +x runningTheStuff.sh
 
+
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.0.0-linux-x86_64.tar.gz
+tar -xf filebeat-5.0.0-linux-x86_64.tar.gz
+
+sudo cp /vagrant/filebeat/vagrantfilebeat.yml /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/filebeat.yml
+sudo cp /vagrant/filebeat/startFilebeat.sh /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
+
+
 cd logs
 
 cp  /vagrant/startCreateBatch.sh startCreateBatch.sh
 sudo chmod +x startCreateBatch.sh
 
-cp  /vagrant/startHandler.sh startHandler.sh
-sudo chmod +x startHandler.sh
+#cp  /vagrant/startHandler.sh startHandler.sh
+#sudo chmod +x startHandler.sh
+
 
 
 
