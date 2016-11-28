@@ -154,7 +154,7 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
     /**
      * For the given directory: <ul> <li>Look up DOMS object for current "path:...".  If not found, create an empty DOMS
      * object here called "DIRECTORYOBJECT" for the given directory itself.</li> <li>Create a DOMS object for each file
-     * (here called "FILEOBJECT").</li> <ul> <li>Create CONTENTS datastream for each metadata file.</li> <li>For each
+     * (here called "FILEOBJECT").</li> <ul> <li>Create METADATA datastream for each metadata file.</li> <li>For each
      * binary file, ingest the file in BitRepository and create CONTENTS datastream for the corresponding public
      * BitRepository URL </li> </ul> <li>For each "FILEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart"
      * "FILEOBJECT")-relation on "DIRECTORYOBJECT" </li> <li>For each subdirectory in this directory, lookup the child
@@ -210,6 +210,8 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
 
         // For each "FILEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "FILEOBJECT")-relation on "DIRECTORYOBJECT"
 
+        // FIXME: HasPart for metadata files, HasFile for files in DOMS put into Bitrepository.
+
         childFileObjectIds.stream().forEach(id -> {
             try {
                 efedora.addRelation(directoryObjectPid, directoryObjectPid, "info:fedora/fedora-system:def/relations-external#hasPart", id, false, "comment");
@@ -255,12 +257,29 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
         }
     }
 
+    /**
+     * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps:
+     * <ol>
+     *  <li>Clone file template.</li>
+     * <li>Upload file to Bitrepository using BitRepositoryClient API</li>
+     * <li>Construct URL pointing to uploaded file in Bitrepository, using text manipulation to create
+     * "http://bitfinder.statsbiblioteket.dk/<i>collection</i>" plus "path/to/A.PDF".
+     * (NOTE: we may have to convert "/" to something else to flatten into a single file name - KFC investigates)</li>
+     * <li>Register external datastream named "CONTENTS" in DOMS referencing the URL.</li>
+     * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "METADATA" data stream).</li>
+     * </ol>
+     * @param dcIdentifier
+     * @param domsFileObjectPath
+     * @return
+     */
     protected String createFileObjectInDOMS(String dcIdentifier, Path domsFileObjectPath) {
         log.trace("createFileObjectInDoms {},{}", dcIdentifier, domsFileObjectPath);
         List<String> founds = lookupObjectFromDCIdentifier(dcIdentifier);
         final String fileObjectId;
         if (founds.isEmpty()) {
             // no DOMS object present already, create one.
+            // FIXME:  For non-metadata files going into the Bitrepository, clone file template.  For all others
+            // call newEmptyObject().
             ArrayList<String> oldIds = new ArrayList<>();
             oldIds.add(dcIdentifier);
             String logMessage = "Created object for file " + domsFileObjectPath.toString();
@@ -292,7 +311,7 @@ public class DomsFilesystemIngester implements BiFunction<DomsId, Path, String> 
                 try {
                     efedora.modifyDatastreamByValue(
                             fileObjectId,
-                            "CONTENTS",
+                            "METADATA",
                             null, // no checksum
                             null, // no checksum
                             allBytes,
