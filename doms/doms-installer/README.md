@@ -89,6 +89,14 @@ This is typical when developing code.
 .
 
     vagrant ssh -c 'JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 bash -x 7880-doms/bin/doms.sh update'
+    
+    
+start process to keep solr updated: 
+===    
+
+The following command updates solr by running the update script every 3 minutes
+
+./doms_updater.sh & disown
 
 
 
