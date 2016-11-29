@@ -27,7 +27,7 @@ tar -xf filebeat-5.0.0-linux-x86_64.tar.gz
 
 sudo cp /vagrant/filebeat/vagrantfilebeat.yml /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/filebeat.yml
 sudo cp /vagrant/filebeat/startFilebeat.sh /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
-
+sudo chmod 777 /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
 
 cd logs
 
