@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.DomsFilesystemIngester;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.FileSystemIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
@@ -57,7 +57,7 @@ public class DomsIngesterMain {
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          QuerySpecification query,
                          DomsRepository repository,
-                         DomsFilesystemIngester ingester
+                         FileSystemIngester ingester
         ) {
 
             return () -> {
