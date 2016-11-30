@@ -18,8 +18,8 @@ cp -R /vagrant/properties properties
 sudo cp  /vagrant/init/initiateAutonomousComponents.sh /etc/init.d/initiateAutonomousComponents.sh
 sudo chmod +x /etc/init.d/initiateAutonomousComponents.sh
 
-cp  /vagrant/runningTheStuff.sh runningTheStuff.sh
-sudo chmod +x runningTheStuff.sh
+cp  /vagrant/runningComponents.sh runningComponents.sh
+sudo chmod +x runningComponents.sh
 
 
 curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.0.0-linux-x86_64.tar.gz
@@ -31,8 +31,8 @@ sudo chmod 777 /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
 
 cd logs
 
-cp  /vagrant/startCreateBatch.sh startCreateBatch.sh
-sudo chmod +x startCreateBatch.sh
+cp  /vagrant/startCreateDelivery.sh startCreateDelivery.sh
+sudo chmod +x startCreateDelivery.sh
 
 #cp  /vagrant/startHandler.sh startHandler.sh
 #sudo chmod +x startHandler.sh
