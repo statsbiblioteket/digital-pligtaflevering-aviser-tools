@@ -29,6 +29,12 @@ public class BitRepositoryModule {
         return map.getRequired(BITMAG_BASEURL_PROPERTY);
     }
 
+    /** The SB Bitrepository pillar allows direct access to the files in the repository, typically
+     * in the form of a NFS mount point from where the file path can be resolved.
+     *
+     * @param map configuration map
+     * @return the configuration parameter provided (required)
+     */
     @Provides
     @Named(BITREPOSITORY_SBPILLAR_MOUNTPOINT)
     String getPutfileDestinationPath(ConfigurationMap map) {

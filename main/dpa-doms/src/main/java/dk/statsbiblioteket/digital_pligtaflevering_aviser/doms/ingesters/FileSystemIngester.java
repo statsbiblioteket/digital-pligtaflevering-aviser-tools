@@ -44,7 +44,7 @@ import static java.nio.file.Files.walk;
  */
 public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
-    Logger log = LoggerFactory.getLogger(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private DomsRepository repository;
     private String ignoredFiles;
@@ -93,15 +93,18 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         try {
             // First get identifiers from the Dublin Core XML data stream.
             //
-            // <dc:identifier>uuid:5a06c0ed-6324-4777-86b0-075fc972dcb4</dc:identifier>
-            // <dc:identifier>path:B20160811-RT1</dc:identifier>
+            // <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+            //  <dc:title>Newspaper Roundtrip</dc:title>
+            //  <dc:identifier>uuid:5a06c0ed-6324-4777-86b0-075fc972dcb4</dc:identifier>
+            //  <dc:identifier>path:B20160811-RT1</dc:identifier>
+            //</oai_dc:dc>
 
             XPath xPath = XPathFactory.newInstance().newXPath();
             NamespaceContextImpl context = new NamespaceContextImpl();
             context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
             xPath.setNamespaceContext(context);
 
-            String dcContent = restApi.path(domsId.id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);
+            String dcContent = restApi.path(domsId.id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
             NodeList nodeList;
             try {
                 nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
@@ -145,6 +148,12 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             /* walk() guarantees that we have always seen the parent of a directory before we
              see the directory itself.  This mean that we can rely of the parent being in DOMS */
 
+            // Process folders in "longest string" order:
+            // dl_20160811_rt1/verapdf/articles
+            // dl_20160811_rt1/verapdf/pages
+            // dl_20160811_rt1/verapdf
+            // dl_20160811_rt1/
+
             walk(deliveryPath)
                     .filter(Files::isDirectory)
                     .sorted(Comparator.reverseOrder()) // ensure children processed before parents
@@ -178,7 +187,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
     protected void createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) throws Exception {
 
-        log.trace("Dir: {}", dcIdentifier);
+        log.trace("DC id: {}", dcIdentifier);
 
         // see if DOMS object exist for this directory
 
@@ -191,16 +200,17 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         try {
             Map<String, List<Path>> pathsForPage = Files.walk(absoluteFileSystemPath, 1)
                     .filter(Files::isRegularFile)
-                    .peek(path -> log.trace("> {}", path.getFileName()))
+                    .sorted()
                     .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
+                    .peek(path -> log.trace("discovered regular file {}", path.getFileName()))
                     .collect(Collectors.groupingBy(path -> "path:" + basenameOfPath(rootPath.relativize(path))));
 
             log.trace("pathsForPage {}", pathsForPage);
 
-            // For each page create a DOMS object.  For each file in the page, consider if it is metadata or not.
+            // For each individual page create a DOMS object.  For each file in the page, consider if it is metadata or not.
             // If it is metadata store it as a datastream on the object.  If it is binary data, put it in the Bitrepository,
             // create a DOMS object for the file, store the public URL for the bitrepository file in "CONTENTS" on the file object,
-            // and create a "hasFile" relation from the file group object to
+            // and create a "hasFile" relation from the file group object to the page object.
             // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
 
             List<String> pagesInThisDirectory = pathsForPage.entrySet().stream()
@@ -220,10 +230,10 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                              * uploaded file in Bitrepository, using text manipulation to create "http://bitfinder.statsbiblioteket.dk/<i>collection</i>"
                                              * plus "path/to/A.PDF". (NOTE: we may have to convert "/" to something else to flatten into a single file name -
                                              * KFC investigates)</li> <li>Register external datastream named "CONTENTS" in DOMS referencing the URL.</li>
-                                             * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "METADATA" data
+                                             * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "XML" data
                                              * stream).</li> </ol>
                                              */
-                                            final String permanentURL = "http://FIXME";
+                                            final String permanentURL = "http://FIXME"; // BITMAG_BASEURL_PROPERTY
                                             final String mimetype = "application/pdf";  // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
 
                                             // create DOMS object for the file
@@ -275,9 +285,10 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         List<String> childDirectoryObjectIds = null;
         try {
             List<String> childIds = Files.walk(absoluteFileSystemPath, 1)
-                    .skip(1) // Skip the parent directory itself.
                     .filter(Files::isDirectory)
-                    .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // HACK!
+                    .skip(1) // Skip the parent directory itself.
+                    .sorted() // Unscramble order
+                    .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // zero or one id returned
                     .collect(Collectors.toList());
 
             if (childIds.size() != 1) { // avoid triggering bug in FedoraRest.addRelations

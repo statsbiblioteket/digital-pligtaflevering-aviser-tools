@@ -217,9 +217,9 @@ The DOMS model constructed looks like:
             ! +-+----------+
             !   !
             !   +>+-------------------------------------------+
-            !   ! "20160811_verapdf_article_5c649fe5"       !
-            !   ! Datastream "METADATA": bytes in .XML file !
-            !   +-------------------------------------------+
+            !     ! "20160811_verapdf_article_5c649fe5"       !
+            !     ! Datastream "XML": bytes in .XML file      ! 
+            !     +-------------------------------------------+
             !
             +>+------------+
               ! "pages"    !
@@ -227,7 +227,7 @@ The DOMS model constructed looks like:
                 !
                 +>+-------------------------------------------+
                 ! ! "20160811_verapdf_page001"                !
-                ! ! Datastream "METADATA": bytes in .XML file !
+                ! ! Datastream "XML": bytes in .XML file      !
                 ! +-+-----------------------------------------+
                 !   ! NOTE: hasFile relation
                 !   +>+-----------------------------------------------+

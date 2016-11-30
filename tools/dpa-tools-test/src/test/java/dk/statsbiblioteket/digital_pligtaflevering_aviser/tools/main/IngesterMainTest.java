@@ -8,14 +8,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain.DPA_DELIVERIES_FOLDER;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
 
 /**
  *
  */
-public class DomsIngesterMainTest {
+public class IngesterMainTest {
     @Test
-    public void domsIngestB20160811_RT1() throws URISyntaxException {
+    public void ingestB20160811_RT1() throws URISyntaxException {
         String batchDirPathInWorkspace = "delivery-samples";
 
         // http://stackoverflow.com/a/320595/53897
@@ -27,8 +27,8 @@ public class DomsIngesterMainTest {
 
         Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
 
-        DomsIngesterMain.main(new String[]{
-                "doms-ingester.properties",
+        IngesterMain.main(new String[]{
+                "ingester.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 "pageSize=9999"
         });

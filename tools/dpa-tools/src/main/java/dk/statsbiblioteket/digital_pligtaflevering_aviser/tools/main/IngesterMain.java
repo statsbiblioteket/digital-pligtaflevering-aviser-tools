@@ -33,24 +33,24 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  * Unfinished
  */
-public class DomsIngesterMain {
+public class IngesterMain {
 
     public static final String DPA_DELIVERIES_FOLDER = "dpa.deliveries.folder";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerDomsIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
+                m -> DaggerIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
-    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, DomsIngesterModule.class})
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, IngesterModule.class})
     protected interface DomsIngesterComponent {
         Tool getTool();
     }
 
     @Module
-    protected static class DomsIngesterModule {
+    protected static class IngesterModule {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
@@ -66,7 +66,7 @@ public class DomsIngesterMain {
                         .map(id -> ingester.apply(id, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
-                return String.valueOf(result);
+                return String.valueOf(result); // FIXME: Formalize output
             };
         }
 
