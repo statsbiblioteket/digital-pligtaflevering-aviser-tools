@@ -94,9 +94,9 @@ This is typical when developing code.
 start process to keep solr updated: 
 ===    
 
-The following command updates solr by running the update script every 3 minutes
+There is placed a script for updating solr every 3 minutes, this can be started by logging into the Vagrant-image and running the following script 
 
-./doms_updater.sh & disown
+./doms_updater.sh
 
 
 
