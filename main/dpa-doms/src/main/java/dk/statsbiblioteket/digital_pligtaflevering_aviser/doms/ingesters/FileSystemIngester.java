@@ -4,7 +4,6 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
-import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
@@ -52,6 +51,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
     private WebResource restApi;
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
+    protected Set<String> ignoredFilesSet;
 
     @Inject
     public FileSystemIngester(DomsRepository repository,
@@ -61,6 +61,9 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         this.ignoredFiles = ignoredFiles;
         this.restApi = restApi;
         this.efedora = efedora;
+
+        ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+        log.trace("Ignored files: {}", ignoredFilesSet);
     }
 
     /**
@@ -86,8 +89,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
      */
     @Override
     public String apply(DomsId domsId, Path rootPath) {
-        Set<String> ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
-        log.trace("Ignored files: {}", ignoredFilesSet);
 
         try {
             // First get identifiers from the Dublin Core XML data stream.
@@ -158,7 +159,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             throw new RuntimeException("domsId: " + domsId + ", rootPath: " + rootPath, e);
         }
 
-        return null;
+        return null;  // FIXME:  Return results list.
     }
 
     /**
@@ -190,6 +191,8 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         try {
             Map<String, List<Path>> pathsForPage = Files.walk(absoluteFileSystemPath, 1)
                     .filter(Files::isRegularFile)
+                    .peek(path -> log.trace("> {}", path.getFileName()))
+                    .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
                     .collect(Collectors.groupingBy(path -> "path:" + basenameOfPath(rootPath.relativize(path))));
 
             log.trace("pathsForPage {}", pathsForPage);
@@ -200,31 +203,44 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             // and create a "hasFile" relation from the file group object to
             // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
 
-            List<String> pagesInDirectory = pathsForPage.entrySet().stream()
+            List<String> pagesInThisDirectory = pathsForPage.entrySet().stream()
                     .map(entry -> {
                         final String id = entry.getKey();
                         String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
                         final List<Path> filesForPage = entry.getValue();
                         filesForPage.stream()
                                 .forEach(path -> {
+                                    // FIXME: check md5 checksum.
                                     try {
-                                        if (path.toString().endsWith(".pdf")) {
+                                        if (path.toString().endsWith(".pdf")) {  // FIXME: "Go in bitrepository?"
                                             // put in bitrepository
-                                            // ...
+                                            /**
+                                             * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps: <ol> <li>Clone file
+                                             * template.</li> <li>Upload file to Bitrepository using BitRepositoryClient API</li> <li>Construct URL pointing to
+                                             * uploaded file in Bitrepository, using text manipulation to create "http://bitfinder.statsbiblioteket.dk/<i>collection</i>"
+                                             * plus "path/to/A.PDF". (NOTE: we may have to convert "/" to something else to flatten into a single file name -
+                                             * KFC investigates)</li> <li>Register external datastream named "CONTENTS" in DOMS referencing the URL.</li>
+                                             * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "METADATA" data
+                                             * stream).</li> </ol>
+                                             */
+                                            final String permanentURL = "http://FIXME";
+                                            final String mimetype = "application/pdf";  // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
 
                                             // create DOMS object for the file
                                             String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + rootPath.relativize(path));
 
                                             // save external datastream in file object.
-                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", path.toString(), "http://FIXME", "application/octet-stream", "application/pdf", null, "Adding file after bitrepository ingest");
+                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", path.toString(), permanentURL, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest");
 
                                             // Add "hasPart" relation from the page object to the file object
                                             efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasFile", fileObjectId, false, "comment");
 
                                         } else if (path.toString().endsWith(".xml")) {
                                             // save physical bytes of XML file as "XML" data stream on page object.
+
+                                            final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
-                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, "text/xml", "From " + path, null);
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
                                         } else {
                                             log.warn("path not pdf/xml: " + path);
                                         }
@@ -237,12 +253,12 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
             // All pages are now created in DOMS.  Add "hasPart" relations to directory object.
 
-            if (pagesInDirectory.size() != 1) {
-                efedora.addRelations(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", pagesInDirectory, false, "comment");
+            if (pagesInThisDirectory.size() != 1) { // avoid triggering bug in FedoraRest.addRelations
+                efedora.addRelations(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", pagesInThisDirectory, false, "comment");
             } else {
-                efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", pagesInDirectory.get(0), false, "comment");
+                efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", pagesInThisDirectory.get(0), false, "comment");
             }
-            log.trace("directory {} pages {}", absoluteFileSystemPath, pagesInDirectory);
+            log.trace("directory {} pages {}", absoluteFileSystemPath, pagesInThisDirectory);
         } catch (IOException e) {
             throw new RuntimeException("directoryToBeDOMSObjectPath=" + dcIdentifier, e);
         }
@@ -264,8 +280,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                     .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // HACK!
                     .collect(Collectors.toList());
 
-            // avoid triggering bug in FedoraRest.addRelations if there is only one id given.
-            if (childIds.size() != 1) {
+            if (childIds.size() != 1) { // avoid triggering bug in FedoraRest.addRelations
                 efedora.addRelations(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", childIds, false, "comment");
             } else {
                 efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", childIds.get(0), false, "comment");
@@ -318,73 +333,5 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         } catch (BackendInvalidCredsException | BackendMethodFailedException e) {
             throw new RuntimeException("findObjectFromDCIdentifier id=" + dcIdentifier, e);
         }
-    }
-
-    /**
-     * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps: <ol> <li>Clone file
-     * template.</li> <li>Upload file to Bitrepository using BitRepositoryClient API</li> <li>Construct URL pointing to
-     * uploaded file in Bitrepository, using text manipulation to create "http://bitfinder.statsbiblioteket.dk/<i>collection</i>"
-     * plus "path/to/A.PDF". (NOTE: we may have to convert "/" to something else to flatten into a single file name -
-     * KFC investigates)</li> <li>Register external datastream named "CONTENTS" in DOMS referencing the URL.</li>
-     * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "METADATA" data
-     * stream).</li> </ol>
-     *
-     * @param dcIdentifier
-     * @param domsFileObjectPath
-     * @return
-     */
-    protected String createFileObjectInDOMS(String dcIdentifier, Path domsFileObjectPath) {
-        log.trace("createFileObjectInDoms {},{}", dcIdentifier, domsFileObjectPath);
-        List<String> founds = lookupObjectFromDCIdentifier(dcIdentifier);
-        final String fileObjectId;
-        if (founds.isEmpty()) {
-            // no DOMS object present already, create one.
-            // FIXME:  For non-metadata files going into the Bitrepository, clone file template.  For all others
-            // call newEmptyObject().
-            ArrayList<String> oldIds = new ArrayList<>();
-            oldIds.add(dcIdentifier);
-            String logMessage = "Created object for file " + domsFileObjectPath.toString();
-
-            try {
-                fileObjectId = efedora.newEmptyObject(oldIds, collections, logMessage);
-            } catch (BackendInvalidCredsException | BackendMethodFailedException | PIDGeneratorException e) {
-                throw new RuntimeException("newEmptyObject() oldIds=" + oldIds, e);
-            }
-        } else {
-            fileObjectId = founds.get(0);
-        }
-
-        boolean goesInBitrepository = domsFileObjectPath.toString().endsWith(".pdf");  // FIXME:  Configurable
-
-        String comment = "Added datastream for file " + domsFileObjectPath.toString();
-
-        if (goesInBitrepository) {
-            // FIXME!
-        } else {
-            if (domsFileObjectPath.toString().endsWith(".xml")) { // FIXME
-                final String mimeType = "text/xml"; // FIXME:  text/plain for others
-                final byte[] allBytes;
-                try {
-                    allBytes = Files.readAllBytes(domsFileObjectPath);
-                } catch (IOException e) {
-                    throw new RuntimeException("reading " + domsFileObjectPath, e);
-                }
-                try {
-                    efedora.modifyDatastreamByValue(
-                            fileObjectId,
-                            "METADATA",
-                            null, // no checksum
-                            null, // no checksum
-                            allBytes,
-                            null,
-                            mimeType,
-                            comment,
-                            null);
-                } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
-                    throw new RuntimeException("modifying datastream for " + domsFileObjectPath, e);
-                }
-            }
-        }
-        return fileObjectId;
     }
 }
