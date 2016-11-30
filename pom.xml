@@ -16,9 +16,11 @@
         <module>main/dpa-bitrepository</module>
 
         <!-- folder names, not modules -->
+        <!-- functionality migrated into new code
         <module>newspaper/newspaper-batch-trigger</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
         <module>newspaper/newspaper-bitrepository-ingester</module>
+        -->
 
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
@@ -27,6 +29,7 @@
         <module>tools/dpa-tools-deployment</module>
     </modules>
 </project>
+
 
 
 
