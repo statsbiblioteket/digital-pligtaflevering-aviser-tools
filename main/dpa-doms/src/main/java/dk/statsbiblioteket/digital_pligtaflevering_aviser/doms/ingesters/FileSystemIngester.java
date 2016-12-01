@@ -6,6 +6,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.ws.commons.util.NamespaceContextImpl;
@@ -44,6 +45,7 @@ import static java.nio.file.Files.walk;
  */
 public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
+    private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private DomsRepository repository;
@@ -156,7 +158,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
             walk(deliveryPath)
                     .filter(Files::isDirectory)
-                    .sorted(Comparator.reverseOrder()) // ensure children processed before parents
+                    .sorted(Comparator.reverseOrder()) // ensure children processed before parents,  FIXME: reverseOrder() how defined on Paths?
                     .forEach(path -> {
                         try {
                             createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map);
@@ -239,20 +241,21 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             // create DOMS object for the file
                                             String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + rootPath.relativize(path));
 
-                                            // save external datastream in file object.
-                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", path.toString(), permanentURL, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest");
+                                            // save external datastream in file object.  FIXME:  Modify "application/octet-stream" to value given by KFC. path.toString() to relative path.
+                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", path.toString(), permanentURL, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
 
-                                            // Add "hasPart" relation from the page object to the file object
-                                            efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasFile", fileObjectId, false, "comment");
+                                            // Add "hasPart" relation from the page object to the file object, FIXME: KFC gives correct value for "info:fedora/fedora-system:def/relations-external#hasFile"
+                                            efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
 
                                         } else if (path.toString().endsWith(".xml")) {
                                             // save physical bytes of XML file as "XML" data stream on page object.
 
                                             final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
-                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
+                                            String md5checksum = "FIXME";
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, md5checksum, allBytes, null, mimeType, "From " + path, null);
                                         } else {
-                                            log.warn("path not pdf/xml: " + path);
+                                            throw new RuntimeException("path not pdf/xml: " + path);
                                         }
                                     } catch (Exception e) {
                                         throw new RuntimeException("creating hasFile relation", e);
@@ -286,7 +289,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         try {
             List<String> childIds = Files.walk(absoluteFileSystemPath, 1)
                     .filter(Files::isDirectory)
-                    .skip(1) // Skip the parent directory itself.
+                    .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
                     .sorted() // Unscramble order
                     .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // zero or one id returned
                     .collect(Collectors.toList());

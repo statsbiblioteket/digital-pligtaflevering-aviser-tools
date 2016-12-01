@@ -229,7 +229,7 @@ The DOMS model constructed looks like:
                 ! ! "20160811_verapdf_page001"                !
                 ! ! Datastream "XML": bytes in .XML file      !
                 ! +-+-----------------------------------------+
-                !   ! NOTE: hasFile relation
+                !   ! NOTE: hasPart relation
                 !   +>+-----------------------------------------------+
                 !     ! "20160811_verapdf_page001.pdf"                ! 
                 !     ! Physical file stored in the Bitrepository.    !
@@ -238,7 +238,7 @@ The DOMS model constructed looks like:
                 !
                 +>+------------------------------------....
                 ! ! "20160811_verapdf_page002".....
-                ! ! Datastream "METADAT....
+                ! ! Datastream "XML....
                 ! +--- ...
                 !
 
