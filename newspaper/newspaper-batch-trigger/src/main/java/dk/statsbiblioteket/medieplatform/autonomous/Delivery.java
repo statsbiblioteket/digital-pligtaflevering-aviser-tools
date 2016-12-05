@@ -16,15 +16,22 @@ public class Delivery extends Item {
      */
     private Integer roundTripNumber = 1;
 
-    /** Constructor */
-    public Delivery() { }
+    /**
+     * Constructor
+     */
+    public Delivery() {
+    }
 
-    /** Constructor */
+    /**
+     * Constructor
+     */
     public Delivery(String batchID) {
         setBatchID(batchID);
     }
 
-    /** Constructor */
+    /**
+     * Constructor
+     */
     public Delivery(String batchID, Integer roundTripNumber) {
         if (roundTripNumber == null) {
             roundTripNumber = 0;
@@ -41,7 +48,9 @@ public class Delivery extends Item {
         return roundTripNumber;
     }
 
-    /** Set the round trip number */
+    /**
+     * Set the round trip number
+     */
     public void setRoundTripNumber(Integer roundTripNumber) {
         this.roundTripNumber = roundTripNumber;
     }
@@ -64,7 +73,6 @@ public class Delivery extends Item {
         this.batchID = batchID;
     }
 
-
     /**
      * Get the full ID in the form B<batchID>-RT<roundTripNumber>
      *
@@ -72,9 +80,8 @@ public class Delivery extends Item {
      */
     @Override
     public String getFullID() {
-        return formatFullID(batchID,roundTripNumber);
+        return formatFullID(batchID, roundTripNumber);
     }
-
 
     @Override
     public String toString() {
@@ -108,17 +115,17 @@ public class Delivery extends Item {
 
     /**
      * Format the batchid and roundtripnumber as a proper batch id
-     * @param batchID the batch id without the leading B
+     *
+     * @param batchID         the batch id without the leading B
      * @param roundTripNumber the roundtrip number
      * @return a string of the format B{batchID}-RT{roundTripNumber}
      */
-    public static String formatFullID(String batchID, Integer roundTripNumber){
-        if (roundTripNumber == null){
+    public static String formatFullID(String batchID, Integer roundTripNumber) {
+        if (roundTripNumber == null) {
             roundTripNumber = 0;
         }
-        return "dl_" + batchID + "_rt" + roundTripNumber;
+        return batchID + "_rt" + roundTripNumber;
     }
-
 
     public static class BatchRoundtripID {
         private String batchID;
@@ -126,26 +133,26 @@ public class Delivery extends Item {
 
         public BatchRoundtripID(String fullID) {
             String[] splits = fullID.split("_rt");
-            if (splits.length == 2){
+            if (splits.length == 2) {
                 String batchIDsplit = splits[0];
-                if (batchIDsplit.startsWith("path:")){
-                    batchIDsplit = batchIDsplit.replace("path:","");
+                if (batchIDsplit.startsWith("path:")) {
+                    batchIDsplit = batchIDsplit.replace("path:", "");
                 }
-                if (batchIDsplit.startsWith("dl_")){
-                    batchIDsplit = batchIDsplit.replace("dl_","");
-                }
-                try {
-                    Long.parseLong(batchIDsplit);
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("This is not a valid round trip id '" + fullID + "'",e);
-                }
-
+//                if (batchIDsplit.startsWith("dl_")){
+//                    batchIDsplit = batchIDsplit.replace("dl_","");
+//                }
+//                try {
+//                    Long.parseLong(batchIDsplit);
+//                } catch (NumberFormatException e) {
+//                    throw new IllegalArgumentException("This is not a valid round trip id '" + fullID + "'",e);
+//                }
+//
                 batchID = batchIDsplit;
                 String roundTripSplit = splits[1];
                 try {
                     roundTripNumber = Integer.parseInt(roundTripSplit);
-                } catch (NumberFormatException e){
-                    throw new IllegalArgumentException("This is not a valid round trip id '"+fullID+"'",e);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("This is not a valid round trip id '" + fullID + "'", e);
                 }
 
             } else {
@@ -166,12 +173,12 @@ public class Delivery extends Item {
             return roundTripNumber;
         }
 
-        public String batchDCIdentifier(){
-            return "path:dl_"+batchID;
+        public String batchDCIdentifier() {
+            return "path:" + batchID;
         }
 
-        public String roundTripDCIdentifier(){
-            return "path:dl_" + batchID + "_rt" + roundTripNumber;
+        public String roundTripDCIdentifier() {
+            return "path:" + batchID + "_rt" + roundTripNumber;
         }
     }
 }

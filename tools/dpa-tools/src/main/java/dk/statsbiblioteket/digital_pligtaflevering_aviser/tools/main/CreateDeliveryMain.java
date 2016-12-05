@@ -59,15 +59,16 @@ public class CreateDeliveryMain {
                 File[] directories = new File(batchFolder).listFiles(File::isDirectory);
                 final String batchResponse = "";
                 //Iterate through the deliveries
-                for (File batchItem : directories) {
+                for (File deliveryItemDirectory : directories) {
                     Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
-                    Matcher matcher = pattern.matcher(batchItem.getName());
+                    Matcher matcher = pattern.matcher(deliveryItemDirectory.getName());
                     if (matcher.matches()) {
                         String batchIdValue = matcher.group(1);
                         String roundtripValue = matcher.group(2);
+                        log.trace("create delivery for {}, (batch id: {}, round trip: {})", deliveryItemDirectory, batchIdValue, roundtripValue);
                         CreateDelivery.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
                     } else {
-                        log.trace("Skipping {}", batchItem.getName());
+                        log.trace("did not match, skipping {}", deliveryItemDirectory.getName());
                     }
                 }
                 String joinedString = StringUtils.join(directories, " ");

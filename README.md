@@ -308,3 +308,18 @@ is triggered by the search criteria, and is simulated to be run on
 dummy PDF files stored as test resources.  VeraPDF is invoked as a
 REST service, and the output stored in the event and as a datastream
 named VERAPDF on the newspaper roundtrip object.
+
+
+# Running visualvm on DOMS
+
+ssh in with X11-forwarding active
+
+    vagrant ssh -- -Y
+    
+Install visualVM and run it.
+
+    sudo apt install visualvm
+
+    jvisualvm
+
+    
