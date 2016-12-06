@@ -22,7 +22,7 @@ public class IngesterMainTest {
         String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
 
         // http://stackoverflow.com/a/320595/53897
-        URI l = BitrepositoryStubIngesterMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        URI l = IngesterMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         Path startDir = Paths.get(l);
 
         // Look for the first instance of batchDir in the directories towards the root of the file system.

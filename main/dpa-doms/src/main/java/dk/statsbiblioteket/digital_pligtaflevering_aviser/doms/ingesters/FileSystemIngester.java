@@ -22,6 +22,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -181,6 +182,8 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             throw new RuntimeException("domsId: " + domsId + ", rootPath: " + rootPath, e);
         }
 
+        // set success/failure event on top level node.based on individual results.
+
         return null;  // FIXME:  Return results list.
     }
 
@@ -242,7 +245,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             // put in bitrepository
 
                                             String rawRelativeFilename = rootPath.relativize(path).toString();
-                                            String bitrepositoryStubFakeFilename = rawRelativeFilename.replace("/", "_"); // URL protect.
+                                            String bitrepositoryStubFakeFilename = rawRelativeFilename.replace("/", "_").replace("#", "_"); // https://sbprojects.statsbiblioteket.dk/jira/browse/DPA-63
 
                                             Path bitrepositoryStubFakePath = Paths.get(bitrepositoryMountpoint, bitrepositoryStubFakeFilename);
                                             // more sanity check
@@ -250,7 +253,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             log.trace("Copying {} to {}", path, bitrepositoryStubFakePath);
 
                                             Files.copy(path, bitrepositoryStubFakePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-
 
                                             /**
                                              * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps: <ol> <li>Clone file
@@ -262,7 +264,8 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                              * stream).</li> </ol>
                                              */
 
-                                            final String permanentURL = bitrepositoryUrlPrefix + bitrepositoryStubFakeFilename;
+                                            final String encodedFakeFilename = URLEncoder.encode(bitrepositoryStubFakeFilename, "UTF-8"); // This doesn't appear to work.
+                                            final String permanentURL = bitrepositoryUrlPrefix + encodedFakeFilename;
 
                                             final String mimetype = "application/pdf";  // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
 

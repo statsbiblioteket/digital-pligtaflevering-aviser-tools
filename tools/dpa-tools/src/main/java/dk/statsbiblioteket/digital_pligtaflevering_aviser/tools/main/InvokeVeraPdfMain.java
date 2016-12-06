@@ -80,10 +80,10 @@ public class InvokeVeraPdfMain {
 
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
-                    .peek(o -> log.trace("{}", o))
+                    .peek(o -> log.trace("Query returned: {}", o))
                     .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId).apply(domsId))
                     // Collect results for each domsId
-                    .peek(o -> log.trace("{}", o))
+                    .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
                     .toString();
 
