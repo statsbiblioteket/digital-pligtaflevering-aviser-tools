@@ -8,8 +8,19 @@ import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
+
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsJP2FileUrlRegister;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
+import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
+import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
+import org.bitrepository.common.utils.Base16Utils;
+import org.bitrepository.common.utils.CalendarUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
@@ -21,10 +32,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -32,10 +46,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.bitrepository.client.eventhandler.EventHandler;
+import org.bitrepository.modify.putfile.PutFileClient;
+
+
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
 
 /**
@@ -46,23 +68,64 @@ import static java.nio.file.Files.walk;
 public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
     private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
+
+
+    //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+    private static final long DEFAULT_FILE_SIZE = 0;
+    public static final String DPA_TEST_MODE = "dpa.testmode";
+    public static final String DPA_PUTFILE_DESTINATION = "dpa.putfile.destinationpath";
+    public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
+
+
+
+
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private DomsRepository repository;
     private String ignoredFiles;
+    private PutFileClient putfileClient;
     private WebResource restApi;
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     protected Set<String> ignoredFilesSet;
 
+
+    //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+    private String dpaIngesterId = null;
+
+
+    private EventHandler handler;
+    private final BlockingQueue<PutJob> failedJobsQueue = new LinkedBlockingQueue<>();
+    private ParallelOperationLimiter parallelOperationLimiter = new ParallelOperationLimiter(1);
+
+
     @Inject
     public FileSystemIngester(DomsRepository repository,
                               @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
+                              @Named(DPA_TEST_MODE) String dpaTestMode,
+                              PutFileClient putfileClient,
+                              @Named(DPA_PUTFILE_DESTINATION) String dpaPutfileDestination,
+                              @Named(COLLECTIONID_PROPERTY) String dpaIngesterId,
+                              @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                              @Named(CERTIFICATE_PROPERTY) String certificateProperty,
                               WebResource restApi, EnhancedFedora efedora) {
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
+        this.putfileClient = putfileClient;
         this.restApi = restApi;
         this.efedora = efedora;
+
+
+
+
+        //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+        this.dpaIngesterId = dpaIngesterId;
+        //this.certificateLocation = this.settingDir + File.separator + certificateProperty;
+        DomsJP2FileUrlRegister domsRegistor = null;
+        handler = new PutFileEventHandler(parallelOperationLimiter, failedJobsQueue, domsRegistor);
+
+
+
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
         log.trace("Ignored files: {}", ignoredFilesSet);
@@ -158,7 +221,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
             walk(deliveryPath)
                     .filter(Files::isDirectory)
-                    .sorted(Comparator.reverseOrder()) // ensure children processed before parents,  FIXME: reverseOrder() how defined on Paths?
+                    .sorted(Comparator.reverseOrder()) // ensure children processed before parents
                     .forEach(path -> {
                         try {
                             createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map);
@@ -172,6 +235,18 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
         return null;  // FIXME:  Return results list.
     }
+
+
+    private ChecksumDataForFileTYPE getChecksum(String checksum) {
+        ChecksumDataForFileTYPE checksumData = new ChecksumDataForFileTYPE();
+        checksumData.setChecksumValue(Base16Utils.encodeBase16(checksum));
+        checksumData.setCalculationTimestamp(CalendarUtils.getNow());
+        ChecksumSpecTYPE checksumSpec = new ChecksumSpecTYPE();
+        checksumSpec.setChecksumType(org.bitrepository.bitrepositoryelements.ChecksumType.MD5);
+        checksumData.setChecksumSpec(checksumSpec);
+        return checksumData;
+    }
+
 
     /**
      * For the given directory: <ul> <li>Look up DOMS object for current "path:...".  If not found, create an empty DOMS
@@ -226,6 +301,18 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                     try {
                                         if (path.toString().endsWith(".pdf")) {  // FIXME: "Go in bitrepository?"
                                             // put in bitrepository
+
+
+                                            String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
+                                            Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
+                                            Path filePath = deliveryPath.relativize(path);
+
+                                            //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+                                            putfileClient.putFile(dpaIngesterId,
+                                                    new URL("file:///" + path.toString()), NewspaperFileNameTranslater.getFileID(path.toString()), DEFAULT_FILE_SIZE,
+                                                    getChecksum(md5map.get(filePath.toString())), null, handler, null);
+
+
                                             /**
                                              * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps: <ol> <li>Clone file
                                              * template.</li> <li>Upload file to Bitrepository using BitRepositoryClient API</li> <li>Construct URL pointing to
@@ -253,7 +340,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
                                             String md5checksum = "FIXME";
-                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, md5checksum, allBytes, null, mimeType, "From " + path, null);
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
                                         } else {
                                             throw new RuntimeException("path not pdf/xml: " + path);
                                         }

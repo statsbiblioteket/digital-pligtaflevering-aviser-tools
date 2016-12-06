@@ -52,7 +52,7 @@ public class BitrepositoryPutFileClientStub implements PutFileClient {
 
         CompleteEvent completeEvent = new CompleteEvent(null, null);
         try {
-            if(!Arrays.equals(this.getFileChecksum(MessageDigest.getInstance("md5"), url.openStream()),checksumForValidationAtPillar.getChecksumValue())) {
+            if(!Arrays.equals(this.getFileChecksum(MessageDigest.getInstance("md5"), url.openStream()), checksumForValidationAtPillar.getChecksumValue())) {
                 completeEvent.setEventType(OperationEvent.OperationEventType.FAILED);
                 completeEvent.setInfo("MD5 check has failed on the file : " + url);
             }
@@ -62,12 +62,12 @@ public class BitrepositoryPutFileClientStub implements PutFileClient {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             completeEvent.setFileID(fileId);
             completeEvent.setOperationType(OperationType.PUT_FILE);
-            eventHandler.handleEvent(completeEvent);
         } catch(Exception e) {
             completeEvent.setEventType(OperationEvent.OperationEventType.FAILED);
             completeEvent.setInfo(e.getMessage());
             log.error("Ingester simulator failed :" + e.getMessage());
         }
+        eventHandler.handleEvent(completeEvent);
     }
 
     /**
