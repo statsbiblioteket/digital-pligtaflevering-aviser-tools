@@ -9,6 +9,7 @@ import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
@@ -55,8 +56,11 @@ import org.bitrepository.modify.putfile.PutFileClient;
 
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
+import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.CONTENTS;
+import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.RELATION_PREDICATE;
 import static java.nio.file.Files.walk;
 
 /**
@@ -90,11 +94,9 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
 
     //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+    private String bitmagUrl = null;
     private String dpaIngesterId = null;
 
-
-    private final BlockingQueue<PutJob> failedJobsQueue = new LinkedBlockingQueue<>();
-    private ParallelOperationLimiter parallelOperationLimiter = new ParallelOperationLimiter(1);
 
 
     @Inject
@@ -112,16 +114,8 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         this.putfileClient = putfileClient;
         this.restApi = restApi;
         this.efedora = efedora;
-
-
-
-
-        //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+        this.bitmagUrl = bitmagUrl;
         this.dpaIngesterId = dpaIngesterId;
-        //this.certificateLocation = this.settingDir + File.separator + certificateProperty;
-
-
-
 
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
@@ -289,17 +283,17 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
 
 
-
+            String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
 
 
             //TODO:BEFORE COMMIT DPA-59 MAKE SURE
-            DomsFileUrlRegister urlRegister = new DomsFileUrlRegister("batchId",
+            DomsFileUrlRegister urlRegister = new DomsFileUrlRegister(deliveryName,
                     efedora,
-                    "http://localhost:58709/",
+                    bitmagUrl,
                     resultCollector,
-                    2,
+                    1,
                     1000);
-            PutFileEventHandler handler = new PutFileEventHandler(parallelOperationLimiter, failedJobsQueue, urlRegister);
+            PutFileEventHandler handler = new PutFileEventHandler();
 
 
 
@@ -322,28 +316,15 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                         final List<Path> filesForPage = entry.getValue();
                         filesForPage.stream()
                                 .forEach(path -> {
-                                    // FIXME: check md5 checksum.
+                                    Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
+                                    Path filePath = deliveryPath.relativize(path);
+                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
                                     try {
-                                        if (path.toString().endsWith(".pdf")) {  // FIXME: "Go in bitrepository?"
+                                        if (path.toString().endsWith(".pdf")) {
                                             // put in bitrepository
-
-
-                                            String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
-                                            Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
-                                            Path filePath = deliveryPath.relativize(path);
-
-                                            //TODO:BEFORE COMMIT DPA-59 MAKE SURE
                                             putfileClient.putFile(dpaIngesterId,
-                                                    new URL("file:///" + path.toString()), NewspaperFileNameTranslater.getFileID(path.toString()), DEFAULT_FILE_SIZE,
-                                                    getChecksum(md5map.get(filePath.toString())), null, handler, null);
-
-
-
-                                            /*IngestableFile file = new IngestableFile(NewspaperFileNameTranslater.getFileID(path.toString()), new URL("file:///" + path.toString()), getChecksum(md5map.get(filePath.toString())), null, "path:" + path.toString());
-                                            PutJob job = new PutJob(file);*/
-
-
-
+                                                    new URL("file:///" + path.toString()), NewspaperFileNameTranslater.getFileID(filePath.getFileName().toString()), DEFAULT_FILE_SIZE,
+                                                    checkSum, null, handler, null);
 
 
                                             /**
@@ -366,6 +347,11 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
                                             // Add "hasPart" relation from the page object to the file object, FIXME: KFC gives correct value for "info:fedora/fedora-system:def/relations-external#hasFile"
                                             efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
+
+                                            String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
+                                            efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE,
+                                                    checksum, true, "Adding checksum after bitrepository ingest");
+
 
                                         } else if (path.toString().endsWith(".xml")) {
                                             // save physical bytes of XML file as "XML" data stream on page object.

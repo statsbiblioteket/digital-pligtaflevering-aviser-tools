@@ -13,6 +13,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
+import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
@@ -47,6 +48,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 
@@ -137,20 +139,14 @@ public class IngesterMain {
             return map.getRequired(IngesterConfiguration.CERTIFICATE_PROPERTY);
         }
 
+        @Provides
+        @Named(BITMAG_BASEURL_PROPERTY)
+        String provideBitmagUrl(ConfigurationMap map) {
+            return map.getRequired(BITMAG_BASEURL_PROPERTY);
+        }
 
-/*
-        public static final String COLLECTIONID_PROPERTY="bitrepository.ingester.collectionid";
-        public static final String COMPONENTID_PROPERTY="bitrepository.ingester.componentid";
-        public static final String SETTINGS_DIR_PROPERTY="bitrepository.ingester.settingsdir";
-        public static final String CERTIFICATE_PROPERTY="bitrepository.ingester.certificate";
-        public static final String URL_TO_BATCH_DIR_PROPERTY="bitrepository.ingester.urltobatchdir";
-        public static final String MAX_NUMBER_OF_PARALLEL_PUTS_PROPERTY="bitrepository.ingester.numberofparrallelPuts";
-        public static final String BITMAG_BASEURL_PROPERTY = "bitrepository.ingester.baseurl";
-        public static final String FORCE_ONLINE_COMMAND = "bitrepository.ingester.forceOnlineCommand";
+
         public static final String DOMS_TIMEOUT = "bitrepository.ingester.domsTimeout";
-        public static final String MAX_BITMAG_PUT_RETRIES = "bitrepository.ingester.maxPutRetries";
-        */
-
 
         @Provides
         ItemFactory<Item> provideItemFactory() {
