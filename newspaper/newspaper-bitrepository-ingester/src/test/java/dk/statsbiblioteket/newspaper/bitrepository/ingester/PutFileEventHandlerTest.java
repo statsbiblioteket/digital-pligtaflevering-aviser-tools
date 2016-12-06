@@ -30,7 +30,7 @@ public class PutFileEventHandlerTest {
      */
     //@Test
     public void dubbleFailureEventTest() throws MalformedURLException {
-        DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
+        DomsFileUrlRegister domsRegister = mock(DomsFileUrlRegister.class);
         @SuppressWarnings("unchecked")
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);
         ParallelOperationLimiter putLimiter = mock(ParallelOperationLimiter.class);
@@ -60,7 +60,7 @@ public class PutFileEventHandlerTest {
      */
     //@Test
     public void successEventTest() throws MalformedURLException {
-        DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
+        DomsFileUrlRegister domsRegister = mock(DomsFileUrlRegister.class);
         @SuppressWarnings("unchecked")
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);
         ParallelOperationLimiter putLimiter = mock(ParallelOperationLimiter.class);

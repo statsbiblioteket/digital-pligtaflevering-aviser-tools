@@ -24,9 +24,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJo
 /**
  * Handle the registration of the bit repository URL for a given JP2000 file in DOMS.  
  */
-public class DomsJP2FileUrlRegister implements AutoCloseable {
+public class DomsFileUrlRegister implements AutoCloseable {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    public static final String JP2_MIMETYPE = "image/jp2";
     public static final String PDF_MIMETYPE = "application/pdf";
     public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     public static final String CONTENTS = "CONTENTS";
@@ -47,8 +46,8 @@ public class DomsJP2FileUrlRegister implements AutoCloseable {
      * @param maxThreads the maximum number of threads used for registering objects in DOMS.
      * @param timeout
      */
-    public DomsJP2FileUrlRegister(Batch batch, EnhancedFedora central, String baseUrl, ResultCollector resultCollector,
-                                  int maxThreads, long timeout) {
+    public DomsFileUrlRegister(Batch batch, EnhancedFedora central, String baseUrl, ResultCollector resultCollector,
+                               int maxThreads, long timeout) {
         this.batch = batch;
         this.enhancedFedora = central;
         this.baseUrl = baseUrl;

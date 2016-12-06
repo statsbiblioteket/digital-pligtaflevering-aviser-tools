@@ -18,7 +18,6 @@ import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumType;
 import org.bitrepository.common.utils.Base16Utils;
 import org.bitrepository.common.utils.CalendarUtils;
-import org.testng.annotations.Test;
 
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
@@ -45,7 +44,7 @@ public class DomsJP2FileUrlRegisterTest {
         when(mockCentral.findObjectFromDCIdentifier(anyString())).thenReturn(Arrays.asList(TEST_PID));
         IngestableFile ingestableFile = new IngestableFile(FILE_NAME, new URL(FILE_URL), getChecksum(CHECKSUM), null, FILE_PATH);
         PutJob job = new PutJob(ingestableFile);
-        try (DomsJP2FileUrlRegister register = new DomsJP2FileUrlRegister(null,
+        try (DomsFileUrlRegister register = new DomsFileUrlRegister(null,
                                                                                  mockCentral, BASE_URL, mockResultCollector, MAX_THREADS,
                                                                                  10000)) {
             register.registerJp2File(job);
@@ -54,9 +53,9 @@ public class DomsJP2FileUrlRegisterTest {
         
         verify(mockCentral).findObjectFromDCIdentifier(FILE_PATH);
         verify(mockCentral).addExternalDatastream(eq(TEST_PID), eq("CONTENTS"), eq(FILE_NAME), eq(FILE_URL),
-                anyString(), eq(DomsJP2FileUrlRegister.JP2_MIMETYPE), anyListOf(String.class) ,anyString());
+                anyString(), eq(DomsFileUrlRegister.PDF_MIMETYPE), anyListOf(String.class) ,anyString());
         verify(mockCentral).addRelation(eq(TEST_PID), eq("info:fedora/" + TEST_PID + "/CONTENTS"),
-                eq(DomsJP2FileUrlRegister.RELATION_PREDICATE), eq(CHECKSUM), eq(true), anyString());
+                eq(DomsFileUrlRegister.RELATION_PREDICATE), eq(CHECKSUM), eq(true), anyString());
         verifyNoMoreInteractions(mockCentral);
     }
     
@@ -71,7 +70,7 @@ public class DomsJP2FileUrlRegisterTest {
         IngestableFile ingestableFile = new IngestableFile(FILE_NAME, new URL(FILE_URL), getChecksum(CHECKSUM), null, FILE_PATH);
         PutJob job = new PutJob(ingestableFile);
         
-        try (DomsJP2FileUrlRegister register = new DomsJP2FileUrlRegister(null, mockCentral,
+        try (DomsFileUrlRegister register = new DomsFileUrlRegister(null, mockCentral,
                                                                                  BASE_URL,
                                                                                  mockResultCollector,
                                                                                  MAX_THREADS, 10000)) {

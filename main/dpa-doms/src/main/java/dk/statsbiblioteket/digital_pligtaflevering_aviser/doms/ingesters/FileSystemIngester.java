@@ -6,13 +6,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
-import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsJP2FileUrlRegister;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +31,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -121,7 +119,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         //TODO:BEFORE COMMIT DPA-59 MAKE SURE
         this.dpaIngesterId = dpaIngesterId;
         //this.certificateLocation = this.settingDir + File.separator + certificateProperty;
-        DomsJP2FileUrlRegister domsRegistor = null;
+        DomsFileUrlRegister domsRegistor = null;
         handler = new PutFileEventHandler(parallelOperationLimiter, failedJobsQueue, domsRegistor);
 
 

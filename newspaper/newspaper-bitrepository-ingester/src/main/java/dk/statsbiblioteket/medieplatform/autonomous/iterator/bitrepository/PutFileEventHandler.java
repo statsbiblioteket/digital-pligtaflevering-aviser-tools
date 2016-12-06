@@ -11,17 +11,17 @@ import org.bitrepository.client.eventhandler.OperationFailedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsJP2FileUrlRegister;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister;
 
 public class PutFileEventHandler implements EventHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final ParallelOperationLimiter operationLimiter;
-    private final DomsJP2FileUrlRegister domsRegister;
+    private final DomsFileUrlRegister domsRegister;
     private final BlockingQueue<PutJob> failedJobs;
     
     public PutFileEventHandler(ParallelOperationLimiter putLimiter, BlockingQueue<PutJob> failedJobsQueue, 
-            DomsJP2FileUrlRegister domsRegister) {
+            DomsFileUrlRegister domsRegister) {
     	this.operationLimiter = putLimiter;
         this.domsRegister = domsRegister;
         this.failedJobs = failedJobsQueue;
