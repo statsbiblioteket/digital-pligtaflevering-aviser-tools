@@ -8,7 +8,6 @@ import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 
-import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
@@ -49,8 +48,6 @@ import org.bitrepository.modify.putfile.PutFileClient;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.CONTENTS;
 import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.RELATION_PREDICATE;
 import static java.nio.file.Files.walk;
@@ -64,15 +61,8 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
     private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
 
-
-    //TODO:BEFORE COMMIT DPA-59 MAKE SURE
     private static final long DEFAULT_FILE_SIZE = 0;
-    public static final String DPA_TEST_MODE = "dpa.testmode";
-    public static final String DPA_PUTFILE_DESTINATION = "dpa.putfile.destinationpath";
     public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
-
-
-
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -84,22 +74,15 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     protected Set<String> ignoredFilesSet;
 
-
-    //TODO:BEFORE COMMIT DPA-59 MAKE SURE
     private String bitmagUrl = null;
     private String dpaIngesterId = null;
-
-
 
     @Inject
     public FileSystemIngester(DomsRepository repository,
                               @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                               @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                               PutFileClient putfileClient,
-                              @Named(DPA_PUTFILE_DESTINATION) String dpaPutfileDestination,
                               @Named(COLLECTIONID_PROPERTY) String dpaIngesterId,
-                              @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                              @Named(CERTIFICATE_PROPERTY) String certificateProperty,
                               WebResource restApi, EnhancedFedora efedora) {
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
@@ -219,7 +202,11 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
         return null;  // FIXME:  Return results list.
     }
 
-
+    /**
+     * Create a checksum-object based on a checksom-string
+     * @param checksum
+     * @return
+     */
     private ChecksumDataForFileTYPE getChecksum(String checksum) {
         ChecksumDataForFileTYPE checksumData = new ChecksumDataForFileTYPE();
         checksumData.setChecksumValue(Base16Utils.encodeBase16(checksum));
@@ -257,11 +244,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
          * <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
          */
 
-        //TODO:Guess we need to place the results in a ResultCollector
-        ResultCollector resultCollector = new ResultCollector("Resultcollector", "Resultcollector", 1000);
-
-
-
 
         try {
             Map<String, List<Path>> pathsForPage = Files.walk(absoluteFileSystemPath, 1)
@@ -274,7 +256,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             log.trace("pathsForPage {}", pathsForPage);
 
 
-
+            // Find the deliveryname, which is also the name of the folder where the delivery is placed
             String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
 
             PutFileEventHandler handler = new PutFileEventHandler();
@@ -299,8 +281,10 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                     try {
                                         if (path.toString().endsWith(".pdf")) {
 
-                                            // put in bitrepository
+                                            // Construct the fileId with the path from the deliveryfolder to the file
                                             final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
+
+                                            // Use the PutClient to ingest the file into Bitrepository
                                             putfileClient.putFile(dpaIngesterId,
                                                     new URL("file:///" + path.toString()), fileId, DEFAULT_FILE_SIZE,
                                                     checkSum, null, handler, null);
@@ -328,6 +312,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             // Add "hasPart" relation from the page object to the file object, FIXME: KFC gives correct value for "info:fedora/fedora-system:def/relations-external#hasFile"
                                             efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
 
+                                            // Add the checksum relation to Fedora
                                             String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                             efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checksum, true, "Adding checksum after bitrepository ingest");
 
@@ -385,7 +370,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                 efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", childIds.get(0), false, "comment");
             }
         } catch (Exception e) {
-            resultCollector.addFailure("FAILED", "FAILED", "FAILED", "FAILED");
             throw new RuntimeException("addRelations child dirs", e);
         }
         log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
@@ -404,7 +388,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                 log.trace(logMessage + " / " + directoryObjectPid);
                 return directoryObjectPid;
             } catch (BackendInvalidCredsException | BackendMethodFailedException | PIDGeneratorException e) {
-                //resultCollector.addFailure("FAILED", "FAILED", "FAILED", "FAILED");
                 throw new RuntimeException("newEmptyObject() dcIdentifier=" + dcIdentifier, e);
             }
         } else {
