@@ -13,6 +13,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_BATCH_FINISH_LOGTEXT;
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_BATCH_START_LOGTEXT;
+
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
  *
@@ -43,11 +46,10 @@ public class CreateDelivery {
         Date now = new Date();
 
         if (args.length != 8) {
-            System.out.println("Not the right amount of arguments");
-            System.out.println("Receives the following arguments (in this order) to create a batch object in DOMS:");
-            System.out.println(
-                    "Batch ID, roundtrip number, Premis agent name, URL to DOMS/Fedora, DOMS username, DOMS password,");
-            System.out.println("URL to PID generator.");
+            log.error("Not the right amount of arguments");
+            log.error("Receives the following arguments (in this order) to create a batch object in DOMS:");
+            log.error("Batch ID, roundtrip number, Premis agent name, URL to DOMS/Fedora, DOMS username, DOMS password,");
+            log.error("URL to PID generator.");
             System.exit(1);
         }
         batchId = args[0];
@@ -57,7 +59,8 @@ public class CreateDelivery {
         domsUser = args[4];
         domsPass = args[5];
         urlToPidGen = args[6];
-        log.info("Entered main for batch dl_{}_rt{}",batchId,roundTrip);
+        long startDeliveryTime = System.currentTimeMillis();
+        log.info(CREATE_BATCH_START_LOGTEXT, batchId, roundTrip);
         domsEventStorageFactory.setFedoraLocation(domsUrl);
         domsEventStorageFactory.setUsername(domsUser);
         domsEventStorageFactory.setPassword(domsPass);
@@ -66,8 +69,10 @@ public class CreateDelivery {
             domsEventClient = domsEventStorageFactory.createDeliveryDomsEventStorage();
             final int roundTripNumber = Integer.parseInt(roundTrip);
             doWork(new Delivery(batchId, roundTripNumber), premisAgent, domsEventClient, now);
+            long finishedDeliveryTime = System.currentTimeMillis();
+            log.info(CREATE_BATCH_FINISH_LOGTEXT, batchId, roundTrip, finishedDeliveryTime - startDeliveryTime);
         } catch (Exception e) {
-            System.err.println("Failed adding event to batch, due to: " + e.getMessage());
+            log.error("Failed adding event to batch, due to: " + e.getMessage());
             log.error("Caught exception: ", e);
             System.exit(1);
         }
