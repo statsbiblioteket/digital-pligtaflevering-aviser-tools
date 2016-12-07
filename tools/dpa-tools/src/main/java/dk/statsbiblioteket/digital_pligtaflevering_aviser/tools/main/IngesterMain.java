@@ -58,6 +58,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 public class IngesterMain {
 
     public static final String DPA_DELIVERIES_FOLDER = "dpa.deliveries.folder";
+    public static final String PUT_CLIENT = "dpa.deliveries.PUT_CLIENT";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -77,9 +78,6 @@ public class IngesterMain {
 
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                         @Named(DPA_PUTFILE_DESTINATION) String dpaPutfileDestination,
-                         @Named(FileSystemIngester.DPA_TEST_MODE) String dpaTestmode,
-                         @Named(FileSystemIngester.COLLECTIONID_PROPERTY) String collectionId,
                          QuerySpecification query,
                          DomsRepository repository,
                          FileSystemIngester ingester
@@ -129,13 +127,13 @@ public class IngesterMain {
 
         @Provides
         @Named(IngesterConfiguration.SETTINGS_DIR_PROPERTY)
-        String a1(ConfigurationMap map) {
+        String provideSettingsProperty(ConfigurationMap map) {
             return map.getRequired(IngesterConfiguration.SETTINGS_DIR_PROPERTY);
         }
 
         @Provides
         @Named(IngesterConfiguration.CERTIFICATE_PROPERTY)
-        String a2(ConfigurationMap map) {
+        String provideCertificateProperty(ConfigurationMap map) {
             return map.getRequired(IngesterConfiguration.CERTIFICATE_PROPERTY);
         }
 

@@ -6,6 +6,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
@@ -102,7 +103,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
     @Inject
     public FileSystemIngester(DomsRepository repository,
                               @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
-                              @Named(DPA_TEST_MODE) String dpaTestMode,
+                              @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                               PutFileClient putfileClient,
                               @Named(DPA_PUTFILE_DESTINATION) String dpaPutfileDestination,
                               @Named(COLLECTIONID_PROPERTY) String dpaIngesterId,
@@ -265,7 +266,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
          * <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
          */
 
-        //TODO:BEFORE COMMIT DPA-59 MAKE SURE
+        //TODO:Guess we need to place the results in a ResultCollector
         ResultCollector resultCollector = new ResultCollector("Mocked bitrepository ingester", "test version", 1000);
 
 
@@ -285,22 +286,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
             String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
 
-
-            //TODO:BEFORE COMMIT DPA-59 MAKE SURE
-            DomsFileUrlRegister urlRegister = new DomsFileUrlRegister(deliveryName,
-                    efedora,
-                    bitmagUrl,
-                    resultCollector,
-                    1,
-                    1000);
             PutFileEventHandler handler = new PutFileEventHandler();
-
-
-
-
-
-
-
 
 
             // For each individual page create a DOMS object.  For each file in the page, consider if it is metadata or not.
@@ -321,9 +307,11 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
                                     try {
                                         if (path.toString().endsWith(".pdf")) {
+
                                             // put in bitrepository
+                                            final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
                                             putfileClient.putFile(dpaIngesterId,
-                                                    new URL("file:///" + path.toString()), NewspaperFileNameTranslater.getFileID(filePath.getFileName().toString()), DEFAULT_FILE_SIZE,
+                                                    new URL("file:///" + path.toString()), fileId, DEFAULT_FILE_SIZE,
                                                     checkSum, null, handler, null);
 
 
@@ -336,21 +324,21 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                              * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "XML" data
                                              * stream).</li> </ol>
                                              */
-                                            final String permanentURL = "http://localhost:58709/B20160811-RT1_verapdf_udgave1_pages_20160811-verapdf-udgave1-page006.pdf"; // BITMAG_BASEURL_PROPERTY
+
+                                            final String filepathToBitmagUrl = bitmagUrl + fileId; // BITMAG_BASEURL_PROPERTY
                                             final String mimetype = "application/pdf";  // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
 
                                             // create DOMS object for the file
                                             String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + rootPath.relativize(path));
 
                                             // save external datastream in file object.  FIXME:  Modify "application/octet-stream" to value given by KFC. path.toString() to relative path.
-                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", path.toString(), permanentURL, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                                            efedora.addExternalDatastream(fileObjectId, "CONTENTS", fileId, filepathToBitmagUrl, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
 
                                             // Add "hasPart" relation from the page object to the file object, FIXME: KFC gives correct value for "info:fedora/fedora-system:def/relations-external#hasFile"
                                             efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
 
                                             String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
-                                            efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE,
-                                                    checksum, true, "Adding checksum after bitrepository ingest");
+                                            efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checksum, true, "Adding checksum after bitrepository ingest");
 
 
                                         } else if (path.toString().endsWith(".xml")) {
@@ -361,11 +349,9 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             String md5checksum = "FIXME";
                                             efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
                                         } else {
-                                            resultCollector.addFailure("FAILED", "FAILED", "FAILED", "FAILED");
                                             throw new RuntimeException("path not pdf/xml: " + path);
                                         }
                                     } catch (Exception e) {
-                                        resultCollector.addFailure("FAILED", "FAILED", "FAILED", "FAILED");
                                         throw new RuntimeException("creating hasFile relation", e);
                                     }
                                 });
@@ -381,7 +367,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
             }
             log.trace("directory {} pages {}", absoluteFileSystemPath, pagesInThisDirectory);
         } catch (IOException e) {
-            resultCollector.addFailure("FAILED", "FAILED", "FAILED", "FAILED");
             throw new RuntimeException("directoryToBeDOMSObjectPath=" + dcIdentifier, e);
         }
 
