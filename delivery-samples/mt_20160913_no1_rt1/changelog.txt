@@ -1,0 +1,19 @@
+Testavis her skrevet en artikel, der beskriver indholdet i en bog, som kammeradvikaten har nedlagt fogedforbud mod.
+Med denne begrundelse skal følgende artikel fjernes fra avisen:
+20160913_testavis_article_2a591eb0.xml
+
+Artiklen indgår på side 2 i testavis hvorfor der også medleveres en modificeret side2:
+20160913_testavis_page002
+
+
+Anbefalingen er at slette "20160913_testavis_article_2a591eb0.xml" og udskifte "20160913_testavis_page002"
+
+
+Omtale af fogedforbud medleveres:
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Curabitur tincidunt viverra mi vitae scelerisque. Donec congue, ligula eget
+maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam id
+mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
+Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
+condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
+in auctor ipsum.
