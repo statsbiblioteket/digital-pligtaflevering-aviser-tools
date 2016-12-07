@@ -13,7 +13,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
-import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
@@ -143,8 +142,6 @@ public class IngesterMain {
             return map.getRequired(BITMAG_BASEURL_PROPERTY);
         }
 
-
-        public static final String DOMS_TIMEOUT = "bitrepository.ingester.domsTimeout";
 
         @Provides
         ItemFactory<Item> provideItemFactory() {

@@ -6,15 +6,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
-import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.lang.StringUtils;
@@ -47,12 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
-import org.bitrepository.client.eventhandler.EventHandler;
 import org.bitrepository.modify.putfile.PutFileClient;
 
 
@@ -267,7 +258,7 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
          */
 
         //TODO:Guess we need to place the results in a ResultCollector
-        ResultCollector resultCollector = new ResultCollector("Mocked bitrepository ingester", "test version", 1000);
+        ResultCollector resultCollector = new ResultCollector("Resultcollector", "Resultcollector", 1000);
 
 
 
