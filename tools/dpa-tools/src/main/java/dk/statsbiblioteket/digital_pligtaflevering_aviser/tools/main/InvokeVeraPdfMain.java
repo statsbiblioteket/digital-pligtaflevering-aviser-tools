@@ -94,7 +94,6 @@ public class InvokeVeraPdfMain {
             return domsId -> {
                 // Single doms item
                 List<TaskResult> taskResults = domsRepository.allChildrenFor(domsId).stream()
-                        .peek(System.out::println)
                         .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId))
                         .collect(Collectors.toList());
 
@@ -130,7 +129,6 @@ public class InvokeVeraPdfMain {
         }
 
         private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
-
             DomsItem domsItem = domsRepository.lookup(domsId);
             Optional<DomsDatastream> profileOptional = domsItem.datastreams().stream()
                     .filter(ds -> ds.getMimeType().equals("application/pdf"))
@@ -139,8 +137,14 @@ public class InvokeVeraPdfMain {
             if (profileOptional.isPresent() == false) {
                 return Stream.of();
             }
+            log.trace("analyzePDF found PDF datastream on {}", domsId);
 
             DomsDatastream ds = profileOptional.get();
+
+            // We need to locate the physical file containing the PDF.  For the bitrepository
+            // the official way in is rather complicated and slow, but for the SB pillar we know
+            // where the information is stored for deriving the file name directly.
+
             // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste
             // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
             final String url = ds.getUrl();
@@ -151,17 +155,23 @@ public class InvokeVeraPdfMain {
 
             Path path = Paths.get(bitrepositoryMountpoint, filename);
             File file = path.toFile();
-            log.trace("validating pdf:  {}", file.getAbsolutePath());
+            log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
+
+            long startTime = System.currentTimeMillis();
 
             byte[] veraPDF_output;
-            try {
+            try (FileInputStream inputStream = new FileInputStream(file)) {
                 VeraPDFValidator validator = new VeraPDFValidator(flavorId, true);
-                veraPDF_output = validator.apply(new FileInputStream(file));
+                veraPDF_output = validator.apply(inputStream);
             } catch (FileNotFoundException e) {
                 return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
             } catch (Exception e) {
                 return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
             }
+
+            String keyword = "VERAPDF"; // LoggingKeywords
+            log.info("{} {} Took: {} ms", keyword, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
+
             // We have now run VeraPDF on the PDF file and has the output in hand.
             // Store it in the "VERAPDF" datastream for the object.
             // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.

@@ -13,7 +13,7 @@ import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.B
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 
 /**
- *
+ * Note:  May require a lot of memory.
  */
 public class IngesterMainTest {
     @Test
