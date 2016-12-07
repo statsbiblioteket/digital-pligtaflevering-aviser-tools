@@ -3,7 +3,7 @@ filebeat.prospectors:
 - input_type: log
 
   paths:
-    - /home/vagrant/dpa/logs/dpa-create-delivery-*.log
+    - /home/vagrant/dpa/logs/*.log
 
   fields:
     beat_id: "prd_dpa"

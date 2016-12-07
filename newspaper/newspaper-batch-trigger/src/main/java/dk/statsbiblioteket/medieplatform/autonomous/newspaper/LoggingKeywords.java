@@ -6,7 +6,7 @@ package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 public class LoggingKeywords {
 
 
-    public static final String CREATE_BATCH_START_LOGTEXT = "EnteredMainMorDelivery dl_{}_rt{} ";
-    public static final String CREATE_BATCH_FINISH_LOGTEXT = "FinishedMainForDelivery dl_{}_rt{} at time: {} ms";
+    public static final String CREATE_BATCH_START_LOGTEXT = "EnteredMainForDelivery dl_{}_rt{} ";
+    public static final String CREATE_BATCH_FINISH_LOGTEXT = "FinishedMainForDelivery dl_{}_rt{} Took: {} ms ";
 
     }

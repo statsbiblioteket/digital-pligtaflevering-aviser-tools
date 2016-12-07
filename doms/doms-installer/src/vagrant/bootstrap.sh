@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cp  /vagrant/doms_updater.sh doms_updater.sh
-sudo chmod +x doms_updater.sh
+chmod +x doms_updater.sh
 
 apt-get update > /dev/null
 apt-get install -y zip unzip openjdk-7-jdk zookeeperd

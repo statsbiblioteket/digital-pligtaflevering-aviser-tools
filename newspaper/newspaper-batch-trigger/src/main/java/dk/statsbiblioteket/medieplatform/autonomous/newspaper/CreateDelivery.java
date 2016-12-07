@@ -60,7 +60,7 @@ public class CreateDelivery {
         domsPass = args[5];
         urlToPidGen = args[6];
         long startDeliveryTime = System.currentTimeMillis();
-        log.info(CREATE_BATCH_START_LOGTEXT,batchId,roundTrip);
+        log.info(CREATE_BATCH_START_LOGTEXT, batchId, roundTrip);
         domsEventStorageFactory.setFedoraLocation(domsUrl);
         domsEventStorageFactory.setUsername(domsUser);
         domsEventStorageFactory.setPassword(domsPass);
@@ -70,7 +70,7 @@ public class CreateDelivery {
             final int roundTripNumber = Integer.parseInt(roundTrip);
             doWork(new Delivery(batchId, roundTripNumber), premisAgent, domsEventClient, now);
             long finishedDeliveryTime = System.currentTimeMillis();
-            log.info(CREATE_BATCH_FINISH_LOGTEXT,batchId,roundTrip, finishedDeliveryTime - startDeliveryTime);
+            log.info(CREATE_BATCH_FINISH_LOGTEXT, batchId, roundTrip, finishedDeliveryTime - startDeliveryTime);
         } catch (Exception e) {
             log.error("Failed adding event to batch, due to: " + e.getMessage());
             log.error("Caught exception: ", e);

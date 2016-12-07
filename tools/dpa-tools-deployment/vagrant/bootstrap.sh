@@ -10,7 +10,7 @@ sudo mkdir logs
 sudo chmod 777 logs
 
 
-sudo cp /target/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz /home/vagrant/dpa/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz
+cp /target/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz /home/vagrant/dpa/dpa-tools-deployment-master-SNAPSHOT-package.tar.gz
 tar -xf dpa-tools-deployment-master-SNAPSHOT-package.tar.gz
 
 cp -R /vagrant/properties properties
@@ -25,8 +25,8 @@ sudo chmod +x runningComponents.sh
 curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.0.0-linux-x86_64.tar.gz
 tar -xf filebeat-5.0.0-linux-x86_64.tar.gz
 
-sudo cp /vagrant/filebeat/vagrantfilebeat.yml /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/filebeat.yml
-sudo cp /vagrant/filebeat/startFilebeat.sh /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
+cp /vagrant/filebeat/vagrantfilebeat.yml /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/filebeat.yml
+cp /vagrant/filebeat/startFilebeat.sh /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
 sudo chmod 777 /home/vagrant/dpa/filebeat-5.0.0-linux-x86_64/startFilebeat.sh
 
 cd logs
