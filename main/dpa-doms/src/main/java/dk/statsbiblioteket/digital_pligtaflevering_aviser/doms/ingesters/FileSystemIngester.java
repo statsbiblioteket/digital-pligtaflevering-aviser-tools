@@ -255,12 +255,9 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
 
             log.trace("pathsForPage {}", pathsForPage);
 
-
             // Find the deliveryname, which is also the name of the folder where the delivery is placed
             String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
-
             PutFileEventHandler handler = new PutFileEventHandler();
-
 
             // For each individual page create a DOMS object.  For each file in the page, consider if it is metadata or not.
             // If it is metadata store it as a datastream on the object.  If it is binary data, put it in the Bitrepository,
@@ -315,7 +312,6 @@ public class FileSystemIngester implements BiFunction<DomsId, Path, String> {
                                             // Add the checksum relation to Fedora
                                             String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                             efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checksum, true, "Adding checksum after bitrepository ingest");
-
 
                                         } else if (path.toString().endsWith(".xml")) {
                                             // save physical bytes of XML file as "XML" data stream on page object.
