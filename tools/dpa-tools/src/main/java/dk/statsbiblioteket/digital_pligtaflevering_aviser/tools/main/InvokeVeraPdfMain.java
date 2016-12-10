@@ -28,9 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -76,12 +78,13 @@ public class InvokeVeraPdfMain {
                                    EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                                    @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryUrlPrefix,
                                    @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint,
-                                   @Named(DPA_VERAPDF_FLAVOR) String flavorId) {
+                                   @Named(DPA_VERAPDF_FLAVOR) String flavorId,
+                                   Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
 
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId).apply(domsId))
+                    .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider).apply(domsId))
                     // Collect results for each domsId
                     .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
@@ -90,11 +93,11 @@ public class InvokeVeraPdfMain {
             return f;
         }
 
-        private static Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
+        private static Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
             return domsId -> {
                 // Single doms item
                 List<TaskResult> taskResults = domsRepository.allChildrenFor(domsId).stream()
-                        .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, flavorId))
+                        .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider))
                         .collect(Collectors.toList());
 
                 List<String> failedTaskResults = taskResults.stream()
@@ -128,7 +131,7 @@ public class InvokeVeraPdfMain {
             };
         }
 
-        private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, String flavorId) {
+        private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
             DomsItem domsItem = domsRepository.lookup(domsId);
             Optional<DomsDatastream> profileOptional = domsItem.datastreams().stream()
                     .filter(ds -> ds.getMimeType().equals("application/pdf"))
@@ -161,8 +164,8 @@ public class InvokeVeraPdfMain {
 
             byte[] veraPDF_output;
             try (FileInputStream inputStream = new FileInputStream(file)) {
-                VeraPDFValidator validator = new VeraPDFValidator(flavorId, true);
-                veraPDF_output = validator.apply(inputStream);
+                //VeraPDFValidator validator = ; //new VeraPDFValidator(flavorId, true);
+                veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
             } catch (FileNotFoundException e) {
                 return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
             } catch (Exception e) {
@@ -233,6 +236,11 @@ public class InvokeVeraPdfMain {
         @Named(DPA_VERAPDF_FLAVOR)
         String getVeraPDFFlavor(ConfigurationMap map) {
             return map.getRequired(DPA_VERAPDF_FLAVOR);
+        }
+
+        @Provides
+        Function<InputStream, byte[]> getVeraPDFInvoker(@Named(DPA_VERAPDF_FLAVOR) String flavorId) {
+            return new VeraPDFValidator(flavorId, true);
         }
     }
 }

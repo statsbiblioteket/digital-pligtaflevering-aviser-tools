@@ -5,7 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.FileSystemIngester;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
@@ -58,16 +58,19 @@ public class IngesterMain {
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          QuerySpecification query,
                          DomsRepository repository,
-                         FileSystemIngester ingester
+                         FileSystemDeliveryIngester ingester
         ) {
 
             return () -> {
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
-                List<String> result = repository.query(query)
-                        .map(id -> ingester.apply(id, normalizedDeliveriesFolder))
+
+                List<String> toolResults = repository.query(query)
+                        .map(domsId -> ingester.apply(domsId, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
-                return String.valueOf(result); // FIXME: Formalize output
+
+
+                return String.valueOf(toolResults); // FIXME: Formalize output
             };
         }
 
