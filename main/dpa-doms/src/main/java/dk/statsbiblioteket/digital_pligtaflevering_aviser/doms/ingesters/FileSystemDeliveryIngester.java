@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -197,12 +198,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         // Original in BatchMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
-        Map<String, String> md5map;
+        Map<String, String> md5map = Collections.emptyMap();
         try {
-            md5map = Files.lines(deliveryPath.resolve("checksums.txt"))
-                    .map(s -> s.split(" +"))
-                    .collect(Collectors.toMap(a -> a[1], a -> a[0]));
-        } catch (IOException e) {
+//            md5map = Files.lines(deliveryPath.resolve("checksums.txt"))
+//                    .map(s -> s.split(", +"))
+//                    .collect(Collectors.toMap(a -> a[1], a -> a[0]));
+        } catch (Exception e) {
             return Arrays.asList(ToolResult.fail("Could not read checksums.txt", e));
         }
 
