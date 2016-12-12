@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Result class embedding the list of results from validation of XML from VeraPdf
- * This class contains a list of all broken paragraphes and a summary of the worst paragraph that is broken
+ * This class contains a list of all broken rules and a summary of the worst rule that is broken
  */
 public class ValidationResults {
 

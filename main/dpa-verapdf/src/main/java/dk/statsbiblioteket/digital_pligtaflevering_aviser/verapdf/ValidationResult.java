@@ -26,6 +26,14 @@ public class ValidationResult {
         return validationEnum;
     }
 
+    /**
+     * Enumeration of rules that has been decided by "digital bevarings gruppen" that we deen to fulfill
+     * The level of rules if:
+     * Invalid: The document can net be accepted
+     * Unknown: A rule has been struck, which there has not been any decision about
+     * Manual inspection: The document needs to be inspected manually
+     * Approved: The document is ok
+     */
     public enum ValidationResultEnum {
         invalid(0), unknown(10), manualInspection(20), approved(30);
         private int validationLevel;
