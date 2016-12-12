@@ -29,6 +29,7 @@ public class VeraPDFOutputValidation {
 
     /**
      * Supply with output from VeraPDF
+     * The stream is parsed and delivered into a Set, in this way every rulebreak is only handled once
      * @param is Inputstream from VeraPDF
      * @param mrrFormat True if the format is the mrr-output
      * @throws ParserConfigurationException
