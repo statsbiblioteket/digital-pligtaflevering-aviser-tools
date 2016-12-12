@@ -10,8 +10,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.TaskResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -22,7 +22,6 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.NotFoundException;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -71,6 +72,8 @@ public class InvokeVeraPdfMain {
         public static final String EVENTTYPE = "EVENTTYPE";
         public static final String AGENT = "agent";
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
+        public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
+        public static final String VERAPDF_DATASTREAM_NAME = "VERAPDF";
 
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
@@ -79,12 +82,13 @@ public class InvokeVeraPdfMain {
                                    @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryUrlPrefix,
                                    @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint,
                                    @Named(DPA_VERAPDF_FLAVOR) String flavorId,
+                                   @Named(DPA_VERAPDF_REUSEEXISTINGDATASTREAM) boolean reuseExistingDatastream,
                                    Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
 
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider).apply(domsId))
+                    .map(domsId -> processChildDomsId(domsRepository, domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream).apply(domsId))
                     // Collect results for each domsId
                     .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
@@ -93,47 +97,57 @@ public class InvokeVeraPdfMain {
             return f;
         }
 
-        private static Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
+        private Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
             return domsId -> {
                 // Single doms item
-                List<TaskResult> taskResults = domsRepository.allChildrenFor(domsId).stream()
-                        .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider))
+                List<ToolResult> toolResults = domsRepository.allChildrenFor(domsId).stream()
+                        .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream))
                         .collect(Collectors.toList());
 
-                List<String> failedTaskResults = taskResults.stream()
-                        .filter(t -> t.isSuccess() == false)
-                        .map(t -> t.getResult())
-                        .collect(Collectors.toList());
 
-                final boolean success = failedTaskResults.size() == 0;
-                String eventDetails;
-                String eventFullDetails;
-                if (success) {
-                    eventDetails = "All " + taskResults.size() + " successful.";
-                    eventFullDetails = eventDetails;
-                } else {
-                    eventDetails = failedTaskResults.size() + " failed out of " + taskResults.size();
-                    eventFullDetails = eventDetails + "\n\n" + String.join("\n", failedTaskResults);
-                }
+                // Combine the
+                String deliveryEventMessage = toolResults.stream()
+                        .map(tr -> tr.getHumanlyReadableMessage() + stackTraceFor(tr.getThrowable()))
+                        .filter(s -> s.trim().length() > 0) // skip blank lines
+                        .collect(Collectors.joining("\n"));
 
-                log.info("DomsID {}: {}", domsId, eventDetails);
+                // outcome was successful only if no toolResults has a FALSE result.
+                boolean outcome = toolResults.stream()
+                        .collect(Collectors.groupingBy(tr -> tr.getResult()))
+                        .containsKey(Boolean.FALSE)
+                        ? false
+                        : true;
 
-                final Item fakeItemToGetAroundAPI = new Item(domsId.id());
+                 final Item fakeItemToGetAroundAPI = new Item(domsId.id());
                 fakeItemToGetAroundAPI.setEventList(Collections.emptyList());
                 final Date timestamp = new Date();
-                try {
-                    // FIXME:  Migrate events into API.
-                    domsEventStorage.appendEventToItem(fakeItemToGetAroundAPI, AGENT, timestamp, eventFullDetails, EVENTTYPE, success);
-                } catch (CommunicationException | NotFoundException e) {
-                    throw new RuntimeException("Could not store event for domsId " + domsId, e);
-                }
-                return domsId + " " + eventDetails;
+
+                domsRepository.appendEventToItem(domsId, AGENT, timestamp, deliveryEventMessage, EVENTTYPE, outcome);
+
+                return domsId + " " + deliveryEventMessage;
             };
         }
 
-        private static Stream<TaskResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider) {
+        private String stackTraceFor(Optional<Throwable> throwable) {
+            if (throwable.isPresent() == false) {
+                return "";
+            }
+            // http://stackoverflow.com/a/18546861/53897
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            pw.println("---");
+            throwable.get().printStackTrace(pw);
+            pw.println("---");
+            return sw.getBuffer().toString();
+        }
+
+
+        protected Stream<ToolResult> analyzePDF(DomsId domsId, DomsRepository domsRepository, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
             DomsItem domsItem = domsRepository.lookup(domsId);
-            Optional<DomsDatastream> profileOptional = domsItem.datastreams().stream()
+
+            final List<DomsDatastream> datastreams = domsItem.datastreams();
+
+            Optional<DomsDatastream> profileOptional = datastreams.stream()
                     .filter(ds -> ds.getMimeType().equals("application/pdf"))
                     .findAny();
 
@@ -141,6 +155,12 @@ public class InvokeVeraPdfMain {
                 return Stream.of();
             }
             log.trace("analyzePDF found PDF datastream on {}", domsId);
+
+            if (reuseExistingDatastream) {
+                if (datastreams.stream().filter(ds -> ds.getID().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
+                    return Stream.of(ToolResult.ok("Reused existing VERAPDF datastream for " + domsId));
+                }
+            }
 
             DomsDatastream ds = profileOptional.get();
 
@@ -152,7 +172,7 @@ public class InvokeVeraPdfMain {
             // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
             final String url = ds.getUrl();
             if (url.startsWith(bitrepositoryUrlPrefix) == false) {
-                return Stream.of(new TaskResult(false, "id: " + domsId + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+                return Stream.of(ToolResult.fail("id: " + domsId + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
             }
             String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
 
@@ -167,9 +187,9 @@ public class InvokeVeraPdfMain {
                 //VeraPDFValidator validator = ; //new VeraPDFValidator(flavorId, true);
                 veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
             } catch (FileNotFoundException e) {
-                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
+                return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
             } catch (Exception e) {
-                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
+                return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
             }
 
             String keyword = "VERAPDF"; // LoggingKeywords
@@ -182,7 +202,7 @@ public class InvokeVeraPdfMain {
             String comment = file.getAbsolutePath() + " at " + new java.util.Date();
             try {
                 domsItem.modifyDatastreamByValue(
-                        "VERAPDF",
+                        VERAPDF_DATASTREAM_NAME,
                         null, // no checksum
                         null, // no checksum
                         veraPDF_output,
@@ -191,10 +211,9 @@ public class InvokeVeraPdfMain {
                         comment,
                         null);
             } catch (Exception e) {
-                return Stream.of(new TaskResult(false, "id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
+                return Stream.of(ToolResult.fail( "id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
             }
-            // FIXME:  Do we need to store an event on the individual PDF node?
-            return Stream.of(new TaskResult(true, "id: " + domsId + " " + comment));
+            return Stream.of(ToolResult.ok("id: " + domsId + " " + comment));
         }
 
         @Provides
@@ -241,6 +260,12 @@ public class InvokeVeraPdfMain {
         @Provides
         Function<InputStream, byte[]> getVeraPDFInvoker(@Named(DPA_VERAPDF_FLAVOR) String flavorId) {
             return new VeraPDFValidator(flavorId, true);
+        }
+
+        @Provides
+        @Named(DPA_VERAPDF_REUSEEXISTINGDATASTREAM)
+        boolean provideReuseExistingDatastream(ConfigurationMap map) {
+            return Boolean.valueOf(map.getDefault(DPA_VERAPDF_REUSEEXISTINGDATASTREAM, "false"));
         }
     }
 }

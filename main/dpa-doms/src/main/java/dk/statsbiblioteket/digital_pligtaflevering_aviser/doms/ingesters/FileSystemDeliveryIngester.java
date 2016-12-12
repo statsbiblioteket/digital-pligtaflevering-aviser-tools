@@ -298,9 +298,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                             .sorted()
                             .map(path -> {
                                 log.trace("Page file {} for {}", path, id);
-                                // FIXME: check md5 checksum.
                                 try {
                                     if (path.toString().endsWith(".pdf")) {  // FIXME: "Go in bitrepository?"
+                                        // FIXME: check md5 checksum.
 
                                         // FAKE BITREPOSITORY INGEST, JUST WRITE OUT THE FILE DIRECTLY.
 
@@ -334,13 +334,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                                         // create DOMS object for the file
                                         String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + rootPath.relativize(path));
 
-                                        // save external datastream in file object.  FIXME:  Modify "application/octet-stream" to value given by KFC. path.toString() to relative path.
+                                        // save external datastream in file object.
                                         efedora.addExternalDatastream(fileObjectId, "CONTENTS", rawRelativeFilename, permanentURL, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
 
-                                        // Add "hasPart" relation from the page object to the file object, FIXME: KFC gives correct value for "info:fedora/fedora-system:def/relations-external#hasFile"
+                                        // Add "hasPart" relation from the page object to the file object.
                                         efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
+
                                         return ToolResult.ok("CONTENT node added for PDF for " + path);
+
                                     } else if (path.toString().endsWith(".xml")) {
+                                        // FIXME: check md5 checksum.
                                         // save physical bytes of XML file as "XML" data stream on page object.
 
                                         final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
@@ -349,6 +352,22 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                                         // efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, md5checksum, allBytes, null, mimeType, "From " + path, null);
                                         efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
                                         return ToolResult.ok("XML datastream added for " + path);
+
+                                    } else if (path.toString().endsWith(".verapdf")) {
+                                        // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.
+                                        // save physical bytes of VERAPDF file as "VERAPDF" data stream on PDF file object.
+                                        String thisDCIdentifier = "path:" + rootPath.relativize(path);
+                                        String fileDCIdentifier = thisDCIdentifier.replaceFirst("\\.verapdf", ".pdf");
+                                        String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(fileDCIdentifier);
+
+                                        final String mimeType = "text/xml";
+                                        byte[] allBytes = Files.readAllBytes(path);
+                                        if (allBytes.length > 0) {
+                                            efedora.modifyDatastreamByValue(fileObjectId, "VERAPDF", null, null, allBytes, null, mimeType, "From " + path, null);
+                                            return ToolResult.ok("VERAPDF datastream added for " + path);
+                                        } else {
+                                            return ToolResult.ok("Skipped empty .verapdf file for " + path);
+                                        }
                                     } else {
                                         return ToolResult.fail("path not pdf/xml: " + path);
                                     }

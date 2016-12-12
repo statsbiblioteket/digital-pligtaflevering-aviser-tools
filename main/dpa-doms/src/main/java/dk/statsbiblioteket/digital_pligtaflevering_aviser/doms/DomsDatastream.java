@@ -20,4 +20,8 @@ public class DomsDatastream {
     public String getUrl() {
         return datastreamProfile.getUrl();
     }
+
+    public String getID() {
+        return datastreamProfile.getID();
+    }
 }

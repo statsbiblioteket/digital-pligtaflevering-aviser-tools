@@ -322,4 +322,14 @@ Install visualVM and run it.
 
     jvisualvm
 
-    
+# Creating *.verapdf files on 
+
+Due to the slowness of VeraPDF 0.26 TRA has augmented the FilesystemDeliveryIngester to add `.verapdf` files as 
+datastreams in the same way that `.xml` files are.  They can be precomputed with this command
+on a local copy of the files as `scape@miaplacidus`.
+
+    find . -name '*.pdf' -print0 | sort | $HOME/tra/gnu/bin/parallel -0 --bar --gnu -j35 ' $HOME/tra/verapdf/verapdf -f 1b --format mrr {} > $(dirname {})/$(basename {} .pdf).verapdf'
+
+(GNU parallels is installed in $HOME/tra/gnu/bin, and a installed copy of $HOME/verapdf is copied to $HOME/tra)
+
+
