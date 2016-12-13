@@ -19,7 +19,8 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     private final DomsRepository domsRepository;
     private ObjectProfile objectProfile;
 
-    /** A DomsItem has an id, and knows it belongs to a Repository.
+    /**
+     * A DomsItem has an id, and knows it belongs to a Repository.
      *
      * @param domsId
      * @param domsRepository
@@ -30,8 +31,9 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         this.objectProfile = null;
     }
 
-    /** Retrieve a list of data streams for further processing.
-     *
+    /**
+     * Retrieve a list of data streams for further processing.
+     * <p>
      * FIXME:  Currently the underlying DatastreamProfile class leaks through.  When we know what we need, hide it.
      */
 
@@ -45,10 +47,10 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     /**
      * Ensure that we have a copy of the DOMS object (and cache it for later).
      * If for any reason the copy is outdated, call <code>requireReload()</code>.
-     *
+     * <p>
      * The synchronization mechanism is not optimized.
      */
-    private synchronized void reloadIfNeeded() {
+    protected synchronized void reloadIfNeeded() {
         if (objectProfile == null) {
             objectProfile = domsRepository.getObjectProfile(domsId.id(), null);
             Objects.requireNonNull(objectProfile, "objectProfile not set");
@@ -83,8 +85,14 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return date;
     }
 
-    /** Invalidate the cached DOMS object, so the next usage will reload it from DOMS.
-     *
+//    public Date appendEventToItem(String agent, Date timestamp, String details, String eventType, boolean outcome) {
+//        final Date date = domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
+//        requireReload();
+//        return date;
+//    }
+
+    /**
+     * Invalidate the cached DOMS object, so the next usage will reload it from DOMS.
      */
     private void requireReload() {
         objectProfile = null;

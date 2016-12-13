@@ -146,7 +146,7 @@ public class DomsModule {
      */
     @Provides
     public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                                      PremisManipulatorFactory premisManipulatorFactory,
+                                                      PremisManipulatorFactory<Item> premisManipulatorFactory,
                                                       DomsEventStorage<Item> domsEventStorage,
                                                       @Named("pageSize") int pageSize) {
         try {
@@ -164,7 +164,7 @@ public class DomsModule {
      * @return factory
      */
     @Provides
-    public PremisManipulatorFactory providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
+    public PremisManipulatorFactory<Item> providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
         try {
             PremisManipulatorFactory<Item> factory;
             factory = new PremisManipulatorFactory<>(PremisManipulatorFactory.TYPE, itemFactory);

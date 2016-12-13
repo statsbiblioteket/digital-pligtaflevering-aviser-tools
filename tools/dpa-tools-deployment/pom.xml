@@ -138,9 +138,9 @@
                                 </program>
                                 <program>
                                     <mainClass>
-                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DomsIngesterMain
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain
                                     </mainClass>
-                                    <id>dpa-doms-ingester</id>
+                                    <id>dpa-ingester</id>
                                 </program>
                                 <program>
                                     <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain

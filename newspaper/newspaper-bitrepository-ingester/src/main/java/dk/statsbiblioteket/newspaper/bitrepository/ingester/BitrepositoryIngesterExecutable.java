@@ -1,21 +1,19 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CallResult;
 import dk.statsbiblioteket.medieplatform.autonomous.NewspaperBatchAutonomousComponentUtils;
 import dk.statsbiblioteket.medieplatform.autonomous.RunnableComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 
 /** AutonomousComponent wrapper for the BitrepositoryIngester. */
 public class BitrepositoryIngesterExecutable {
@@ -42,7 +40,7 @@ public class BitrepositoryIngesterExecutable {
      * @see NewspaperBatchAutonomousComponentUtils#parseArgs(String[])
      */
     public static int doMain(String[] args) throws IOException {
-        log.info("Starting with args {}", args);
+        log.info("Starting with args {}", (Object []) args);
         Properties properties = readProperties(args);
         RunnableComponent<Batch> component = new BitrepositoryIngesterComponent(properties);
 

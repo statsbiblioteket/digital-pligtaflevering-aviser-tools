@@ -9,6 +9,7 @@ import java.util.Date;
 /**
  *
  */
+@Deprecated
 public class DomsEventAdderCollection extends ArrayList<DomsEvent> {
 
     private DomsId domsId;
