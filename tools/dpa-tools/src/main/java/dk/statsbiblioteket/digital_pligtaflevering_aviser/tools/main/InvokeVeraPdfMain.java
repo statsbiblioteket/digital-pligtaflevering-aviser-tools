@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -41,6 +39,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,7 +69,6 @@ public class InvokeVeraPdfMain {
     public static class VeraPdfModule {
 
         public static final String VERAPDF_RUN = "VeraPDF_Run";
-        public static final String AGENT = "agent";
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
         public static final String VERAPDF_DATASTREAM_NAME = "VERAPDF";
@@ -99,46 +97,35 @@ public class InvokeVeraPdfMain {
 
         private Function<DomsId, String> processChildDomsId(DomsRepository domsRepository, DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
             return domsId -> {
+                long startTime = System.currentTimeMillis();
+
                 // Single doms item
                 List<ToolResult> toolResults = domsRepository.allChildrenFor(domsId).stream()
                         .flatMap(childDomsId -> analyzePDF(childDomsId, domsRepository, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream))
                         .collect(Collectors.toList());
 
+                // Sort according to result
+                final Map<Boolean, List<ToolResult>> toolResultMap = toolResults.stream()
+                        .collect(Collectors.groupingBy(tr -> tr.getResult()));
 
-                // Combine the
-                String deliveryEventMessage = toolResults.stream()
-                        .map(tr -> tr.getHumanlyReadableMessage() + stackTraceFor(tr.getThrowable()))
+                List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
+
+                String deliveryEventMessage = failingToolResults.stream()
+                        .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
                         .filter(s -> s.trim().length() > 0) // skip blank lines
                         .collect(Collectors.joining("\n"));
 
                 // outcome was successful only if no toolResults has a FALSE result.
-                boolean outcome = toolResults.stream()
-                        .collect(Collectors.groupingBy(tr -> tr.getResult()))
-                        .containsKey(Boolean.FALSE)
-                        ? false
-                        : true;
+                boolean outcome = failingToolResults.size() == 0;
 
-                 final Item fakeItemToGetAroundAPI = new Item(domsId.id());
-                fakeItemToGetAroundAPI.setEventList(Collections.emptyList());
+                final String keyword = getClass().getSimpleName();
                 final Date timestamp = new Date();
 
-                domsRepository.appendEventToItem(domsId, AGENT, timestamp, deliveryEventMessage, VERAPDF_RUN, outcome);
+                domsRepository.appendEventToItem(domsId, keyword, timestamp, deliveryEventMessage, VERAPDF_RUN, outcome);
 
-                return domsId + " " + deliveryEventMessage;
+                log.info("{} {} Took: {} ms", keyword, domsId, (System.currentTimeMillis() - startTime));
+                return "domsID " + domsId + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
-        }
-
-        private String stackTraceFor(Optional<Throwable> throwable) {
-            if (throwable.isPresent() == false) {
-                return "";
-            }
-            // http://stackoverflow.com/a/18546861/53897
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw, true);
-            pw.println("---");
-            throwable.get().printStackTrace(pw);
-            pw.println("---");
-            return sw.getBuffer().toString();
         }
 
 
