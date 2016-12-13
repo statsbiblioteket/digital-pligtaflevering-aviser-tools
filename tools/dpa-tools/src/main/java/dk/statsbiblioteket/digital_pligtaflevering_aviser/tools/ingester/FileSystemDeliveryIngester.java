@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
@@ -22,8 +22,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,9 +45,12 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 import static java.nio.file.Files.walk;
 
 /**
- * FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
+ * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
  * directory and one object for each file (some are ignored).  A <code>hasPart</code> relation is created between a
- * given object and the object for the parent directory it belongs to.
+ * given object and the object for the parent directory it belongs to. </p><p>NOTE: FedoraRest.addRelations has a bug
+ * occasionally invoking addRelation several times more than necessary.  For instance when called with just one object
+ * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
+ * See ABR for details. </p>
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, String> {
 
@@ -110,37 +111,26 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         // Collect all the indvidual toolResults.
         List<ToolResult> toolResult = ingestDirectoryForDomsId(domsId, rootPath);
 
+        // Sort according to result
+        final Map<Boolean, List<ToolResult>> toolResultMap = toolResult.stream()
+                .collect(Collectors.groupingBy(tr -> tr.getResult()));
+
+        List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
+
         // Combine the
-        String deliveryEventMessage = toolResult.stream()
-                .map(tr -> tr.getHumanlyReadableMessage() + stackTraceFor(tr.getThrowable()))
+        String deliveryEventMessage = failingToolResults.stream()
+                .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
                 .filter(s -> s.trim().length() > 0) // skip blank lines
                 .collect(Collectors.joining("\n"));
 
         // outcome was successful only if no toolResults has a FALSE result.
-        boolean outcome = toolResult.stream()
-                .collect(Collectors.groupingBy(tr -> tr.getResult()))
-                .containsKey(Boolean.FALSE)
-                ? false
-                : true;
+        boolean outcome = failingToolResults.size() == 0;
 
         final String keyword = getClass().getSimpleName();
 
         repository.appendEventToItem(domsId, keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
         log.info("{} {} Took: {} ms", keyword, domsId, (System.currentTimeMillis() - startTime));
         return "domsID " + domsId + " ingested. outcome = " + outcome;
-    }
-
-    private String stackTraceFor(Optional<Throwable> throwable) {
-        if (throwable.isPresent() == false) {
-            return "";
-        }
-        // http://stackoverflow.com/a/18546861/53897
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw, true);
-        pw.println("---");
-        throwable.get().printStackTrace(pw);
-        pw.println("---");
-        return sw.getBuffer().toString();
     }
 
     public List<ToolResult> ingestDirectoryForDomsId(DomsId domsId, Path rootPath) {
@@ -164,7 +154,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
             nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
                     DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true), XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            throw new RuntimeException("Invalid XPath. This is a programming error.", e);
+            return Arrays.asList(ToolResult.fail("Invalid XPath. This is a programming error.", e));
         }
         List<String> textContent = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -377,6 +367,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                             });
                 }).collect(Collectors.toList());
 
+        // All files now processed and created in DOMS.  If any failures so far, stop here.
+
         toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
 
         if (toolResultsForThisDirectory.stream().filter(tr -> tr.getResult() == Boolean.FALSE).findAny().isPresent()) {
@@ -384,7 +376,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
             return toolResultsForThisDirectory.stream();
         }
 
-        // All pages are now created in DOMS.  Add "hasPart" relations to directory object.
+        // Add "hasPart" relations to all domsIds on this page directory object.
 
         List<String> domsIdsInThisDirectory = sortedPathsForPage.keySet().stream().map(id -> lookupObjectFromDCIdentifier(id).get(0)).collect(Collectors.toList());
         try {
@@ -401,9 +393,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
 
         /**
-         * NOTE: FedoraRest.addRelations has a bug occasionally invoking addRelation several times more than necessary.  For
-         * instance when called with just one object id.  This leads to duplications of relations.  Therefore we loop ourselves causing
-         * a new REL-EXT datastream version for every write.  See ABR for details.
          */
 
         // For each subdirectory in this directory, lookup the child DOMS id using its relative Path and create

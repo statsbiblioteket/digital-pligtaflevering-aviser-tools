@@ -69,7 +69,7 @@ public class InvokeVeraPdfMain {
     @Module
     public static class VeraPdfModule {
 
-        public static final String EVENTTYPE = "EVENTTYPE";
+        public static final String VERAPDF_RUN = "VeraPDF_Run";
         public static final String AGENT = "agent";
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
@@ -122,7 +122,7 @@ public class InvokeVeraPdfMain {
                 fakeItemToGetAroundAPI.setEventList(Collections.emptyList());
                 final Date timestamp = new Date();
 
-                domsRepository.appendEventToItem(domsId, AGENT, timestamp, deliveryEventMessage, EVENTTYPE, outcome);
+                domsRepository.appendEventToItem(domsId, AGENT, timestamp, deliveryEventMessage, VERAPDF_RUN, outcome);
 
                 return domsId + " " + deliveryEventMessage;
             };
@@ -184,7 +184,6 @@ public class InvokeVeraPdfMain {
 
             byte[] veraPDF_output;
             try (FileInputStream inputStream = new FileInputStream(file)) {
-                //VeraPDFValidator validator = ; //new VeraPDFValidator(flavorId, true);
                 veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
             } catch (FileNotFoundException e) {
                 return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));

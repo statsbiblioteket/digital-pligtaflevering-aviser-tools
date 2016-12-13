@@ -160,8 +160,19 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
+    /** appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
+     *
+     * @param domsId domsId to add event to
+     * @param agent text string identifying this autonomous component
+     * @param timestamp timestamp being put into the event, usually "now".
+     * @param details humanly readable string describing this event
+     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
+     * @param outcome true=success, false=failure.
+     * @return
+     */
+
     public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
-        Item fakeItemToGetThroughAPI = new Item(domsId.id());
+        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
         try {
             return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
         } catch (RuntimeException e) {
