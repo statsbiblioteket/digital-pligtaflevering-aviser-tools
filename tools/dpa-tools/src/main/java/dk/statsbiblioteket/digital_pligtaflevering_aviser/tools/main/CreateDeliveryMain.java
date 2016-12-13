@@ -14,8 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
@@ -38,20 +42,6 @@ public class CreateDeliveryMain {
         Tool getTool();
     }
 
-
-    /**
-     * Create an empty file to indicate that the batch has been run
-     * @param file
-     * @throws IOException
-     */
-    public static void touch(File file) throws IOException {
-        if (!file.exists()) {
-            new FileOutputStream(file).close();
-        }
-        file.setLastModified(System.currentTimeMillis());
-    }
-
-
     @Module
     static class CreateDeliveryModule {
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
@@ -59,21 +49,19 @@ public class CreateDeliveryMain {
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 
-
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_AGENT) String premisAgent,
                          @Named(DOMS_URL) String domsUrl,
                          @Named(DOMS_USERNAME) String domsUser,
                          @Named(DOMS_PASSWORD) String domsPass,
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen,
-                         @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolder,
+                         @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
                          @Named(AUTONOMOUS_DONEDIR) String doneDir) {
 
             //Look in filesystem and find all deliveries that has not yet been seen by "CreateDelivery"
-            File[] directories = new File(deliveryFolder).listFiles(File::isDirectory);
+            File[] directories = new File(deliveryFolderName).listFiles(File::isDirectory);
 
             return () -> {
-                final String batchResponse = "";
                 // Iterate through the deliveries on disk
                 for (File deliveryItemDirectory : directories) {
                     Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
@@ -82,19 +70,19 @@ public class CreateDeliveryMain {
                         String deliveryIdValue = matcher.group(1);
                         String roundtripValue = matcher.group(2);
 
-                        File deliveryProcessedIndicator = new File(doneDir, deliveryFolderName);
-                        if(!deliveryProcessedIndicator.exists()) {
-                            CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolder});
-                            touch(new File(doneDir, deliveryFolderName));
+                        final File directoryProcessedIndicatorFile = new File(doneDir, deliveryFolderName);
+
+                        if (!directoryProcessedIndicatorFile.exists()) {
+                            CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
+                            touch(directoryProcessedIndicatorFile);
                         } else {
-                            log.trace("did not match, skipping {}", deliveryItemDirectory.getName());
+                            log.trace("already processed, skipping {}", deliveryItemDirectory.getName());
                         }
                     } else {
-                        log.trace("did not match, skipping {}", deliveryItemDirectory.getName());
+                        log.trace("file name did not match, skipping {}", deliveryItemDirectory.getName());
                     }
                 }
                 String joinedString = StringUtils.join(directories, " ");
-
 
                 return "created delivery for " + joinedString;
             };
@@ -112,4 +100,19 @@ public class CreateDeliveryMain {
             return map.getRequired(AUTONOMOUS_DONEDIR);
         }
     }
+
+    /**
+     * Create an empty file to indicate that the batch has been run.  Last modified time is set to now.
+     * A simple implementation of the Unix "touch" command.
+     *
+     * @param file file to "touch"
+     * @throws IOException
+     */
+    public static void touch(File file) throws IOException {
+        if (!file.exists()) {
+            new FileOutputStream(file).close();
+        }
+        file.setLastModified(System.currentTimeMillis());
+    }
+
 }
