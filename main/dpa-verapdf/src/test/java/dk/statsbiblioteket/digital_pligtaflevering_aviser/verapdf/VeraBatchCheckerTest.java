@@ -1,47 +1,46 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+
+import static org.junit.Assert.assertEquals;
 
 /**
- * FIXME:  Skulle vist ikke have været checket ind.
+ *
  */
 public class VeraBatchCheckerTest {
-
-
-
 
 
     //@Test
     public void generateXMLaa() throws Exception {
 
 
+        try {
 
-                    try {
+            FileInputStream fip = new FileInputStream("/home/mmj/temp/test4.pdf");
 
-                        FileInputStream fip = new FileInputStream("/home/mmj/temp/test4.pdf");
+            VeraPDFValidator validator1b = new VeraPDFValidator("1b", false);
+            byte[] result = validator1b.apply(fip);
 
-                        VeraPDFValidator validator1b = new VeraPDFValidator("1b", false);
-                        byte[] result =  validator1b.apply(fip);
-
-                        FileUtils.writeByteArrayToFile(new File("/home/mmj/temp/temp/" + "filename" + ".xml"), result);
-
+            FileUtils.writeByteArrayToFile(new File("/home/mmj/temp/temp/" + "filename" + ".xml"), result);
 
 
-                    } catch (Exception e) {
+        } catch (Exception e) {
 
 
-                    }
+        }
 
     }
-
-
 
 
     //@Test
@@ -49,23 +48,22 @@ public class VeraBatchCheckerTest {
 
 
         ArrayList<String> list = new ArrayList<String>();
-        Files.walk(Paths.get("/home/mmj/temp/dl1_20161201_rt1")).forEach(filePath -> {
+        Files.walk(Paths.get("/home/mmj/testdata/dl1_20161201_rt1")).forEach(filePath -> {
             if (Files.isRegularFile(filePath)) {
                 String file = filePath.getFileName().toString();
                 int pointLocation = file.lastIndexOf(".");
                 String filename = file.substring(0, pointLocation);
                 String ext = file.substring(pointLocation);
-                if(ext.equals(".pdf")) {
+                if (ext.equals(".pdf")) {
 
                     try {
 
                         FileInputStream fip = new FileInputStream(filePath.toFile());
 
                         VeraPDFValidator validator1b = new VeraPDFValidator("1b", false);
-                        byte[] result =  validator1b.apply(fip);
+                        byte[] result = validator1b.apply(fip);
 
                         FileUtils.writeByteArrayToFile(new File("/home/mmj/temp/temp/" + filename + ".xml"), result);
-
 
 
                     } catch (Exception e) {
@@ -80,122 +78,129 @@ public class VeraBatchCheckerTest {
     }
 
 
-
-    //@Test
+    @Test
     public void validateXML() throws Exception {
+
+
+        String testBatch = "/home/mads/testdata/tstdelivery";
+        String batchDirPathInWorkspace = "delivery-samples";
+        Path p = Paths.get(batchDirPathInWorkspace).toAbsolutePath();
+
+        // http://stackoverflow.com/a/320595/53897
+        URI l = null;
+        try {
+            l = VeraBatchCheckerTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        Path startDir = Paths.get(l);
 
 
         ArrayList<FailedPage> arl = new ArrayList<FailedPage>();
 
 
         ArrayList<String> list = new ArrayList<String>();
-        Files.walk(Paths.get("/home/mmj/temp/dl1_20161201_rt1")).forEach(filePath -> {
+        Files.walk(Paths.get(testBatch)).forEach(filePath -> {
             if (Files.isRegularFile(filePath)) {
                 String file = filePath.getFileName().toString();
 
-//                System.out.println(file);
-
                 int pointLocation = file.lastIndexOf(".");
-                if(pointLocation != -1) {
-//                System.out.println(pointLocation);
+                if (pointLocation > 0) {// only check real filenames
 
-                String filename = file.substring(0, pointLocation);
-                String ext = file.substring(pointLocation);
-                if(ext.equals(".verapdf")) {
-
-
-
+                    String filename = file.substring(0, pointLocation);
+                    String ext = file.substring(pointLocation);
+                    if (ext.equals(".verapdf")) {
                         try {
-
                             FileInputStream fip = new FileInputStream(filePath.toAbsolutePath().toFile());
-                            VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(true);
-                            List<String> ids = rulo.extractRejected(fip);
-                            ValidationResults validationResults = rulo.validateResult(ids);
-
+                            VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(fip, true);
+                            ValidationResults validationResults = rulo.validateResult();
                             arl.add(new FailedPage(validationResults, file));
-
-                            /*if(validationResults.getWorstBrokenRule().getValidationLevel()==30) {
-                                arl.add()
-                                t30 ++;
-                            } else if(validationResults.getWorstBrokenRule().getValidationLevel()==20) {
-                                t20 ++;
-                            }*/
-
-
                         } catch (Exception e) {
-
+                            assertEquals(e.getMessage(), true, false);
                         }
-
                     }
-
                 } else {
                     System.out.println("-- " + filePath.toAbsolutePath().toString());
                 }
-
-
-
             }
         });
-        System.out.println(list.size());
 
 
-        int t30 = 0;
-        int t20 = 0;
-        int t00 = 0;
+        int approvedCounter = 0;
+        int manualInspectCounter = 0;
+        int invalidCounter = 0;
+        int unknownCounter = 0;
 
 
-        for(FailedPage ar : arl) {
+        HashSet<String> failedList = new HashSet<String>();
 
 
+        for (FailedPage ar : arl) {
 
-            if(ar.getNo().getWorstBrokenRule().getValidationLevel()==30) {
-                t30 ++;
-            } else if(ar.getNo().getWorstBrokenRule().getValidationLevel()==20) {
-                //System.out.println("MAN INSPECT " + ar.getPage());
-                t20 ++;
-            } else if(ar.getNo().getWorstBrokenRule().getValidationLevel()==0) {
 
-                System.out.println("FAILED " + ar.getPage());
-                t00 ++;
-            }  else {
-                //System.out.println("OTHER " + ar.getNo().getWorstBrokenRule().getValidationLevel());
+            if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.approved.getValidationLevel()) {
+                approvedCounter++;
+            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.manualInspection.getValidationLevel()) {
+
+                //fejler på 6.3.5 og 6.1.11
+                //System.out.println("Manual inspect " + ar.getPagePathAsString());
+                ArrayList<ValidationResult> rules = ar.getValidationResult().getRulesBroken();
+
+                for (ValidationResult res : rules) {
+                    failedList.add(res.getParagraph());
+                }
+                manualInspectCounter++;
+            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.invalid.getValidationLevel()) {
+
+                //Fejler paa 6.9
+                System.out.println("FAILED " + ar.getPagePathAsString());
+                ArrayList<ValidationResult> rules = ar.getValidationResult().getRulesBroken();
+                for (ValidationResult res : rules) {
+                    failedList.add(res.getParagraph());
+                }
+                invalidCounter++;
+            } else {
+
+                System.out.println("UNKNOWN " + ar.getPagePathAsString() + ar.validationResult.getWorstBrokenRule());
+                ArrayList<ValidationResult> rules = ar.getValidationResult().getRulesBroken();
+                for (ValidationResult res : rules) {
+                    failedList.add(res.getParagraph());
+                }
+                unknownCounter++;
+                //System.out.println("OTHER " + ar.getValidationResult().getWorstBrokenRule().getValidationLevel());
             }
-
-
         }
 
-        System.out.println(t30);
-        System.out.println(t20);
-        System.out.println(t00);
+        System.out.println("APPROVED " + approvedCounter);
+        System.out.println("MANUAL   " + manualInspectCounter);
+        System.out.println("INVALID  " + invalidCounter);
+        System.out.println("UNKNOWN  " + unknownCounter);
 
 
-
-
-
+        for (String failItem : failedList) {
+            System.out.println(failItem);
+        }
     }
 
 
+    /** Class embedding
+     *
+     */
     public class FailedPage {
-        ValidationResults no;
-        String page;
+        ValidationResults validationResult;
+        String pagePathAsString;
 
         public FailedPage(ValidationResults no, String page) {
-            this.no = no;
-            this.page = page;
-
+            this.validationResult = no;
+            this.pagePathAsString = page;
         }
 
-        public ValidationResults getNo() {
-            return no;
+        public ValidationResults getValidationResult() {
+            return validationResult;
         }
 
-        public String getPage() {
-            return page;
+        public String getPagePathAsString() {
+            return pagePathAsString;
         }
-
-
-
     }
-
-
 }
