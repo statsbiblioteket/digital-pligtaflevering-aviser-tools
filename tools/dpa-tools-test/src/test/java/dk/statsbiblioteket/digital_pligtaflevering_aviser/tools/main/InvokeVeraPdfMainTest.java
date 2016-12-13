@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain.VeraPdfModule.DPA_PUTFILE_DESTINATIONPATH;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
@@ -33,7 +33,7 @@ public class InvokeVeraPdfMainTest {
 
         InvokeVeraPdfMain.main(new String[]{
                 "invoke-verapdf-vagrant.properties",
-                DPA_PUTFILE_DESTINATIONPATH + "=" + bitrepoPath.toAbsolutePath(),
+                BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });
     }

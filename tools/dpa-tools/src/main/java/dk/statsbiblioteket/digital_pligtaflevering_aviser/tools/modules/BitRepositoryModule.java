@@ -14,6 +14,8 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 @Module
 public class BitRepositoryModule {
 
+    public static final String BITREPOSITORY_SBPILLAR_MOUNTPOINT = "bitrepository.sbpillar.mountpoint";
+
     /** This is the base url for the public exposure of a given file ingested in the BitRepository.  This
      * is stored as the URL of the CONTENTS datastream.
      * For the SB pillar we can remove this prefix from the URL and get the actual relative filename on disk.
@@ -26,4 +28,18 @@ public class BitRepositoryModule {
     public @Named(BITMAG_BASEURL_PROPERTY) String provideBitrepositoryBaseUrl(ConfigurationMap map) {
         return map.getRequired(BITMAG_BASEURL_PROPERTY);
     }
+
+    /** The SB Bitrepository pillar allows direct access to the files in the repository, typically
+     * in the form of a NFS mount point from where the file path can be resolved.
+     *
+     * @param map configuration map
+     * @return the configuration parameter provided (required)
+     */
+    @Provides
+    @Named(BITREPOSITORY_SBPILLAR_MOUNTPOINT)
+    String getPutfileDestinationPath(ConfigurationMap map) {
+        return map.getRequired(BITREPOSITORY_SBPILLAR_MOUNTPOINT);
+    }
+
+
 }

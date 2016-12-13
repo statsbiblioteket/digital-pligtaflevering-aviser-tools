@@ -9,6 +9,7 @@ import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
@@ -31,14 +32,16 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     private SBOIEventIndex<Item> sboiEventIndex;
     private WebResource webResource;
     private EnhancedFedora efedora;
+    private DomsEventStorage<Item> domsEventStorage;
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource, EnhancedFedora efedora) {
+    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource, EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage) {
         this.sboiEventIndex = sboiEventIndex;
         this.webResource = webResource;
         this.efedora = efedora;
+        this.domsEventStorage = domsEventStorage;
     }
 
     @Override
@@ -155,6 +158,27 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
             throw new RuntimeException("could not save datastream " + datastream + " for id " + domsId);
         }
+    }
+
+    /** appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
+     *
+     * @param domsId domsId to add event to
+     * @param agent text string identifying this autonomous component
+     * @param timestamp timestamp being put into the event, usually "now".
+     * @param details humanly readable string describing this event
+     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
+     * @param outcome true=success, false=failure.
+     * @return
+     */
+
+    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
+        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
+        try {
+            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("appendEventToItem failed for " + domsId, e);        }
     }
 }
 

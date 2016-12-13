@@ -1,5 +1,7 @@
 <configuration>
 
+    <timestamp key="myTimestamp" datePattern="yyyy-MM-dd'_'HH-mm-ss.SSS"/>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
@@ -9,9 +11,19 @@
         </encoder>
     </appender>
 
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <!-- "application-name" is a variable -->
+        <file>/tmp/%{myTimestamp}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- https://sbprojects.statsbiblioteket.dk/display/KIB/Bets+practice+when+logging+to+ELK -->
+            <Pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg %n</Pattern>
+        </encoder>
+    </appender>
+
     <logger name="dk.statsbiblioteket" level="trace" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

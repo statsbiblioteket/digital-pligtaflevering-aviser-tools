@@ -40,9 +40,9 @@ Steps relevant for PDF's could be:
 
 * _Ingest_ PDF's (preserve them in Bitmagasinet)
 * Analyse if the PDF can be rendered to a series of images, one per page.
-* Check if the PDF is suitable for digital preservation.  An example could be if all fonts and images are present 
+* Check if the PDF is suitable for digital preservation.  An example could be if all fonts and images are present
 inside the PDF
-or if any need to be retrieved from the internet.  Such a resource may go away at any time, making the PDF incomplete. 
+or if any need to be retrieved from the internet.  Such a resource may go away at any time, making the PDF incomplete.
 If we receive such PDF's a human must take action.
 * Create reports on deliveries to get an overview of how the process is going.
 
@@ -173,6 +173,82 @@ this is expected to be a very rare situation, the exact steps to take
 are currently undefined.
 
 
+# DOMS model created by Ingester based on Infomedia delivery format
+
+The sample delivery "dl_20160811_rt1" (in delivery-samples/ folder) contains a single
+test newspaper named "verapdf" with 9 physical pages and 1 article ready to be ingested.
+The transfer_acknowledged and transfer_complete files are empty and ignored by the ingester.
+
+    dl_20160811_rt1/
+    dl_20160811_rt1/md5sums.txt
+    dl_20160811_rt1/transfer_acknowledged
+    dl_20160811_rt1/transfer_complete
+    dl_20160811_rt1/verapdf
+    dl_20160811_rt1/verapdf/articles
+    dl_20160811_rt1/verapdf/articles/20160811_verapdf_article_5c649fe5.xml
+    dl_20160811_rt1/verapdf/pages
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page001.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page001.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page002.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page002.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page003.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page003.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page004.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page004.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page005.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page005.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page006.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page006.xml
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page007.pdf
+    dl_20160811_rt1/verapdf/pages/20160811_verapdf_page007.xml
+
+The DOMS model constructed looks like:
+
+    +---------------------+
+    ! "dl_20160811" + "1" !
+    +-+-------------------+
+      !
+      +>+-----------+
+        | "verapdf" |
+        +-+---------+
+            |
+            +>+------------+
+            ! ! "articles" !
+            ! +-+----------+
+            !   !
+            !   +>+-------------------------------------------+
+            !     ! "20160811_verapdf_article_5c649fe5"       !
+            !     ! Datastream "XML": bytes in .XML file      ! 
+            !     +-------------------------------------------+
+            !
+            +>+------------+
+              ! "pages"    !
+              +-+----------+
+                !
+                +>+-------------------------------------------+
+                ! ! "20160811_verapdf_page001"                !
+                ! ! Datastream "XML": bytes in .XML file      !
+                ! +-+-----------------------------------------+
+                !   ! NOTE: hasPart relation
+                !   +>+-----------------------------------------------+
+                !     ! "20160811_verapdf_page001.pdf"                ! 
+                !     ! Physical file stored in the Bitrepository.    !
+                !     ! Datastream "CONTENTS" points to bitfinder URL !
+                !     +-----------------------------------------------+
+                !
+                +>+------------------------------------....
+                ! ! "20160811_verapdf_page002".....
+                ! ! Datastream "XML....
+                ! +--- ...
+                !
+
+FIXME:  Move description from Javadoc into here. 
+
+All arrows except one indicate a "hasPart" relation on the parent node
+(typically directory) from the parent node to the child node.  There
+is not a relation on the child pointing to its parent.  The exception
+is the relation from the "page" node to the PDF file (which is
+stored externally in the Bitrepository) which is a "hasFile" relation.
 
 
 
@@ -202,7 +278,7 @@ By default it listens on port 8000.
 For development a full "server vagrant" with DOMS, Zookeeper etc has been
 adapted from the doms-installer project and is placed in doms/doms-installer.
 This is not integrated in the main pom.xml as this requires insane bandwidth
-and read access to the internal SB Nexus instance.  
+and read access to the internal SB Nexus instance.
 
 NOTE:  THIS IS NOT PRODUCTION QUALITY.  JUST ENOUGH TO ALLOW LOCAL WORK.
 
@@ -220,7 +296,7 @@ Get vagrant services up and running:
     vagrant ssh -c "nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh"
 
 DOMS with friends are now running.  Do NOT stop this virtual machine
-as the services do not come up propely.  Pause it and restart it as 
+as the services do not come up propely.  Pause it and restart it as
 needed.
 
 Access Fedora (fedoraAdmin/fedoraAdminPass):
@@ -232,3 +308,28 @@ is triggered by the search criteria, and is simulated to be run on
 dummy PDF files stored as test resources.  VeraPDF is invoked as a
 REST service, and the output stored in the event and as a datastream
 named VERAPDF on the newspaper roundtrip object.
+
+
+# Running visualvm on DOMS
+
+ssh in with X11-forwarding active
+
+    vagrant ssh -- -Y
+    
+Install visualVM and run it.
+
+    sudo apt install visualvm
+
+    jvisualvm
+
+# Creating *.verapdf files on 
+
+Due to the slowness of VeraPDF 0.26 TRA has augmented the FilesystemDeliveryIngester to add `.verapdf` files as 
+datastreams in the same way that `.xml` files are.  They can be precomputed with this command
+on a local copy of the files as `scape@miaplacidus`.
+
+    find . -name '*.pdf' -print0 | sort | $HOME/tra/gnu/bin/parallel -0 --bar --gnu -j35 ' $HOME/tra/verapdf/verapdf -f 1b --format mrr {} > $(dirname {})/$(basename {} .pdf).verapdf'
+
+(GNU parallels is installed in $HOME/tra/gnu/bin, and a installed copy of $HOME/verapdf is copied to $HOME/tra)
+
+

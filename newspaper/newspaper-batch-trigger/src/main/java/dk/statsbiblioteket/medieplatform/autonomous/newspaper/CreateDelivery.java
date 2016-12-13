@@ -1,12 +1,10 @@
 package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
-import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Event;
-
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -99,7 +97,7 @@ public class CreateDelivery {
 
         List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
         if(roundtrips == null) {
-            roundtrips = Collections.EMPTY_LIST;
+            roundtrips = Collections.emptyList();
         }
         for (Delivery roundtrip : roundtrips) {
             if (roundtrip.getRoundTripNumber() > batch.getRoundTripNumber()) {

@@ -1,26 +1,23 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngestableFile;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
+import org.bitrepository.client.eventhandler.CompleteEvent;
+import org.bitrepository.client.eventhandler.OperationFailedEvent;
+import org.mockito.InOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 
-import org.bitrepository.client.eventhandler.CompleteEvent;
-import org.bitrepository.client.eventhandler.OperationFailedEvent;
-import org.mockito.InOrder;
-import org.testng.annotations.Test;
-
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngestableFile;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 
 public class PutFileEventHandlerTest {
@@ -34,6 +31,7 @@ public class PutFileEventHandlerTest {
     //@Test
     public void dubbleFailureEventTest() throws MalformedURLException {
         DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
+        @SuppressWarnings("unchecked")
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);
         ParallelOperationLimiter putLimiter = mock(ParallelOperationLimiter.class);
         PutFileEventHandler handler = new PutFileEventHandler(putLimiter, failedJobsQueue, domsRegister);
@@ -63,6 +61,7 @@ public class PutFileEventHandlerTest {
     //@Test
     public void successEventTest() throws MalformedURLException {
         DomsJP2FileUrlRegister domsRegister = mock(DomsJP2FileUrlRegister.class);
+        @SuppressWarnings("unchecked")
         BlockingQueue<PutJob> failedJobsQueue = mock(BlockingQueue.class);
         ParallelOperationLimiter putLimiter = mock(ParallelOperationLimiter.class);
         PutFileEventHandler handler = new PutFileEventHandler(putLimiter, failedJobsQueue, domsRegister);

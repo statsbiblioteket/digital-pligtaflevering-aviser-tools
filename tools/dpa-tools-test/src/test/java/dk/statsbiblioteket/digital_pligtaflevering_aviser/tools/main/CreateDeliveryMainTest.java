@@ -20,11 +20,12 @@ public class CreateDeliveryMainTest {
         CreateDeliveryMain.main(new String[]{
                 "create-batch.properties",
                 "autonomous.agent=register-batch-trigger",
-                ITERATOR_FILESYSTEM_BATCHES_FOLDER+"="+getBatchFolder()});
+                ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + getBatchFolder()});
     }
 
     /**
      * Get the folder where the testbatches is located during test in dev-environment
+     *
      * @return
      */
     public String getBatchFolder() {
@@ -33,7 +34,7 @@ public class CreateDeliveryMainTest {
         // http://stackoverflow.com/a/320595/53897
         URI l = null;
         try {
-            l =CreateDeliveryMain.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            l = CreateDeliveryMain.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

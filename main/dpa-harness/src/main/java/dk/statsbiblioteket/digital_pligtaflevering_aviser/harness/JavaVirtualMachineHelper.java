@@ -31,7 +31,7 @@ public class JavaVirtualMachineHelper {
     }
 
     private static void dumpHeap0(String heapDumpFileName, boolean onlyLiveVariables) throws ClassNotFoundException, IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+        Class<?> clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         Object bean = ManagementFactory.newPlatformMXBeanProxy(
                 server,
