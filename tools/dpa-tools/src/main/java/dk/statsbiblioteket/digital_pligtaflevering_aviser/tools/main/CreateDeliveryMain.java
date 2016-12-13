@@ -14,10 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import java.io.File;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
@@ -40,11 +38,27 @@ public class CreateDeliveryMain {
         Tool getTool();
     }
 
+
+    /**
+     * Create an empty file to indicate that the batch has been run
+     * @param file
+     * @throws IOException
+     */
+    public static void touch(File file) throws IOException {
+        if (!file.exists()) {
+            new FileOutputStream(file).close();
+        }
+        file.setLastModified(System.currentTimeMillis());
+    }
+
+
     @Module
     static class CreateDeliveryModule {
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
+        public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
 
         Logger log = LoggerFactory.getLogger(this.getClass());
+
 
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_AGENT) String premisAgent,
@@ -52,28 +66,37 @@ public class CreateDeliveryMain {
                          @Named(DOMS_USERNAME) String domsUser,
                          @Named(DOMS_PASSWORD) String domsPass,
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen,
-                         @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String batchFolder) {
+                         @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolder,
+                         @Named(AUTONOMOUS_DONEDIR) String doneDir) {
+
+            //Look in filesystem and find all deliveries that has not yet been seen by "CreateDelivery"
+            File[] directories = new File(deliveryFolder).listFiles(File::isDirectory);
 
             return () -> {
-                // Look in filesystem and find all deliveries that has not yet been seen by "CreateDelivery"
-                File[] directories = new File(batchFolder).listFiles(File::isDirectory);
                 final String batchResponse = "";
-                //Iterate through the deliveries
+                // Iterate through the deliveries on disk
                 for (File deliveryItemDirectory : directories) {
                     Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                     Matcher matcher = pattern.matcher(deliveryItemDirectory.getName());
                     if (matcher.matches()) {
-                        String batchIdValue = matcher.group(1);
+                        String deliveryIdValue = matcher.group(1);
                         String roundtripValue = matcher.group(2);
-                        log.trace("create delivery for {}, (batch id: {}, round trip: {})", deliveryItemDirectory, batchIdValue, roundtripValue);
-                        CreateDelivery.main(new String[]{batchIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, batchFolder});
+
+                        File deliveryProcessedIndicator = new File(doneDir, deliveryFolderName);
+                        if(!deliveryProcessedIndicator.exists()) {
+                            CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolder});
+                            touch(new File(doneDir, deliveryFolderName));
+                        } else {
+                            log.trace("did not match, skipping {}", deliveryItemDirectory.getName());
+                        }
                     } else {
                         log.trace("did not match, skipping {}", deliveryItemDirectory.getName());
                     }
                 }
                 String joinedString = StringUtils.join(directories, " ");
 
-                return "created batch for " + joinedString;
+
+                return "created delivery for " + joinedString;
             };
         }
 
@@ -81,6 +104,12 @@ public class CreateDeliveryMain {
         @Named(AUTONOMOUS_AGENT)
         String provideAgent(ConfigurationMap map) {
             return map.getRequired(AUTONOMOUS_AGENT);
+        }
+
+        @Provides
+        @Named(AUTONOMOUS_DONEDIR)
+        String provideDoneDir(ConfigurationMap map) {
+            return map.getRequired(AUTONOMOUS_DONEDIR);
         }
     }
 }
