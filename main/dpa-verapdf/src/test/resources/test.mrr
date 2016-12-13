@@ -96,7 +96,7 @@
                             <context>root/document[0]/metadata[0](2 0 obj PDMetadata)/XMPPackage[0]</context>
                         </check>
                     </rule>
-                    <rule specification="ISO 19005-1:2005" clause="6.2.3" testNumber="3" status="failed"
+                    <rule specification="ISO 19005-1:2005" clause="6.1.3" testNumber="3" status="failed"
                           passedChecks="0" failedChecks="624">
                         <description>DeviceCMYK may be used only if the file has a PDF/A-1 OutputIntent that uses a CMYK
                             colour space

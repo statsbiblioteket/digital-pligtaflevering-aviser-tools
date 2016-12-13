@@ -24,7 +24,7 @@ import java.util.Iterator;
 public class VeraPDFOutputValidation {
 
     private final String xmlParserString = "//validationResult/assertions/assertion[@status='FAILED']/ruleId/@clause";
-    private final String mrrParserString = "/report/jobs/job/validationReport/details/rule[@status='failed']";
+    private final String mrrParserString = "/report/jobs/job/validationReport/details/rule[@status='failed']/@clause";
     private HashSet<String> rejections = new HashSet<String>();
 
     /**
