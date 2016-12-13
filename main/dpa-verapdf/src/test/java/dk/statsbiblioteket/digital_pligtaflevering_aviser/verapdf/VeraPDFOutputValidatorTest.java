@@ -4,6 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 
@@ -31,8 +33,9 @@ public class VeraPDFOutputValidatorTest {
     @Test
     public void testResultValidationXmlManyBrokenRule() throws Exception {
 
-        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(getClass().getResourceAsStream("/ManyImportantBrokenRules.xml"), false);
-        ValidationResults validationResults = rulo.validateResult();
+        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
+        List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/ManyImportantBrokenRules.xml"));
+        ValidationResults validationResults = rulo.validateResult(ids);
         assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.invalid, validationResults.getWorstBrokenRule());
         assertEquals("Unexpected validation", 6, validationResults.getRulesBroken().size());
         int invalid = 0;
@@ -61,8 +64,9 @@ public class VeraPDFOutputValidatorTest {
     @Test
     public void testResultValidationXmlNoBrokenRule() throws Exception {
 
-        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(getClass().getResourceAsStream("/NoImportantBrokenRules.xml"), false);
-        ValidationResults validationResults = rulo.validateResult();
+        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
+        List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/NoImportantBrokenRules.xml"));
+        ValidationResults validationResults = rulo.validateResult(ids);
         assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.approved, validationResults.getWorstBrokenRule());
     }
 
@@ -72,8 +76,9 @@ public class VeraPDFOutputValidatorTest {
      */
     @Test
     public void testResultValidationXmlOneBrokenRule() throws Exception {
-        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(getClass().getResourceAsStream("/OneManualInspectRule.xml"), false);
-        ValidationResults validationResults = rulo.validateResult();
+        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
+        List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/OneManualInspectRule.xml"));
+        ValidationResults validationResults = rulo.validateResult(ids);
         assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.manualInspection, validationResults.getWorstBrokenRule());
         assertEquals("Unexpected validation", 1, validationResults.getRulesBroken().size());
 
@@ -85,8 +90,9 @@ public class VeraPDFOutputValidatorTest {
      */
     @Test
     public void testResultValidationMrr() throws Exception {
-        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(getClass().getResourceAsStream("/test.mrr"), true);
-        ValidationResults validationResults = rulo.validateResult();
+        VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(true);
+        List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/test.mrr"));
+        ValidationResults validationResults = rulo.validateResult(ids);
         assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.invalid, validationResults.getWorstBrokenRule());
     }
 }

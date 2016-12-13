@@ -1,16 +1,16 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- *
+ * FIXME:  Skulle vist ikke have været checket ind.
  */
 public class VeraBatchCheckerTest {
 
@@ -108,8 +108,9 @@ public class VeraBatchCheckerTest {
                         try {
 
                             FileInputStream fip = new FileInputStream(filePath.toAbsolutePath().toFile());
-                            VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(fip, true);
-                            ValidationResults validationResults = rulo.validateResult();
+                            VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(true);
+                            List<String> ids = rulo.extractRejected(fip);
+                            ValidationResults validationResults = rulo.validateResult(ids);
 
                             arl.add(new FailedPage(validationResults, file));
 
