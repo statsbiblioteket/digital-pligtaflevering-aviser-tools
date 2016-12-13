@@ -87,6 +87,6 @@ public class VeraPDFOutputValidatorTest {
     public void testResultValidationMrr() throws Exception {
         VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(getClass().getResourceAsStream("/test.mrr"), true);
         ValidationResults validationResults = rulo.validateResult();
-        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.approved, validationResults.getWorstBrokenRule());
+        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.invalid, validationResults.getWorstBrokenRule());
     }
 }

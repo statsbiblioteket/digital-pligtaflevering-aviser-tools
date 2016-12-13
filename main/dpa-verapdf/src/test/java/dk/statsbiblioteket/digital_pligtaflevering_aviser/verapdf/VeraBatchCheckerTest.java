@@ -81,11 +81,11 @@ public class VeraBatchCheckerTest {
 
 
 
-    @Test
+    //@Test
     public void validateXML() throws Exception {
 
 
-        ArrayList<ValidationResults> arl = new ArrayList<ValidationResults>();
+        ArrayList<FailedPage> arl = new ArrayList<FailedPage>();
 
 
         ArrayList<String> list = new ArrayList<String>();
@@ -111,7 +111,7 @@ public class VeraBatchCheckerTest {
                             VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(fip, true);
                             ValidationResults validationResults = rulo.validateResult();
 
-                            arl.add(validationResults);
+                            arl.add(new FailedPage(validationResults, file));
 
                             /*if(validationResults.getWorstBrokenRule().getValidationLevel()==30) {
                                 arl.add()
@@ -143,18 +143,21 @@ public class VeraBatchCheckerTest {
         int t00 = 0;
 
 
-        for(ValidationResults ar : arl) {
+        for(FailedPage ar : arl) {
 
 
 
-            if(ar.getWorstBrokenRule().getValidationLevel()==30) {
+            if(ar.getNo().getWorstBrokenRule().getValidationLevel()==30) {
                 t30 ++;
-            } else if(ar.getWorstBrokenRule().getValidationLevel()==20) {
+            } else if(ar.getNo().getWorstBrokenRule().getValidationLevel()==20) {
+                //System.out.println("MAN INSPECT " + ar.getPage());
                 t20 ++;
-            } else if(ar.getWorstBrokenRule().getValidationLevel()==0) {
+            } else if(ar.getNo().getWorstBrokenRule().getValidationLevel()==0) {
+
+                System.out.println("FAILED " + ar.getPage());
                 t00 ++;
             }  else {
-                System.out.println("OTHER " + ar.getWorstBrokenRule().getValidationLevel());
+                //System.out.println("OTHER " + ar.getNo().getWorstBrokenRule().getValidationLevel());
             }
 
 
@@ -165,6 +168,29 @@ public class VeraBatchCheckerTest {
         System.out.println(t00);
 
 
+
+
+
+    }
+
+
+    public class FailedPage {
+        ValidationResults no;
+        String page;
+
+        public FailedPage(ValidationResults no, String page) {
+            this.no = no;
+            this.page = page;
+
+        }
+
+        public ValidationResults getNo() {
+            return no;
+        }
+
+        public String getPage() {
+            return page;
+        }
 
 
 
