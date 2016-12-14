@@ -36,6 +36,10 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
+    public WebResource getWebResource() {
+        return webResource;
+    }
+
     @Inject
     public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource, EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage) {
         this.sboiEventIndex = sboiEventIndex;
@@ -45,7 +49,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Override
-    public Stream<DomsId> query(QuerySpecification querySpecification) {
+    public Stream<DomsItem> query(QuerySpecification querySpecification) {
 
         // -- Create and populate SBIO query and return the DOMS ids found as a stream.
 
@@ -61,12 +65,12 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         try {
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
-            List<DomsId> domsIdList = new ArrayList<>();
+            List<DomsItem> domsItemList = new ArrayList<>();
 
             Iterator<Item> searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
-            searchIterator.forEachRemaining(item -> domsIdList.add(new DomsId(item.getDomsID())));
+            searchIterator.forEachRemaining(item -> domsItemList.add(new DomsItem(new DomsId(item.getDomsID()), this)));
 
-            return domsIdList.stream();
+            return domsItemList.stream();
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -83,59 +87,6 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
-    /**
-     * Logic lifted from https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
-     *
-     * @param parent
-     * @return
-     */
-    public List<DomsId> childrenFor(DomsId parent) {
-        log.trace("childrenFor: {}", parent);
-        final WebResource wr;
-        wr = webResource.path(parent.id()).path("relationships").queryParam("format", "ntriples");
-        log.trace("WebResource: {}", wr.getURI());
-
-        //<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/relations-external#hasPart> <info:fedora/uuid:5cfa5459-c553-4894-980e-b2b7b37b37d3> .
-        //<info:fedora/uuid:e1213a2b-909e-4ed7-a3ca-7eca1fe35688> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/doms:ContentModel_DOMS> .
-        String rawResult = wr.get(String.class);
-
-        List<DomsId> children = new ArrayList<>();
-        for (String line : rawResult.split("\n")) {
-            String[] tuple = line.split(" ");
-            if (tuple.length >= 3 && tuple[2].startsWith("<info:fedora/")) {
-                String predicate = tuple[1].substring(1, tuple[1].length() - ">".length());
-                String child = tuple[2].substring("<info:fedora/".length(), tuple[2].length() - ">".length());
-
-                if (predicate.equals("info:fedora/fedora-system:def/relations-external#hasPart")) {
-                    children.add(new DomsId(child));
-                }
-            }
-        }
-        return children;
-    }
-
-    public List<DomsId> allChildrenFor(DomsId root) {
-        log.trace("allChildrenFor: {}", root);
-        List<DomsId> allChildrenSoFar = new ArrayList<>();
-        List<DomsId> unprocessed = new ArrayList<>();
-
-        unprocessed.add(root);
-        while (unprocessed.isEmpty() == false) {
-            DomsId currentId = unprocessed.remove(0);
-            allChildrenSoFar.add(currentId);
-
-            List<DomsId> currentChildren = childrenFor(currentId);
-            for (DomsId child : currentChildren) {
-                if (allChildrenSoFar.contains(child)) {
-                    // seen before, malformed tree, shouldn't happen
-                    log.warn("DomsID {} have {} as multiple children", root, child);
-                } else {
-                    unprocessed.add(child);
-                }
-            }
-        }
-        return allChildrenSoFar;
-    }
 
     @Override
     public DomsItem lookup(DomsId id) {
