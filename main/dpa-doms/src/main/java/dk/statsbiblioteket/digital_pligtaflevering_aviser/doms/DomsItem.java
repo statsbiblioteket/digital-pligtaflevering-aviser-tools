@@ -200,4 +200,11 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         }
         return children;
     }
+
+    @Override
+    public String toString() {
+        return "DomsItem{" +
+                "domsId=" + domsId +
+                '}';
+    }
 }

@@ -15,6 +15,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.ValidationResults;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFOutputValidation;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
@@ -26,8 +27,12 @@ import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import javax.inject.Named;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,13 +64,13 @@ public class VeraPDFAnalyzeMain {
         );
     }
 
-    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPDFInvokeModule.class, BitRepositoryModule.class})
+    @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPDFAnalyzeModule.class, BitRepositoryModule.class})
     interface VeraPdfTaskDaggerComponent {
         Tool getTool();
     }
 
     @Module
-    public static class VeraPDFInvokeModule {
+    public static class VeraPDFAnalyzeModule {
 
         public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
         public static final String VERAPDF_ANALYZED = "VeraPDF_Analyzed";
@@ -119,7 +124,7 @@ public class VeraPDFAnalyzeMain {
                 domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome);
 
                 log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
-                return "domsID " + domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
+                return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
         }
 
@@ -139,24 +144,45 @@ public class VeraPDFAnalyzeMain {
 
             DomsDatastream ds = profileOptional.get();
 
+            // FIXME:  internal datastream is apparently elsewhere
             String urlToDatastream = ds.getUrl();
+            if (urlToDatastream == null) {
+                return Stream.of(ToolResult.fail("urlToDatastream==null"));
+            }
 
             // Read in all bytes, replace in Java 9 with readAllBytes().
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] datastreamBytes;
             try (InputStream inputStream = new URL(urlToDatastream).openConnection().getInputStream()) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] buffer = new byte[4096];
                 int count;
                 while (((count = inputStream.read(buffer)) != -1)) {
                     baos.write(buffer, 0, count);
                 }
+                datastreamBytes = baos.toByteArray();
             } catch (MalformedURLException e) {
-                return Stream.of(ToolResult.fail("item = " + domsItem + " url=" + urlToDatastream, e));
+                return Stream.of(ToolResult.fail(domsItem + " url=" + urlToDatastream, e));
             } catch (IOException e) {
-                return Stream.of(ToolResult.fail("item = " + domsItem + " url=" + urlToDatastream, e));
+                return Stream.of(ToolResult.fail(domsItem + " url=" + urlToDatastream, e));
             }
 
-            throw new RuntimeException("NOT DONE YET!");
+            // XML datastream bytes loaded.
+
+            List<String> rejected;
+            try {
+                rejected = veraPDFOutputValidation.extractRejected(new ByteArrayInputStream(datastreamBytes));
+            } catch (ParserConfigurationException | IOException | SAXException | XPathExpressionException e) {
+                log.trace("failed to extract rejected", e);
+                return Stream.of(ToolResult.fail("extractRejected(..) on " + domsItem));
+            }
+            ValidationResults l = veraPDFOutputValidation.validateResult(rejected);
+
+            log.info("{}", domsItem + " " + l.getWorstBrokenRule());
+
+            return Stream.of(ToolResult.ok( domsItem + " " + l.getWorstBrokenRule()));
+
+            // FIXME:: NOT DONE YET!
 
             // We need to locate the physical file containing the PDF.  For the bitrepository
             // the official way in is rather complicated and slow, but for the SB pillar we know
@@ -262,7 +288,7 @@ public class VeraPDFAnalyzeMain {
 
         @Provides
         VeraPDFOutputValidation provideVeraPDFOutputValidation() {
-            throw new UnsupportedOperationException("not yet");
+            return new VeraPDFOutputValidation(true);
         }
     }
 }

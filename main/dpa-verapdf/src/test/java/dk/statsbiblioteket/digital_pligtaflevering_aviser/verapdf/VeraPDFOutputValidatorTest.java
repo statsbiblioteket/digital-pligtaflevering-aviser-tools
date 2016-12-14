@@ -27,7 +27,7 @@ public class VeraPDFOutputValidatorTest {
     }
 
     /**
-     * Test against an output with 6 broken rules, one of them is unknown
+     * Test against an output with 6 broken rules, one of them is UNKNOWN
      * @throws Exception
      */
     @Test
@@ -36,7 +36,7 @@ public class VeraPDFOutputValidatorTest {
         VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
         List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/ManyImportantBrokenRules.xml"));
         ValidationResults validationResults = rulo.validateResult(ids);
-        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.invalid, validationResults.getWorstBrokenRule());
+        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.INVALID, validationResults.getWorstBrokenRule());
         assertEquals("Unexpected validation", 6, validationResults.getRulesBroken().size());
         int invalid = 0;
         int unknown = 0;
@@ -44,11 +44,11 @@ public class VeraPDFOutputValidatorTest {
 
         for(ValidationResult vr : validationResults.getRulesBroken()) {
 
-            if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.invalid) {
+            if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.INVALID) {
                 invalid++;
-            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.unknown) {
+            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.UNKNOWN) {
                 unknown++;
-            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.manualInspection) {
+            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.MANUAL_INSPECTION) {
                 manual++;
             }
         }
@@ -67,7 +67,7 @@ public class VeraPDFOutputValidatorTest {
         VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
         List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/NoImportantBrokenRules.xml"));
         ValidationResults validationResults = rulo.validateResult(ids);
-        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.approved, validationResults.getWorstBrokenRule());
+        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.ACCEPTABLE, validationResults.getWorstBrokenRule());
     }
 
     /**
@@ -79,7 +79,7 @@ public class VeraPDFOutputValidatorTest {
         VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(false);
         List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/OneManualInspectRule.xml"));
         ValidationResults validationResults = rulo.validateResult(ids);
-        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.manualInspection, validationResults.getWorstBrokenRule());
+        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.MANUAL_INSPECTION, validationResults.getWorstBrokenRule());
         assertEquals("Unexpected validation", 1, validationResults.getRulesBroken().size());
 
     }
@@ -93,6 +93,6 @@ public class VeraPDFOutputValidatorTest {
         VeraPDFOutputValidation rulo = new VeraPDFOutputValidation(true);
         List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/test.mrr"));
         ValidationResults validationResults = rulo.validateResult(ids);
-        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.invalid, validationResults.getWorstBrokenRule());
+        assertEquals("Unexpected validation", ValidationResult.ValidationResultEnum.INVALID, validationResults.getWorstBrokenRule());
     }
 }

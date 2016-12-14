@@ -61,6 +61,7 @@ public class VeraPDFInvokeMain {
                 m -> DaggerVeraPDFInvokeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool()
         );
     }
+
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPDFInvokeModule.class, BitRepositoryModule.class})
     interface VeraPdfTaskDaggerComponent {
         Tool getTool();
@@ -123,10 +124,9 @@ public class VeraPDFInvokeMain {
                 domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome);
 
                 log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
-                return "domsItem " + domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
+                return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
         }
-
 
         protected Stream<ToolResult> invokeVeraPDFOnPhysicalFiles(DomsItem domsItem, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
 
@@ -158,7 +158,7 @@ public class VeraPDFInvokeMain {
             // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
             final String url = ds.getUrl();
             if (url.startsWith(bitrepositoryUrlPrefix) == false) {
-                return Stream.of(ToolResult.fail("item: " + domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+                return Stream.of(ToolResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
             }
             String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
 
@@ -172,9 +172,9 @@ public class VeraPDFInvokeMain {
             try (FileInputStream inputStream = new FileInputStream(file)) {
                 veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
             } catch (FileNotFoundException e) {
-                return Stream.of(ToolResult.fail("id: " + domsItem + " file '" + file.getAbsolutePath() + " does not exist", e));
+                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + " does not exist", e));
             } catch (Exception e) {
-                return Stream.of(ToolResult.fail("id: " + domsItem + " file '" + file.getAbsolutePath() + " failed validation", e));
+                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + " failed validation", e));
             }
 
             log.info("{} {} Took: {} ms", VERAPDF_INVOKED, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
@@ -195,9 +195,9 @@ public class VeraPDFInvokeMain {
                         comment,
                         null);
             } catch (Exception e) {
-                return Stream.of(ToolResult.fail( "item: " + domsItem + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
+                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
             }
-            return Stream.of(ToolResult.ok("item: " + domsItem + " " + comment));
+            return Stream.of(ToolResult.ok(domsItem + " " + comment));
         }
 
         @Provides

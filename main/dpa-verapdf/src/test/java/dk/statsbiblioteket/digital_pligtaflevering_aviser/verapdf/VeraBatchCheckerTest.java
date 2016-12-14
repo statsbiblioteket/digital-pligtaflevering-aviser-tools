@@ -139,9 +139,9 @@ public class VeraBatchCheckerTest {
         for (FailedPage ar : arl) {
 
 
-            if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.approved.getValidationLevel()) {
+            if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.ACCEPTABLE.getValidationLevel()) {
                 approvedCounter++;
-            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.manualInspection.getValidationLevel()) {
+            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.MANUAL_INSPECTION.getValidationLevel()) {
 
                 //fejler på 6.3.5 og 6.1.11
                 //System.out.println("Manual inspect " + ar.getPagePathAsString());
@@ -151,7 +151,7 @@ public class VeraBatchCheckerTest {
                     failedList.add(res.getParagraph());
                 }
                 manualInspectCounter++;
-            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.invalid.getValidationLevel()) {
+            } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.INVALID.getValidationLevel()) {
 
                 //Fejler paa 6.9
                 System.out.println("FAILED " + ar.getPagePathAsString());
@@ -172,7 +172,7 @@ public class VeraBatchCheckerTest {
             }
         }
 
-        System.out.println("APPROVED " + approvedCounter);
+        System.out.println("ACCEPTABLE " + approvedCounter);
         System.out.println("MANUAL   " + manualInspectCounter);
         System.out.println("INVALID  " + invalidCounter);
         System.out.println("UNKNOWN  " + unknownCounter);

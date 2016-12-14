@@ -7,9 +7,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
-
 /**
  *
  */
@@ -32,9 +29,7 @@ public class VeraPDFAnalyzeMainTest {
         Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, bitrepoDirPathInWorkspace);
 
         VeraPDFAnalyzeMain.main(new String[]{
-                "verapdf-analyze-vagrant.properties",
-                BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
-                URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
+                "verapdf-analyze-vagrant.properties"
         });
     }
 }

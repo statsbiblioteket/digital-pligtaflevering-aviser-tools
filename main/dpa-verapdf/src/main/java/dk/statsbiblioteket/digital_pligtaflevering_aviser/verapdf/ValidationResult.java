@@ -35,7 +35,7 @@ public class ValidationResult {
      * Approved: The document is ok
      */
     public enum ValidationResultEnum {
-        invalid(0), unknown(10), manualInspection(20), approved(30);
+        INVALID(0), UNKNOWN(10), MANUAL_INSPECTION(20), ACCEPTABLE(30);
         private int validationLevel;
 
         ValidationResultEnum(int validationLevel) {
