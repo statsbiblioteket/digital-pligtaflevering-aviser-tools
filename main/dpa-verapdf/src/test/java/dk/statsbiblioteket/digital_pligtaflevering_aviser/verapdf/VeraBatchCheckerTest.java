@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,11 +79,11 @@ public class VeraBatchCheckerTest {
     }
 
 
-    // @Test - disabled as this has hardcoded local file names.
+    //@Test// - disabled as this has hardcoded local file names.
     public void validateXML() throws Exception {
 
 
-        String testBatch = "/home/mads/testdata/tstdelivery";
+        String testBatch = "/home/mmj/temp/dl1_20161202_rt1";
         String batchDirPathInWorkspace = "delivery-samples";
         Path p = Paths.get(batchDirPathInWorkspace).toAbsolutePath();
 
@@ -117,7 +118,8 @@ public class VeraBatchCheckerTest {
                             ValidationResults validationResults = rulo.validateResult(ids);
                             arl.add(new FailedPage(validationResults, file));
                         } catch (Exception e) {
-                            assertEquals(e.getMessage(), true, false);
+                            System.out.println("WRONG FILE ---- " + filename);
+                            //assertEquals(e.getMessage(), true, false);
                         }
                     }
                 } else {
@@ -144,7 +146,7 @@ public class VeraBatchCheckerTest {
             } else if (ar.getValidationResult().getWorstBrokenRule().getValidationLevel() == ValidationResult.ValidationResultEnum.manualInspection.getValidationLevel()) {
 
                 //fejler på 6.3.5 og 6.1.11
-                //System.out.println("Manual inspect " + ar.getPagePathAsString());
+                System.out.println("Manual inspect " + ar.getPagePathAsString());
                 ArrayList<ValidationResult> rules = ar.getValidationResult().getRulesBroken();
 
                 for (ValidationResult res : rules) {
