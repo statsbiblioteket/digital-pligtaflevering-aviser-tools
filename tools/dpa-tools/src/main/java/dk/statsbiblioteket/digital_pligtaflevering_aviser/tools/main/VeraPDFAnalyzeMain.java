@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
+import com.google.common.base.Charsets;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -15,6 +16,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.ValidationResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.ValidationResults;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFOutputValidation;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
@@ -33,11 +35,8 @@ import javax.inject.Named;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -45,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,6 +76,7 @@ public class VeraPDFAnalyzeMain {
         public static final String VERAPDF_ANALYZED = "VeraPDF_Analyzed";
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
+        public static final String VERAPDF_ANALYSIS_DATASTREAM_NAME = "VERAPDF_ANALYSIS";
 
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
@@ -144,94 +145,64 @@ public class VeraPDFAnalyzeMain {
 
             DomsDatastream ds = profileOptional.get();
 
-            // FIXME:  internal datastream is apparently elsewhere
-            String urlToDatastream = ds.getUrl();
-            if (urlToDatastream == null) {
-                return Stream.of(ToolResult.fail("urlToDatastream==null"));
-            }
+            // FIXME: only exposed datastream loading method returns a string,
+            // we have ascii only so we can do some naughty assumptions about converting
+            // the strings back to a byte stream and load it.
 
-            // Read in all bytes, replace in Java 9 with readAllBytes().
-
-            byte[] datastreamBytes;
-            try (InputStream inputStream = new URL(urlToDatastream).openConnection().getInputStream()) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[4096];
-                int count;
-                while (((count = inputStream.read(buffer)) != -1)) {
-                    baos.write(buffer, 0, count);
-                }
-                datastreamBytes = baos.toByteArray();
-            } catch (MalformedURLException e) {
-                return Stream.of(ToolResult.fail(domsItem + " url=" + urlToDatastream, e));
-            } catch (IOException e) {
-                return Stream.of(ToolResult.fail(domsItem + " url=" + urlToDatastream, e));
-            }
+            String datastreamString = ds.getDatastreamAsString();
+            //log.trace("datastream value: {}", datastreamString);
+            InputStream characterConversionTroubledDatastreamInputStream =
+                    new ByteArrayInputStream(datastreamString.getBytes(Charsets.UTF_8));
 
             // XML datastream bytes loaded.
 
             List<String> rejected;
             try {
-                rejected = veraPDFOutputValidation.extractRejected(new ByteArrayInputStream(datastreamBytes));
+                rejected = veraPDFOutputValidation.extractRejected(characterConversionTroubledDatastreamInputStream);
             } catch (ParserConfigurationException | IOException | SAXException | XPathExpressionException e) {
                 log.trace("failed to extract rejected", e);
                 return Stream.of(ToolResult.fail("extractRejected(..) on " + domsItem));
             }
             ValidationResults l = veraPDFOutputValidation.validateResult(rejected);
 
-            log.info("{}", domsItem + " " + l.getWorstBrokenRule());
+            Map<ValidationResult.ValidationResultEnum, List<String>> severenessMap = new TreeSet<>(rejected).stream()
+                    .collect(Collectors.groupingBy(veraPDFOutputValidation::severenessFor));
 
-            return Stream.of(ToolResult.ok( domsItem + " " + l.getWorstBrokenRule()));
+            String analysisResult = severenessMap.entrySet().stream().
+                    map(Object::toString)
+                    .collect(Collectors.joining("\n"));
 
-            // FIXME:: NOT DONE YET!
+            final ValidationResult.ValidationResultEnum worstBrokenRule = l.getWorstBrokenRule();
 
-            // We need to locate the physical file containing the PDF.  For the bitrepository
-            // the official way in is rather complicated and slow, but for the SB pillar we know
-            // where the information is stored for deriving the file name directly.
+            // Save analysis in datastream.
+            String comment = getClass().getCanonicalName();
 
-            // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste
-            // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
-//            final String url = ds.getUrl();
-//            if (url.startsWith(bitrepositoryUrlPrefix) == false) {
-//                return Stream.of(ToolResult.fail("id: " + domsId + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
-//            }
-//            String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
-//
-//            Path path = Paths.get(bitrepositoryMountpoint, filename);
-//            File file = path.toFile();
-//            log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
-//
-//            long startTime = System.currentTimeMillis();
-//
-//            byte[] veraPDF_output;
-//            try (FileInputStream inputStream = new FileInputStream(file)) {
-//                veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
-//            } catch (FileNotFoundException e) {
-//                return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " does not exist", e));
-//            } catch (Exception e) {
-//                return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
-//            }
-//
-//            log.info("{} {} Took: {} ms", VERAPDF_ANALYZED, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
-//
-//            // We have now run VeraPDF on the PDF file and has the output in hand.
-//            // Store it in the "VERAPDF" datastream for the object.
-//            // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
-//
-//            String comment = file.getAbsolutePath() + " at " + new Date();
-//            try {
-//                domsItem.modifyDatastreamByValue(
-//                        VERAPDF_DATASTREAM_NAME,
-//                        null, // no checksum
-//                        null, // no checksum
-//                        veraPDF_output,
-//                        null,
-//                        "text/xml",
-//                        comment,
-//                        null);
-//            } catch (Exception e) {
-//                return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
-//            }
-//            return Stream.of(ToolResult.ok("id: " + domsId + " " + comment));
+            try {
+                domsItem.modifyDatastreamByValue(
+                        VERAPDF_ANALYSIS_DATASTREAM_NAME,
+                        null, // no checksum
+                        null, // no checksum
+                        analysisResult.getBytes(Charsets.UTF_8),
+                        null,
+                        "text/plain",
+                        comment,
+                        null);
+            } catch (Exception e) {
+                return Stream.of(ToolResult.fail(domsItem + " could not save to datastream"));
+            }
+
+            switch (worstBrokenRule) {
+                case INVALID:
+                    return Stream.of(ToolResult.fail(domsItem + " " + worstBrokenRule));
+                case UNKNOWN:
+                    return Stream.of(ToolResult.fail(domsItem + " " + worstBrokenRule));
+                case MANUAL_INSPECTION:
+                    return Stream.of(ToolResult.fail(domsItem + " " + worstBrokenRule));
+                case ACCEPTABLE:
+                    return Stream.of(ToolResult.ok(domsItem + " " + worstBrokenRule));
+                default:
+                    throw new RuntimeException("Unexpected worst rule" + worstBrokenRule);
+            }
         }
 
         @Provides

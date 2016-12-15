@@ -74,7 +74,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     public List<DomsDatastream> datastreams() {
         reloadIfNeeded();
         return objectProfile.getDatastreams().stream()
-                .map(DomsDatastream::new)
+                .map(ds -> new DomsDatastream(ds, this, domsRepository))
                 .collect(Collectors.toList());
     }
 
@@ -142,7 +142,9 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     /** append a PREMIS event on the current item
      */
     public Date appendEvent(String agent, Date timestamp, String details, String eventType, boolean outcome) {
-        return domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
+        final Date date = domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
+        requireReload();
+        return date;
     }
 
     /** return all direct children nodes for the current node

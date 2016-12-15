@@ -87,7 +87,6 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
-
     @Override
     public DomsItem lookup(DomsId id) {
         DomsItem domsItem = new DomsItem(id, this);
@@ -111,14 +110,15 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
-    /** appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
+    /**
+     * appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
      *
-     * @param domsId domsId to add event to
-     * @param agent text string identifying this autonomous component
+     * @param domsId    domsId to add event to
+     * @param agent     text string identifying this autonomous component
      * @param timestamp timestamp being put into the event, usually "now".
-     * @param details humanly readable string describing this event
+     * @param details   humanly readable string describing this event
      * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
-     * @param outcome true=success, false=failure.
+     * @param outcome   true=success, false=failure.
      * @return
      */
 
@@ -129,7 +129,17 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("appendEventToItem failed for " + domsId, e);        }
+            throw new RuntimeException("appendEventToItem failed for " + domsId, e);
+        }
+    }
+
+    public String getDataStreamAsString(String pid, String datastreamName) {
+        try {
+            String result = efedora.getXMLDatastreamContents(pid, datastreamName, new Date().getTime());
+            return result;
+        } catch (BackendInvalidCredsException | BackendInvalidResourceException | BackendMethodFailedException e) {
+            throw new RuntimeException("cannot load pid " + pid + " datastream " + datastreamName, e);
+        }
     }
 }
 
