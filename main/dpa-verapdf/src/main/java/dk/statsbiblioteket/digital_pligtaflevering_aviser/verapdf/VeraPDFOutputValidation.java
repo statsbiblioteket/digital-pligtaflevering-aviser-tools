@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -32,11 +33,14 @@ public class VeraPDFOutputValidation {
     public VeraPDFOutputValidation(boolean mrrFormat) {
         // FIXME:  We must also check that the rule specification is the one we expect.
         if (mrrFormat) {
-            expression = "/report/jobs/job/validationReport/details/rule[@status='failed']/@clause";
+            expression = "/report/jobs/job/validationReport/details/rule[@status='failed']";
         } else {
             expression = "//validationResult/assertions/assertion[@status='FAILED']/ruleId/@clause";
         }
     }
+
+    private static String startUrl = "https://github.com/veraPDF/veraPDF-validation-profiles/wiki/PDFA-Part-1-rules#rule-";
+
 
     /**
      * Supply with output from VeraPDF
@@ -60,9 +64,17 @@ public class VeraPDFOutputValidation {
         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
 
         for (int index = 0; index < nodeList.getLength(); index++) {
-            String rule = nodeList.item(index).getNodeValue();
+            Node rule = nodeList.item(index);
+
+            String clause = rule.getAttributes().getNamedItem("clause").getNodeValue();
+            String testNumber = rule.getAttributes().getNamedItem("testNumber").getNodeValue();
+
+            String fullUrl = /*startUrl + */clause + "-" + testNumber;
+
+
+
             if (rule != null) {
-                result.add(nodeList.item(index).getNodeValue());
+                result.add(fullUrl);
             }
         }
         return result;
