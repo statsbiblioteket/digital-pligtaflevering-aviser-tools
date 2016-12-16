@@ -360,28 +360,28 @@ public class VeraBatchCheckerTest {
         }
 
         System.out.println("=================================================================");
-        System.out.println("6.1.13-1 : " + p61131);
-        System.out.println("6.1.12-2 : " + p61122);
-        System.out.println("6.2.4-3 : " + p6243);
+        //System.out.println("6.1.13-1 : " + p61131);
+        //System.out.println("6.1.12-2 : " + p61122);
+        //System.out.println("6.2.4-3 : " + p6243);
         System.out.println("6.1.11-1 : " + p61111 );
-        System.out.println("6.1.12-6 : " + p61126 );
+        //System.out.println("6.1.12-6 : " + p61126 );
         System.out.println("6.9-4 : " + p694 );
-        System.out.println("6.5.3-2 : " + p6532);
-        System.out.println("6.4-5 : " + p645);
-        System.out.println("6.4-6 : " + p646);
-        System.out.println("6.4-3 : " + p643);
-        System.out.println("6.4-4 : " + p644);
-        System.out.println("6.2.8-1 : " + p6281);
-        System.out.println("6.4-1 : " + p641);
-        System.out.println("6.4-2 : " + p642);
-        System.out.println("6.1.8-1 : " + p6181);
+        //System.out.println("6.5.3-2 : " + p6532);
+        //System.out.println("6.4-5 : " + p645);
+        //System.out.println("6.4-6 : " + p646);
+        //System.out.println("6.4-3 : " + p643);
+        //System.out.println("6.4-4 : " + p644);
+        //System.out.println("6.2.8-1 : " + p6281);
+        //System.out.println("6.4-1 : " + p641);
+        //System.out.println("6.4-2 : " + p642);
+        //System.out.println("6.1.8-1 : " + p6181);
         System.out.println("6.1.7-1 : " + p6171);
         System.out.println("6.3.5-2 : " + p6352);
         System.out.println("6.3.6-1 : " + p6361);
         System.out.println("6.3.5-1 : " + p6351);
         System.out.println("6.1.3-1 : " + p6131);
         System.out.println("6.3.4-1 : " + p6341);
-        System.out.println("6.3.7-3 : " + p6373);
+        //System.out.println("6.3.7-3 : " + p6373);
         System.out.println("6.3.5-3 : " + p6353);
 
 
