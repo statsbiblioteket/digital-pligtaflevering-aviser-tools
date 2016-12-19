@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 import com.google.common.base.Charsets;
+import com.jasongoodwin.monads.Try;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -129,7 +130,7 @@ public class VeraPDFAnalyzeMain {
             };
         }
 
-        protected Stream<ToolResult> analyzeVeraPDFDataStream(DomsItem domsItem, VeraPDFOutputValidation veraPDFOutputValidation) {
+        protected Stream<Try<ToolResult>> analyzeVeraPDFDataStream(DomsItem domsItem, VeraPDFOutputValidation veraPDFOutputValidation) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -156,7 +157,13 @@ public class VeraPDFAnalyzeMain {
 
             // XML datastream bytes loaded.
 
-            List<String> rejected;
+            Try<List<String>> t = Try.ofFailable(() -> veraPDFOutputValidation.extractRejected(characterConversionTroubledDatastreamInputStream)).recoverWith();
+            if (t.isSuccess() == false) {
+                Stream.of(ToolResult.fail("extractRejected(..) on " + domsItem), t.);
+            }
+            List<String> rejected = t.
+
+
             try {
                 rejected = veraPDFOutputValidation.extractRejected(characterConversionTroubledDatastreamInputStream);
             } catch (ParserConfigurationException | IOException | SAXException | XPathExpressionException e) {
@@ -262,4 +269,6 @@ public class VeraPDFAnalyzeMain {
             return new VeraPDFOutputValidation(true);
         }
     }
+
+
 }

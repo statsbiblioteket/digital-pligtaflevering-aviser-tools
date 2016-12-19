@@ -8,6 +8,14 @@
     <artifactId>dpa-api</artifactId>
     <version>master-SNAPSHOT</version>
 
+    <dependencies>
+        <!-- to get Try - https://github.com/jasongoodwin/better-java-monads -->
+        <dependency>
+            <groupId>com.jason-goodwin</groupId>
+            <artifactId>better-monads</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
