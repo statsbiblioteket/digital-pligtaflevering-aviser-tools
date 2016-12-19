@@ -24,14 +24,13 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJo
 /**
  * Handle the registration of the bit repository URL for a given JP2000 file in DOMS.  
  */
-public class DomsJP2FileUrlRegister implements AutoCloseable {
+public class DomsFileUrlRegister implements AutoCloseable {
     private final Logger log = LoggerFactory.getLogger(getClass());
-    public static final String JP2_MIMETYPE = "image/jp2";
     public static final String PDF_MIMETYPE = "application/pdf";
     public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     public static final String CONTENTS = "CONTENTS";
 
-    private final Batch batch;
+    private final String deliveryId;
     private EnhancedFedora enhancedFedora;
     private final String baseUrl;
     private final ResultCollector resultCollector;
@@ -40,16 +39,16 @@ public class DomsJP2FileUrlRegister implements AutoCloseable {
 
     /**
      * Constructor
-     * @param batch
+     * @param deliveryId
      * @param central The EnhancedFedora used for registering the objects in DOMS.
      * @param baseUrl The base of the URL where the files can be accessed.
      * @param resultCollector The ResultCollector in which to register failures.
      * @param maxThreads the maximum number of threads used for registering objects in DOMS.
      * @param timeout
      */
-    public DomsJP2FileUrlRegister(Batch batch, EnhancedFedora central, String baseUrl, ResultCollector resultCollector,
-                                  int maxThreads, long timeout) {
-        this.batch = batch;
+    public DomsFileUrlRegister(String deliveryId, EnhancedFedora central, String baseUrl, ResultCollector resultCollector,
+                               int maxThreads, long timeout) {
+        this.deliveryId = deliveryId;
         this.enhancedFedora = central;
         this.baseUrl = baseUrl;
         this.resultCollector = resultCollector;
@@ -85,8 +84,8 @@ public class DomsJP2FileUrlRegister implements AutoCloseable {
             pool.awaitTermination(timeout, TimeUnit.MILLISECONDS);
         } finally {
             if (!pool.isTerminated()){
-                log.error("Doms ingest of batch {} not done after '{}'. Stopping the doms ingester forcibly",batch.getFullID(),timeout);
-                resultCollector.addFailure(batch.getFullID(),
+                log.error("Doms ingest of batch {} not done after '{}'. Stopping the doms ingester forcibly", deliveryId, timeout);
+                resultCollector.addFailure(deliveryId,
                                                   "Exception",
                                                   getClass().getSimpleName(),
                                                   "Doms ingest not done after '" + timeout + "'. Stopping the doms ingester forcibly");

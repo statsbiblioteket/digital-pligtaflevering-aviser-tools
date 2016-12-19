@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.FileSystemIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -15,11 +16,27 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModu
 import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
+import org.bitrepository.common.settings.Settings;
+import org.bitrepository.common.settings.SettingsProvider;
+import org.bitrepository.common.settings.XMLFileSettingsLoader;
+import org.bitrepository.modify.ModifyComponentFactory;
+import org.bitrepository.modify.putfile.PutFileClient;
+import org.bitrepository.protocol.security.BasicMessageAuthenticator;
+import org.bitrepository.protocol.security.BasicMessageSigner;
+import org.bitrepository.protocol.security.BasicOperationAuthorizor;
+import org.bitrepository.protocol.security.BasicSecurityManager;
+import org.bitrepository.protocol.security.MessageAuthenticator;
+import org.bitrepository.protocol.security.MessageSigner;
+import org.bitrepository.protocol.security.OperationAuthorizor;
+import org.bitrepository.protocol.security.PermissionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +47,9 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 
 /**
  * Unfinished
@@ -37,6 +57,8 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 public class IngesterMain {
 
     public static final String DPA_DELIVERIES_FOLDER = "dpa.deliveries.folder";
+    public static final String DPA_TEST_MODE = "dpa.testmode";
+    public static final String DPA_PUTFILE_DESTINATION = "dpa.putfile.destinationpath";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -86,6 +108,61 @@ public class IngesterMain {
             return map.getRequired(DPA_DELIVERIES_FOLDER);
         }
 
+        /**
+         * The path where PutfileClient places files
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(DPA_PUTFILE_DESTINATION)
+        String provideDestinationPath(ConfigurationMap map) {
+            return map.getRequired(DPA_PUTFILE_DESTINATION);
+        }
+
+        /**
+         * Indicates if a teststub simulationg the putfileClient is used
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(DPA_TEST_MODE)
+        String provideTestMode(ConfigurationMap map) {
+            return map.getRequired(DPA_TEST_MODE);
+        }
+
+        /**
+         * The ID of this collection
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY)
+        String provideIngesterId(ConfigurationMap map) {
+            return map.getRequired(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY);
+        }
+
+        /**
+         * The path to the directory where settings for putfileClient is placed
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(IngesterConfiguration.SETTINGS_DIR_PROPERTY)
+        String provideSettingsProperty(ConfigurationMap map) {
+            return map.getRequired(IngesterConfiguration.SETTINGS_DIR_PROPERTY);
+        }
+
+        /**
+         * The name of the certificate used by putfileClient
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(IngesterConfiguration.CERTIFICATE_PROPERTY)
+        String provideCertificateProperty(ConfigurationMap map) {
+            return map.getRequired(IngesterConfiguration.CERTIFICATE_PROPERTY);
+        }
+
         @Provides
         ItemFactory<Item> provideItemFactory() {
             return id -> new Item();
@@ -121,5 +198,40 @@ public class IngesterMain {
             }
         }
 
+        /**
+         * Provides PutClient for interfacing to bitrepository
+         * @param testMode If true a testclient is returned
+         * @param dpaIngesterId The ID of the collection
+         * @param destination The destination where the client places the files
+         * @param settingDir
+         * @param certificateProperty
+         * @return
+         */
+        @Provides
+        PutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
+                                                @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                                @Named(DPA_PUTFILE_DESTINATION) String destination,
+                                                @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                                                @Named(CERTIFICATE_PROPERTY) String certificateProperty) {
+
+            BitrepositoryPutFileClientStub putClient;
+            if(Boolean.parseBoolean(testMode)) {
+                putClient = new BitrepositoryPutFileClientStub(destination);
+            } else {
+
+                String certificateLocation = settingDir + File.separator + certificateProperty;
+
+                SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
+                Settings bitRepoSet = settingsLoader.getSettings();
+
+                PermissionStore permissionStore = new PermissionStore();
+                MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);
+                MessageSigner signer = new BasicMessageSigner();
+                OperationAuthorizor authorizer = new BasicOperationAuthorizor(permissionStore);
+                org.bitrepository.protocol.security.SecurityManager securityManager =new BasicSecurityManager(bitRepoSet.getRepositorySettings(),certificateLocation,authenticator, signer, authorizer, permissionStore, dpaIngesterId);
+                return ModifyComponentFactory.getInstance().retrievePutClient(bitRepoSet, securityManager, dpaIngesterId);
+            }
+            return putClient;
+        }
     }
 }

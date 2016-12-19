@@ -1,4 +1,4 @@
-709a82ff592411ca513cea035e5a49ed  verapdf/articles/20160811_verapdf_5c649fe5.xml
+709a82ff592411ca513cea035e5a49ed  verapdf/articles/20160811_verapdf_article_5c649fe5.xml
 8bd4797544edfba4f50c91c917a5fc81  verapdf/pages/20160811_verapdf_page001.pdf
 e2ff88af3c306dd424e782c7118bfadd  verapdf/pages/20160811_verapdf_page001.xml
 0823642b5ba06284cd2b149dc11f480b  verapdf/pages/20160811_verapdf_page002.pdf
