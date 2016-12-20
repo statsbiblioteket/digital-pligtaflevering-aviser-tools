@@ -199,7 +199,11 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
             return Arrays.asList(ToolResult.fail("Could not get 'path:...' identifier for " + domsId));
         }
 
-        Path deliveryPath = rootPath.resolve(relativeFilenameFromDublinCore.get());
+        String batchName = relativeFilenameFromDublinCore.get();
+        long startBatchIngestTime = System.currentTimeMillis();
+        log.info(LoggingKeywords.START_BATCH_INGEST, batchName);
+
+        Path deliveryPath = rootPath.resolve(batchName);
 
         if (Files.notExists(deliveryPath)) {
             return Arrays.asList(ToolResult.fail("Directory not found for delivery:  " + deliveryPath));
@@ -242,6 +246,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                 .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map))
                 .collect(Collectors.toList());
 
+        long finishedBatchIngestTime = System.currentTimeMillis();
+        log.info(LoggingKeywords.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
         return subDirectoryResults;
     }
 
@@ -277,8 +283,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
     protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
-        long startBatchIngestTime = System.currentTimeMillis();
-        log.info(LoggingKeywords.START_BATCH_INGEST, dcIdentifier);
 
         // see if DOMS object exist for this directory
 
@@ -443,8 +447,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
 
         log.trace("DC id: {}", dcIdentifier);
-        long finishedBatchIngestTime = System.currentTimeMillis();
-        log.info(LoggingKeywords.FINISHED_BATCH_INGEST, dcIdentifier, finishedBatchIngestTime - startBatchIngestTime);
 
         return toolResultsForThisDirectory.stream();
     }
