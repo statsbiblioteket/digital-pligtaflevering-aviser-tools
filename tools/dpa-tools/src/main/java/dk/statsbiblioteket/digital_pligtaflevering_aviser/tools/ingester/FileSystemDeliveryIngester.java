@@ -8,7 +8,6 @@ import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutFileEventHandler;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.lang.StringUtils;
@@ -31,11 +30,9 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,8 +49,6 @@ import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
-import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.CONTENTS;
-import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.RELATION_PREDICATE;
 import static java.nio.file.Files.walk;
 
 /**
@@ -218,7 +213,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         Map<String, String> md5map;
         try {
             md5map = Files.lines(deliveryPath.resolve("checksums.txt"))
-                    .map(s -> s.split(" +"))
+                    .map(s -> s.split("[,\\s]\\s*"))
                     .collect(Collectors.toMap(a -> a[1], a -> a[0]));
         } catch (Exception e) {
             return Arrays.asList(ToolResult.fail("Could not read checksums.txt", e));
@@ -282,6 +277,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
     protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
+        long startBatchIngestTime = System.currentTimeMillis();
+        log.info(LoggingKeywords.START_BATCH_INGEST, dcIdentifier);
 
         // see if DOMS object exist for this directory
 
@@ -315,7 +312,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
 
         // Find the deliveryname, which is also the name of the folder where the delivery is placed
         String deliveryName = StringUtils.substringBetween(dcIdentifier, ":", "/");
-        PutFileEventHandler handler = new PutFileEventHandler();
 
         // For each individual page create a DOMS object.  For each file in the page, consider if it is metadata or not.
         // If it is metadata store it as a datastream on the object.  If it is binary data, put it in the Bitrepository,
@@ -339,44 +335,26 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                                     Path filePath = deliveryPath.relativize(path);
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
                                     if (path.toString().endsWith(".pdf")) {
-
+                                        long startFileIngestTime = System.currentTimeMillis();
+                                        log.info(LoggingKeywords.START_PDF_FILE_INGEST, path);
                                         // Construct the fileId with the path from the deliveryfolder to the file
                                         final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
+                                        Path relativePath = rootPath.relativize(path);
+                                        String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
+
+                                        BitrepositoryClientEventHandler handler = new BitrepositoryClientEventHandler(collections, pageObjectId, bitmagUrl, relativePath, checksum, efedora, SOFTWARE_VERSION);
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         putfileClient.putFile(dpaIngesterId,
                                                 new URL("file:///" + path.toString()), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, handler, null);
 
+                                        ToolResult toolResult = handler.getLastToolResult();
+                                        toolResultsForThisDirectory.add(toolResult);
+                                        long finishedFileIngestTime = System.currentTimeMillis();
+                                        log.info(LoggingKeywords.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
 
-                                        /**
-                                         * If a file is named "A.PDF" it goes in the Bitrepository by taking the following steps: <ol> <li>Clone file
-                                         * template.</li> <li>Upload file to Bitrepository using BitRepositoryClient API</li> <li>Construct URL pointing to
-                                         * uploaded file in Bitrepository, using text manipulation to create "http://bitfinder.statsbiblioteket.dk/<i>collection</i>"
-                                         * plus "path/to/A.PDF". (NOTE: we may have to convert "/" to something else to flatten into a single file name -
-                                         * KFC investigates)</li> <li>Register external datastream named "CONTENTS" in DOMS referencing the URL.</li>
-                                         * <li>Create "hasFile" relation  from DOMS object for "A" (which also has "A.XML" stored as the "XML" data
-                                         * stream).</li> </ol>
-                                         */
-
-                                        final String filepathToBitmagUrl = bitmagUrl + fileId; // BITMAG_BASEURL_PROPERTY
-                                        final String mimetype = "application/pdf";
-
-                                        // create DOMS object for the file
-                                        String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + rootPath.relativize(path));
-
-                                        // save external datastream in file object.
-                                        efedora.addExternalDatastream(fileObjectId, "CONTENTS", fileId, filepathToBitmagUrl, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
-
-                                        // Add "hasPart" relation from the page object to the file object.
-                                        efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
-
-                                        // Add the checksum relation to Fedora
-                                        String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
-                                        efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checksum, true, "Adding checksum after bitrepository ingest");
-
-
-                                        return ToolResult.ok("CONTENT node added for PDF for " + path);
+                                        return toolResult;
 
                                     } else if (path.toString().endsWith(".xml")) {
                                         // FIXME: check md5 checksum.
@@ -463,6 +441,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
             toolResultsForThisDirectory.add(ToolResult.fail("Could not add hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds));
         }
         log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
+
+        log.trace("DC id: {}", dcIdentifier);
+        long finishedBatchIngestTime = System.currentTimeMillis();
+        log.info(LoggingKeywords.FINISHED_BATCH_INGEST, dcIdentifier, finishedBatchIngestTime - startBatchIngestTime);
 
         return toolResultsForThisDirectory.stream();
     }

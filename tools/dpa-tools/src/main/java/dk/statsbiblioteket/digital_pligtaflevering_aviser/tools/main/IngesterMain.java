@@ -5,7 +5,6 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ingesters.FileSystemIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -218,7 +217,7 @@ public class IngesterMain {
             if(Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
-
+                //TODO: Using the real Bitrepository client has not been testet, It is created as DPA-75
                 String certificateLocation = settingDir + File.separator + certificateProperty;
 
                 SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
