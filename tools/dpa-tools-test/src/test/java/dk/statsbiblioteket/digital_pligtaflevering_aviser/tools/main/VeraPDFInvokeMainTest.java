@@ -14,7 +14,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
  *
  */
 
-public class InvokeVeraPdfMainTest {
+public class VeraPDFInvokeMainTest {
     @org.junit.Test
     public void invocationTest() throws URISyntaxException {
 
@@ -22,7 +22,7 @@ public class InvokeVeraPdfMainTest {
         String batchDirPathInWorkspace = "delivery-samples";
 
         // http://stackoverflow.com/a/320595/53897
-        URI l = InvokeVeraPdfMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        URI l = VeraPDFInvokeMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         Path startDir = Paths.get(l);
 
         // Look for the first instance of batchDir in the directories towards the root of the file system.
@@ -31,8 +31,8 @@ public class InvokeVeraPdfMainTest {
         Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
         Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, bitrepoDirPathInWorkspace);
 
-        InvokeVeraPdfMain.main(new String[]{
-                "invoke-verapdf-vagrant.properties",
+        VeraPDFInvokeMain.main(new String[]{
+                "verapdf-invoke-vagrant.properties",
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });

@@ -65,7 +65,7 @@ public class IngesterMain {
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
                 List<String> toolResults = repository.query(query)
-                        .map(domsId -> ingester.apply(domsId, normalizedDeliveriesFolder))
+                        .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
 

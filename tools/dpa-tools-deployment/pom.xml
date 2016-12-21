@@ -143,9 +143,9 @@
                                     <id>dpa-ingester</id>
                                 </program>
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.InvokeVeraPdfMain
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFInvokeMain
                                     </mainClass>
-                                    <id>dpa-tool-verapdf</id>
+                                    <id>dpa-verapdf-apply</id>
                                 </program>
                             </programs>
                         </configuration>

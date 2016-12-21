@@ -1,7 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.sun.jersey.api.client.WebResource;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -52,7 +52,7 @@ import static java.nio.file.Files.walk;
  * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
  * See ABR for details. </p>
  */
-public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, String> {
+public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String> {
 
     private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -100,16 +100,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
      * non-binary metadatafiles they are stored as a managed Fedora datastream type "M" named with the extension for the
      * file.  ("a.xml" will be stored in the o.</li> </ul>
      *
-     * @param domsId
-     * @param rootPath
-     * @return
+     * @param domsItem item as queried in DOMS
+     * @param rootPath directory where to locate the delivery
+     * @return humanly readable string describing the outcome
      */
     @Override
-    public String apply(DomsId domsId, Path rootPath) {
+    public String apply(DomsItem domsItem, Path rootPath) {
         long startTime = System.currentTimeMillis();
 
         // Collect all the indvidual toolResults.
-        List<ToolResult> toolResult = ingestDirectoryForDomsId(domsId, rootPath);
+        List<ToolResult> toolResult = ingestDirectoryForDomsItem(domsItem, rootPath);
 
         // Sort according to result
         final Map<Boolean, List<ToolResult>> toolResultMap = toolResult.stream()
@@ -128,12 +128,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
 
         final String keyword = getClass().getSimpleName();
 
-        repository.appendEventToItem(domsId, keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
-        log.info("{} {} Took: {} ms", keyword, domsId, (System.currentTimeMillis() - startTime));
-        return "domsID " + domsId + " ingested. outcome = " + outcome;
+        domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
+        log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+        return "item " + domsItem + " ingested. outcome = " + outcome;
     }
 
-    public List<ToolResult> ingestDirectoryForDomsId(DomsId domsId, Path rootPath) {
+    public List<ToolResult> ingestDirectoryForDomsItem(DomsItem domsItem, Path rootPath) {
 
         // First get identifiers from the Dublin Core XML data stream.
         //
@@ -148,7 +148,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
         xPath.setNamespaceContext(context);
 
-        String dcContent = restApi.path(domsId.id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
+        String dcContent = restApi.path(domsItem.getDomsId().id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
         NodeList nodeList;
         try {
             nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
@@ -174,7 +174,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
         // "B20160811-RT1"
 
         if (relativeFilenameFromDublinCore.isPresent() == false) {
-            return Arrays.asList(ToolResult.fail("Could not get 'path:...' identifier for " + domsId));
+            return Arrays.asList(ToolResult.fail("Could not get 'path:...' identifier for " + domsItem));
         }
 
         Path deliveryPath = rootPath.resolve(relativeFilenameFromDublinCore.get());
