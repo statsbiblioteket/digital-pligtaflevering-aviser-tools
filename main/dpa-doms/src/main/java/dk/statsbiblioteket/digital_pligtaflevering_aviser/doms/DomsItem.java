@@ -1,6 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
-import com.sun.istack.internal.NotNull;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
@@ -59,7 +58,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      * @param domsId
      * @param domsRepository
      */
-    public DomsItem(@NotNull DomsId domsId, DomsRepository domsRepository) {
+    public DomsItem(DomsId domsId, DomsRepository domsRepository) {
         this.domsId = Objects.requireNonNull(domsId, "domsId");
         this.domsRepository = domsRepository;
         this.objectProfile = null;
