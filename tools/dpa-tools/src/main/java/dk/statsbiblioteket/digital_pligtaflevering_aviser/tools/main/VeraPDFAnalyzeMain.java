@@ -130,7 +130,7 @@ public class VeraPDFAnalyzeMain {
             };
         }
 
-        protected Stream<Try<ToolResult>> analyzeVeraPDFDataStream(DomsItem domsItem, VeraPDFOutputValidation veraPDFOutputValidation) {
+        protected Stream<ToolResult> analyzeVeraPDFDataStream(DomsItem domsItem, VeraPDFOutputValidation veraPDFOutputValidation) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
