@@ -46,9 +46,9 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.CERTIFICATE_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
  * Unfinished
@@ -141,6 +141,20 @@ public class IngesterMain {
         @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY)
         String provideIngesterId(ConfigurationMap map) {
             return map.getRequired(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY);
+        }
+
+
+
+        /**
+         * 'base' path to where batch/deliverable can be found by bitrepositoryClient
+         *
+         * @param map
+         * @return
+         */
+        @Provides
+        @Named(URL_TO_BATCH_DIR_PROPERTY)
+        String provideUrlToBetrepositorysBatchPath(ConfigurationMap map) {
+            return map.getRequired(URL_TO_BATCH_DIR_PROPERTY);
         }
 
         /**

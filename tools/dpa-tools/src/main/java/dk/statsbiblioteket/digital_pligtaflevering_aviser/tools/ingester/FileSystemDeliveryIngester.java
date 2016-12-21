@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
 
 /**
@@ -73,33 +74,36 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
     private PutFileClient putfileClient;
     private final String bitrepositoryUrlPrefix;
     private final String bitrepositoryMountpoint;
+    private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     protected Set<String> ignoredFilesSet;
 
     private String bitmagUrl = null;
-    private String dpaIngesterId = null;
+    private String dpaCollectionId = null;
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
-                                      @Named(COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                      @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
                                       @Named("bitrepository.ingester.baseurl") String bitrepositoryUrlPrefix,
                                       @Named("bitrepository.sbpillar.mountpoint") String bitrepositoryMountpoint,
+                                      @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora) {
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
         this.bitrepositoryUrlPrefix = bitrepositoryUrlPrefix;
         this.bitrepositoryMountpoint = bitrepositoryMountpoint;
+        this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
 
         this.bitmagUrl = bitmagUrl;
-        this.dpaIngesterId = dpaIngesterId;
+        this.dpaCollectionId = dpaCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
         log.trace("Ignored files: {}", ignoredFilesSet);
@@ -349,8 +353,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsId, Path, Stri
                                         BitrepositoryClientEventHandler handler = new BitrepositoryClientEventHandler(collections, pageObjectId, bitmagUrl, relativePath, checksum, efedora, SOFTWARE_VERSION);
 
                                         // Use the PutClient to ingest the file into Bitrepository
-                                        putfileClient.putFile(dpaIngesterId,
-                                                new URL("file:///" + path.toString()), fileId, DEFAULT_FILE_SIZE,
+                                        putfileClient.putFile(dpaCollectionId,
+                                                new URL(urlToBitmagBatchPath + path.toString()), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, handler, null);
 
                                         ToolResult toolResult = handler.getLastToolResult();
