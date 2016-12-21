@@ -15,8 +15,6 @@ import org.bitrepository.client.eventhandler.OperationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.CONTENTS;
-import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRegister.RELATION_PREDICATE;
 
 /**
  * This is just an empty implementation of an eventHandler, this is used for injecting into PutfileClient
@@ -25,6 +23,9 @@ import static dk.statsbiblioteket.newspaper.bitrepository.ingester.DomsFileUrlRe
 public class BitrepositoryClientEventHandler implements EventHandler {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
+
+    public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
+    public static final String CONTENTS = "CONTENTS";
 
     private final List<String> collections;
     private final String pageObjectId;
@@ -69,14 +70,9 @@ public class BitrepositoryClientEventHandler implements EventHandler {
                 lastToolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
                 log.info("Completed ingest of file " + event.getFileID());
 
-            } catch (BackendInvalidCredsException e) {
-                lastToolResult = ToolResult.fail("Could not process " + fileObjectId, e);
-            } catch (BackendMethodFailedException e) {
-                lastToolResult = ToolResult.fail("Could not process " + fileObjectId, e);
-            } catch (BackendInvalidResourceException e) {
+            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
                 lastToolResult = ToolResult.fail("Could not process " + fileObjectId, e);
             }
-
 
         } else if (event.getEventType().equals(OperationEvent.OperationEventType.FAILED)) {
             log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", event.getFileID(), event.getEventType());

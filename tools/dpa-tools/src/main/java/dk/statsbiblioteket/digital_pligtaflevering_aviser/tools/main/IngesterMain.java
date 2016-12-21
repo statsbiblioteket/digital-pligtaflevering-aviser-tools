@@ -90,7 +90,6 @@ public class IngesterMain {
                         .collect(Collectors.toList());
 
 
-
                 return String.valueOf(toolResults); // FIXME: Formalize output
             };
         }
@@ -108,7 +107,9 @@ public class IngesterMain {
         }
 
         /**
-         * The path where PutfileClient places files
+         * The path where PutfileClientStub places files
+         * This path is only used by the stub and not the real bitrepositoryIngester
+         *
          * @param map
          * @return
          */
@@ -119,7 +120,8 @@ public class IngesterMain {
         }
 
         /**
-         * Indicates if a teststub simulationg the putfileClient is used
+         * Indicates if a teststub simulating the putfileClient is used
+         *
          * @param map
          * @return
          */
@@ -130,7 +132,8 @@ public class IngesterMain {
         }
 
         /**
-         * The ID of this collection
+         * The ID of this collection, the ID has to match the id of the collection created in fedora
+         *
          * @param map
          * @return
          */
@@ -142,6 +145,7 @@ public class IngesterMain {
 
         /**
          * The path to the directory where settings for putfileClient is placed
+         *
          * @param map
          * @return
          */
@@ -153,6 +157,7 @@ public class IngesterMain {
 
         /**
          * The name of the certificate used by putfileClient
+         *
          * @param map
          * @return
          */
@@ -199,22 +204,23 @@ public class IngesterMain {
 
         /**
          * Provides PutClient for interfacing to bitrepository
-         * @param testMode If true a testclient is returned
-         * @param dpaIngesterId The ID of the collection
-         * @param destination The destination where the client places the files
-         * @param settingDir
-         * @param certificateProperty
+         *
+         * @param testMode            If true a testclient is returned
+         * @param dpaIngesterId       The ID of the collection, the ID has to match the id of the collection created in fedora
+         * @param destination         The destination where the client places the files
+         * @param settingDir          The folder where settings for bitrepositoryClient is placed
+         * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
          * @return
          */
         @Provides
         PutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
-                                                @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
-                                                @Named(DPA_PUTFILE_DESTINATION) String destination,
-                                                @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                                                @Named(CERTIFICATE_PROPERTY) String certificateProperty) {
+                                           @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                           @Named(DPA_PUTFILE_DESTINATION) String destination,
+                                           @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty) {
 
             BitrepositoryPutFileClientStub putClient;
-            if(Boolean.parseBoolean(testMode)) {
+            if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
                 //TODO: Using the real Bitrepository client has not been testet, It is created as DPA-75
@@ -227,7 +233,7 @@ public class IngesterMain {
                 MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);
                 MessageSigner signer = new BasicMessageSigner();
                 OperationAuthorizor authorizer = new BasicOperationAuthorizor(permissionStore);
-                org.bitrepository.protocol.security.SecurityManager securityManager =new BasicSecurityManager(bitRepoSet.getRepositorySettings(),certificateLocation,authenticator, signer, authorizer, permissionStore, dpaIngesterId);
+                org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(bitRepoSet.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
                 return ModifyComponentFactory.getInstance().retrievePutClient(bitRepoSet, securityManager, dpaIngesterId);
             }
             return putClient;

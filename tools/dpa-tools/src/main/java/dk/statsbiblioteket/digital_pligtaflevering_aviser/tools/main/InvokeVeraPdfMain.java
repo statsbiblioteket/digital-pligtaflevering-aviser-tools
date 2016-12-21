@@ -178,7 +178,7 @@ public class InvokeVeraPdfMain {
                 return Stream.of(ToolResult.fail("id: " + domsId + " file '" + file.getAbsolutePath() + " failed validation", e));
             }
 
-            String keyword = "VERAPDF"; // LoggingKeywords
+            String keyword = "VERAPDF"; // KibanaLoggingKeywordsOutput
             log.info("{} {} Took: {} ms", keyword, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
 
             // We have now run VeraPDF on the PDF file and has the output in hand.
