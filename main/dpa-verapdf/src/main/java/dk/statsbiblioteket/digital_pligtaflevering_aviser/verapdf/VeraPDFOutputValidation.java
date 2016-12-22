@@ -1,0 +1,133 @@
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+/**
+ * Validator for checking the results from VeraPDF
+ * The results is validated agains the recommodations from "Digital bevarings gruppen"
+ * https://sbprojects.statsbiblioteket.dk/display/DPAA/Projektdokumenter?preview=/15993252/31490419/pdfa-anbefaling.pdf
+ */
+public class VeraPDFOutputValidation {
+
+    String expression;
+
+    public VeraPDFOutputValidation(boolean mrrFormat) {
+        // FIXME:  We must also check that the rule specification is the one we expect.
+        if (mrrFormat) {
+            expression = "/report/jobs/job/validationReport/details/rule[@status='failed']/@clause";
+        } else {
+            expression = "//validationResult/assertions/assertion[@status='FAILED']/ruleId/@clause";
+        }
+    }
+
+    /**
+     * Supply with output from VeraPDF
+     * The stream is parsed and delivered into a Set, in this way every rulebreak is only handled once
+     *
+     * @param is Inputstream from VeraPDF
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     * @throws XPathExpressionException
+     */
+    public List<String> extractRejected(InputStream is) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+
+        List<String> result = new ArrayList<>();
+
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        Document xmlDocument = builder.parse(is);
+
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(xmlDocument, XPathConstants.NODESET);
+
+        for (int index = 0; index < nodeList.getLength(); index++) {
+            String rule = nodeList.item(index).getNodeValue();
+            if (rule != null) {
+                result.add(nodeList.item(index).getNodeValue());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Validate the results of paragraphs in a pdf, the broken rules is delivered in a set
+     * The first time
+     *
+     * @return ValidationResults indication the result of validating output from VeraPDF
+     */
+    public ValidationResults validateResult(List<String> l) {
+
+        ValidationResults rulesBroken = new ValidationResults();
+
+        new HashSet<>(l).stream()
+                .map(item -> new ValidationResult(item, severenessFor(item)))
+                .filter(vr -> vr.getValidationEnum() != ValidationResult.ValidationResultEnum.ACCEPTABLE)
+                .forEach(vr -> rulesBroken.add(vr));
+
+        return rulesBroken;
+    }
+
+    public ValidationResult.ValidationResultEnum severenessFor(String sectionId) {
+        switch (sectionId) {
+            case "6.1.3":
+            case "6.5.2":
+            case "6.6.1":
+            case "6.6.2":
+            case "6.9":
+                return ValidationResult.ValidationResultEnum.INVALID;
+            case "6.1.7":
+            case "6.1.11":
+            case "6.2.6":
+            case "6.3.4":
+            case "6.3.5":
+            case "6.3.3.1":
+            case "6.3.6":
+            case "6.2.10":
+            case "6.3.2":
+                return ValidationResult.ValidationResultEnum.MANUAL_INSPECTION;
+            case "6.1.2":
+            case "6.1.4":
+            case "6.1.6":
+            case "6.1.8":
+            case "6.1.12":
+            case "6.1.13":
+            case "6.2.4":
+            case "6.2.5":
+            case "6.5.3":
+            case "6.2.7":
+            case "6.1.10":
+            case "6.2.2":
+            case "6.2.8":
+            case "6.2.9":
+            case "6.3.3.2":
+            case "6.3.7":
+            case "6.7.10":
+            case "6.4":
+            case "6.1.5":
+                return ValidationResult.ValidationResultEnum.ACCEPTABLE;
+            default:
+                if (sectionId.startsWith("6.2.3") || sectionId.startsWith("6.7") || sectionId.startsWith("6.8")) {
+                    return ValidationResult.ValidationResultEnum.ACCEPTABLE;
+                } else {
+                    return ValidationResult.ValidationResultEnum.UNKNOWN;
+                }
+        }
+    }
+}
+

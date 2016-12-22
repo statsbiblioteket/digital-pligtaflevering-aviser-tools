@@ -8,9 +8,13 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamP
  */
 public class DomsDatastream {
     private DatastreamProfile datastreamProfile;
+    private DomsItem domsItem;
+    private DomsRepository domsRepository;
 
-    public DomsDatastream(DatastreamProfile datastreamProfile) {
+    public DomsDatastream(DatastreamProfile datastreamProfile, DomsItem domsItem, DomsRepository domsRepository) {
         this.datastreamProfile = datastreamProfile;
+        this.domsItem = domsItem;
+        this.domsRepository = domsRepository;
     }
 
     public String getMimeType() {
@@ -23,5 +27,9 @@ public class DomsDatastream {
 
     public String getID() {
         return datastreamProfile.getID();
+    }
+
+    public String getDatastreamAsString() {
+        return domsRepository.getDataStreamAsString(domsItem.getDomsId().id(), getID());
     }
 }
