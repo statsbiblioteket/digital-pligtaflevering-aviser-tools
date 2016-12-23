@@ -2,6 +2,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -19,6 +20,10 @@ public class ValidateXMLMainTest {
 
     @org.junit.Test
     public void invocationTest() throws URISyntaxException {
+
+
+        File f = new File("/Article.xsd");
+        boolean bb = f.exists();
 
         /*String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
         String batchDirPathInWorkspace = "delivery-samples";

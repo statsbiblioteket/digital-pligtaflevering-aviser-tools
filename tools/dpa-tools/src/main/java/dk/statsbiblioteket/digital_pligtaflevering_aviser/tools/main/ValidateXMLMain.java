@@ -4,7 +4,6 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -18,10 +17,26 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.inject.Named;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.Collections;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,9 +58,6 @@ public class ValidateXMLMain {
                 args,
                 m -> DaggerValidateXMLMain_ValidateXMLComponent.builder().configurationMap(m).build().getTool()
         );
-
-
-
     }
 
 
@@ -64,7 +76,7 @@ public class ValidateXMLMain {
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsId -> processChildDomsId(domsRepository).apply(domsId))
+                    .map(domsItem -> processChildDomsId(domsRepository).apply(domsItem))
                     .collect(Collectors.toList())
                     .toString();
 
@@ -72,13 +84,13 @@ public class ValidateXMLMain {
         };
 
 
-        private Function<DomsId, String> processChildDomsId(DomsRepository domsRepository) {
-            return domsId -> {
+        private Function<DomsItem, String> processChildDomsId(DomsRepository domsRepository) {
+            return domsItem -> {
                 long startTime = System.currentTimeMillis();
 
                 // Single doms item
-                List<ToolResult> toolResults = domsRepository.allChildrenFor(domsId).stream()
-                        .flatMap(childDomsId -> analyzeXML(childDomsId, domsRepository))
+                List<ToolResult> toolResults = domsItem.allChildren().stream()
+                        .flatMap(childDomsItem -> analyzeXML(childDomsItem, domsRepository))
                         .collect(Collectors.toList());
 
                 // Sort according to result
@@ -96,21 +108,19 @@ public class ValidateXMLMain {
                 boolean outcome = failingToolResults.size() == 0;
 
                 final String keyword = getClass().getSimpleName();
-                final Date timestamp = new Date();
 
-                //domsRepository.appendEventToItem(domsId, keyword, timestamp, deliveryEventMessage, VERAPDF_RUN, outcome);
-
-                log.info("{} {} Took: {} ms", keyword, domsId, (System.currentTimeMillis() - startTime));
-                return "domsID " + domsId + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
+                log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+                return "domsID " + domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
         }
 
-
-
-
-
-        protected Stream<ToolResult> analyzeXML(DomsId domsId, DomsRepository domsRepository) {
-            DomsItem domsItem = domsRepository.lookup(domsId);
+        /**
+         * Start validating xmlfiles in fedora and return results
+         * @param domsItem
+         * @param domsRepository
+         * @return
+         */
+        protected Stream<ToolResult> analyzeXML(DomsItem domsItem, DomsRepository domsRepository) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -121,34 +131,65 @@ public class ValidateXMLMain {
             if (profileOptional.isPresent() == false) {
                 return Stream.of();
             }
-            //log.trace("analyzePDF found PDF datastream on {}", domsId);
 
-
+            Map<String, String> xsdMap = provideXsdRootMap();
             DomsDatastream ds = profileOptional.get();
 
-            System.out.println("------------------------------------------------> ");
+            try {
 
+                SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                StringReader reader = new StringReader(ds.getDatastreamAsString());
+                InputSource inps = new InputSource(reader);
 
-            for(DomsDatastream stream : datastreams) {
-                System.out.println(stream.getID());
+                String rootnameInCurrentXmlFile = getRootName(inps);
+                String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
+                URL url = getClass().getClassLoader().getResource(xsdFile);
+                reader = new StringReader(ds.getDatastreamAsString());
+                Schema schema = schemaFactory.newSchema(url);
+                Validator validator = schema.newValidator();
+
+                validator.validate(new StreamSource(reader));
+                log.trace("IT IS VALID");
+            } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
+                e.printStackTrace();
             }
 
-            return Stream.of(ToolResult.ok("id: " + domsId + " " + "comment"));
+
+            //If the end of this file is hit without hitting an exception, ok is returned
+            return Stream.of(ToolResult.ok("id: " + domsItem + " " + "comment"));
         }
 
 
+
+        private String getRootName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = builderFactory.newDocumentBuilder();
+            Document xmlDocument = builder.parse(reader);
+            Element root = xmlDocument.getDocumentElement();
+            return root.getTagName();
+        }
+
+        /**
+         * Previd a map between rootitems in xmlfiles and their corresponding schemafile
+         * @return
+         */
+        @Provides
+        Map<String, String> provideXsdRootMap() {
+            Map<String, String> xsdMap = new HashMap<String, String>();
+            xsdMap.put("article", "Article.xsd");
+            xsdMap.put("pdfinfo", "PdfInfo.xsd");
+            return xsdMap;
+        }
 
         @Provides
         ItemFactory<Item> provideItemFactory() {
             return id -> new Item();
         }
 
-
         @Provides
         @Named("pageSize")
         Integer providePageSize(ConfigurationMap map) {
             return Integer.valueOf(map.getRequired("pageSize"));
         }
-
     }
 }
