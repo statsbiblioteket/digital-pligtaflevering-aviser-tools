@@ -70,7 +70,7 @@ public class CreateDeliveryMain {
                         String deliveryIdValue = matcher.group(1);
                         String roundtripValue = matcher.group(2);
 
-                        final File directoryProcessedIndicatorFile = new File(doneDir, deliveryFolderName);
+                        final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectory.getName());
 
                         if (!directoryProcessedIndicatorFile.exists()) {
                             CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
