@@ -42,6 +42,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -202,8 +203,6 @@ public class ValidateXMLMain {
             DomsDatastream ds = profileOptional.get();
 
             try {
-
-                SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
 
@@ -211,19 +210,39 @@ public class ValidateXMLMain {
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
-                Schema schema = schemaFactory.newSchema(url);
-                Validator validator = schema.newValidator();
 
-                validator.validate(new StreamSource(reader));
-                log.trace("Validation of the xml-content is accepted");
+                if(tryParsing(reader, url)) {
+                    //If returning true the parsing is accepted
+                    return Stream.of(ToolResult.ok("id: " + domsItem + " " + "comment"));
+                } else {
+                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "comment"));
+                }
             } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
                 log.error(e.getMessage());
                 return Stream.of(ToolResult.fail("id: " + domsItem + " " + "comment"));
             }
+        }
 
-
-            //If the end of this file is hit without hitting an exception, ok is returned
-            return Stream.of(ToolResult.ok("id: " + domsItem + " " + "comment"));
+        /**
+         * Try parsing the content inside the reader against the schema located at the url
+         * The function returns true if the xml is validated
+         * @param reader Reader containing the content to get parsed
+         * @param schemaUrl The url of the schema to validate against
+         * @return true if validated
+         */
+        protected boolean tryParsing(Reader reader, URL schemaUrl) {
+            try {
+                SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                Schema schema = schemaFactory.newSchema(schemaUrl);
+                Validator validator = schema.newValidator();
+                validator.validate(new StreamSource(reader));
+                log.info("Validation of the xml-content is accepted");
+                return true;
+            } catch (IOException | SAXException e) {
+                //This exception is not keept since this exception should just result in registrating that the xml is not validate
+                log.info("Validation of the xml-content is arecected");
+                return false;
+            }
         }
 
 
@@ -236,7 +255,7 @@ public class ValidateXMLMain {
          * @throws SAXException
          * @throws XPathExpressionException
          */
-        private String getRootName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        protected String getRootName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
             Document xmlDocument = builder.parse(reader);
@@ -248,8 +267,7 @@ public class ValidateXMLMain {
          * Previd a map between rootitems in xmlfiles and their corresponding schemafile
          * @return
          */
-        @Provides
-        Map<String, String> provideXsdRootMap() {
+        protected Map<String, String> provideXsdRootMap() {
             Map<String, String> xsdMap = new HashMap<String, String>();
             xsdMap.put("article", "Article.xsd");
             xsdMap.put("pdfinfo", "PdfInfo.xsd");
