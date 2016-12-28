@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- from Jersey quickstart instructions as of 2016-12-27 -->
-        <jersey.version>2.25</jersey.version>
+        <jersey.version>1.19</jersey.version>
         <appassembler-maven-plugin.mainClass1>
             dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
         </appassembler-maven-plugin.mainClass1>
@@ -20,17 +20,6 @@
         <!-- DO NOT REENABLE TESTS UNLESS YOU KNOW WHAT YOU ARE DOING!  See README.md -->
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.glassfish.jersey</groupId>
-                <artifactId>jersey-bom</artifactId>
-                <version>${jersey.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
          <dependency>
@@ -60,15 +49,44 @@
 
         <!-- get embedded jersey enabled http server - copied from jersey quickstart -->
         <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-grizzly2-http</artifactId>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-grizzly2</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
         <!-- uncomment this to get JSON support:
          <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-moxy</artifactId>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-version}</version>
         </dependency>
         -->
+        <!-- uncomment this to get Fastinfoset support:
+         <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-fastinfoset</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        -->
+        <!-- uncomment this to get ATOM support:
+         <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-atom</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        -->
+        <!-- uncomment this to get multipart MIME types support:
+         <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
