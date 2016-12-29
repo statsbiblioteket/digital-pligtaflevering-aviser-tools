@@ -5,10 +5,11 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolForConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -34,15 +35,17 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  * Unfinished
  */
-public class IngesterMain {
+public class IngesterMain implements ToolForConfigurationMap {
 
     public static final String DPA_DELIVERIES_FOLDER = "dpa.deliveries.folder";
 
     public static void main(String[] args) {
-        AutonomousPreservationToolHelper.execute(
-                args,
-                m -> DaggerIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
-        );
+        AutonomousPreservationToolHelper.execute(args, new IngesterMain());
+    }
+
+    @Override
+    public Tool getTool(ConfigurationMap configurationMap) {
+        return DaggerIngesterMain_DomsIngesterComponent.builder().configurationMap(configurationMap).build().getTool();
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, IngesterModule.class, BitRepositoryModule.class})
@@ -67,8 +70,6 @@ public class IngesterMain {
                 List<String> toolResults = repository.query(query)
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
-
-
 
                 return String.valueOf(toolResults); // FIXME: Formalize output
             };

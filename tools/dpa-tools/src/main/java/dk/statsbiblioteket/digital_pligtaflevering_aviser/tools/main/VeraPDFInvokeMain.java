@@ -11,6 +11,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecificatio
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolForConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -50,16 +51,18 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 /**
  * Unfinished
  */
-public class VeraPDFInvokeMain {
+public class VeraPDFInvokeMain implements ToolForConfigurationMap {
     protected static final Logger log = LoggerFactory.getLogger(VeraPDFInvokeMain.class);
 
     public static final String VERAPDF_DATASTREAM_NAME = "VERAPDF";
 
     public static void main(String[] args) {
-        AutonomousPreservationToolHelper.execute(
-                args,
-                m -> DaggerVeraPDFInvokeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool()
-        );
+        AutonomousPreservationToolHelper.execute(args, new VeraPDFInvokeMain());
+    }
+
+    @Override
+    public Tool getTool(ConfigurationMap configurationMap) {
+        return DaggerVeraPDFInvokeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(configurationMap).build().getTool();
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, VeraPDFInvokeModule.class, BitRepositoryModule.class})

@@ -6,6 +6,7 @@ import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolForConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
@@ -29,12 +30,14 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  * Unfinished create batch trigger main.
  */
-public class CreateDeliveryMain {
+public class CreateDeliveryMain implements ToolForConfigurationMap {
     public static void main(String[] args) {
-        AutonomousPreservationToolHelper.execute(
-                args,
-                m -> DaggerCreateDeliveryMain_CreateDeliveryComponent.builder().configurationMap(m).build().getTool()
-        );
+        AutonomousPreservationToolHelper.execute(args, new CreateDeliveryMain());
+    }
+
+    @Override
+    public Tool getTool(ConfigurationMap configurationMap) {
+        return DaggerCreateDeliveryMain_CreateDeliveryComponent.builder().configurationMap(configurationMap).build().getTool();
     }
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateDeliveryModule.class})

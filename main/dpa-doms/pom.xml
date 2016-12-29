@@ -7,6 +7,10 @@
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
     <artifactId>dpa-doms</artifactId>
     <version>master-SNAPSHOT</version>
+    <properties>
+        <jersey.version>1.19</jersey.version>
+    </properties>
+
 
     <dependencies>
         <dependency>
@@ -48,6 +52,15 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- provide newer version of Jersey to support Java 8 (overriding the transient dependency) -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>

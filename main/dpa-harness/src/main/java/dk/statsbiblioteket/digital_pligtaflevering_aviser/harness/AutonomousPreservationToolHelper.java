@@ -23,17 +23,17 @@ import static java.time.LocalDate.now;
  * property contains the name of the program.</p>
  */
 public class AutonomousPreservationToolHelper {
+
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from the
      * configuration file/resource denoted by args[0], plus the remaining arguments interpreted as "key=value" lines,
      * and pass it into the given function returning a Tool, which is then executed.  It is not
      * expected to return.
      *
-     * @param args     like passed in to "main(String[] args)"
-     * @param function function creating a populated Tool from a configuration map.
+     * @param args                    like passed in to "main(String[] args)"
+     * @param toolForConfigurationMap function creating a populated Tool from a configuration map.
      */
-
-    public static void execute(String[] args, Function<ConfigurationMap, Tool> function) {
+    public static void execute(String[] args, ToolForConfigurationMap toolForConfigurationMap) {
         Objects.requireNonNull(args, "args == null");
         // args: ["config.properties",  "a=1", "b=2", "c=3"]
         if (args.length < 1) {
@@ -60,7 +60,7 @@ public class AutonomousPreservationToolHelper {
         map.addMap(argsMap);
 
         // -- and go.
-        execute(map, function);
+        execute(map, m -> toolForConfigurationMap.getTool(m));
     }
 
     /**
