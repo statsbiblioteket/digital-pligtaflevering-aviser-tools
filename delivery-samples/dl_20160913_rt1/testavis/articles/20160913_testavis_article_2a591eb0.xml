@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article>
-    <administrativeData>
-        <articleId>123e4567-e89b-12d3-a456-426655440002</articleId>
+    <administrativedata>
+        <articleid>123e4567-e89b-12d3-a456-426655440002</articleid>
         <filename>20160913_testavis_2a591eb0.xml</filename>
-    </administrativeData>
+    </administrativedata>
     <metadata>
         <source>testavis</source>
-        <publishDate>20160913</publishDate>
-        <sectionName>kultur</sectionName>
-        <sectionNumber>2</sectionNumber>
-        <pageName>kultur</pageName>
-        <pageNumber>2</pageNumber>
+        <publishdate>20160913</publishdate>
+        <sectionname>kultur</sectionname>
+        <sectionnumber>2</sectionnumber>
+        <pagename>kultur</pagename>
+        <pagenumber>2</pagenumber>
+        <type>Print</type>
         <links>
             <link>http://www.example.com/test2</link>
         </links>
@@ -18,10 +19,6 @@
             <term>
                 <subject>Emner</subject>
                 <value>kultur</value>
-            </term>
-            <term>
-                <subject>Emner</subject>
-                <value>Litteratur</value>
             </term>
         </classification>
         <journalists>

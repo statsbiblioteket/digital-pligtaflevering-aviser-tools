@@ -4,13 +4,13 @@
     <publishing>
         <source>testavis</source>
         <edition>Udgave1</edition>
-        <publishDate>20160913</publishDate>
+        <publishdate>20160913</publishdate>
     </publishing>
     <positional>
-        <sectionName>Kultur</sectionName>
-        <sectionNumber>2</sectionNumber>
-        <pageName>Side 2</pageName>
-        <pageNumber>2</pageNumber>
+        <sectionname>Kultur</sectionname>
+        <sectionnumber>2</sectionnumber>
+        <pagename>Side 2</pagename>
+        <pagenumber>2</pagenumber>
     </positional>
     <content>
         <text>

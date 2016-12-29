@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article>
-    <administrativeData>
-        <articleId>Artiklens ID (DUID)</articleId>
+    <administrativedata>
+        <articleid>Artiklens ID (DUID)</articleid>
         <filename>20160811_verapdf_5c649fe5.xml</filename>
-    </administrativeData>
+    </administrativedata>
     <metadata>
         <source>verapdf</source>
-        <publishDate>20160811</publishDate>
-        <sectionName>kultur</sectionName>
-        <sectionNumber>2</sectionNumber>
-        <pageName>kultur</pageName>
-        <pageNumber>2</pageNumber>
+        <publishdate>20160811</publishdate>
+        <sectionname>kultur</sectionname>
+        <sectionnumber>2</sectionnumber>
+        <pagename>kultur</pagename>
+        <pagenumber>2</pagenumber>
+        <type>Print</type>
         <links>
             <link>http://www.example.com/test3</link>
         </links>

@@ -4,13 +4,13 @@
     <publishing>
         <source>verapdf</source>
         <edition>Udgave1</edition>
-        <publishDate>20160811</publishDate>
+        <publishdate>20160811</publishdate>
     </publishing>
     <positional>
-        <sectionName>undefined</sectionName>
-        <sectionNumber>1</sectionNumber>
-        <pageName>undefined</pageName>
-        <pageNumber>1</pageNumber>
+        <sectionname>undefined</sectionname>
+        <sectionnumber>1</sectionnumber>
+        <pagename>undefined</pagename>
+        <pagenumber>1</pagenumber>
     </positional>
     <content>
         <text>
