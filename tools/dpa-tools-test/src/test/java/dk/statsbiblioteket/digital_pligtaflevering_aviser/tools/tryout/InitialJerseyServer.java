@@ -25,7 +25,7 @@ public class InitialJerseyServer {
         return defaultPort;
     }
     private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://localhost/").port(getPort(9998)).build();
+        return UriBuilder.fromUri("http://localhost/").port(getPort(9998)).path("foo/").build();
     }
 
     public static final URI BASE_URI = getBaseURI();
