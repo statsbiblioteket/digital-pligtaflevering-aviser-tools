@@ -75,6 +75,11 @@
             <artifactId>dpa-verapdf</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.helger</groupId>
+            <artifactId>ph-schematron-validator</artifactId>
+            <version>4.1.1</version>
+        </dependency>
     </dependencies>
 
     <build>
