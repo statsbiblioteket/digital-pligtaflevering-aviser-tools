@@ -64,7 +64,7 @@ import java.util.stream.Stream;
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
 
-    public static final String AUTONOMOUS_SUCESSFULL_EVENT = "autonomous.thisSucessfulEvent";
+    public static final String AUTONOMOUS_SUCCESSFULL_EVENT = "autonomous.thisSuccessfullEvent";
 
     public static void main(String[] args) {
 
@@ -86,7 +86,7 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_SUCESSFULL_EVENT) String thisSucessfulEventName, QuerySpecification query, WebResource restApi, DomsRepository domsRepository) {
+        Tool provideTool(@Named(AUTONOMOUS_SUCCESSFULL_EVENT) String thisSucessfulEventName, QuerySpecification query, WebResource restApi, DomsRepository domsRepository) {
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
@@ -203,10 +203,11 @@ public class ValidateXMLMain {
             DomsDatastream ds = profileOptional.get();
 
             try {
+                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
 
-                String rootnameInCurrentXmlFile = getRootName(inps);
+                String rootnameInCurrentXmlFile = getRootTagName(inps);
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
@@ -240,7 +241,7 @@ public class ValidateXMLMain {
                 return true;
             } catch (IOException | SAXException e) {
                 //This exception is not keept since this exception should just result in registrating that the xml is not validate
-                log.info("Validation of the xml-content is arecected");
+                log.info("Validation of the xml-content is rejected");
                 return false;
             }
         }
@@ -255,7 +256,7 @@ public class ValidateXMLMain {
          * @throws SAXException
          * @throws XPathExpressionException
          */
-        protected String getRootName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        protected String getRootTagName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = builderFactory.newDocumentBuilder();
             Document xmlDocument = builder.parse(reader);
@@ -280,9 +281,9 @@ public class ValidateXMLMain {
          * @return
          */
         @Provides
-        @Named(AUTONOMOUS_SUCESSFULL_EVENT)
+        @Named(AUTONOMOUS_SUCCESSFULL_EVENT)
         String thisEventName(ConfigurationMap map) {
-            return map.getRequired(AUTONOMOUS_SUCESSFULL_EVENT);
+            return map.getRequired(AUTONOMOUS_SUCCESSFULL_EVENT);
         }
 
         @Provides

@@ -17,14 +17,14 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Test af xml validation against xsd
+ * Test af xml validation against xsd.
+ * This component uses two different xsd-files Article.xsd and PdfInfo.xsd.
+ * It looks for the rootTag in the xml, and finds the schema expected to match the name of the rootTag
  */
 public class ValidateXMLMainTest {
 
     private ValidateXMLMain.ValidateXMLModule xmlValidatorModule;
 
-
-    // Should rename to @BeforeTestMethod
     // e.g. Creating an similar object and share for all @Test
     @Before
     public void runBeforeTestMethod() {
@@ -36,22 +36,18 @@ public class ValidateXMLMainTest {
     public void analyzeDeliveriesFolderTest() throws Exception {
 
         String folder = getBatchFolder();
-        Files.walk(Paths.get(folder)).forEach(filePath -> {
+        Files.walk(Paths.get(folder))
+                .filter(p -> p.toString().endsWith(".xml"))
+                .forEach(filePath -> {
             if (Files.isRegularFile(filePath)) {
-                String file = filePath.getFileName().toString();
-                if (file.endsWith(".xml")) {
-                    try {
-
-                        String xsdName = xmlValidatorModule.getRootName(new InputSource(filePath.toString()));
-                        Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-                        URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
-                        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filePath.toString()), "UTF8"));
-                        assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.tryParsing(in, xsdUrl));
-
-                    } catch (Exception e) {
-                        assertEquals(e.getMessage(), true, false);
-                    }
-
+                try {
+                    String xsdName = xmlValidatorModule.getRootTagName(new InputSource(Files.newInputStream(filePath)));
+                    Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
+                    URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
+                    assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.tryParsing(in, xsdUrl));
+                } catch (Exception e) {
+                    assertEquals(e.getMessage(), true, false);
                 }
             }
         });
@@ -59,48 +55,39 @@ public class ValidateXMLMainTest {
 
     @org.junit.Test
     public void analyzeAcceptedXMLArticleTest() throws Exception {
-        URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/articleTest.xml");
-        ValidateXMLMain.ValidateXMLModule xmlValidatorModule = new ValidateXMLMain.ValidateXMLModule();
-        String xsdName = xmlValidatorModule.getRootName(new InputSource(xmlurl.getFile()));
-        Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-        URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        assertEquals("Test of approved article", true, xmlValidatorModule.tryParsing(in, xsdUrl));
+        assertEquals("Test of approved article", true, validatePath("xmlValidation/correctArticleTest.xml"));
     }
 
 
     @org.junit.Test
     public void analyzeAcceptedXMLPageTest() throws Exception {
-
-        URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/pageTest.xml");
-        String xsdName = xmlValidatorModule.getRootName(new InputSource(xmlurl.getFile()));
-        Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-        URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        assertEquals("Test of approved page", true, xmlValidatorModule.tryParsing(in, xsdUrl));
+        assertEquals("Test of approved page", true, validatePath("xmlValidation/correctPageTest.xml"));
     }
 
     @org.junit.Test
     public void analyzeFailingXMLArticleTest() throws Exception {
-
-        URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/articleFailTest.xml");
-        String xsdName = xmlValidatorModule.getRootName(new InputSource(xmlurl.getFile()));
-        Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-        URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        assertEquals("Test of failing article", false, xmlValidatorModule.tryParsing(in, xsdUrl));
+        assertEquals("Test of failing article", false, validatePath("xmlValidation/articleFailTest.xml"));
     }
 
 
     @org.junit.Test
     public void analyzeFailingXMLPageTest() throws Exception {
+        assertEquals("Test of failing page", false, validatePath("xmlValidation/pageFailTest.xml"));
+    }
 
-        URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/pageFailTest.xml");
-        String xsdName = xmlValidatorModule.getRootName(new InputSource(xmlurl.getFile()));
+    /**
+     * Check wether a path to an xml-file can be validated aganst xsd-files
+     * @param path
+     * @return
+     * @throws Exception
+     */
+    private boolean validatePath(String path) throws Exception {
+        URL xmlurl = getClass().getClassLoader().getResource(path);
+        String xsdName = xmlValidatorModule.getRootTagName(new InputSource(xmlurl.getFile()));
         Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
         URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        assertEquals("Test of failing page", false, xmlValidatorModule.tryParsing(in, xsdUrl));
+        return xmlValidatorModule.tryParsing(in, xsdUrl);
     }
 
 
