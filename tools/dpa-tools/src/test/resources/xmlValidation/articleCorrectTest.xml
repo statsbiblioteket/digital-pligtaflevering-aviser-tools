@@ -5,8 +5,7 @@
         <filename>20160913_testavis_2a591eb0.xml</filename>
     </administrativedata>
     <metadata>
-        <!-- sources is supposed to be called source to get validated in xsd -->
-        <sources>testavis</sources>
+        <source>testavis</source>
         <publishdate>20160913</publishdate>
         <sectionname>kultur</sectionname>
         <sectionnumber>2</sectionnumber>
