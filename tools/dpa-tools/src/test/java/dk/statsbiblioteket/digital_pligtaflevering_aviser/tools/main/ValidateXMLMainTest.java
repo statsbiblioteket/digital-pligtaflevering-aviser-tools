@@ -55,13 +55,13 @@ public class ValidateXMLMainTest {
 
     @org.junit.Test
     public void analyzeAcceptedXMLArticleTest() throws Exception {
-        assertEquals("Test of approved article", true, validatePath("xmlValidation/correctArticleTest.xml"));
+        assertEquals("Test of approved article", true, validatePath("xmlValidation/articleCorrectTest.xml"));
     }
 
 
     @org.junit.Test
     public void analyzeAcceptedXMLPageTest() throws Exception {
-        assertEquals("Test of approved page", true, validatePath("xmlValidation/correctPageTest.xml"));
+        assertEquals("Test of approved page", true, validatePath("xmlValidation/pageCorrectTest.xml"));
     }
 
     @org.junit.Test
