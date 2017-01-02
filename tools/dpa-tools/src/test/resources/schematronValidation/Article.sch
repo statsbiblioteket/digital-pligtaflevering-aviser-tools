@@ -9,7 +9,7 @@
         use="cat:properties/cat:color"/>
 
    <pattern id="section-check">
-      <rule context="sectiondd">
+      <rule context="section">
          <assert test="/article/administrativedata/articleid">The element Person must have a Title attribute.</assert>
          <assert test="title">This section has no title</assert>
          <assert test="para">This section has no paragraphs</assert>
@@ -20,6 +20,7 @@
    <pattern id="article-fields">
       <rule context="article">
          <assert test="string-length(/article/administrativedata/articleid) = 36">articleId needs to be 36 characters</assert>
+         <assert test="ends-with(/article/administrativedata/filename, '.xml')">file needs to be xml</assert>
       </rule>
    </pattern>
 
