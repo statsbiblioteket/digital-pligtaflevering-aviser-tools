@@ -43,7 +43,7 @@ public class ValidateXMLMainTest {
                 try {
                     String xsdName = xmlValidatorModule.getRootTagName(new InputSource(Files.newInputStream(filePath)));
                     Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-                    URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
+                    URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
                     BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
                     assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.tryParsing(in, xsdUrl));
                 } catch (Exception e) {
@@ -85,7 +85,7 @@ public class ValidateXMLMainTest {
         URL xmlurl = getClass().getClassLoader().getResource(path);
         String xsdName = xmlValidatorModule.getRootTagName(new InputSource(xmlurl.getFile()));
         Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-        URL xsdUrl = getClass().getClassLoader().getResource("xmlValidation/" + xsdMap.get(xsdName));
+        URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
         return xmlValidatorModule.tryParsing(in, xsdUrl);
     }
