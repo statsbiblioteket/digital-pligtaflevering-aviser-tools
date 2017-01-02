@@ -9,7 +9,7 @@
         use="cat:properties/cat:color"/>
 
    <pattern id="section-check">
-      <rule context="section">
+      <rule context="sectiondd">
          <assert test="/article/administrativedata/articleid">The element Person must have a Title attribute.</assert>
          <assert test="title">This section has no title</assert>
          <assert test="para">This section has no paragraphs</assert>
@@ -17,11 +17,11 @@
       </rule>
    </pattern>
 
-      <pattern id="other-bob">
-         <rule context="section">
-            <let name="testit" value="/article/administrativedata/articleid"/>
-         </rule>
-      </pattern>
+   <pattern id="article-fields">
+      <rule context="article">
+         <assert test="string-length(/article/administrativedata/articleid) = 36">articleId needs to be 36 characters</assert>
+      </rule>
+   </pattern>
 
        <pattern id="other-check">
            <rule context="cellar">
