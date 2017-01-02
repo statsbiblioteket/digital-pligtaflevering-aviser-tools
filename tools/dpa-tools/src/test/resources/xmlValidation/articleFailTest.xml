@@ -1,32 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article>
     <administrativedata>
-        <articleid>Artiklens ID (DUID)</articleid>
-        <filename>20160811_verapdf_5c649fe5.xml</filename>
+        <articleid>123e4567-e89b-12d3-a456-426655440002</articleid>
+        <filename>20160913_testavis_2a591eb0.xml</filename>
     </administrativedata>
     <metadata>
-        <source>verapdf</source>
-        <publishdate>20160811</publishdate>
+        <!-- sources is supposed to be called source to get validated in xsd -->
+        <sources>testavis</sources>
+        <publishdate>20160913</publishdate>
         <sectionname>kultur</sectionname>
         <sectionnumber>2</sectionnumber>
         <pagename>kultur</pagename>
         <pagenumber>2</pagenumber>
         <type>Print</type>
         <links>
-            <link>http://www.example.com/test3</link>
+            <link>http://www.example.com/test2</link>
         </links>
         <classification>
             <term>
                 <subject>Emner</subject>
                 <value>kultur</value>
             </term>
-            <term>
-                <subject>Emner</subject>
-                <value>Litteratur</value>
-            </term>
         </classification>
         <journalists>
-            <journalist>Foo Bar</journalist>
+            <journalist>Foo Bar Nielsen</journalist>
         </journalists>
     </metadata>
     <content>
@@ -34,9 +31,9 @@
         <byline>This is the byline</byline>
         <bodytext>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             Curabitur tincidunt viverra mi vitae scelerisque. Donec congue, ligula eget
-            maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam domsId
-            mauris. Quisque domsId porttitor turpis. Proin malesuada hendrerit sollicitudin.
-            Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis domsId nunc blandit
+            maximus ullamcorper, dolor velit tincidunt massa, sed dignissim sem quam id
+            mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
+            Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
             condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
             in auctor ipsum.</bodytext>
     </content>

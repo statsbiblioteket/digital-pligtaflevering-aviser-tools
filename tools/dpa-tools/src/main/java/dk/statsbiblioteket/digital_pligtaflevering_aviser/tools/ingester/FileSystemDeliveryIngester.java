@@ -205,7 +205,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         String batchName = relativeFilenameFromDublinCore.get();
         long startBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingKeywordsOutput.START_BATCH_INGEST, batchName);
+        log.info(KibanaLoggingStrings.START_BATCH_INGEST, batchName);
 
         Path deliveryPath = rootPath.resolve(batchName);
 
@@ -251,7 +251,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingKeywordsOutput.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
+        log.info(KibanaLoggingStrings.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
         return subDirectoryResults;
     }
 
@@ -344,7 +344,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
                                     if (path.toString().endsWith(".pdf")) {
                                         long startFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingKeywordsOutput.START_PDF_FILE_INGEST, path);
+                                        log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
                                         // Construct the fileId with the path from the deliveryfolder to the file
                                         final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
                                         Path relativePath = rootPath.relativize(path);
@@ -360,7 +360,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         ToolResult toolResult = handler.getLastToolResult();
                                         toolResultsForThisDirectory.add(toolResult);
                                         long finishedFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingKeywordsOutput.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
+                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
 
                                         return toolResult;
 

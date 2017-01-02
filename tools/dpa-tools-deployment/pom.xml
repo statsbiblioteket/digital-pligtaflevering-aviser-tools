@@ -147,6 +147,11 @@
                                     </mainClass>
                                     <id>dpa-verapdf-apply</id>
                                 </program>
+                                <program>
+                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ValidateXMLMain
+                                    </mainClass>
+                                    <id>dpa-validate-xml</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
