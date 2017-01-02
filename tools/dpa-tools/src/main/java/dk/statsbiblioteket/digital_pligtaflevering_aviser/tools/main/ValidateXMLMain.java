@@ -209,18 +209,21 @@ public class ValidateXMLMain {
 
                 String rootnameInCurrentXmlFile = getRootTagName(inps);
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
+                if(xsdFile == null) {
+                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "Unknown root"));
+                }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
 
                 if(tryParsing(reader, url)) {
                     //If returning true the parsing is accepted
-                    return Stream.of(ToolResult.ok("id: " + domsItem + " " + "comment"));
+                    return Stream.of(ToolResult.ok("id: " + domsItem + " " + "XML approved"));
                 } else {
-                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "comment"));
+                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "XML invalid"));
                 }
             } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
                 log.error(e.getMessage());
-                return Stream.of(ToolResult.fail("id: " + domsItem + " " + "comment"));
+                return Stream.of(ToolResult.fail("id: " + domsItem + " " + "Parserexception"));
             }
         }
 
@@ -270,8 +273,8 @@ public class ValidateXMLMain {
          */
         protected Map<String, String> provideXsdRootMap() {
             Map<String, String> xsdMap = new HashMap<String, String>();
-            xsdMap.put("article", "Article.xsd");
-            xsdMap.put("pdfinfo", "PdfInfo.xsd");
+            xsdMap.put("article", "xmlValidation/Article.xsd");
+            xsdMap.put("pdfinfo", "xmlValidation/PdfInfo.xsd");
             return xsdMap;
         }
 
