@@ -7,71 +7,41 @@
         uri="http://www.iro.umontreal.ca/lapalme/wine-catalog"/>
     <xsl:key name="colors" match="/cellar-book/cat:wine-catalog/cat:wine"
         use="cat:properties/cat:color"/>
-    
-    <pattern>
-        <rule context="administrativedata">
-            <report test="length(@filename) > 4">
-                There should be a comment for a wine with more than one star.
-            </report>
-        </rule>
-    </pattern>
+
+   <pattern id="section-check">
+      <rule context="section">
+         <assert test="/article/administrativedata/articleid">The element Person must have a Title attribute.</assert>
+         <assert test="title">This section has no title</assert>
+         <assert test="para">This section has no paragraphs</assert>
+         <let name="testing" value="/article/administrativedata/articleid"/>
+      </rule>
+   </pattern>
+
+      <pattern id="other-bob">
+         <rule context="section">
+            <let name="testit" value="/article/administrativedata/articleid"/>
+         </rule>
+      </pattern>
+
+       <pattern id="other-check">
+           <rule context="cellar">
+               <let name="nbBottles" value="sum(wine/quantity)"/>
+               <report test="$nbBottles &lt; 10">
+                   Only <value-of select="$nbBottles"/> bottles left in the cellar.
+               </report>
+               <!-- nb of bottles of each color in the cellar -->
+               <let name="winesFromCellar" value="/cellar-book/cellar/wine"/>
+               <let name="nbReds"
+                value="sum($winesFromCellar[@code=key('colors','red')/@code]/quantity)"/>
+               <let name="nbWhites"
+                value="sum($winesFromCellar[@code=key('colors','white')/@code]/quantity)"/>
+               <let name="nbRosés"
+                value="sum($winesFromCellar[@code=key('colors','rosé')/@code]/quantity)"/>
+               <let name="nbColors" value="$nbReds+$nbWhites+$nbRosés"/>
+           </rule>
+       </pattern>
 
 
 
-
-    
-    <pattern>
-        <rule context="cellar">
-            <let name="nbBottles" value="sum(wine/quantity)"/>
-            <report test="$nbBottles &lt; 10">
-                Only <value-of select="$nbBottles"/> bottles left in the cellar.
-            </report>
-            <!-- nb of bottles of each color in the cellar -->
-            <let name="winesFromCellar" value="/cellar-book/cellar/wine"/>
-            <let name="nbReds" 
-             value="sum($winesFromCellar[@code=key('colors','red')/@code]/quantity)"/>
-            <let name="nbWhites" 
-             value="sum($winesFromCellar[@code=key('colors','white')/@code]/quantity)"/>
-            <let name="nbRosés" 
-             value="sum($winesFromCellar[@code=key('colors','rosé')/@code]/quantity)"/>
-            <let name="nbColors" value="$nbReds+$nbWhites+$nbRosés"/>
-            <!-- check for a well balanced cellar!!! -->
-            <assert test="$nbReds>$nbColors div 3">
-                Not enough reds (<value-of select="$nbReds"/> over 
-                <value-of select="$nbColors"/>) left in the cellar.
-            </assert>
-            <assert test="$nbWhites>$nbColors div 4">
-                Not enough whites (<value-of select="$nbWhites"/> over 
-                <value-of select="$nbColors"/>) left in the cellar.
-            </assert>
-            <assert test="$nbRosés>$nbColors div 4">
-                Not enough rosés (<value-of select="$nbRosés"/> over 
-                <value-of select="$nbColors"/>) left in the cellar.
-            </assert>
-            <!-- check for consistency within number of bottles -->
-            <assert test="$nbBottles=$nbColors">
-                Inconsistent count of bottles: total is <value-of select="$nbBottles"/> 
-                but the count by colors is <value-of select="$nbColors"/>: 
-                (<value-of select="$nbReds"/> reds, <value-of select="$nbWhites"/> 
-                whites and <value-of select="$nbRosés"/> rosés).
-            </assert>
-        </rule>
-    </pattern>
-    
-    <pattern abstract="true" id="spacesAtStartEnd">
-        <rule context="comment|cat:comment|cat:food-pairing|cat:tasting-note">
-            <report test="starts-with($elem,' ') or 
-                          substring($elem,string-length($elem))=' '">
-                A <value-of select="name($elem)"/> element within a <name/> 
-                should not start or end with a space.
-            </report>
-        </rule>
-    </pattern>
-    <pattern is-a="spacesAtStartEnd">
-        <param name="elem" value="cat:bold"/>
-    </pattern>
-    <pattern is-a="spacesAtStartEnd">
-        <param name="elem" value="cat:emph"/>
-    </pattern>
     
 </schema>
