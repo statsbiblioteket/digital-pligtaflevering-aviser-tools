@@ -41,6 +41,9 @@ import static java.util.Arrays.asList;
  */
 @Module
 public class DomsModule {
+
+    public static final String DATASTREAM_CACHE = "datastreamCache";
+
     /**
      * URL for accessing the DOMS repository.  No default value.
      *
@@ -76,7 +79,6 @@ public class DomsModule {
     public String provideDomsPidGeneratorURL(ConfigurationMap map) {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
-
 
     /**
      * Patht to the folder containing batches
@@ -310,7 +312,7 @@ public class DomsModule {
      * (meaning to be compatible with the existing configuration files) we do the same silent adding
      * on "/objects/" as was done in IteratorForFedora3 constructor in item-event-framework-common.
      *
-     * @param domsUrl url to Fedora Commons instance
+     * @param domsUrl      url to Fedora Commons instance
      * @param domsUsername username for Fedora Commons instance
      * @param domsPassword password for Fedora Commons instance
      * @return ready-to-use WebResource for Fedora Commons interaction.
@@ -324,5 +326,11 @@ public class DomsModule {
         client.addFilter(new HTTPBasicAuthFilter(domsUsername, domsPassword));
         WebResource webResource = client.resource(domsUrl.endsWith("/objects/") ? domsUrl : domsUrl + "/objects/");
         return webResource;
+    }
+
+    @Provides
+    @Named(DATASTREAM_CACHE)
+    public String provideDatastreamCache(ConfigurationMap configurationMap) {
+        return configurationMap.getDefault(DATASTREAM_CACHE, "");
     }
 }

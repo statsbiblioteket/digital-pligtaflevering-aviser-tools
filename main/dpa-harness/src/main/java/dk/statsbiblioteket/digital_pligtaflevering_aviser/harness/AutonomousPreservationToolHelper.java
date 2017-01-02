@@ -6,11 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDate.now;
@@ -43,21 +40,8 @@ public class AutonomousPreservationToolHelper {
         // "config.properties"
         String configurationFileName = args[0];
 
-        ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties(configurationFileName);
-
-        // remainingArgs: ["a=1", "b=2", "c=3"]
-        String[] remainingArgs = Arrays.copyOfRange(args, 1, args.length);
-        Map<String, String> argsMap = new TreeMap<>();
-        for (String keyValue : remainingArgs) {
-            String[] splitKeyValue = keyValue.split(Pattern.quote("="), 2);
-            if (splitKeyValue.length > 1) {
-                String key = splitKeyValue[0];
-                String value = splitKeyValue[1];
-                argsMap.put(key, value);
-            }
-        }
-
-        map.addMap(argsMap);
+        ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties(configurationFileName)
+                .add(ConfigurationMapHelper.configurationMapFromKeyValueStrings(Arrays.copyOfRange(args, 1, args.length)));
 
         // -- and go.
         execute(map, m -> toolForConfigurationMap.getTool(m));

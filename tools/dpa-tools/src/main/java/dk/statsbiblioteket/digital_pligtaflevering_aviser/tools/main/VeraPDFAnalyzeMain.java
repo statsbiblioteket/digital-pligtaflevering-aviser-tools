@@ -59,7 +59,7 @@ public class VeraPDFAnalyzeMain implements ToolForConfigurationMap {
     protected static final Logger log = LoggerFactory.getLogger(VeraPDFAnalyzeMain.class);
 
     public static void main(String[] args) {
-        AutonomousPreservationToolHelper.execute(args, m -> DaggerVeraPDFAnalyzeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool());
+        AutonomousPreservationToolHelper.execute(args, m -> new VeraPDFAnalyzeMain().getTool(m));
     }
 
     @Override

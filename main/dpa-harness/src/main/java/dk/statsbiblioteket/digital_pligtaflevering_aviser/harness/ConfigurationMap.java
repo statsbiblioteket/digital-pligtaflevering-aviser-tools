@@ -8,15 +8,11 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
@@ -30,26 +26,10 @@ public class ConfigurationMap {
 
     Map<String, String> map = new TreeMap<>();
 
-    Set<String> everUsed = new HashSet<>();
-
     // Constructor must take arguments to ensure Dagger does not instantiate automatically.
 
     public ConfigurationMap(Map<String, String> initialMap) {
         map.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
-
-        // During development this helps in slimming down configuration files.
-        Runtime.getRuntime().addShutdownHook(new Thread(
-                () -> {
-                    List<String> unused = map.keySet().stream()
-                            .filter(e -> everUsed.contains(e) == false)
-                            .sorted()
-                            .collect(Collectors.toList());
-                    if (unused.size() > 0 ) {
-                        System.err.println("Unused configuration keys: " + unused);
-                    }
-                }
-        ));
-
     }
 
     /**
@@ -137,8 +117,9 @@ public class ConfigurationMap {
      * Adds all entries in mapToAdd to the current configuration map
      */
 
-    public void addMap(Map<String, String> mapToAdd) {
-        map.putAll(mapToAdd);
+    public ConfigurationMap add(ConfigurationMap mapToAdd) {
+        map.putAll(mapToAdd.map);
+        return this;
     }
 
     /**
@@ -149,7 +130,6 @@ public class ConfigurationMap {
      * @return value if present, throws exception if not.
      */
     public String getRequired(String key) {
-        everUsed.add(key);
         if (map.containsKey(key)) {
             return map.get(key);
         }
@@ -161,7 +141,6 @@ public class ConfigurationMap {
      */
 
     public String getDefault(String key, String defaultValue) {
-        everUsed.add(key);
         if (map.containsKey(key)) {
             return map.get(key);
         }
@@ -176,7 +155,6 @@ public class ConfigurationMap {
      * @return value stored in map converted with Integer.parseInt()
      */
     public int getRequiredInt(String key) {
-        everUsed.add(key);
         String value = getRequired(key);
         try {
             return Integer.parseInt(value);

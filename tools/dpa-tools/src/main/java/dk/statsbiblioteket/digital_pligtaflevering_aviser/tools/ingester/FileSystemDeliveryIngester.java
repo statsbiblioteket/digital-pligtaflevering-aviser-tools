@@ -41,6 +41,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule.DATASTREAM_CACHE;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static java.nio.file.Files.walk;
 
@@ -65,21 +66,25 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     protected Set<String> ignoredFilesSet;
+    private String datastreamCache;
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named("bitrepository.ingester.baseurl") String bitrepositoryUrlPrefix,
                                       @Named("bitrepository.sbpillar.mountpoint") String bitrepositoryMountpoint,
-                                      WebResource restApi, EnhancedFedora efedora) {
+                                      WebResource restApi, EnhancedFedora efedora,
+                                      @Named(DATASTREAM_CACHE) String datastreamCache) {
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
         this.bitrepositoryUrlPrefix = bitrepositoryUrlPrefix;
         this.bitrepositoryMountpoint = bitrepositoryMountpoint;
         this.restApi = restApi;
         this.efedora = efedora;
+        this.datastreamCache = datastreamCache;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+
         log.trace("Ignored files: {}", ignoredFilesSet);
     }
 
