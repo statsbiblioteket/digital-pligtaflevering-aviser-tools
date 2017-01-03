@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+ln -s /vagrant/nohup.out /home/vagrant/nohup.out
+
 cp  /vagrant/doms_updater.sh doms_updater.sh
 chmod +x doms_updater.sh
 

@@ -33,10 +33,15 @@ Start vagrant (using virtualbox provider):
 
 (may take 5-10 minutes and download quite a bit the first time).
 
-    vagrant ssh -c "nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
+    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
 
-SBOI and DOMS Wui Solr will take a while to initialize.  Check
-the URLs below to see when they are ready and responsive.
+SBOI and DOMS Wui Solr will take a while to initialize.  
+The output from "nohup" is placed in the "nohup.out" file 
+which can be followed with e.g.
+
+    tail -F nohup.out
+
+Check the URLs below to see when they are ready and responsive.
 
 **You now have a local, empty DOMS**.
 
