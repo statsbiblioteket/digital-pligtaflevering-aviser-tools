@@ -8,6 +8,7 @@
     <xsl:key name="colors" match="/cellar-book/cat:wine-catalog/cat:wine"
         use="cat:properties/cat:color"/>
 
+
     <pattern id="section-check">
       <rule context="section">
          <assert test="/article/administrativedata/articleid">The element Person must have a Title attribute.</assert>
@@ -17,15 +18,6 @@
       </rule>
    </pattern>
 
-    <!--This is untestet check for valid filenaming-->
-    <rule context="/">
-        <let name="fileName" value="tokenize(document-uri(/), '/')[last()]"/>
-        <report test="contains($fileName, encode-for-uri('ß'))">
-            Do not use special chars in file name "<value-of select="$fileName"/>".
-        </report>
-    </rule>
-
-
    <pattern id="article-fields">
       <rule context="article">
          <assert test="string-length(/article/administrativedata/articleid) = 36">articleId needs to be 36 characters</assert>
@@ -33,4 +25,5 @@
       </rule>
    </pattern>
 
+    
 </schema>

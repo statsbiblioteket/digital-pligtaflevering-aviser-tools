@@ -3,12 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import static org.junit.Assert.*;
 
 import com.helger.commons.collection.ext.ICommonsList;
-import com.helger.commons.error.IResourceError;
-import com.helger.commons.error.IResourceErrorGroup;
 import com.helger.commons.error.level.EErrorLevel;
-import com.helger.commons.error.level.IErrorLevel;
 import com.helger.commons.error.list.IErrorList;
-import com.helger.commons.io.resource.ClassPathResource;
 import com.helger.schematron.ISchematronResource;
 import com.helger.schematron.SchematronHelper;
 import com.helger.schematron.pure.SchematronResourcePure;
@@ -16,40 +12,82 @@ import com.helger.schematron.svrl.SVRLFailedAssert;
 import com.helger.schematron.svrl.SVRLHelper;
 import com.helger.schematron.svrl.SVRLSuccessfulReport;
 import org.oclc.purl.dsdl.svrl.ActivePattern;
-import org.oclc.purl.dsdl.svrl.FailedAssert;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * CSchematron validation
  */
 public class ValidateSchematronXMLMainTest {
 
+
+    @org.junit.Test
+    public void analyzeArticleAgainstCommonSchemaTest() throws Exception {
+
+        URL xmlurl = getClass().getClassLoader().getResource("schematronValidation/articleCorrectTest.xml");
+
+
+        final ISchematronResource schematronSchemaCommonExec = SchematronResourcePure.fromClassPath("schematronValidation/Common.sch");
+        if(!schematronSchemaCommonExec.isValidSchematron()) {
+            assertEquals("INVALID", false, true);
+        }
+
+        SchematronResourcePure schematronSchemaDescriptive = new SchematronResourcePure(schematronSchemaCommonExec.getResource());
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
+        schematronSchemaDescriptive.applySchematronValidation(new StreamSource(in));
+        in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
+        SchematronOutputType results = schematronSchemaDescriptive.applySchematronValidationToSVRL(new StreamSource(in));
+
+        final ICommonsList<SVRLSuccessfulReport> failedReports = SVRLHelper.getAllSuccessfulReports(results);
+        final ICommonsList<SVRLFailedAssert> failedAssertions = SVRLHelper.getAllFailedAssertions(results);
+
+        assertEquals("FAILING ASSERTIONS", 0, failedAssertions.size());
+        assertEquals("FAILING REPORTS", 0, failedReports.size());
+    }
+
+    @org.junit.Test
+    public void analyzeAPageAgainstCommonASchemaTest() throws Exception {
+
+        URL xmlurl = getClass().getClassLoader().getResource("schematronValidation/pageCorrectTest.xml");
+
+
+        final ISchematronResource schematronSchemaCommonExec = SchematronResourcePure.fromClassPath("schematronValidation/Common.sch");
+        if(!schematronSchemaCommonExec.isValidSchematron()) {
+            assertEquals("INVALID", false, true);
+        }
+
+        SchematronResourcePure schematronSchemaDescriptive = new SchematronResourcePure(schematronSchemaCommonExec.getResource());
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
+        schematronSchemaDescriptive.applySchematronValidation(new StreamSource(in));
+        in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
+        SchematronOutputType results = schematronSchemaDescriptive.applySchematronValidationToSVRL(new StreamSource(in));
+
+        final ICommonsList<SVRLSuccessfulReport> failedReports = SVRLHelper.getAllSuccessfulReports(results);
+        final ICommonsList<SVRLFailedAssert> failedAssertions = SVRLHelper.getAllFailedAssertions(results);
+
+        assertEquals("FAILING ASSERTIONS", 0, failedAssertions.size());
+        assertEquals("FAILING REPORTS", 0, failedReports.size());
+    }
+
     @org.junit.Test
     public void analyzeAcceptedXMLArticleTest() throws Exception {
 
-        URL xmlurl = getClass().getClassLoader().getResource("schematronValidation/articleTest.xml");
+        URL xmlurl = getClass().getClassLoader().getResource("schematronValidation/articleCorrectTest.xml");
 
 
 
@@ -121,23 +159,11 @@ public class ValidateSchematronXMLMainTest {
 
         final ICommonsList<SVRLSuccessfulReport> allSuccessfulReports3 = SVRLHelper.getAllSuccessfulReportsMoreOrEqualSevereThan(results, EErrorLevel.LOWEST);
 
-
-
-
-
         assertEquals("FAILING ASSERTIONS", 0, failedAssertions.size());
         assertEquals("FAILING REPORTS", 0, failedReports.size());
 
 
         System.out.println(errors);
-
-
-
-
-
-
-
-
     }
 
 }
