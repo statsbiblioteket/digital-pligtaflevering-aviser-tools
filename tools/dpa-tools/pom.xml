@@ -62,7 +62,6 @@
         <dependency>
             <groupId>dk.statsbiblioteket.newspaper</groupId>
             <artifactId>dpa-prompt-doms-ingester</artifactId>
-            <!-- updated as 1.12-SNAPSHOT was incorrectly available at a time -->
             <version>1.9999-SNAPSHOT</version>
         </dependency>
         <dependency>

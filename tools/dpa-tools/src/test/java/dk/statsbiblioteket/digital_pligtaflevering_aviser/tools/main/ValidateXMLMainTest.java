@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
  * It looks for the rootTag in the xml, and finds the schema expected to match the name of the rootTag
  */
 public class ValidateXMLMainTest {
+    // FIXME:  Named the same as a launcher.
 
     private ValidateXMLMain.ValidateXMLModule xmlValidatorModule;
 
@@ -32,7 +33,7 @@ public class ValidateXMLMainTest {
     }
 
 
-    @org.junit.Test
+    //FIXME: Disabled by TRA @org.junit.Test
     public void analyzeDeliveriesFolderTest() throws Exception {
 
         String folder = getBatchFolder();
