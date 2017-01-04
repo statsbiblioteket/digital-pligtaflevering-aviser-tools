@@ -1,0 +1,130 @@
+diff --git a/conf/RepositorySettings.xml b/conf/RepositorySettings.xml
+index fdc3c90..e865621 100644
+--- a/conf/RepositorySettings.xml
++++ b/conf/RepositorySettings.xml
+@@ -24,8 +24,8 @@
+   <Name>Quickstart-repository</Name>
+   <Collections>
+     <Collection>
+-      <ID>books</ID>
+-      <Name>The Book collection</Name>
++      <ID>dpaviser</ID>
++      <Name>DPA vagrant developer instance</Name>
+       <PillarIDs>
+         <PillarID>checksum-pillar</PillarID>
+         <PillarID>file1-pillar</PillarID>
+@@ -43,7 +43,7 @@
+   </Collections>
+   <ProtocolSettings>
+     <DefaultChecksumType>MD5</DefaultChecksumType>
+-    <AllowedFileIDPattern>[a-zA-Z_\.\-0-9]{1,250}</AllowedFileIDPattern>
++    <AllowedFileIDPattern>^[^ \./\p{Cntrl}][^\p{Cntrl}]{0,199}[^\s\p{Cntrl}]$</AllowedFileIDPattern>
+     <RequireMessageAuthentication>false</RequireMessageAuthentication>
+     <RequireOperationAuthorization>false</RequireOperationAuthorization>
+     <RequireChecksumForDestructiveRequests>true</RequireChecksumForDestructiveRequests>
+diff --git a/conf/commandline/ReferenceSettings.xml b/conf/commandline/ReferenceSettings.xml
+index 1da9dc9..f3769f4 100644
+--- a/conf/commandline/ReferenceSettings.xml
++++ b/conf/commandline/ReferenceSettings.xml
+@@ -14,11 +14,16 @@
+     <MediatorCleanupInterval>1000</MediatorCleanupInterval>
+     <ConversationTimeout>3600000</ConversationTimeout>
+   </ClientSettings>
+-  <FileExchangeSettings>
++<!--  <FileExchangeSettings>
+     <ProtocolType>HTTP</ProtocolType>
+     <ServerName>localhost</ServerName>
+     <Port>80</Port>
+     <Path>/dav</Path>
+   </FileExchangeSettings>
++-->
++ <FileExchangeSettings>
++    <ProtocolType>FILE</ProtocolType>
++    <Path>/tmp</Path>
++  </FileExchangeSettings>
+ </ReferenceSettings>
+ 
+diff --git a/conf/file1pillar/ReferenceSettings.xml b/conf/file1pillar/ReferenceSettings.xml
+index 303b736..bf8427a 100644
+--- a/conf/file1pillar/ReferenceSettings.xml
++++ b/conf/file1pillar/ReferenceSettings.xml
+@@ -35,7 +35,7 @@
+     <PillarID>file1-pillar</PillarID>
+     <PillarType>FILE</PillarType>
+     <CollectionDirs>
+-      <CollectionID>books</CollectionID>
++      <CollectionID>dpaviser</CollectionID>
+       <FileDirs><!--foobarpattern-->var/reference1pillar</FileDirs>
+     </CollectionDirs>
+     <MinimumSizeLeft>1000000000</MinimumSizeLeft>
+@@ -51,4 +51,8 @@
+     </ChecksumDatabase>
+     <AlarmLevel>ERROR</AlarmLevel>
+   </PillarSettings>
++  <FileExchangeSettings>
++     <ProtocolType>FILE</ProtocolType>
++     <Path>/</Path>
++   </FileExchangeSettings>
+ </ReferenceSettings>
+diff --git a/conf/file2pillar/ReferenceSettings.xml b/conf/file2pillar/ReferenceSettings.xml
+index 0738e42..61573de 100644
+--- a/conf/file2pillar/ReferenceSettings.xml
++++ b/conf/file2pillar/ReferenceSettings.xml
+@@ -35,7 +35,7 @@
+     <PillarID>file2-pillar</PillarID>
+     <PillarType>FILE</PillarType>
+     <CollectionDirs>
+-      <CollectionID>books</CollectionID>
++      <CollectionID>dpaviser</CollectionID>
+       <FileDirs><!--foobarpattern-->var/reference2pillar</FileDirs>
+     </CollectionDirs>
+     <CollectionDirs>
+@@ -55,4 +55,8 @@
+     </ChecksumDatabase>
+     <AlarmLevel>ERROR</AlarmLevel>
+   </PillarSettings>
++ <FileExchangeSettings>
++    <ProtocolType>FILE</ProtocolType>
++    <Path>/</Path>
++  </FileExchangeSettings>
+ </ReferenceSettings>
+diff --git a/conf/integrityservice/ReferenceSettings.xml b/conf/integrityservice/ReferenceSettings.xml
+index 1f344eb..43e8687 100644
+--- a/conf/integrityservice/ReferenceSettings.xml
++++ b/conf/integrityservice/ReferenceSettings.xml
+@@ -40,7 +40,7 @@
+           <Schedule>
+             <WorkflowInterval>86400000</WorkflowInterval>  
+             <Collections>
+-              <CollectionID>books</CollectionID>
++              <CollectionID>dpaviser</CollectionID>
+               <CollectionID>dvds</CollectionID>                          
+             </Collections>
+           </Schedule>
+@@ -52,7 +52,7 @@
+           <Schedule>
+             <WorkflowInterval>3600000</WorkflowInterval>  
+             <Collections>
+-              <CollectionID>books</CollectionID>
++              <CollectionID>dpaviser</CollectionID>
+               <CollectionID>dvds</CollectionID>             
+             </Collections>
+           </Schedule>
+@@ -65,7 +65,7 @@
+             <!-- Only run manually -->  
+             <WorkflowInterval>-1</WorkflowInterval>
+             <Collections>
+-              <CollectionID>books</CollectionID>
++              <CollectionID>dpaviser</CollectionID>
+               <CollectionID>dvds</CollectionID>             
+             </Collections>
+           </Schedule>
+@@ -78,7 +78,7 @@
+             <!-- Only run manually -->  
+             <WorkflowInterval>-1</WorkflowInterval>
+             <Collections>
+-              <CollectionID>books</CollectionID>
++              <CollectionID>dpaviser</CollectionID>
+               <CollectionID>dvds</CollectionID>             
+             </Collections>
+           </Schedule>

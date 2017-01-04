@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+ln -s /vagrant/nohup.out /home/vagrant/nohup.out
+
 cp  /vagrant/doms_updater.sh doms_updater.sh
 chmod +x doms_updater.sh
 
 apt-get update > /dev/null
-apt-get install -y zip unzip openjdk-7-jdk zookeeperd
+apt-get install -y zip unzip openjdk-7-jdk zookeeperd git
 
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 
