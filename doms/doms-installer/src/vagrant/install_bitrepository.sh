@@ -15,6 +15,11 @@ curl -L -O https://sbforge.org/nexus/content/repositories/releases/org/bitreposi
 
 tar xvzf bitrepository-integration-1.8-quickstart.tar.gz
 
+# we want the actual files stored outside the vagrant machine.
+# FIXME:  This does not work well with snapshots.  Instead find a solution allowing us to look inside the vagrant box.
+
+ln -s /bitrepositorystub-storage/var bitrepository-quickstart/var
+
 # fix collection name, file exchance settings and allow for "/" in file identifiers.
 patch -p1 -d bitrepository-quickstart < /vagrant/bitrepository-quickstart.diff
 
