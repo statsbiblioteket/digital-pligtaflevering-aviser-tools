@@ -224,33 +224,42 @@ public class IngesterMain {
          * @param destination         The destination where the client places the files
          * @param settingDir          The folder where settings for bitrepositoryClient is placed
          * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
-         * @return
+         * @return PutFileClient
          */
         @Provides
         PutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
                                            @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
                                            @Named(DPA_PUTFILE_DESTINATION) String destination,
                                            @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty) {
+                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty,
+                                           Settings settings) {
 
             BitrepositoryPutFileClientStub putClient;
             if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
-                //TODO: Using the real Bitrepository client has not been testet, It is created as DPA-75
                 String certificateLocation = settingDir + File.separator + certificateProperty;
-
-                SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
-                Settings bitRepoSet = settingsLoader.getSettings();
-
                 PermissionStore permissionStore = new PermissionStore();
                 MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);
                 MessageSigner signer = new BasicMessageSigner();
                 OperationAuthorizor authorizer = new BasicOperationAuthorizor(permissionStore);
-                org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(bitRepoSet.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
-                return ModifyComponentFactory.getInstance().retrievePutClient(bitRepoSet, securityManager, dpaIngesterId);
+                org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(settings.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
+                return ModifyComponentFactory.getInstance().retrievePutClient(settings, securityManager, dpaIngesterId);
             }
             return putClient;
+        }
+
+        /**
+         * Provide settings for PutfileClient and for EventHandler listening for the events from ingesting
+         * @param dpaIngesterId The ID of the collection
+         * @param settingDir The directory where the collection is located seen from the putFileClient
+         * @return Settings for putfile PutfileClient and EventHandler
+         */
+        @Provides
+        Settings provideSettings(@Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                     @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
+            SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
+            return settingsLoader.getSettings();
         }
     }
 }

@@ -5,6 +5,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
+import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
@@ -14,6 +15,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
+import org.bitrepository.client.eventhandler.OperationEvent;
+import org.bitrepository.commandline.eventhandler.CompleteEventAwaiter;
+import org.bitrepository.commandline.eventhandler.PutFileEventHandler;
+import org.bitrepository.commandline.output.DefaultOutputHandler;
+import org.bitrepository.commandline.output.OutputHandler;
+import org.bitrepository.common.settings.Settings;
 import org.bitrepository.common.utils.Base16Utils;
 import org.bitrepository.common.utils.CalendarUtils;
 import org.bitrepository.modify.putfile.PutFileClient;
@@ -66,6 +73,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
+    public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
+    public static final String CONTENTS = "CONTENTS";
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -79,9 +88,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     protected Set<String> ignoredFilesSet;
+    private Settings settings;
 
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
+
+
+    protected final OutputHandler output = new DefaultOutputHandler(getClass());
+
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
@@ -92,7 +106,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named("bitrepository.ingester.baseurl") String bitrepositoryUrlPrefix,
                                       @Named("bitrepository.sbpillar.mountpoint") String bitrepositoryMountpoint,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
-                                      WebResource restApi, EnhancedFedora efedora) {
+                                      WebResource restApi, EnhancedFedora efedora,
+                                      Settings settings) {
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
@@ -106,6 +121,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.dpaCollectionId = dpaCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+        this.settings = settings;
         log.trace("Ignored files: {}", ignoredFilesSet);
     }
 
@@ -350,19 +366,15 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         Path relativePath = rootPath.relativize(path);
                                         String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
 
-                                        BitrepositoryClientEventHandler handler = new BitrepositoryClientEventHandler(collections, pageObjectId, bitmagUrl, relativePath, checksum, efedora, SOFTWARE_VERSION);
-
+                                        CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
                                         // Use the PutClient to ingest the file into Bitrepository
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + path.toString()), fileId, DEFAULT_FILE_SIZE,
-                                                checkSum, null, handler, null);
-
-                                        ToolResult toolResult = handler.getLastToolResult();
-                                        toolResultsForThisDirectory.add(toolResult);
+                                                new URL(urlToBitmagBatchPath + filePath.toString()), fileId, DEFAULT_FILE_SIZE,
+                                                checkSum, null, eventHandler, null);
+                                        OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-
-                                        return toolResult;
+                                        return this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
 
                                     } else if (path.toString().endsWith(".xml")) {
                                         // FIXME: check md5 checksum.
@@ -454,6 +466,52 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         return toolResultsForThisDirectory.stream();
     }
+
+
+    /**
+     * Write the result of activate putfileClient to envoke bitmagasin
+     * @param relativePath
+     * @param finalEvent
+     * @param pageObjectId
+     * @param checkSum
+     * @return
+     */
+    private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
+
+        final String filepathToBitmagUrl = bitmagUrl + finalEvent.getFileID();
+        final String mimetype = "application/pdf";
+        ToolResult toolResult = null;
+
+        // create DOMS object for the file
+        String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + relativePath.toString());
+
+        if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
+
+            try {
+
+                // save external datastream in file object.
+                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), filepathToBitmagUrl, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                // Add "hasPart" relation from the page object to the file object.
+                efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
+                // Add the checksum relation to Fedora
+                efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
+                toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
+                log.info("Completed ingest of file " + finalEvent.getFileID());
+
+            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+                toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
+            }
+
+        } else if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.FAILED)) {
+            log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", finalEvent.getFileID(), finalEvent.getEventType());
+            toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID());
+        } else {
+            log.debug("Got an event that I really don't care about, event type: '{}' for fileID '{}'", finalEvent.getEventType(), finalEvent.getFileID());
+        }
+        return toolResult;
+    }
+
+
 
     /**
      * Ensure that we have a valid DOMS id for the given dcIdentifier.  If it is not found, create

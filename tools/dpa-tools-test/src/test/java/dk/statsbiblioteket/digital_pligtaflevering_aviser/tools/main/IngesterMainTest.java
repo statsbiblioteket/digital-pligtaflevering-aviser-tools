@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 
 /**
  * Note:  May require a lot of memory.
@@ -36,6 +37,7 @@ public class IngesterMainTest {
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/",
+                SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),
                 "pageSize=9999"
         });
     }
