@@ -43,7 +43,7 @@ which can be followed with e.g.
 
 Check the URLs below to see when they are ready and responsive.
 
-**You now have a local, empty DOMS**.
+**You now have a local, empty DOMS and Bit repository**.
 
 Create a snapshot to be able to easily revert to this point.
 
@@ -102,6 +102,22 @@ start process to keep solr updated:
 There is placed a script for updating solr every 3 minutes, this can be started by logging into the Vagrant-image and running the following script 
 
 ./doms_updater.sh
+
+Manually adding a file to Bitrepository
+===
+
+There is a sample command line client included with the bitrepository quickstart.  ssh inside the vagrant box
+and invoke
+
+    JAVA_HOME=$(echo $HOME/zulu8*-linux_x64/) bitrepository-quickstart/commandline/bin/bitmag.sh put-file -c dpaviser -f bitrepository-quickstart/commandline/logback.xml 
+
+This will add the file "logback.xml".
+
+After invoking "Start" for "CompleteIntegrityCheck" on  http://localhost:8080/bitrepository-webclient/integrity-service.html
+"logback.xml" should be one of the files when clicking on the number in the "Total number of files" column for each pillar.
+
+
+
 
 
 
