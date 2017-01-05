@@ -8,6 +8,7 @@ import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
@@ -358,13 +359,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
+                                    String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
                                         long startFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
                                         // Construct the fileId with the path from the deliveryfolder to the file
                                         final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
                                         Path relativePath = rootPath.relativize(path);
-                                        String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
 
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
                                         // Use the PutClient to ingest the file into Bitrepository
@@ -383,8 +384,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                         byte[] allBytes = Files.readAllBytes(path);
                                         // String md5checksum = "FIXME";
-                                        // efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, md5checksum, allBytes, null, mimeType, "From " + path, null);
-                                        efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
+                                        efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
+                                        //efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
                                         return ToolResult.ok("XML datastream added for " + path);
 
                                     } else if (path.toString().endsWith(".verapdf")) {
