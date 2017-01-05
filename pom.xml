@@ -25,6 +25,8 @@
         <module>tools/dpa-tools-test</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>
+
+        <module>web/dpa-web-mock</module>
     </modules>
 </project>
 
