@@ -369,7 +369,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
                                         // Use the PutClient to ingest the file into Bitrepository
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + filePath.toString()), fileId, DEFAULT_FILE_SIZE,
+                                                new URL(urlToBitmagBatchPath + relativePath.toString()), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();

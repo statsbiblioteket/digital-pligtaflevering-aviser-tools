@@ -18,7 +18,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
  */
 public class IngesterMainTest {
     @Test
-    public void ingestB20160811_RT1() throws URISyntaxException {
+    public void ingestAllTestBatches() throws URISyntaxException {
         String batchDirPathInWorkspace = "delivery-samples";
         String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
 
