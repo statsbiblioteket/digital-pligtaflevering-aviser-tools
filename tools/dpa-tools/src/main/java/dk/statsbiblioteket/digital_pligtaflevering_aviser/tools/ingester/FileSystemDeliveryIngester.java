@@ -10,7 +10,6 @@ import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
@@ -36,6 +35,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -82,8 +82,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private DomsRepository repository;
     private String ignoredFiles;
     private PutFileClient putfileClient;
-    private final String bitrepositoryUrlPrefix;
-    private final String bitrepositoryMountpoint;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
@@ -112,8 +110,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.repository = repository;
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
-        this.bitrepositoryUrlPrefix = bitrepositoryUrlPrefix;
-        this.bitrepositoryMountpoint = bitrepositoryMountpoint;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
@@ -361,16 +357,17 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
                                     String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
+                                        //Save *.pdf files to bitrepository
                                         long startFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
-                                        // Construct the fileId with the path from the deliveryfolder to the file
-                                        final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
                                         Path relativePath = rootPath.relativize(path);
 
+                                        //Construct a syncronus eventhandler
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
                                         // Use the PutClient to ingest the file into Bitrepository
+                                        // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + relativePath.toString()), fileId, DEFAULT_FILE_SIZE,
+                                                new URL(urlToBitmagBatchPath + relativePath.toString()), filePath.toString(), DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
@@ -378,16 +375,20 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         return this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
 
                                     } else if (path.toString().endsWith(".xml")) {
-                                        // FIXME: check md5 checksum.
                                         // save physical bytes of XML file as "XML" data stream on page object.
 
-                                        final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
-                                        byte[] allBytes = Files.readAllBytes(path);
-                                        // String md5checksum = "FIXME";
-                                        efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
-                                        //efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
-                                        return ToolResult.ok("XML datastream added for " + path);
-
+                                        //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
+                                        FileInputStream fis = new FileInputStream(path.toFile());
+                                        String md5s = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+                                        fis.close();
+                                        if(md5s.equals(checksum)) {//If checksum is validated start ingesting otherwise return fail
+                                            final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
+                                            byte[] allBytes = Files.readAllBytes(path);
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
+                                            return ToolResult.ok("XML datastream added for " + path);
+                                        } else {
+                                            return ToolResult.fail("The checksum failed on : " + path);
+                                        }
                                     } else if (path.toString().endsWith(".verapdf")) {
                                         // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.
                                         // save physical bytes of VERAPDF file as "VERAPDF" data stream on PDF file object.
@@ -471,10 +472,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     /**
      * Write the result of activate putfileClient to envoke bitmagasin
-     * @param relativePath
-     * @param finalEvent
-     * @param pageObjectId
-     * @param checkSum
+     * @param relativePath The [relative to deliveryfolder] path to the file
+     * @param finalEvent The event that is fetched from the putFileClient
+     * @param pageObjectId pageObjectId to write to fedora
+     * @param checkSum The checksum of the file
      * @return
      */
     private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {

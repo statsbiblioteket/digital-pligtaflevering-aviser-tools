@@ -3,15 +3,18 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import org.junit.Test;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_PUTFILE_DESTINATION;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
  * Note:  May require a lot of memory.
@@ -38,6 +41,8 @@ public class IngesterMainTest {
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/reference1pillar/dpaviser/fileDir/",
                 SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),
+                URL_TO_BATCH_DIR_PROPERTY + "=file://" + batchPath.toAbsolutePath() + "/",
+                DPA_PUTFILE_DESTINATION+ "=" + bitrepoPath.toAbsolutePath() + "/var/reference1pillar/dpaviser/fileDir",
                 "pageSize=9999"
         });
     }
