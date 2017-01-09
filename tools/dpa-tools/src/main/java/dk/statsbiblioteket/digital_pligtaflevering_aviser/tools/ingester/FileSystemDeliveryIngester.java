@@ -74,24 +74,22 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
-    public static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
-    public static final String CONTENTS = "CONTENTS";
+    private static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
+    private static final String CONTENTS = "CONTENTS";
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private DomsRepository repository;
     private String ignoredFiles;
     private PutFileClient putfileClient;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
-    protected Set<String> ignoredFilesSet;
+    private Set<String> ignoredFilesSet;
     private Settings settings;
 
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
-
 
     protected final OutputHandler output = new DefaultOutputHandler(getClass());
 
@@ -102,12 +100,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
-                                      @Named("bitrepository.ingester.baseurl") String bitrepositoryUrlPrefix,
-                                      @Named("bitrepository.sbpillar.mountpoint") String bitrepositoryMountpoint,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora,
                                       Settings settings) {
-        this.repository = repository;
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
@@ -231,11 +226,18 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // Original in BatchMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
-        Map<String, String> md5map;
+        BatchMD5Validation md5validations;
         try {
-            md5map = Files.lines(deliveryPath.resolve("checksums.txt"))
-                    .map(s -> s.split("[,\\s]\\s*"))
-                    .collect(Collectors.toMap(a -> a[1], a -> a[0]));
+            md5validations = new BatchMD5Validation(rootPath.toString(), ignoredFiles);
+            md5validations.validation(batchName);
+            List<String> validationResults = md5validations.getValidationResult();
+            if(validationResults.size() > 0) {
+                String collectiveValidationString = new String();
+                for(String singleValidation : validationResults) {
+                    collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
+                }
+                return Arrays.asList(ToolResult.fail("Checksum validation failed:  " + collectiveValidationString));
+            }
         } catch (Exception e) {
             return Arrays.asList(ToolResult.fail("Could not read checksums.txt", e));
         }
@@ -260,7 +262,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5validations.getCurrentLoadedMap()))
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
@@ -438,12 +440,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
 
-        /**
-         */
 
         // For each subdirectory in this directory, lookup the child DOMS id using its relative Path and create
         // a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the subdirectories are processed first.
-
         List<String> childDirectoryObjectIds = null;
         try {
             childDirectoryObjectIds = Files.walk(absoluteFileSystemPath, 1)
@@ -476,7 +475,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param finalEvent The event that is fetched from the putFileClient
      * @param pageObjectId pageObjectId to write to fedora
      * @param checkSum The checksum of the file
-     * @return
+     * @return A result of the specifik job
      */
     private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
 
@@ -488,9 +487,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + relativePath.toString());
 
         if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
-
             try {
-
                 // save external datastream in file object.
                 efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), filepathToBitmagUrl, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
                 // Add "hasPart" relation from the page object to the file object.
@@ -501,6 +498,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 log.info("Completed ingest of file " + finalEvent.getFileID());
 
             } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+                log.error(e.getMessage());
                 toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
             }
 
@@ -522,7 +520,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param dcIdentifier identifier to lookup in DOMS.
      * @return an existing DOMS id.
      */
-
     protected String lookupObjectFromDCIdentifierAndCreateItIfNeeded(String dcIdentifier) {
 
         List<String> founds = lookupObjectFromDCIdentifier(dcIdentifier);
