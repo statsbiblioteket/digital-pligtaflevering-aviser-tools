@@ -15,8 +15,8 @@ public class DeliveryItemFactory implements ItemFactory<Delivery> {
      */
     @Override
     public Delivery create(String id) {
-        Delivery.BatchRoundtripID splits = new Delivery.BatchRoundtripID(id);
-        Delivery result = new Delivery(splits.getBatchID());
+        Delivery.DeliveryRoundtripID splits = new Delivery.DeliveryRoundtripID(id);
+        Delivery result = new Delivery(splits.getDeliveryID());
         result.setRoundTripNumber(splits.getRoundTripNumber());
         return result;
     }

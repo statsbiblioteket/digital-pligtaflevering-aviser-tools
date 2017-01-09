@@ -29,7 +29,7 @@ public class CreateDeliveryTest {
      * Note: The batch is not known by DOMS, only MFPAK, so the getAllRoundTrips should return null.
      * Expected behaviour: RT1 has an event added.
      */
-    @Test
+    //@Test
     public void testDoWorkRT1() throws Exception {
         Batch batch1 = new Batch("1234", 1);
         batch1.setEventList(Collections.<Event>emptyList());
@@ -48,7 +48,7 @@ public class CreateDeliveryTest {
      * Test normal case: RT2 received, RT1 already exists.
      * Expected behaviour: RT2 has an event added. RT1 gets a stop event.
      */
-    @Test
+    //@Test
     public void testDoWorkRT2() throws Exception {
         Delivery batch1 = new Delivery("1234", 1);
         batch1.setEventList(Collections.<Event>emptyList());
@@ -70,7 +70,7 @@ public class CreateDeliveryTest {
      * Test exceptional case: RT1 received, RT2 already exists.
      * Expected behaviour: RT1 gets a failed event added.
      */
-    @Test
+    //@Test
     public void testDoWorkRT1afterRT2() throws Exception {
         Delivery batch1 = new Delivery("1234", 1);
         batch1.setEventList(Collections.<Event>emptyList());
@@ -91,7 +91,7 @@ public class CreateDeliveryTest {
      * Test exceptional case: RT2 received, RT1 already approved.
      * Expected behaviour: RT2 gets a failed event added.
      */
-    @Test
+    //@Test
     public void testDoWorkRT2whereRT1Approved() throws Exception {
         Delivery batch1 = new Delivery("1234", 1);
         Event event = new Event();

@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
-    private static Logger log = LoggerFactory.getLogger(NewspaperDomsEventStorage.class);
+    private static Logger log = LoggerFactory.getLogger(DeliveryDomsEventStorage.class);
 
     private final String batchTemplate;
     private final String roundTripTemplate;
@@ -33,7 +33,6 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
 
     private final String createBatchRoundTripComment = "Creating batch round trip";
-    private final String addEventToBatchComment = "Adding event to natch round trip";
 
     public DeliveryDomsEventStorage(EnhancedFedora fedora, String type, String batchTemplate, String roundTripTemplate,
                                      String hasPart_relation, String eventsDatastream, ItemFactory<Delivery> itemFactory) throws JAXBException {
@@ -79,7 +78,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
             //find the batch object
             String batchObject;
-            Delivery.BatchRoundtripID fullIDSplits = new Delivery.BatchRoundtripID(fullItemID);
+            Delivery.DeliveryRoundtripID fullIDSplits = new Delivery.DeliveryRoundtripID(fullItemID);
             List<String> founds = fedora.findObjectFromDCIdentifier(fullIDSplits.batchDCIdentifier());
             if (founds.size() > 0) {
                 batchObject = founds.get(0);
@@ -114,8 +113,6 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
                 BackendInvalidResourceException | ObjectIsWrongTypeException | JAXBException e) {
             throw new CommunicationException(e);
         }
-
-
     }
 
 
@@ -133,7 +130,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
             }
         };
         try {
-            List<String> founds = fedora.findObjectFromDCIdentifier(new Delivery.BatchRoundtripID(batchId,0).batchDCIdentifier());
+            List<String> founds = fedora.findObjectFromDCIdentifier(new Delivery.DeliveryRoundtripID(batchId,0).batchDCIdentifier());
             if (founds == null || founds.size() == 0) {
                 return null;
             }
@@ -156,9 +153,4 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
             throw new CommunicationException(e);
         }
     }
-
-
-
-
-
 }
