@@ -15,22 +15,19 @@ public class Delivery extends Item {
      */
     private Integer roundTripNumber = 1;
 
-    /**
-     * Constructor
-     */
-    public Delivery(String deliveryID) {
-        setDeliveryID(deliveryID);
-    }
+    private DeliveryType deliveryType;
+
 
     /**
      * Constructor
      */
-    public Delivery(String deliveryID, Integer roundTripNumber) {
+    public Delivery(String deliveryID, Integer roundTripNumber, DeliveryType deliveryType) {
         if (roundTripNumber == null) {
             roundTripNumber = 0;
         }
         setDeliveryID(deliveryID);
         setRoundTripNumber(roundTripNumber);
+        this.deliveryType = deliveryType;
     }
 
     /**
@@ -56,6 +53,16 @@ public class Delivery extends Item {
     public String getDeliveryID() {
         return deliveryID;
     }
+
+    /**
+     * Get the deliveryType id.
+     *
+     * @return as above
+     */
+    public DeliveryType getDeliveryType() {
+        return deliveryType;
+    }
+
 
     /**
      * Set the batch id
@@ -165,5 +172,9 @@ public class Delivery extends Item {
         public String roundTripDCIdentifier() {
             return "path:" + deliveryID + "_rt" + roundTripNumber;
         }
+    }
+
+    public enum DeliveryType {
+        DELIVERY, MUTATION
     }
 }
