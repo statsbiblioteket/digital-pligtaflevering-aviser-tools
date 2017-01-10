@@ -41,8 +41,6 @@ public class IngesterMainTest {
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/reference1pillar/dpaviser/fileDir/",
                 SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),
-                URL_TO_BATCH_DIR_PROPERTY + "=file://" + batchPath.toAbsolutePath() + "/",
-                DPA_PUTFILE_DESTINATION+ "=" + bitrepoPath.toAbsolutePath() + "/var/reference1pillar/dpaviser/fileDir",
                 "pageSize=9999"
         });
     }

@@ -16,6 +16,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearc
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import org.bitrepository.common.settings.Settings;
@@ -40,6 +41,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
@@ -260,6 +262,15 @@ public class IngesterMain {
                                      @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
             SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
             return settingsLoader.getSettings();
+        }
+
+        /**
+         * Provide Function for converting filePath into an ID which is suitable for bitRepository
+         * @return and ID for the fileContent
+         */
+        @Provides
+        Function<Path, String> provideFileNameConverter() {
+            return path1 -> NewspaperFileNameTranslater.getFileID(path1.toString());
         }
     }
 }

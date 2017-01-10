@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,7 +81,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private String ignoredFiles;
-    private PutFileClient putfileClient;
+    protected final PutFileClient putfileClient;
+    protected final Function<Path, String> fileNameConverter;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
@@ -99,12 +101,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
+                                      Function<Path, String> fileNameConverter,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
+        this.fileNameConverter = fileNameConverter;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
@@ -366,10 +370,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
                                         //Construct a syncronus eventhandler
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
+
+                                        //Use the fileNameConverter to convert the filepath into something suitable for bitRepositoryClient
+                                        final String fileId = fileNameConverter.apply(Paths.get(deliveryName, filePath.toString()));
+
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + relativePath.toString()), filePath.toString(), DEFAULT_FILE_SIZE,
+                                                new URL(urlToBitmagBatchPath + relativePath.toString()), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
