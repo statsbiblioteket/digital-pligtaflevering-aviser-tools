@@ -4,4 +4,6 @@
 
 <a href="status.jsp">Statusside</a>
 </body>
+<hr />
+<%= new java.util.Date() %>
 </html>
