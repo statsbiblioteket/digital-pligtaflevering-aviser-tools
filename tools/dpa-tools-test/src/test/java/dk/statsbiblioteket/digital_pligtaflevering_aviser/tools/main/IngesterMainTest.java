@@ -3,21 +3,25 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import org.junit.Test;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_PUTFILE_DESTINATION;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
  * Note:  May require a lot of memory.
  */
 public class IngesterMainTest {
     @Test
-    public void ingestB20160811_RT1() throws URISyntaxException {
+    public void ingestAllTestBatches() throws URISyntaxException {
         String batchDirPathInWorkspace = "delivery-samples";
         String bitrepoDirPathInWorkspace = "bitrepositorystub-storage";
 
@@ -35,7 +39,8 @@ public class IngesterMainTest {
                 "ingester.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
-                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/",
+                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/reference1pillar/dpaviser/fileDir/",
+                SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),
                 "pageSize=9999"
         });
     }
