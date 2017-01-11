@@ -19,6 +19,7 @@
   License along with this program.  If not, see
   <http://www.gnu.org/licenses/lgpl-2.1.html>.
   #L%
+  This file is i a copy of the simultaneus file that is used by bitrepository
   -->
 
 <ReferenceSettings xmlns="http://bitrepository.org/settings/ReferenceSettings.xsd">
