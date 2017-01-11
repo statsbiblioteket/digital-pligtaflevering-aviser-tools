@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,20 +15,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 
 
 /**
  * Validator for md5 validation of digital newspaper batches
  */
 public class BatchMD5Validation {
-    private String batchFolder;
-    private HashSet<String> ignoredFiles = new HashSet<String>();
-    private Map<String, String> md5Map = new HashMap<String, String>();
+    final private String batchFolder;
+    private String checksumFileName;
+    private boolean infomediaFormat = false;
+    final private HashSet<String> ignoredFiles = new HashSet<String>();
+    private Map<String, String> cashedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
 
-    public BatchMD5Validation(String batchFolder, String ignoredFilesString) {
+    public BatchMD5Validation(String batchFolder, String checksumFileName, boolean infomediaFormat, String ignoredFilesString) {
         this.batchFolder = batchFolder;
+        this.checksumFileName = checksumFileName;
+        this.infomediaFormat = infomediaFormat;
         for(String ignoredFile : ignoredFilesString.split(",")) {
             ignoredFiles.add(ignoredFile);
         }
@@ -42,15 +47,15 @@ public class BatchMD5Validation {
      * @throws NoSuchAlgorithmException
      */
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
-        //Read the checksums from the file "MD5SUMS.txt" and insert it into a hashmap with filenames as keys and checksums as values
-        File checksumFile = Paths.get(batchFolder, batchName, "checksums.txt").toFile();
+        //Read the checksums from the file "checksums.txt" and insert it into a hashmap with filenames as keys and checksums as values
+        File checksumFile = Paths.get(batchFolder, batchName, checksumFileName).toFile();
         if(!checksumFile.exists()) {
             validationResult.add("The checksumfile " + checksumFile.getAbsolutePath() + " is missing");
             return false;
         }
 
         //Start reading the checksum-file, and store all checksums in a hashmap
-
+        Map<String, String> md5Map = new HashMap<String, String>();
         try(BufferedReader br = new BufferedReader(new FileReader(checksumFile))) {
             String line = br.readLine();
             while (line != null) {
@@ -65,24 +70,23 @@ public class BatchMD5Validation {
                 line = br.readLine();
             }
         }
-        String test;
 
         //Walk through the filesystem in tha batch and confirm that all files inside the batch is also mentioned in the checksum-file
         //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
         Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
-                    String fileName=filePath.getFileName().toString();
-                    String relativePath=Paths.get(batchFolder, batchName).relativize(filePath).toString();
-
-                    if (ignoredFiles.contains(fileName)) {
+                    String fileIdMatchingChecksumfile = provideFilePathConverter(batchName).apply(filePath);
+                    if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
                         //This file is one of the ignored files, just contionue without doing anything
-                    } else if(!md5Map.containsKey(relativePath)) {
-                        validationResult.add("There is missing a file reference in \"checksums.txt\" : " + filePath.toFile().getAbsolutePath());
+                    } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
+                        validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
+                    } else {
+                        cashedFileListMap.put(fileIdMatchingChecksumfile, md5Map.remove(fileIdMatchingChecksumfile));
                     }
                 });
 
-        //Make sure that all files listed in "MD5SUMS.txt" exists and has the correct checksum
+        //Make sure that all files listed in "checksums.txt" exists and has the correct checksum
         for(String fileName: md5Map.keySet()) {
             File file = Paths.get(batchFolder, batchName, fileName).toFile();
             if(file.exists()) {
@@ -93,7 +97,7 @@ public class BatchMD5Validation {
                     validationResult.add(file.getAbsolutePath() + " expectedMd5: " + expectedMd5 + " actualMd5:" + actualMd5);
                 }
             } else {
-                //If the file that is claimed to exist in the "MD5SUMS.txt" can not be found, raise an error
+                //If the file that is claimed to exist in the "checksums.txt" can not be found, raise an error
                 validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() +" claims is existing  : " + file);
             }
         }
@@ -101,11 +105,24 @@ public class BatchMD5Validation {
     }
 
     /**
-     * Get the currently loaded list of checksums
-     * @return list of checksums as map
+     * Function for conversion from Path to the fileformat described in the checksum-file
+     * @param batchName
+     * @return
      */
-    public Map<String, String> getCurrentLoadedMap() {
-        return md5Map;
+    private Function<Path, String> provideFilePathConverter(String batchName) {
+        if(infomediaFormat) {
+            return path1 -> path1.getFileName().toString();
+        } else {
+            return path1 -> Paths.get(batchFolder, batchName).relativize(path1).toString();
+        }
+    }
+
+    public String getChecksum(Path filePath) {
+        if(infomediaFormat) {
+            return cashedFileListMap.get(filePath.getFileName().toString());
+        } else {
+            return cashedFileListMap.get(filePath.toString());
+        }
     }
 
     /**

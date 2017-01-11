@@ -240,7 +240,7 @@ public class IngesterMain {
             if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
-                //TODO: WHERE IS IT COPIED FROM
+                //This is for Authentication for bitrepository-client, This is copied directly from BitrepositoryIngesterComponent.createPutFileClient in dpa-bitrerepository-ingester
                 String certificateLocation = settingDir + File.separator + certificateProperty;
                 PermissionStore permissionStore = new PermissionStore();
                 MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);
@@ -270,7 +270,7 @@ public class IngesterMain {
          * @return and ID for the fileContent
          */
         @Provides
-        Function<Path, String> provideFileNameConverter() {
+        Function<Path, String> provideFileNameToFileIDConverter() {
             return path1 -> NewspaperFileNameTranslater.getFileID(path1.toString());
         }
     }

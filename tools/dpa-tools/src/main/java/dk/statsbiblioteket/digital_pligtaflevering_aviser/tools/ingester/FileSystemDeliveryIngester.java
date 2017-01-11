@@ -232,7 +232,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         BatchMD5Validation md5validations;
         try {
-            md5validations = new BatchMD5Validation(rootPath.toString(), ignoredFiles);
+            md5validations = new BatchMD5Validation(rootPath.toString(), "checksums.txt", true, ignoredFiles);
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if(validationResults.size() > 0) {
@@ -267,7 +267,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5validations.getCurrentLoadedMap()))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5validations))
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
@@ -304,7 +304,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param md5map
      */
 
-    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) {
+    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, BatchMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
@@ -361,7 +361,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                 try {
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
-                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
+                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(filePath));
                                     String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
                                         //Save *.pdf files to bitrepository
@@ -488,7 +488,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @return A result of the specifik job
      */
     private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
-//TODO: WHERE IS IT COPIED FROM
+        //Writing to components has been inspired by the code i DomsJP2FileUrlRegister.register() from the project "dpa-bitrepository-ingester"
         final String filepathToBitmagUrl = bitmagUrl + finalEvent.getFileID();
         final String mimetype = "application/pdf";
         ToolResult toolResult = null;
