@@ -3,29 +3,18 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.BatchMD5Validation;
 import org.junit.Before;
-import org.xml.sax.InputSource;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Test af xml validation against xsd.
- * This component uses two different xsd-files Article.xsd and PdfInfo.xsd.
- * It looks for the rootTag in the xml, and finds the schema expected to match the name of the rootTag
+ * Test of checksum-consistency component
  */
 public class ValidateMD5FileTest {
-
 
 
     // e.g. Creating an similar object and share for all @Test
@@ -35,24 +24,28 @@ public class ValidateMD5FileTest {
 
 
     @org.junit.Test
-    public void analyzeDeliveriesFolderTest() throws Exception {
-
+    public void analyzeDeliveriesAgainstChecksums1() throws Exception {
 
         String folder = getBatchFolder();
-
-
-        BatchMD5Validation md5Validator = new BatchMD5Validation(folder, "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        BatchMD5Validation md5Validator = new BatchMD5Validation(folder, "checksums.txt", true, "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         boolean bb = md5Validator.validation("dl_20160811_rt1");
         List<String> results = md5Validator.getValidationResult();
 
         assertEquals("CHECKSUM", bb, true);
-
-
     }
 
 
+    @org.junit.Test
+    public void analyzeDeliveriesAgainstChecksums2() throws Exception {
 
+        String folder = getBatchFolder();
 
+        BatchMD5Validation md5Validator = new BatchMD5Validation(folder, "MD5SUMS.txt", false, "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        boolean bb = md5Validator.validation("dl_20160811_rt1");
+        List<String> results = md5Validator.getValidationResult();
+
+        assertEquals("CHECKSUM", bb, true);
+    }
 
     /**
      * Get the folder where the testbatches is located during test in dev-environment
