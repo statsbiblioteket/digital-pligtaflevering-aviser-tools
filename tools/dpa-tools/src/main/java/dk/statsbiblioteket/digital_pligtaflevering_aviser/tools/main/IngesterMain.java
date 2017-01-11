@@ -240,6 +240,7 @@ public class IngesterMain {
             if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
+                //TODO: WHERE IS IT COPIED FROM
                 String certificateLocation = settingDir + File.separator + certificateProperty;
                 PermissionStore permissionStore = new PermissionStore();
                 MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);

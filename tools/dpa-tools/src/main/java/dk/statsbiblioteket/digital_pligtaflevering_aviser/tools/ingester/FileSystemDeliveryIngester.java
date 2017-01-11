@@ -82,7 +82,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     private String ignoredFiles;
     protected final PutFileClient putfileClient;
-    protected final Function<Path, String> fileNameConverter;
+    protected final Function<Path, String> fileNameToFileIDConverter;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
@@ -101,14 +101,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
-                                      Function<Path, String> fileNameConverter,
+                                      Function<Path, String> fileNameToFileIDConverter,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
-        this.fileNameConverter = fileNameConverter;
+        this.fileNameToFileIDConverter = fileNameToFileIDConverter;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
@@ -238,12 +238,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             if(validationResults.size() > 0) {
                 String collectiveValidationString = new String();
                 for(String singleValidation : validationResults) {
+                    //FIXME: When the webclient is done this might need to be refactored to write this where the webclient fetches it
                     collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
                 }
                 return Arrays.asList(ToolResult.fail("Checksum validation failed:  " + collectiveValidationString));
             }
         } catch (Exception e) {
-            return Arrays.asList(ToolResult.fail("Could not read checksums.txt", e));
+            return Arrays.asList(ToolResult.fail("Could not process checksums.txt", e));
         }
 
             /* walk() guarantees that we have always seen the parent of a directory before we
@@ -368,21 +369,22 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
                                         Path relativePath = rootPath.relativize(path);
 
-                                        //Construct a syncronus eventhandler
+                                        //Construct a synchronous eventhandler
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
 
-                                        //Use the fileNameConverter to convert the filepath into something suitable for bitRepositoryClient
-                                        final String fileId = fileNameConverter.apply(Paths.get(deliveryName, filePath.toString()));
+                                        final String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
+                                        // Checksum is not validated since the bitrepository return an error if the checksum is not validated
                                         putfileClient.putFile(dpaCollectionId,
                                                 new URL(urlToBitmagBatchPath + relativePath.toString()), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-                                        return this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
+                                        ToolResult toolResult = this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
+                                        return toolResult;
 
                                     } else if (path.toString().endsWith(".xml")) {
                                         // save physical bytes of XML file as "XML" data stream on page object.
@@ -486,7 +488,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @return A result of the specifik job
      */
     private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
-
+//TODO: WHERE IS IT COPIED FROM
         final String filepathToBitmagUrl = bitmagUrl + finalEvent.getFileID();
         final String mimetype = "application/pdf";
         ToolResult toolResult = null;

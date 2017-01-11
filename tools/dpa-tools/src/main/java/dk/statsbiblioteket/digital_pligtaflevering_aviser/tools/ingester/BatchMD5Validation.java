@@ -33,18 +33,18 @@ public class BatchMD5Validation {
     }
 
     /**
-     * Validate a specified batch by reading the MD5SUMS, and confirm that all files listed in "MD5SUMS.txt" does actually exist and that the real files has the same checksum.
+     * Validate a specified batch by reading the MD5SUMS, and confirm that all files listed in "checksums.txt" does actually exist and that the real files has the same checksum.
      *
      * @param deliveryName The deliveryName equals the name of the folder inside the deliveryFolder
      * @return true if tha validation passed successfully
      * @throws IOException If files can not be read
      * @throws NoSuchAlgorithmException If md5 is unknown
      */
-    public boolean validation(String deliveryName) throws IOException, NoSuchAlgorithmException {
+    public boolean validation(String deliveryName) throws IOException, NoSuchAlgorithmException, Exception {
         boolean validationResponse = true;
         //Read the checksums from the file "checksums.txt" and insert it into a hashmap with filenames as keys and checksums as values
 
-        try(BufferedReader br = new BufferedReader(new FileReader(Paths.get(batchFolder, deliveryName, "checksums.txt").toFile()))) {
+        try(BufferedReader br = java.nio.file.Files.newBufferedReader(Paths.get(batchFolder, deliveryName, "checksums.txt"))) {
             String line = br.readLine();
 
             while (line != null) {
@@ -52,15 +52,20 @@ public class BatchMD5Validation {
                 //Example [8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf]
                 if(line != null) {
                     String[] split = line.split("[,\\s]\\s*");
+                    //Any line containing something must contain bot file and checksum
+                    if(split.length != 0 && split.length != 2) {
+                        throw new Exception("");
+                    }
                     String filename = split[1];
                     String checksum = split[0];
+
                     md5Map.put(filename, checksum);
                 }
                 line = br.readLine();
             }
         }
 
-        //Validate that all files in the folder does exist in "MD5SUMS.txt" except the ignored files
+        //Validate that all files in the folder does exist in "checksums.txt" except the ignored files
         Set<String> files = new HashSet<String>();
         listFiles(Paths.get(batchFolder, deliveryName).toFile().getAbsolutePath(), files);
         for(String ignoredFile : ignoredFiles) {
@@ -73,6 +78,7 @@ public class BatchMD5Validation {
                 validationResponse = false;
             }
         }
+        //TODO: FIX TO NEW DELIVERIES
 
         //Make sure that all files listed in "MD5SUMS.txt" exists and has the correct checksum
         for(String fileName: md5Map.keySet()) {
@@ -81,7 +87,7 @@ public class BatchMD5Validation {
                 String expectedMd5 = md5Map.get(fileName);
                 String actualMd5 = getFileChecksum(MessageDigest.getInstance("md5"), file);
                 if(!expectedMd5.equals(actualMd5)) {
-                    //If the checksum of the delivered file and the checksum of the file in "MD5SUMS.txt" does not match, raise an error
+                    //If the checksum of the delivered file and the checksum of the file in "checksums.txt" does not match, raise an error
                     validationResult.add(file.getAbsolutePath() + " expectedMd5: " + expectedMd5 + " actualMd5:" + actualMd5);
                     validationResponse = false;
                 }
