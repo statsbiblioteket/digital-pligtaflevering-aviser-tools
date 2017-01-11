@@ -1,11 +1,9 @@
 package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
-import dk.statsbiblioteket.medieplatform.autonomous.Batch;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -77,7 +75,7 @@ public class CreateDelivery {
             Pattern mutationPattern = Pattern.compile("^mt_(.*)");
 
             if (deliveryPattern.matcher(deliveryId).matches()) {
-                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.DELIVERY), premisAgent, domsEventClient, now);
+                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.STDDELIVERY), premisAgent, domsEventClient, now);
             } else if (mutationPattern.matcher(deliveryId).matches()) {
                 doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.MUTATION), premisAgent, domsEventClient, now);
             }
@@ -122,7 +120,7 @@ public class CreateDelivery {
         }
 
 
-        if(Delivery.DeliveryType.DELIVERY.equals(delivery.getDeliveryType())) {
+        if(Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
             domsEventClient.appendEventToItem(delivery, premisAgent, now, message, "Data_Received", !newerRoundTripAlreadyReceived);
         } else if(Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
             domsEventClient.appendEventToItem(delivery, premisAgent, now, message, "Mutation_Received", !newerRoundTripAlreadyReceived);

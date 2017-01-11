@@ -18,7 +18,7 @@ public class CreateDeliveryMainTest {
     public void createPendingBatches() {
         // Look for delivery samples and invoke for each folder there
         CreateDeliveryMain.main(new String[]{
-                "create-batch.properties",
+                "create-delivery.properties",
                 "autonomous.agent=register-batch-trigger",
                 ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + getBatchFolder()});
     }
@@ -29,7 +29,7 @@ public class CreateDeliveryMainTest {
      * @return
      */
     public String getBatchFolder() {
-        String batchDirPathInWorkspace = "delivery-samples";
+        String deliveryDirPathInWorkspace = "delivery-samples";
 
         // http://stackoverflow.com/a/320595/53897
         URI l = null;
@@ -42,7 +42,7 @@ public class CreateDeliveryMainTest {
 
         // Look for the first instance of batchDir in the directories towards the root of the file system.
         // This will work anywhere in the source tree.  StreamEx provide three argument iterate() in Java 8.
-        Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
-        return batchPath.toString();
+        Path deliveryPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, deliveryDirPathInWorkspace);
+        return deliveryPath.toString();
     }
 }

@@ -8,8 +8,7 @@ import javax.xml.bind.JAXBException;
 import java.net.MalformedURLException;
 
 /**
- * Quick extraction of logic from BatchDomsEventStorageFactory
- * TODO: Needs to decide what to do about all this
+ * Factory implementation of a DomsEventStorageFactory which generates a DeliveryDomsEventStorage-object
  */
 public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Delivery> {
 
@@ -38,44 +37,5 @@ public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Del
         }
         return new DeliveryDomsEventStorage(fedora,
                 premisIdentifierType, batchTemplate,roundTripTemplate,hasPartRelation,eventsDatastream, itemFactory);
-    }
-
-    public String getBatchTemplate() {
-        return batchTemplate;
-    }
-
-    /**
-     * Set the template objects used to generate batch objects. Default  doms:Template_Batch
-     *
-     * @param batchTemplate the template
-     */
-    public void setBatchTemplate(String batchTemplate) {
-        this.batchTemplate = batchTemplate;
-    }
-
-    public String getRoundTripTemplate() {
-        return roundTripTemplate;
-    }
-
-    /**
-     * Set the template object used to generate round trip objects. Default doms:Template_RoundTrip
-     *
-     * @param roundTripTemplate the template
-     */
-    public void setRoundTripTemplate(String roundTripTemplate) {
-        this.roundTripTemplate = roundTripTemplate;
-    }
-
-    public String getHasPartRelation() {
-        return hasPartRelation;
-    }
-
-    /**
-     * The full predicate for the hasPartRelation. Default info:fedora/fedora-system:def/relations-external#hasPart
-     *
-     * @param hasPartRelation the relation
-     */
-    public void setHasPartRelation(String hasPartRelation) {
-        this.hasPartRelation = hasPartRelation;
     }
 }

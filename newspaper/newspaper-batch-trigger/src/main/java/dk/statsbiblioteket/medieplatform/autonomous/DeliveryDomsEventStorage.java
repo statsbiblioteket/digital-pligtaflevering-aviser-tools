@@ -21,24 +21,23 @@ import java.util.List;
 
 /**
  * Quick extraction of logic from BatchDomsEventStorage
- * TODO: Needs to decide what to do about all this
  */
 public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
     private static Logger log = LoggerFactory.getLogger(DeliveryDomsEventStorage.class);
 
-    private final String batchTemplate;
+    private final String deliveryTemplate;
     private final String roundTripTemplate;
     private final String hasPart_relation;
 
 
-    private final String createBatchRoundTripComment = "Creating batch round trip";
+    private final String createDeliveryRoundTripComment = "Creating delivery round trip";
 
-    public DeliveryDomsEventStorage(EnhancedFedora fedora, String type, String batchTemplate, String roundTripTemplate,
-                                     String hasPart_relation, String eventsDatastream, ItemFactory<Delivery> itemFactory) throws JAXBException {
+    public DeliveryDomsEventStorage(EnhancedFedora fedora, String type, String deliveryTemplate, String roundTripTemplate,
+                                    String hasPart_relation, String eventsDatastream, ItemFactory<Delivery> itemFactory) throws JAXBException {
         super(fedora, type, eventsDatastream,
                 itemFactory);
-        this.batchTemplate = batchTemplate;
+        this.deliveryTemplate = deliveryTemplate;
         this.roundTripTemplate = roundTripTemplate;
         this.hasPart_relation = hasPart_relation;
     }
@@ -48,7 +47,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
                                   boolean outcome) throws CommunicationException {
         String itemID = item.getDomsID();
         if (itemID == null) {
-            itemID = createBatchRoundTrip(item.getFullID());
+            itemID = createDeliveryRoundTrip(item.getFullID());
             item.setDomsID(itemID);
         }
         try {
@@ -66,7 +65,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
      * @return the pid of the doms object corresponding to the round trip
      * @throws dk.statsbiblioteket.medieplatform.autonomous.CommunicationException if communication with doms failed
      */
-    public String createBatchRoundTrip(String fullItemID) throws CommunicationException {
+    public String createDeliveryRoundTrip(String fullItemID) throws CommunicationException {
         try {
             try {
                 //find the roundTrip Object
@@ -77,35 +76,35 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
             }
 
             //find the batch object
-            String batchObject;
+            String deliveryObject;
             Delivery.DeliveryRoundtripID fullIDSplits = new Delivery.DeliveryRoundtripID(fullItemID);
             List<String> founds = fedora.findObjectFromDCIdentifier(fullIDSplits.batchDCIdentifier());
             if (founds.size() > 0) {
-                batchObject = founds.get(0);
+                deliveryObject = founds.get(0);
             } else {
                 //no batch object either, more sad
                 //create it, then
-                batchObject = fedora.cloneTemplate(
-                        batchTemplate, Arrays.asList(fullIDSplits.batchDCIdentifier()), createBatchRoundTripComment);
+                deliveryObject = fedora.cloneTemplate(
+                        deliveryTemplate, Arrays.asList(fullIDSplits.batchDCIdentifier()), createDeliveryRoundTripComment);
             }
             String roundTripObject;
 
-            roundTripObject = fedora.cloneTemplate(roundTripTemplate, Arrays.asList(fullIDSplits.roundTripDCIdentifier()), createBatchRoundTripComment);
+            roundTripObject = fedora.cloneTemplate(roundTripTemplate, Arrays.asList(fullIDSplits.roundTripDCIdentifier()), createDeliveryRoundTripComment);
 
             //connect batch object to round trip object
             fedora.addRelation(
-                    batchObject,
-                    FedoraUtil.ensureURI(batchObject),
+                    deliveryObject,
+                    FedoraUtil.ensureURI(deliveryObject),
                     hasPart_relation,
                     FedoraUtil.ensureURI(roundTripObject),
                     false,
-                    createBatchRoundTripComment);
+                    createDeliveryRoundTripComment);
 
             //create the initial EVENTS datastream
 
             String premisBlob = premisFactory.createInitialPremisBlob(fullItemID).toXML();
             fedora.modifyDatastreamByValue(
-                    roundTripObject, eventsDatastream, null,null,premisBlob.getBytes(), null, "text/xml",createBatchRoundTripComment,null);
+                    roundTripObject, eventsDatastream, null,null,premisBlob.getBytes(), null, "text/xml", createDeliveryRoundTripComment,null);
 
 
             return roundTripObject;

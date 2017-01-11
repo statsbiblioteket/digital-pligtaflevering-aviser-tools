@@ -15,6 +15,9 @@ public class Delivery extends Item {
      */
     private Integer roundTripNumber = 1;
 
+    /**
+     * DeliveryType, this can be either a std. delivery or a mutation
+     */
     private DeliveryType deliveryType;
 
 
@@ -175,6 +178,6 @@ public class Delivery extends Item {
     }
 
     public enum DeliveryType {
-        DELIVERY, MUTATION
+        STDDELIVERY, MUTATION
     }
 }

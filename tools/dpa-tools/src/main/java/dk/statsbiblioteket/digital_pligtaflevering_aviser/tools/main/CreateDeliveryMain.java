@@ -67,25 +67,20 @@ public class CreateDeliveryMain {
                     final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, "transfer_complete");
                     if (doneDeliveryIndicatorFile.exists()) {
 
-
                         Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                         Matcher matcher = pattern.matcher(deliveryItemDirectory.getName());
                         if (matcher.matches()) {
                             String deliveryIdValue = matcher.group(1);
                             String roundtripValue = matcher.group(2);
 
-
                             final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectory.getName());
 
-
-
-
-                            //if (!directoryProcessedIndicatorFile.exists()) {
+                            if (!directoryProcessedIndicatorFile.exists()) {
                                 CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
                                 touch(directoryProcessedIndicatorFile);
-                            /*} else {
+                            } else {
                                 log.trace("already processed, skipping {}", deliveryItemDirectory.getName());
-                            }*/
+                            }
                         } else {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectory.getName());
                         }

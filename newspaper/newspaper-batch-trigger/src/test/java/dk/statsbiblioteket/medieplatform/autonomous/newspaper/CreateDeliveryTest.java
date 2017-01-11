@@ -33,15 +33,15 @@ public class CreateDeliveryTest {
      */
     @Test
     public void testDoWorkRT1() throws Exception {
-        Delivery delivery = new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery = new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY);
         delivery.setEventList(Collections.<Event>emptyList());
 
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(null);
 
-        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
                                                       anyString(), eq("Data_Received"), eq(true));
         verifyNoMoreInteractions(domsStorage);
     }
@@ -52,15 +52,15 @@ public class CreateDeliveryTest {
      */
     @Test
     public void testDoWorkRT2() throws Exception {
-        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY);
         delivery1.setEventList(Collections.<Event>emptyList());
-        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY);
         delivery2.setEventList(Collections.<Event>emptyList());
 
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery1));
 
-        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.DELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
     }
 
     /**
@@ -69,17 +69,17 @@ public class CreateDeliveryTest {
      */
     @Test
     public void testDoWorkRT1afterRT2() throws Exception {
-        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY);
         delivery1.setEventList(Collections.<Event>emptyList());
-        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY);
         delivery2.setEventList(Collections.<Event>emptyList());
 
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery2));
 
-        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
                                                       contains("Roundtrip (2) is newer than this roundtrip (1)"), eq("Data_Received"), eq(false));
         verifyNoMoreInteractions(domsStorage);
     }
@@ -90,18 +90,18 @@ public class CreateDeliveryTest {
      */
     @Test
     public void testDoWorkRT2whereRT1Approved() throws Exception {
-        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY);
         Event event = new Event();
         event.setEventID("Roundtrip_Approved");
         event.setSuccess(true);
         delivery1.setEventList(Arrays.asList(event));
-        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.DELIVERY);
+        Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY);
         delivery2.setEventList(Collections.<Event>emptyList());
 
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery1));
 
-        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.DELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
     }
 
