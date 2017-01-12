@@ -62,18 +62,22 @@ public class CreateDeliveryMain {
             File[] directories = new File(deliveryFolderName).listFiles(File::isDirectory);
 
             return () -> {
+                //Expected folderFormat
+                Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                 // Iterate through the deliveries on disk
                 for (File deliveryItemDirectory : directories) {
                     final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, "transfer_complete");
                     if (doneDeliveryIndicatorFile.exists()) {
-                        //Split into a part with 1 =[dl_######## of mt_########_no#] and 2=[#]
-                        Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
-                        Matcher matcher = pattern.matcher(deliveryItemDirectory.getName());
+                        //Split into a part with deliveryname and one with mutation
+                        // Std. Delivery: dl_########_rt#
+                        // Mutation: mt_########_no#
+                        String deliveryItemDirectoryName = deliveryItemDirectory.getName();
+                        Matcher matcher = pattern.matcher(deliveryItemDirectoryName);
                         if (matcher.matches()) {
                             String deliveryIdValue = matcher.group(1);
                             String roundtripValue = matcher.group(2);
 
-                            final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectory.getName());
+                            final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectoryName);
 
                             //if (!directoryProcessedIndicatorFile.exists()) {
                                 CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
@@ -82,8 +86,10 @@ public class CreateDeliveryMain {
                                 log.trace("already processed, skipping {}", deliveryItemDirectory.getName());
                             }*/
                         } else {
-                            log.trace("file name did not match, skipping {}", deliveryItemDirectory.getName());
+                            log.trace("file name did not match, skipping {}", deliveryItemDirectoryName);
                         }
+                    } else {
+                        log.debug("Skipping directory since the delivery has not been completed");
                     }
                 }
                 String joinedString = StringUtils.join(directories, " ");

@@ -32,7 +32,9 @@ public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Del
                 null,
                 retries,
                 delayBetweenRetries);
-
-        return new DeliveryDomsEventStorage(fedora, premisIdentifierType, batchTemplate,roundTripTemplate,hasPartRelation,eventsDatastream, null);
+        if (itemFactory == null){
+            itemFactory = new DeliveryItemFactory();
+        }
+        return new DeliveryDomsEventStorage(fedora, premisIdentifierType, batchTemplate, roundTripTemplate, hasPartRelation, eventsDatastream, itemFactory);
     }
 }

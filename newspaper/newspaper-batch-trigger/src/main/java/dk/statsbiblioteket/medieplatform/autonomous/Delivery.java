@@ -22,7 +22,7 @@ public class Delivery extends Item {
 
 
     /**
-     * Constructor
+     * Constructor for Deliverys, deliverys can be of two types, either a std. delivery or a mutation
      */
     public Delivery(String deliveryID, Integer roundTripNumber, DeliveryType deliveryType) {
         if (roundTripNumber == null) {
@@ -119,9 +119,9 @@ public class Delivery extends Item {
     /**
      * Format the batchid and roundtripnumber as a proper batch id
      *
-     * @param deliveryID         the batch id without the leading B
+     * @param deliveryID         the delivery id without the leading dl_
      * @param roundTripNumber the roundtrip number
-     * @return a string of the format B{deliveryID}-RT{roundTripNumber}
+     * @return a string of the format dl_{deliveryID}_rt{roundTripNumber}
      */
     public static String formatFullID(String deliveryID, Integer roundTripNumber) {
         if (roundTripNumber == null) {

@@ -22,7 +22,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * TODO: Testcases is not very fulfilling
+ * TODO: Thease testcases is a copy of testcases from other "avisproject" which it enherits from. Things that failed was removed
+ *
  */
 public class CreateDeliveryTest {
 
@@ -103,6 +104,11 @@ public class CreateDeliveryTest {
 
         CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
+                anyString(), eq("Data_Received"), eq(true));
+        //Text containing "Newer roundtrip" means that fedora has identifid that it has already been added
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Newer roundtrip"), eq("Manually_stopped"), eq(true));
+        verifyNoMoreInteractions(domsStorage);
     }
 
     /**
@@ -124,7 +130,10 @@ public class CreateDeliveryTest {
 
         CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.MUTATION), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
+                anyString(), eq("Mutation_Received"), eq(true));
+        //Text containing "Newer roundtrip" means that fedora has identifid that it has already been added
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Newer roundtrip"), eq("Manually_stopped"), eq(true));
+        verifyNoMoreInteractions(domsStorage);
     }
-
-
 }

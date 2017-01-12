@@ -68,19 +68,20 @@ public class CreateDelivery {
             final int roundTripNumber = Integer.parseInt(roundTrip);
 
             // Match that the deliverys contains the expected string, either "dl_yyyymmdd" or "mt_yyyymmdd_no#"
-            // Found as example on: http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy/15504877#15504877
 
             //deliveryPatterMatcher
-            Pattern deliveryPattern = Pattern.compile("^dl_+([0-9]{4}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)$");
+            Pattern deliveryPattern = Pattern.compile("^dl_+([\\d]{8}+)$");
             Matcher matcher = deliveryPattern.matcher(deliveryId);
 
             //mutationPatterMatcher
-            Pattern mutationPattern = Pattern.compile("^mt_+([0-9]{4}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)+_no([0-9]+)$");//_no([0-9]+)$
+            Pattern mutationPattern = Pattern.compile("^mt_+([\\d]{8})+_no([0-9]+)$");
 
             if (deliveryPattern.matcher(deliveryId).matches()) {
                 doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.STDDELIVERY), premisAgent, domsEventClient);
             } else if (mutationPattern.matcher(deliveryId).matches()) {
                 doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.MUTATION), premisAgent, domsEventClient);
+            } else {
+                log.error("The folder with the name " + deliveryId + " is not recognized by this component");
             }
 
             long finishedDeliveryTime = System.currentTimeMillis();
@@ -104,6 +105,8 @@ public class CreateDelivery {
      * @throws CommunicationException On trouble registering event.
      */
     public static void doWork(Delivery delivery, String premisAgent, DeliveryDomsEventStorage domsEventClient) throws CommunicationException {
+        //Fedora can not handle ore than one event on the same object at the same time, for this reason Date is not delivered as a parameter
+        //It would not fail with the same parameter anyway since there is only written one event
         boolean newerRoundTripAlreadyReceived = false;
 
         String message = "";
@@ -113,7 +116,7 @@ public class CreateDelivery {
             roundtrips = Collections.emptyList();
         }
         for (Delivery roundtrip : roundtrips) {
-            //Make sure that roundtrips wich does not have the newest roundtrip-id goes into failed state
+            //Make sure that roundtrips which does not have the newest roundtrip-id goes into failed state
             if (roundtrip.getRoundTripNumber() > delivery.getRoundTripNumber()) {
                 message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is newer than this roundtrip ("+delivery.getRoundTripNumber()+"), so this roundtrip will not be triggered here\n";
                 log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
