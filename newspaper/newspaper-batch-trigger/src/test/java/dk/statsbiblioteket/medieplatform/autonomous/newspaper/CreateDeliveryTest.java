@@ -39,7 +39,7 @@ public class CreateDeliveryTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(null);
 
-        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
                                                       anyString(), eq("Data_Received"), eq(true));
@@ -60,7 +60,7 @@ public class CreateDeliveryTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery1));
 
-        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
     }
 
     /**
@@ -77,7 +77,7 @@ public class CreateDeliveryTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery2));
 
-        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
                                                       contains("Roundtrip (2) is newer than this roundtrip (1)"), eq("Data_Received"), eq(false));
@@ -101,7 +101,7 @@ public class CreateDeliveryTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery1));
 
-        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
     }
 
@@ -122,7 +122,7 @@ public class CreateDeliveryTest {
         DeliveryDomsEventStorage domsStorage = mock(DeliveryDomsEventStorage.class);
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(mutation1));
 
-        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.MUTATION), "premisAgent", domsStorage, new Date());
+        CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.MUTATION), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
     }
 

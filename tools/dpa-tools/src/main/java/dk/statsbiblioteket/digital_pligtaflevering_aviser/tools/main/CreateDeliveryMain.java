@@ -66,7 +66,7 @@ public class CreateDeliveryMain {
                 for (File deliveryItemDirectory : directories) {
                     final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, "transfer_complete");
                     if (doneDeliveryIndicatorFile.exists()) {
-
+                        //Split into a part with 1 =[dl_######## of mt_########_no#] and 2=[#]
                         Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                         Matcher matcher = pattern.matcher(deliveryItemDirectory.getName());
                         if (matcher.matches()) {
@@ -75,12 +75,12 @@ public class CreateDeliveryMain {
 
                             final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectory.getName());
 
-                            if (!directoryProcessedIndicatorFile.exists()) {
+                            //if (!directoryProcessedIndicatorFile.exists()) {
                                 CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
                                 touch(directoryProcessedIndicatorFile);
-                            } else {
+                            /*} else {
                                 log.trace("already processed, skipping {}", deliveryItemDirectory.getName());
-                            }
+                            }*/
                         } else {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectory.getName());
                         }

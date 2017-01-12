@@ -67,17 +67,20 @@ public class CreateDelivery {
             domsEventClient = domsEventStorageFactory.createDeliveryDomsEventStorage();
             final int roundTripNumber = Integer.parseInt(roundTrip);
 
+            // Match that the deliverys contains the expected string, either "dl_yyyymmdd" or "mt_yyyymmdd_no#"
+            // Found as example on: http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy/15504877#15504877
+
             //deliveryPatterMatcher
-            Pattern deliveryPattern = Pattern.compile("^dl_(.*)");
+            Pattern deliveryPattern = Pattern.compile("^dl_+([0-9]{4}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)$");
             Matcher matcher = deliveryPattern.matcher(deliveryId);
 
             //mutationPatterMatcher
-            Pattern mutationPattern = Pattern.compile("^mt_(.*)");
+            Pattern mutationPattern = Pattern.compile("^mt_+([0-9]{4}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)+_no([0-9]+)$");//_no([0-9]+)$
 
             if (deliveryPattern.matcher(deliveryId).matches()) {
-                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.STDDELIVERY), premisAgent, domsEventClient, now);
+                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.STDDELIVERY), premisAgent, domsEventClient);
             } else if (mutationPattern.matcher(deliveryId).matches()) {
-                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.MUTATION), premisAgent, domsEventClient, now);
+                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.MUTATION), premisAgent, domsEventClient);
             }
 
             long finishedDeliveryTime = System.currentTimeMillis();
@@ -98,10 +101,9 @@ public class CreateDelivery {
      * @param delivery The batch to register
      * @param premisAgent The string used as premis agent id
      * @param domsEventClient The doms event client used for registering events.
-     * @param now The timestamp for when we started work on this Delivery
      * @throws CommunicationException On trouble registering event.
      */
-    public static void doWork(Delivery delivery, String premisAgent, DeliveryDomsEventStorage domsEventClient, Date now) throws CommunicationException {
+    public static void doWork(Delivery delivery, String premisAgent, DeliveryDomsEventStorage domsEventClient) throws CommunicationException {
         boolean newerRoundTripAlreadyReceived = false;
 
         String message = "";
@@ -121,9 +123,9 @@ public class CreateDelivery {
 
 
         if(Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
-            domsEventClient.appendEventToItem(delivery, premisAgent, now, message, "Data_Received", !newerRoundTripAlreadyReceived);
+            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Data_Received", !newerRoundTripAlreadyReceived);
         } else if(Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
-            domsEventClient.appendEventToItem(delivery, premisAgent, now, message, "Mutation_Received", !newerRoundTripAlreadyReceived);
+            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Mutation_Received", !newerRoundTripAlreadyReceived);
         }
 
         if(!newerRoundTripAlreadyReceived) {
