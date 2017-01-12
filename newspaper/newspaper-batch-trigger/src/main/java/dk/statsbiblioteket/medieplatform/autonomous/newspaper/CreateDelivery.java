@@ -17,7 +17,6 @@ import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeyw
 
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
- *
  */
 public class CreateDelivery {
     private static final String STOPPED_STATE = "Manually_stopped";
@@ -41,7 +40,6 @@ public class CreateDelivery {
         //Starting to refactor Delivery into something that is specifically for "digital pligtaflevering"
         DeliveryDomsEventStorageFactory domsEventStorageFactory = new DeliveryDomsEventStorageFactory();
         DeliveryDomsEventStorage domsEventClient;
-        Date now = new Date();
 
         if (args.length != 8) {
             log.error("Not the right amount of arguments");
@@ -98,9 +96,8 @@ public class CreateDelivery {
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
      *
-     *
-     * @param delivery The batch to register
-     * @param premisAgent The string used as premis agent id
+     * @param delivery        The batch to register
+     * @param premisAgent     The string used as premis agent id
      * @param domsEventClient The doms event client used for registering events.
      * @throws CommunicationException On trouble registering event.
      */
@@ -112,26 +109,26 @@ public class CreateDelivery {
         String message = "";
 
         List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(delivery.getDeliveryID());
-        if(roundtrips == null) {
+        if (roundtrips == null) {
             roundtrips = Collections.emptyList();
         }
         for (Delivery roundtrip : roundtrips) {
             //Make sure that roundtrips which does not have the newest roundtrip-id goes into failed state
             if (roundtrip.getRoundTripNumber() > delivery.getRoundTripNumber()) {
-                message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is newer than this roundtrip ("+delivery.getRoundTripNumber()+"), so this roundtrip will not be triggered here\n";
+                message += "Roundtrip (" + roundtrip.getRoundTripNumber() + ") is newer than this roundtrip (" + delivery.getRoundTripNumber() + "), so this roundtrip will not be triggered here\n";
                 log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
                 newerRoundTripAlreadyReceived = true;
             }
         }
 
 
-        if(Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
+        if (Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
             domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Data_Received", !newerRoundTripAlreadyReceived);
-        } else if(Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
+        } else if (Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
             domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Mutation_Received", !newerRoundTripAlreadyReceived);
         }
 
-        if(!newerRoundTripAlreadyReceived) {
+        if (!newerRoundTripAlreadyReceived) {
             for (Delivery roundtrip : roundtrips) {
                 if (!roundtrip.getRoundTripNumber().equals(delivery.getRoundTripNumber())) {
                     domsEventClient.appendEventToItem(roundtrip, premisAgent, new Date(),

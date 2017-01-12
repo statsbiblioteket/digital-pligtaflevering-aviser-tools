@@ -79,12 +79,12 @@ public class CreateDeliveryMain {
 
                             final File directoryProcessedIndicatorFile = new File(doneDir, deliveryItemDirectoryName);
 
-                            //if (!directoryProcessedIndicatorFile.exists()) {
+                            if (!directoryProcessedIndicatorFile.exists()) {
                                 CreateDelivery.main(new String[]{deliveryIdValue, roundtripValue, premisAgent, domsUrl, domsUser, domsPass, urlToPidGen, deliveryFolderName});
                                 touch(directoryProcessedIndicatorFile);
-                            /*} else {
+                            } else {
                                 log.trace("already processed, skipping {}", deliveryItemDirectory.getName());
-                            }*/
+                            }
                         } else {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectoryName);
                         }
