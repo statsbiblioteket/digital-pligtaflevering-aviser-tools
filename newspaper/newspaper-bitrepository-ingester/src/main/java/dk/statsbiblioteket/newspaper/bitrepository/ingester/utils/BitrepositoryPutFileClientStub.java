@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -57,8 +58,14 @@ public class BitrepositoryPutFileClientStub implements PutFileClient {
                 completeEvent.setInfo("MD5 check has failed on the file : " + url);
             }
             String newFileId = this.destinationPath + File.separator + fileId;
+            File newFile = new File(newFileId);
+            File parent = newFile.getParentFile();
+            if(!parent.exists() && !parent.mkdirs()){
+                throw new IllegalStateException("Couldn't create dir: " + parent);
+            }
+
             ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-            FileOutputStream fos = new FileOutputStream(newFileId);
+            FileOutputStream fos = new FileOutputStream(newFile);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             completeEvent.setFileID(fileId);
             completeEvent.setOperationType(OperationType.PUT_FILE);
