@@ -4,20 +4,19 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_BATCH_FINISH_LOGTEXT;
-import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_BATCH_START_LOGTEXT;
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_DELIVERY_FINISH_LOGTEXT;
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_DELIVERY_START_LOGTEXT;
 
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
- *
- * @author jrg
  */
 public class CreateDelivery {
     private static final String STOPPED_STATE = "Manually_stopped";
@@ -31,26 +30,25 @@ public class CreateDelivery {
      * @param args The command line arguments received from calling shell script. Explained above.
      */
     public static void main(String[] args) {
-        String batchId;
+        String deliveryId;
         String roundTrip;
         String premisAgent;
         String domsUrl;
         String domsUser;
         String domsPass;
         String urlToPidGen;
-        //Starting to refactor Batch into something that is specifically for "digital pligtaflevering"
+        //Starting to refactor Delivery into something that is specifically for "digital pligtaflevering"
         DeliveryDomsEventStorageFactory domsEventStorageFactory = new DeliveryDomsEventStorageFactory();
         DeliveryDomsEventStorage domsEventClient;
-        Date now = new Date();
 
         if (args.length != 8) {
             log.error("Not the right amount of arguments");
             log.error("Receives the following arguments (in this order) to create a batch object in DOMS:");
-            log.error("Batch ID, roundtrip number, Premis agent name, URL to DOMS/Fedora, DOMS username, DOMS password,");
+            log.error("Deliveries ID, roundtrip number, Premis agent name, URL to DOMS/Fedora, DOMS username, DOMS password,");
             log.error("URL to PID generator.");
             System.exit(1);
         }
-        batchId = args[0];
+        deliveryId = args[0];
         roundTrip = args[1];
         premisAgent = args[2];
         domsUrl = args[3];
@@ -58,7 +56,7 @@ public class CreateDelivery {
         domsPass = args[5];
         urlToPidGen = args[6];
         long startDeliveryTime = System.currentTimeMillis();
-        log.info(CREATE_BATCH_START_LOGTEXT, batchId, roundTrip);
+        log.info(CREATE_DELIVERY_START_LOGTEXT, deliveryId, roundTrip);
         domsEventStorageFactory.setFedoraLocation(domsUrl);
         domsEventStorageFactory.setUsername(domsUser);
         domsEventStorageFactory.setPassword(domsPass);
@@ -66,9 +64,26 @@ public class CreateDelivery {
         try {
             domsEventClient = domsEventStorageFactory.createDeliveryDomsEventStorage();
             final int roundTripNumber = Integer.parseInt(roundTrip);
-            doWork(new Delivery(batchId, roundTripNumber), premisAgent, domsEventClient, now);
+
+            // Match that the deliverys contains the expected string, either "dl_yyyymmdd" or "mt_yyyymmdd_no#"
+
+            //deliveryPatterMatcher
+            Pattern deliveryPattern = Pattern.compile("^dl_+([\\d]{8}+)$");
+            Matcher matcher = deliveryPattern.matcher(deliveryId);
+
+            //mutationPatterMatcher
+            Pattern mutationPattern = Pattern.compile("^mt_+([\\d]{8})+_no([0-9]+)$");
+
+            if (deliveryPattern.matcher(deliveryId).matches()) {
+                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.STDDELIVERY), premisAgent, domsEventClient);
+            } else if (mutationPattern.matcher(deliveryId).matches()) {
+                doWork(new Delivery(deliveryId, roundTripNumber, Delivery.DeliveryType.MUTATION), premisAgent, domsEventClient);
+            } else {
+                log.error("The folder with the name " + deliveryId + " is not recognized by this component");
+            }
+
             long finishedDeliveryTime = System.currentTimeMillis();
-            log.info(CREATE_BATCH_FINISH_LOGTEXT, batchId, roundTrip, finishedDeliveryTime - startDeliveryTime);
+            log.info(CREATE_DELIVERY_FINISH_LOGTEXT, deliveryId, roundTrip, finishedDeliveryTime - startDeliveryTime);
         } catch (Exception e) {
             log.error("Failed adding event to batch, due to: " + e.getMessage());
             log.error("Caught exception: ", e);
@@ -81,72 +96,47 @@ public class CreateDelivery {
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
      *
-     *
-     * @param batch The batch to register
-     * @param premisAgent The string used as premis agent id
+     * @param delivery        The batch to register
+     * @param premisAgent     The string used as premis agent id
      * @param domsEventClient The doms event client used for registering events.
-     * @param now The timestamp to use.
      * @throws CommunicationException On trouble registering event.
      */
-    public static void doWork(Delivery batch, String premisAgent, DeliveryDomsEventStorage domsEventClient, Date now) throws CommunicationException {
-        boolean alreadyApproved = false;
+    public static void doWork(Delivery delivery, String premisAgent, DeliveryDomsEventStorage domsEventClient) throws CommunicationException {
+        //Fedora can not handle ore than one event on the same object at the same time, for this reason Date is not delivered as a parameter
+        //It would not fail with the same parameter anyway since there is only written one event
         boolean newerRoundTripAlreadyReceived = false;
-
 
         String message = "";
 
-        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(batch.getBatchID());
-        if(roundtrips == null) {
+        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(delivery.getDeliveryID());
+        if (roundtrips == null) {
             roundtrips = Collections.emptyList();
         }
         for (Delivery roundtrip : roundtrips) {
-            if (roundtrip.getRoundTripNumber() > batch.getRoundTripNumber()) {
-                message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is newer than this roundtrip ("+batch.getRoundTripNumber()+"), so this roundtrip will not be triggered here\n";
-                log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", batch.getFullID(), roundtrip.getRoundTripNumber());
+            //Make sure that roundtrips which does not have the newest roundtrip-id goes into failed state
+            if (roundtrip.getRoundTripNumber() > delivery.getRoundTripNumber()) {
+                message += "Roundtrip (" + roundtrip.getRoundTripNumber() + ") is newer than this roundtrip (" + delivery.getRoundTripNumber() + "), so this roundtrip will not be triggered here\n";
+                log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
                 newerRoundTripAlreadyReceived = true;
-
-            }
-            if (isApproved(roundtrip)) {
-                message  +=  "Roundtrip ("+roundtrip.getRoundTripNumber()+") is already approved, so this roundtrip ("+batch.getRoundTripNumber()+") should not be triggered here\n";
-                log.warn("Stopping batch '{}' because another roundtrip {} is already approved", batch.getFullID(), roundtrip.getRoundTripNumber());
-                alreadyApproved = true;
-
             }
         }
 
 
-        domsEventClient.appendEventToItem(batch, premisAgent, now, message, "Data_Received",
-                                       !newerRoundTripAlreadyReceived);
+        if (Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
+            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Data_Received", !newerRoundTripAlreadyReceived);
+        } else if (Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
+            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Mutation_Received", !newerRoundTripAlreadyReceived);
+        }
 
-
-        if (alreadyApproved){
-            domsEventClient.appendEventToItem(batch, premisAgent, now,
-                                           "Another Roundtrip is already approved, so this batch should be stopped",
-                                           STOPPED_STATE, true);
-        } else if (!newerRoundTripAlreadyReceived){
+        if (!newerRoundTripAlreadyReceived) {
             for (Delivery roundtrip : roundtrips) {
-                if (!roundtrip.getRoundTripNumber().equals(batch.getRoundTripNumber())) {
-                    domsEventClient.appendEventToItem(roundtrip, premisAgent, now,
-                                                   "Newer roundtrip (" + batch.getRoundTripNumber()
-                                                           + ") has been received, so this batch should be stopped",
-                                                   STOPPED_STATE, true);
-                    log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), batch.getFullID());
+                if (!roundtrip.getRoundTripNumber().equals(delivery.getRoundTripNumber())) {
+                    domsEventClient.appendEventToItem(roundtrip, premisAgent, new Date(),
+                            "Newer roundtrip (" + roundtrip.getRoundTripNumber()
+                                    + ") has been received, so this batch should be stopped", STOPPED_STATE, true);
+                    log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), roundtrip.getFullID());
                 }
             }
         }
-    }
-
-
-
-
-
-
-    private static boolean isApproved(Delivery olderRoundtrip) {
-        for (Event event : olderRoundtrip.getEventList()) {
-            if (event.getEventID().equals("Roundtrip_Approved") && event.isSuccess()) {
-                return true;
-            }
-        }
-        return false;
     }
 }
