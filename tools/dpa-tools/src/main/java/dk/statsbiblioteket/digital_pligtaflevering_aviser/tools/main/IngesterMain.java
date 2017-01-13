@@ -271,7 +271,7 @@ public class IngesterMain {
          * @return and ID for the fileContent
          */
         @Provides
-        FileNameToFileIDConverter provideFileNameToFileIDConverterss() {
+        FileNameToFileIDConverter provideFileNameToFileIDConverter() {
             return path1 -> NewspaperFileNameTranslater.getFileID(path1.toString());
         }
 
