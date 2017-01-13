@@ -5,6 +5,8 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -41,7 +43,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
@@ -270,8 +271,22 @@ public class IngesterMain {
          * @return and ID for the fileContent
          */
         @Provides
-        Function<Path, String> provideFileNameToFileIDConverter() {
+        FileNameToFileIDConverter provideFileNameToFileIDConverterss() {
             return path1 -> NewspaperFileNameTranslater.getFileID(path1.toString());
         }
+
+        /**
+         * Provide Function for converting filePath a for
+         * @return and ID for the fileContent
+         */
+        @Provides
+        public FilePathToChecksumPathConverter provideFilePathConverter() {
+            //This should be used for the checksums in the deliveries from Infomedia
+            return (path1, batchId) -> path1.getFileName().toString();
+
+            //This should be used for the checksums in the specifications
+            //return (path1, batchId) -> Paths.get(path1.toString(), batchId).relativize(path1).toString();
+        }
+
     }
 }

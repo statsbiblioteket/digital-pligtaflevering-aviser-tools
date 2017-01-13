@@ -4,6 +4,8 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
@@ -83,6 +85,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private String ignoredFiles;
     protected final PutFileClient putfileClient;
     protected final Function<Path, String> fileNameToFileIDConverter;
+    protected final BiFunction<Path, String, String> md5Convert;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
@@ -101,7 +104,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
-                                      Function<Path, String> fileNameToFileIDConverter,
+                                      FileNameToFileIDConverter fileNameToFileIDConverter,
+                                      FilePathToChecksumPathConverter md5Convert,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora,
@@ -109,6 +113,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
         this.fileNameToFileIDConverter = fileNameToFileIDConverter;
+        this.md5Convert = md5Convert;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
@@ -232,7 +237,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         BatchMD5Validation md5validations;
         try {
-            md5validations = new BatchMD5Validation(rootPath.toString(), "checksums.txt", true, ignoredFiles);
+            md5validations = new BatchMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if(validationResults.size() > 0) {
@@ -361,7 +366,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                 try {
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
-                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(filePath));
+                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
                                     String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
                                         //Save *.pdf files to bitrepository
@@ -503,6 +508,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 // Add "hasPart" relation from the page object to the file object.
                 efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
                 // Add the checksum relation to Fedora
+
+                //TODO: Document why this is done
                 efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
                 toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
                 log.info("Completed ingest of file " + finalEvent.getFileID());

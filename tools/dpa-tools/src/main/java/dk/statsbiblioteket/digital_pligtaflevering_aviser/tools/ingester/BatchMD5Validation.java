@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 
 /**
@@ -24,15 +24,15 @@ import java.util.function.Function;
 public class BatchMD5Validation {
     final private String batchFolder;
     private String checksumFileName;
-    private boolean infomediaFormat = false;
+    private BiFunction<Path, String, String> md5Convert;
     final private HashSet<String> ignoredFiles = new HashSet<String>();
     private Map<String, String> cashedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
 
-    public BatchMD5Validation(String batchFolder, String checksumFileName, boolean infomediaFormat, String ignoredFilesString) {
+    public BatchMD5Validation(String batchFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
         this.batchFolder = batchFolder;
         this.checksumFileName = checksumFileName;
-        this.infomediaFormat = infomediaFormat;
+        this.md5Convert = md5Convert;
         for(String ignoredFile : ignoredFilesString.split(",")) {
             ignoredFiles.add(ignoredFile);
         }
@@ -76,13 +76,13 @@ public class BatchMD5Validation {
         Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
-                    String fileIdMatchingChecksumfile = provideFilePathConverter(batchName).apply(filePath);
+                    String fileIdMatchingChecksumfile = md5Convert.apply(filePath, batchName);
                     if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
                         //This file is one of the ignored files, just contionue without doing anything
                     } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
                         validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
                     } else {
-                        cashedFileListMap.put(fileIdMatchingChecksumfile, md5Map.remove(fileIdMatchingChecksumfile));
+                        cashedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
                     }
                 });
 
@@ -105,24 +105,13 @@ public class BatchMD5Validation {
     }
 
     /**
-     * Function for conversion from Path to the fileformat described in the checksum-file
-     * @param batchName
+     * Get a checksum from a Path, this function finds the element from the checksum-file which is matching the Path, and it returns the expected checksum
+     * @param filePath
      * @return
      */
-    private Function<Path, String> provideFilePathConverter(String batchName) {
-        if(infomediaFormat) {
-            return path1 -> path1.getFileName().toString();
-        } else {
-            return path1 -> Paths.get(batchFolder, batchName).relativize(path1).toString();
-        }
-    }
-
-    public String getChecksum(Path filePath) {
-        if(infomediaFormat) {
-            return cashedFileListMap.get(filePath.getFileName().toString());
-        } else {
-            return cashedFileListMap.get(filePath.toString());
-        }
+    public String getChecksum(String filePath) {
+        String checksum = cashedFileListMap.get(filePath);
+        return checksum;
     }
 
     /**
