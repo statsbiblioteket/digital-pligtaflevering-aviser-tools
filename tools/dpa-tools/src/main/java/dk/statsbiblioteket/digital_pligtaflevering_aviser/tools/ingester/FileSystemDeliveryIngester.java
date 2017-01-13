@@ -508,8 +508,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 // Add "hasPart" relation from the page object to the file object.
                 efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
                 // Add the checksum relation to Fedora
-
-                //TODO: Document why this is done
                 efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
                 toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
                 log.info("Completed ingest of file " + finalEvent.getFileID());
