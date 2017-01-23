@@ -24,7 +24,8 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
-        <verapdf.pdfbox.validation.version>[0.20.3]</verapdf.pdfbox.validation.version>
+        <!-- as of 2017-01-23 /tra -->
+        <verapdf.validation.version>1.0.6</verapdf.validation.version>
     </properties>
 
     <dependencies>
@@ -34,10 +35,10 @@
             <version>master-SNAPSHOT</version>
         </dependency>
 
-         <dependency>
+        <dependency>
             <groupId>org.verapdf</groupId>
-            <artifactId>pdfbox-validation-model</artifactId>
-            <version>RELEASE</version>
+            <artifactId>validation-model</artifactId>
+            <version>${verapdf.validation.version}</version>
         </dependency>
 
         <dependency>
