@@ -11,7 +11,7 @@ Fejlet:
     <% } %>
 </ul>
 
-oK:
+Ok:
 
 <ul>
 

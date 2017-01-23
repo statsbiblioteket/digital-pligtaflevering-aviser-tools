@@ -15,6 +15,16 @@ public class QuerySpecification {
      */
     private boolean details;
 
+    /**
+     * Hold a complete SBOI query (maps to <code>EventTrigger.Query&lt;Item></code>) querying a repository for
+     * items fulfilling a given set of criterias.  Each event is a simple string and the same as
+     * is used when adding an event to an item.
+     * @param pastSuccessfulEvents list of events that must have happened with a successful result
+     * @param futureEvents list of events that must never have happened
+     * @param oldEvents list of events that must either FIXME (what exactly) or never have happened.
+     * @param types FIXME
+     * @param details false for a simple response, true for all details filled out.
+     */
     public QuerySpecification(List<String> pastSuccessfulEvents,
                               List<String> futureEvents,
                               List<String> oldEvents,
