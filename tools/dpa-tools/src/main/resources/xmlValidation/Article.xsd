@@ -1,5 +1,5 @@
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="article">
+  <xs:element name="article">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="administrativedata">
@@ -16,27 +16,27 @@
               <xs:element type="xs:string" name="source"  minOccurs="1" maxOccurs="1"/>
               <xs:element name="publishdate" minOccurs="1" maxOccurs="1">
                 <xs:simpleType>
-                  <xs:restriction base="xs:integer">
-                    <xs:totalDigits value="8"/>
+                  <xs:restriction base="xs:string">
+                    <xs:pattern value="\d{8}" />
                   </xs:restriction>
                 </xs:simpleType>
-      			  </xs:element>
+              </xs:element>
               <xs:element type="xs:string" name="sectionname"  minOccurs="0" maxOccurs="1" nillable="true" />
-              <xs:element type="xs:string" name="sectionnumber" minOccurs="0" maxOccurs="1" nillable="true"/>
+              <xs:element type="xs:string" name="sectionnumber" minOccurs="0" maxOccurs="1" nillable="true" />
               <xs:element type="xs:string" name="pagename" minOccurs="0" maxOccurs="1"/>
               <xs:element type="xs:integer" name="pagenumber"  minOccurs="1" maxOccurs="1"/>
               <xs:element type="xs:string" name="type"  minOccurs="1" maxOccurs="1"/>
               <xs:element name="links">
                 <xs:complexType>
                   <xs:sequence minOccurs="0">
-                    <xs:element type="xs:anyURI" name="link"/>
+                    <xs:element type="xs:anyURI" name="link" minOccurs="0" maxOccurs="unbounded"/>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
               <xs:element name="classification">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
+                    <xs:element name="term" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
                         <xs:sequence>
                           <xs:element type="xs:string" name="subject"/>
@@ -50,7 +50,7 @@
               <xs:element name="journalists">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element type="xs:string" name="journalist" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:element type="xs:string" name="journalist" minOccurs="0" maxOccurs="unbounded"/>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
