@@ -13,6 +13,7 @@ import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.util.xml.DOM;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
@@ -39,7 +40,9 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +65,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
@@ -92,7 +96,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     private Set<String> ignoredFilesSet;
     private Settings settings;
-
+    int count = 0;
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
 
@@ -315,6 +319,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         // see if DOMS object exist for this directory
 
+
+
         final String currentDirectoryPid = lookupObjectFromDCIdentifierAndCreateItIfNeeded(dcIdentifier);
 
         /**
@@ -377,14 +383,17 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         //Construct a synchronous eventhandler
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
 
-                                        final String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
+                                        String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
+                                        String urlEncodedFileSource = URLEncoder.encode(relativePath.toString(), CharEncoding.UTF_8);
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                                         // Checksum is not validated since the bitrepository return an error if the checksum is not validated
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + relativePath.toString()), fileId, DEFAULT_FILE_SIZE,
+                                                new URL(urlToBitmagBatchPath + urlEncodedFileSource), fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
+
+
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
@@ -425,6 +434,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         return ToolResult.fail("path not pdf/xml: " + path);
                                     }
                                 } catch (Exception e) {
+                                    log.error(e.getMessage());
                                     return ToolResult.fail("Could not process " + path, e);
                                 }
                             });
@@ -494,7 +504,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      */
     private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
         //Writing to components has been inspired by the code i DomsJP2FileUrlRegister.register() from the project "dpa-bitrepository-ingester"
-        final String filepathToBitmagUrl = bitmagUrl + finalEvent.getFileID();
         final String mimetype = "application/pdf";
         ToolResult toolResult = null;
 
@@ -503,8 +512,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
             try {
+                // The URLEncoding needs to be done twice to get it stored correctly inside Fedora, this is not the best solution but it is the only possible solution when running with this fedora client
+                String LinkFromFedoraToBitrepository = bitmagUrl + URLEncoder.encode(URLEncoder.encode(finalEvent.getFileID(), CharEncoding.UTF_8), CharEncoding.UTF_8);
                 // save external datastream in file object.
-                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), filepathToBitmagUrl, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), LinkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
                 // Add "hasPart" relation from the page object to the file object.
                 efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
                 // Add the checksum relation to Fedora
@@ -512,7 +523,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
                 log.info("Completed ingest of file " + finalEvent.getFileID());
 
-            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException | UnsupportedEncodingException e) {
                 log.error(e.getMessage());
                 toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
             }
