@@ -8,8 +8,6 @@ import java.net.URISyntaxException;
  */
 public class ValidateXMLMainTest {
 
-
-
     @org.junit.Test
     public void invocationTest() throws URISyntaxException {
 
