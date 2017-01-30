@@ -31,6 +31,11 @@ Start vagrant (using virtualbox provider):
     cd src/vagrant
     vagrant up
 
+
+Before including modified bitrepository build the version which supports hashes and slashes in filenames for ingest
+    FIXME: This is not needed any more when this version of bitrepository has been released
+    checkout "git@github.com:Madsmj/reference.git -b filenamesContainingHashcharacter" and run "mvn clean install"
+
 (may take 5-10 minutes and download quite a bit the first time).
 
     vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash -x /vagrant/setup-newspapers.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
