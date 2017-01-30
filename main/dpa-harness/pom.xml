@@ -11,9 +11,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
     <artifactId>dpa-harness</artifactId>
-    <version>master-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

@@ -11,9 +11,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
     <artifactId>dpa-verapdf</artifactId>
-    <version>master-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -31,7 +29,7 @@
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
         <!-- as of 2017-01-23 /tra -->
-        <verapdf.validation.version>1.0.6</verapdf.validation.version>
+        <verapdf.validation.version>1.1.6</verapdf.validation.version>
     </properties>
 
     <dependencies>

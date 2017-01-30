@@ -4,6 +4,7 @@ import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -107,8 +108,9 @@ public class AutonomousPreservationToolHelper {
                 .filter(p -> p.toFile().exists())
                 .findFirst()
                 .orElseThrow(() ->
-                        new RuntimeException(pathToFind + " not found towards root of " + startPath.toAbsolutePath())
-                );
+                        new RuntimeException(pathToFind + " not found towards root of " + startPath.toAbsolutePath(),
+                                new FileNotFoundException("..." + pathToFind)
+                        ));
         return pathFound;
     }
 

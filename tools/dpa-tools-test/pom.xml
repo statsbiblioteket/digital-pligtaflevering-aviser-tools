@@ -2,9 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+        <artifactId>dpa-root</artifactId>
+        <version>master-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
     <artifactId>dpa-tools-test</artifactId>
-    <version>master-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,6 +29,12 @@
             <artifactId>dpa-tools</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.javaslang</groupId>
+            <artifactId>javaslang</artifactId>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
