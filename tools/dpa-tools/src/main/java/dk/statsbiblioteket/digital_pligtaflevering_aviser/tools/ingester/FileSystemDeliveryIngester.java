@@ -525,7 +525,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 log.info("Completed ingest of file " + finalEvent.getFileID());
 
             } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException | UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
+                log.error("ObjectId: " + fileObjectId + " relativePath: " + relativePath.toString(), e);
                 toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
             }
 
