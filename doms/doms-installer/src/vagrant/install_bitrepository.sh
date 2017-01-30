@@ -12,10 +12,10 @@ tar xvzf zulu8.19.0.1-jdk8.0.112-linux_x64.tar.gz
 
 #curl -L -O https://sbforge.org/nexus/content/repositories/releases/org/bitrepository/reference/bitrepository-integration/1.8/bitrepository-integration-1.8-quickstart.tar.gz
 #tar xvzf bitrepository-integration-1.8-quickstart.tar.gz
-# FIXME: Untill this version of bimagasin is released, we will just use the branch that does support Hashes and slas in filenames
+# FIXME: Untill this version of bimagasin is released, we will just use the branch that does support Hashes and slashes in filenames
 # checkout "git@github.com:Madsmj/reference.git -b filenamesContainingHashcharacter" and run "mvn clean install"
 cp /bitRepoDelivery/bitrepository-integration-1.9-SNAPSHOT-quickstart.tar.gz bitrepository-integration-1.9-SNAPSHOT-quickstart.tar.gz
-tar xvzf bitrepository-integration-1.9-SNAPSHOT-quickstart.tar.gz
+tar xvzf bitrepository-integration-*-quickstart.tar.gz
 
 # we want the actual files stored outside the vagrant machine.
 # FIXME:  This does not work well with snapshots.  Instead find a solution allowing us to look inside the vagrant box.
