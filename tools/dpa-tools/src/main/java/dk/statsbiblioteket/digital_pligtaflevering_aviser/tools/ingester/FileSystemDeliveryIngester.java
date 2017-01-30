@@ -96,7 +96,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     private Set<String> ignoredFilesSet;
     private Settings settings;
-    int count = 0;
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
 
@@ -434,7 +433,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         return ToolResult.fail("path not pdf/xml: " + path);
                                     }
                                 } catch (Exception e) {
-                                    log.error(e.getMessage());
+                                    log.error(e.getMessage(), e);
                                     return ToolResult.fail("Could not process " + path, e);
                                 }
                             });
@@ -513,9 +512,11 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
             try {
                 // The URLEncoding needs to be done twice to get it stored correctly inside Fedora, this is not the best solution but it is the only possible solution when running with this fedora client
-                String LinkFromFedoraToBitrepository = bitmagUrl + URLEncoder.encode(URLEncoder.encode(finalEvent.getFileID(), CharEncoding.UTF_8), CharEncoding.UTF_8);
+                String singleEncodedFileId = URLEncoder.encode(finalEvent.getFileID(), CharEncoding.UTF_8);
+                String doubleEncodedFileId = URLEncoder.encode(singleEncodedFileId, CharEncoding.UTF_8);
+                String linkFromFedoraToBitrepository = bitmagUrl + doubleEncodedFileId;
                 // save external datastream in file object.
-                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), LinkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
                 // Add "hasPart" relation from the page object to the file object.
                 efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
                 // Add the checksum relation to Fedora
@@ -524,7 +525,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 log.info("Completed ingest of file " + finalEvent.getFileID());
 
             } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException | UnsupportedEncodingException e) {
-                log.error(e.getMessage());
+                log.error(e.getMessage(), e);
                 toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
             }
 
