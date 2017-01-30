@@ -8,11 +8,10 @@
             <xs:sequence>
               <xs:element type="xs:string" name="source" minOccurs="1" maxOccurs="1"/>
               <xs:element type="xs:string" name="edition" minOccurs="1" maxOccurs="1"/>
-              <xs:element name="publishdate">
+              <xs:element name="publishdate" minOccurs="1" maxOccurs="1">
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
-                    <xs:pattern value="\d{8}"></xs:pattern>
-                    <xs:length value="8"/>
+                    <xs:pattern value="\d{8}" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
@@ -23,13 +22,7 @@
           <xs:complexType>
             <xs:sequence>
               <xs:element type="xs:string" name="sectionname" minOccurs="0" maxOccurs="1"/>
-              <xs:element name="sectionnumber" minOccurs="0" maxOccurs="1" nillable="true">
-                <xs:simpleType>
-                  <xs:restriction base="xs:string">
-                    <xs:pattern value="[a-zA-Z0-9]?"/>
-                  </xs:restriction>
-                </xs:simpleType>
-              </xs:element>
+              <xs:element type="xs:string" name="sectionnumber" minOccurs="0" maxOccurs="1" nillable="true" />
               <xs:element type="xs:string" name="pagename" minOccurs="0" maxOccurs="1" nillable="true"/>
               <xs:element type="xs:integer" name="pagenumber" minOccurs="1" maxOccurs="1" nillable="true"/>
             </xs:sequence>

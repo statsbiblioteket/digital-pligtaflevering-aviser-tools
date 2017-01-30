@@ -38,9 +38,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "../../target/", "/target"
   config.vm.synced_folder "../../../../bitrepositorystub-storage/", "/bitrepositorystub-storage"
   config.vm.synced_folder "../../../../delivery-samples/", "/delivery-samples"
+  config.vm.synced_folder "~/.m2/repository/org/bitrepository/reference/bitrepository-integration/1.9-SNAPSHOT", "/bitRepoDelivery"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 5120
+    v.memory = 8192
     v.cpus = 2 # or more for heavy load
   end
 
