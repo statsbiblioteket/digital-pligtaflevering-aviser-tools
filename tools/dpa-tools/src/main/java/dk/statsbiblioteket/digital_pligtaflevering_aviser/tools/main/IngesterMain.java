@@ -273,10 +273,10 @@ public class IngesterMain {
         @Provides
         FileNameToFileIDConverter provideFileNameToFileIDConverter() {
             //For creating flat filestructure for ingested files
-            //return path1 -> NewspaperFileNameTranslater.getFileID(path1.toString());
+            //return path -> NewspaperFileNameTranslater.getFileID(path.toString());
 
             //For creating folders for ingested files
-            return path1 -> path1.toString();
+            return path -> path.toString();
         }
 
         /**
