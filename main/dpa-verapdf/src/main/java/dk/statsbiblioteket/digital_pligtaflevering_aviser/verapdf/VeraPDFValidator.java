@@ -4,11 +4,12 @@ import org.verapdf.core.EncryptedPdfException;
 import org.verapdf.core.ModelParsingException;
 import org.verapdf.core.ValidationException;
 import org.verapdf.core.XmlSerialiser;
-import org.verapdf.model.ModelParser;
+import org.verapdf.pdfa.Foundries;
+import org.verapdf.pdfa.PDFAParser;
 import org.verapdf.pdfa.PDFAValidator;
+import org.verapdf.pdfa.VeraGreenfieldFoundryProvider;
 import org.verapdf.pdfa.flavours.PDFAFlavour;
 import org.verapdf.pdfa.results.ValidationResult;
-import org.verapdf.pdfa.validation.validators.ValidatorFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
@@ -32,6 +33,9 @@ public class VeraPDFValidator implements Function<InputStream, byte[]> {
     public VeraPDFValidator(String flavorId, Boolean prettyXml) {
         this.flavorId = flavorId;
         this.prettyXml = prettyXml;
+
+        // tell verapdf we want the greenfield parser.
+        VeraGreenfieldFoundryProvider.initialise();
     }
 
     @Override
@@ -46,17 +50,28 @@ public class VeraPDFValidator implements Function<InputStream, byte[]> {
     }
 
     private byte[] apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
-        PDFAFlavour profileId = PDFAFlavour.byFlavourId(flavorId);
-        ModelParser toValidate = ModelParser.createModelWithFlavour(inputStream, profileId);
-        PDFAValidator validator = ValidatorFactory.createValidator(profileId, false);
-        ValidationResult result = validator.validate(toValidate);
+        /*
+        Carl Wilson 2016-12-29: The best place to look for an example is here:
 
-        // as of 0.25 ValidationResult can be marshalled using JAXB to XML
-        // for now do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
+        https://github.com/veraPDF/veraPDF-integration-tests/blob/integration/src/test/java/org/verapdf/integration/CorpusTest.java#L60
+
+        The appropriate Maven include is here:
+
+        https://github.com/veraPDF/veraPDF-integration-tests/blob/integration/pom.xml#L83.
+
+        TRA 2017-01-23:  Froze pom.xml ranges at version 1.0.6
+         */
+        PDFAFlavour flavour = PDFAFlavour.byFlavourId(flavorId);
+        PDFAValidator validator = Foundries.defaultInstance().createValidator(flavour, false);
+        PDFAParser loader = Foundries.defaultInstance().createParser(inputStream, flavour);
+        ValidationResult result = validator.validate(loader);
+
+        // do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         XmlSerialiser.toXml(result, baos, prettyXml, false);
-        return baos.toByteArray();
+        final byte[] byteArray = baos.toByteArray();
+        return byteArray;
     }
 }
 
