@@ -15,7 +15,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
@@ -243,7 +242,8 @@ public class VeraPDFInvokeMain {
 
         @Provides
         Function<InputStream, byte[]> getVeraPDFInvoker(@Named(DPA_VERAPDF_FLAVOR) String flavorId) {
-            return new VeraPDFValidator(flavorId, true);
+            //return new VeraPDFValidator(flavorId, true);
+            throw new RuntimeException("verapdf disabled - see DPA-89");
         }
 
         @Provides
