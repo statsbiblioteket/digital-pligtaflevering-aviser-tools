@@ -51,7 +51,9 @@
 
     <modules>
         <module>main/dpa-api</module>
+        <!-- DPA-89 broken verapdf maven repository, disabled for now
         <module>main/dpa-verapdf</module>
+        -->
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
