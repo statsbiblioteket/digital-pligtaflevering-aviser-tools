@@ -1,5 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,16 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-
 /**
  * Validator for md5 validation of digital newspaper batches
  */
 public class BatchMD5Validation {
+
+    final Logger log = LoggerFactory.getLogger(this.getClass());
+
     final private String batchFolder;
     private String checksumFileName;
     private BiFunction<Path, String, String> md5Convert;
     final private HashSet<String> ignoredFiles = new HashSet<String>();
-    private Map<String, String> cashedFileListMap = new HashMap<String, String>();
+    private Map<String, String> cachedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
 
     public BatchMD5Validation(String batchFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
@@ -49,7 +54,10 @@ public class BatchMD5Validation {
     public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
         //Read the checksums from the file "checksums.txt" and insert it into a hashmap with filenames as keys and checksums as values
         File checksumFile = Paths.get(batchFolder, batchName, checksumFileName).toFile();
+        log.trace("Reading checksum file:  {}", checksumFile.getAbsolutePath());
+
         if(!checksumFile.exists()) {
+            log.trace("checksum file not found {}", checksumFile.getAbsolutePath());
             validationResult.add("The checksumfile " + checksumFile.getAbsolutePath() + " is missing");
             return false;
         }
@@ -71,18 +79,19 @@ public class BatchMD5Validation {
             }
         }
 
-        //Walk through the filesystem in tha batch and confirm that all files inside the batch is also mentioned in the checksum-file
-        //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
+        //Walk through the filesystem in that delivery and confirm that all files inside the batch is also mentioned in the checksum-file
+        //It is possible to indicate some specific files which should be ignored, they is not part of the validation
         Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
                     String fileIdMatchingChecksumfile = md5Convert.apply(filePath, batchName);
                     if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
-                        //This file is one of the ignored files, just contionue without doing anything
+                        //This file is one of the ignored files, just continue without doing anything
                     } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
+                        log.trace("{} not a key in md5Map", fileIdMatchingChecksumfile);
                         validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
                     } else {
-                        cashedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
+                        cachedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
                     }
                 });
 
@@ -94,10 +103,12 @@ public class BatchMD5Validation {
                 String actualMd5 = getFileChecksum(MessageDigest.getInstance("md5"), file);
                 if(!expectedMd5.equals(actualMd5)) {
                     //If the checksum of the delivered file and the checksum of the file in "MD5SUMS.txt" does not match, raise an error
+                    log.trace("expectedMD5: {}  actualMD5: {}", expectedMd5, actualMd5);
                     validationResult.add(file.getAbsolutePath() + " expectedMd5: " + expectedMd5 + " actualMd5:" + actualMd5);
                 }
             } else {
                 //If the file that is claimed to exist in the "checksums.txt" can not be found, raise an error
+                log.trace("key not present: {} for {}", fileName, file.getAbsolutePath());
                 validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() +" claims is existing  : " + file);
             }
         }
@@ -110,7 +121,7 @@ public class BatchMD5Validation {
      * @return
      */
     public String getChecksum(String filePath) {
-        String checksum = cashedFileListMap.get(filePath);
+        String checksum = cachedFileListMap.get(filePath);
         return checksum;
     }
 

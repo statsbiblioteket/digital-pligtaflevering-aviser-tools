@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-cd /bitrepositorystub-storage
+cd bitrepository-quickstart/
 python3 -m http.server 58709 &
 

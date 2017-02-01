@@ -65,7 +65,6 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
@@ -176,6 +175,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
         log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+        log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage,outcome);
         return "item " + domsItem + " ingested. outcome = " + outcome;
     }
 
