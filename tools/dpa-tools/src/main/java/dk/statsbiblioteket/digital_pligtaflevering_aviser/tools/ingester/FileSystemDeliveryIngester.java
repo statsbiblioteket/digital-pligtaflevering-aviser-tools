@@ -225,7 +225,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         String batchName = relativeFilenameFromDublinCore.get();
         long startBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.START_BATCH_INGEST, batchName);
+        log.info(KibanaLoggingStrings.START_DELIVERY_INGEST, batchName);
 
         Path deliveryPath = rootPath.resolve(batchName);
 
@@ -279,7 +279,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
+        log.info(KibanaLoggingStrings.FINISHED_DELIVERY_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
         return subDirectoryResults;
     }
 
