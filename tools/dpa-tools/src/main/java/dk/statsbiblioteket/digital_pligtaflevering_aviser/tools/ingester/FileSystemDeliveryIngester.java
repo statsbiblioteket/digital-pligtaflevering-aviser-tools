@@ -395,7 +395,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
+                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path.getFileName().toString(), finishedFileIngestTime - startFileIngestTime);
                                         ToolResult toolResult = this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
                                         return toolResult;
 
