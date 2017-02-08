@@ -13,6 +13,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -124,13 +125,14 @@ public class VeraPDFAnalyzeMain {
 
                 domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome);
 
-                log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+                log.info(KibanaLoggingStrings.FINISHED_DELIVERY_PDFANALYZE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
                 return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
         }
 
         protected Stream<ToolResult> analyzeVeraPDFDataStream(DomsItem domsItem, VeraPDFOutputValidation veraPDFOutputValidation) {
 
+            long startTime = System.currentTimeMillis();
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
             Optional<DomsDatastream> profileOptional = datastreams.stream()
@@ -190,7 +192,7 @@ public class VeraPDFAnalyzeMain {
             } catch (Exception e) {
                 return Stream.of(ToolResult.fail(domsItem + " could not save to datastream"));
             }
-
+            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFANALYZE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
             switch (worstBrokenRule) {
                 case INVALID:
                     return Stream.of(ToolResult.fail(domsItem + " " + worstBrokenRule));

@@ -12,6 +12,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -23,6 +24,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -123,7 +127,7 @@ public class VeraPDFInvokeMain {
 
                 domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome);
 
-                log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+                log.info(KibanaLoggingStrings.FINISHED_DELIVERY_PDFINVOKE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
                 return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
             };
         }
@@ -161,10 +165,14 @@ public class VeraPDFInvokeMain {
                 return Stream.of(ToolResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
             }
             String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
-
-            Path path = Paths.get(bitrepositoryMountpoint, filename);
-            File file = path.toFile();
-            log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
+            File file = null;
+            try {
+                Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(filename, CharEncoding.UTF_8));
+                file = path.toFile();
+                log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
+            } catch (UnsupportedEncodingException e) {
+                return Stream.of(ToolResult.fail(domsItem + " file '" + filename + " could not get decoded", e));
+            }
 
             long startTime = System.currentTimeMillis();
 
@@ -176,8 +184,7 @@ public class VeraPDFInvokeMain {
             } catch (Exception e) {
                 return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + " failed validation", e));
             }
-
-            log.info("{} {} Took: {} ms", VERAPDF_INVOKED, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
+            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
 
             // We have now run VeraPDF on the PDF file and has the output in hand.
             // Store it in the "VERAPDF" datastream for the object.

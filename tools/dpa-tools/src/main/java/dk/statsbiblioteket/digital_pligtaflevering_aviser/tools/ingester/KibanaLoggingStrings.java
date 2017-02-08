@@ -14,4 +14,10 @@ public class KibanaLoggingStrings {
     public static final String START_DELIVERY_XML_VALIDATION_AGAINST_XSD = "EnteredDeliveryXSDValidation {} ";
     public static final String FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD = "FinishedDeliveryXSDValidation {} Took: {} ms ";
 
+    public static final String FINISHED_DELIVERY_PDFINVOKE = "FinishedDeliveryPDFInvoke {} Took: {} ms ";
+    public static final String FINISHED_FILE_PDFINVOKE = "FinishedFilePDFInvoke {} Took: {} ms ";
+
+    public static final String FINISHED_DELIVERY_PDFANALYZE = "FinishedDeliveryPDFAnalyze {} Took: {} ms ";
+    public static final String FINISHED_FILE_PDFANALYZE = "FinishedFilePDFAnalyze {} Took: {} ms ";
+
 }
