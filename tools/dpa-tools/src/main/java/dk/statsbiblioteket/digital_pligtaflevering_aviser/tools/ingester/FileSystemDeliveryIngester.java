@@ -65,7 +65,6 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
@@ -235,12 +234,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("Delivery directory: {}", deliveryPath);
 
-        // Original in BatchMD5Validation.readChecksums()
+        // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
-        BatchMD5Validation md5validations;
+        DeliveryMD5Validation md5validations;
         try {
-            md5validations = new BatchMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
+            md5validations = new DeliveryMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if(validationResults.size() > 0) {
@@ -312,7 +311,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param md5map
      */
 
-    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, BatchMD5Validation md5map) {
+    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
@@ -395,7 +394,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path.getFileName().toString(), finishedFileIngestTime - startFileIngestTime);
+                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
                                         ToolResult toolResult = this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
                                         return toolResult;
 

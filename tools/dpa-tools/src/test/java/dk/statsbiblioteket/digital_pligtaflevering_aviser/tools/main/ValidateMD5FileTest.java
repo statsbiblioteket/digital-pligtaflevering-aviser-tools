@@ -1,9 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.BatchMD5Validation;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.DeliveryMD5Validation;
 import org.junit.Before;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,7 +31,7 @@ public class ValidateMD5FileTest {
     public void analyzeDeliveriesAgainstChecksums1() throws Exception {
 
         String folder = getBatchFolder();
-        BatchMD5Validation md5Validator = new BatchMD5Validation(folder, "checksums.txt", provideFilePathConverter(true), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", provideFilePathConverter(true), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         boolean bb = md5Validator.validation("dl_20160811_rt1");
         List<String> results = md5Validator.getValidationResult();
 
@@ -45,7 +44,7 @@ public class ValidateMD5FileTest {
 
         String folder = getBatchFolder();
 
-        BatchMD5Validation md5Validator = new BatchMD5Validation(folder, "MD5SUMS.txt", provideFilePathConverter(false), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", provideFilePathConverter(false), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         boolean bb = md5Validator.validation("dl_20160811_rt1");
         List<String> results = md5Validator.getValidationResult();
 

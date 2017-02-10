@@ -1,8 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,21 +21,16 @@ import java.util.function.BiFunction;
 /**
  * Validator for md5 validation of digital newspaper batches
  */
-public class BatchMD5Validation {
-
-    protected Logger log = LoggerFactory.getLogger(getClass());
-
-    final private String batchFolder;
+public class DeliveryMD5Validation {
+    final private String deliveryFolder;
     private String checksumFileName;
     private BiFunction<Path, String, String> md5Convert;
     final private HashSet<String> ignoredFiles = new HashSet<String>();
     private Map<String, String> cashedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
-    private int pageCount = 0;
-    private int articleCount = 0;
 
-    public BatchMD5Validation(String batchFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
-        this.batchFolder = batchFolder;
+    public DeliveryMD5Validation(String deliveryFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
+        this.deliveryFolder = deliveryFolder;
         this.checksumFileName = checksumFileName;
         this.md5Convert = md5Convert;
         for(String ignoredFile : ignoredFilesString.split(",")) {
@@ -47,16 +39,16 @@ public class BatchMD5Validation {
     }
 
     /**
-     * Validate a specified batch by reading the checksums, and confirm that all files listed in "checksums.txt" does actually exist and that the real files has the same checksum.
+     * Validate a specified delivery by reading the checksums, and confirm that all files listed in "checksums.txt" does actually exist and that the real files has the same checksum.
      *
-     * @param batchName The name of the batch is something like "dl_yyyymmdd_rt#"
-     * @return true if the validation of the path was executed successfully
+     * @param deliveryName
+     * @return
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    public boolean validation(String batchName) throws IOException, NoSuchAlgorithmException {
+    public boolean validation(String deliveryName) throws IOException, NoSuchAlgorithmException {
         //Read the checksums from the file "checksums.txt" and insert it into a hashmap with filenames as keys and checksums as values
-        File checksumFile = Paths.get(batchFolder, batchName, checksumFileName).toFile();
+        File checksumFile = Paths.get(deliveryFolder, deliveryName, checksumFileName).toFile();
         if(!checksumFile.exists()) {
             validationResult.add("The checksumfile " + checksumFile.getAbsolutePath() + " is missing");
             return false;
@@ -79,34 +71,24 @@ public class BatchMD5Validation {
             }
         }
 
-        //Walk through the filesystem in tha batch and confirm that all files inside the batch is also mentioned in the checksum-file
+        //Walk through the filesystem in tha delivery and confirm that all files inside the delivery is also mentioned in the checksum-file
         //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
-        Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
+        Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()))
+                .filter(Files::isRegularFile)
                 .forEach(filePath -> {
-                    if(Files.isRegularFile(filePath)) {
-                        String fileIdMatchingChecksumfile = md5Convert.apply(filePath, batchName);
-                        if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
-                            //This file is one of the ignored files, just contionue without doing anything
-                        } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
-                            validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
-                        } else {
-                            cashedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
-                        }
+                    String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryName);
+                    if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
+                        //This file is one of the ignored files, just contionue without doing anything
+                    } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
+                        validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
                     } else {
-                        String folderPath = Paths.get(batchFolder).relativize(filePath).toString();
-                        if (folderPath.contains("pages")) {
-                            pageCount = filePath.toFile().listFiles().length;
-                        } else if(folderPath.contains("articles")) {
-                            articleCount = filePath.toFile().listFiles().length;
-                        }
+                        cashedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
                     }
                 });
 
-        log.info(KibanaLoggingStrings.DELIVERY_CONTENT_INFO, batchName, pageCount, articleCount);
-
         //Make sure that all files listed in "checksums.txt" exists and has the correct checksum
         for(String fileName: md5Map.keySet()) {
-            File file = Paths.get(batchFolder, batchName, fileName).toFile();
+            File file = Paths.get(deliveryFolder, deliveryName, fileName).toFile();
             if(file.exists()) {
                 String expectedMd5 = md5Map.get(fileName);
                 String actualMd5 = getFileChecksum(MessageDigest.getInstance("md5"), file);
