@@ -72,12 +72,15 @@
             <!-- updated as 1.12-SNAPSHOT was incorrectly available at a time -->
             <version>1.9999-SNAPSHOT</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
             <artifactId>dpa-verapdf</artifactId>
             <version>master-SNAPSHOT</version>
         </dependency>
 
+        Also restore VeraPDFAnalyzeMain and VeraPDFAnalyzeMainTest from f557854a5525de8050d0b2eedb28ce683624cc1d
+        -->
     </dependencies>
 
     <build>

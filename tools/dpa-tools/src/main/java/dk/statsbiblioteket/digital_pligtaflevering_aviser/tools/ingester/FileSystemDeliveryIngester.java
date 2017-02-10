@@ -175,6 +175,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
         log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+        log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage,outcome);
         return "item " + domsItem + " ingested. outcome = " + outcome;
     }
 

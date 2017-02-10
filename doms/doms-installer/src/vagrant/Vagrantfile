@@ -6,6 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
+  # Note:  This is not the officially recommended box!  See https://www.vagrantup.com/docs/boxes.html
   config.vm.box = "ubuntu/trusty64"
   # Initial experiments with xenial64 showed that the image is not completely ready yet.
   # config.vm.box = "ubuntu/xenial64"
@@ -36,9 +37,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Be able to get the artifacts from host Maven build.
   config.vm.synced_folder "../../target/", "/target"
-  config.vm.synced_folder "../../../../bitrepositorystub-storage/", "/bitrepositorystub-storage"
   config.vm.synced_folder "../../../../delivery-samples/", "/delivery-samples"
-  config.vm.synced_folder "~/.m2/repository/org/bitrepository/reference/bitrepository-integration/1.9-SNAPSHOT", "/bitRepoDelivery"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 8192

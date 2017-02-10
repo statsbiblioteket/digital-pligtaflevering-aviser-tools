@@ -1,5 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +24,8 @@ import java.util.function.BiFunction;
  * Validator for md5 validation of digital newspaper batches
  */
 public class DeliveryMD5Validation {
+    final Logger log = LoggerFactory.getLogger(this.getClass());
+
     final private String deliveryFolder;
     private String checksumFileName;
     private BiFunction<Path, String, String> md5Convert;
@@ -49,7 +53,10 @@ public class DeliveryMD5Validation {
     public boolean validation(String deliveryName) throws IOException, NoSuchAlgorithmException {
         //Read the checksums from the file "checksums.txt" and insert it into a hashmap with filenames as keys and checksums as values
         File checksumFile = Paths.get(deliveryFolder, deliveryName, checksumFileName).toFile();
+        log.trace("Reading checksum file:  {}", checksumFile.getAbsolutePath());
+
         if(!checksumFile.exists()) {
+            log.trace("checksum file not found {}", checksumFile.getAbsolutePath());
             validationResult.add("The checksumfile " + checksumFile.getAbsolutePath() + " is missing");
             return false;
         }
@@ -71,18 +78,19 @@ public class DeliveryMD5Validation {
             }
         }
 
-        //Walk through the filesystem in tha delivery and confirm that all files inside the delivery is also mentioned in the checksum-file
-        //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
+        //Walk through the filesystem in that delivery and confirm that all files inside the delivery is also mentioned in the checksum-file
+        //It is possible to indicate some specific files whish should be ignored, they is not part of the validation
         Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()))
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
                     String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryName);
                     if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
-                        //This file is one of the ignored files, just contionue without doing anything
+                        //This file is one of the ignored files, just continue without doing anything
                     } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
+                        log.trace("{} not a key in md5Map", fileIdMatchingChecksumfile);
                         validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
                     } else {
-                        cashedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
+                        cachedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
                     }
                 });
 
@@ -94,10 +102,12 @@ public class DeliveryMD5Validation {
                 String actualMd5 = getFileChecksum(MessageDigest.getInstance("md5"), file);
                 if(!expectedMd5.equals(actualMd5)) {
                     //If the checksum of the delivered file and the checksum of the file in "MD5SUMS.txt" does not match, raise an error
+                    log.trace("expectedMD5: {}  actualMD5: {}", expectedMd5, actualMd5);
                     validationResult.add(file.getAbsolutePath() + " expectedMd5: " + expectedMd5 + " actualMd5:" + actualMd5);
                 }
             } else {
                 //If the file that is claimed to exist in the "checksums.txt" can not be found, raise an error
+                log.trace("key not present: {} for {}", fileName, file.getAbsolutePath());
                 validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() +" claims is existing  : " + file);
             }
         }
@@ -110,7 +120,7 @@ public class DeliveryMD5Validation {
      * @return
      */
     public String getChecksum(String filePath) {
-        String checksum = cashedFileListMap.get(filePath);
+        String checksum = cachedFileListMap.get(filePath);
         return checksum;
     }
 

@@ -149,11 +149,13 @@
                                     </mainClass>
                                     <id>dpa-ingester</id>
                                 </program>
+                                <!--
                                 <program>
                                     <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFInvokeMain
                                     </mainClass>
                                     <id>dpa-verapdf-apply</id>
                                 </program>
+                                -->
                                 <program>
                                     <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ValidateXMLMain
                                     </mainClass>
