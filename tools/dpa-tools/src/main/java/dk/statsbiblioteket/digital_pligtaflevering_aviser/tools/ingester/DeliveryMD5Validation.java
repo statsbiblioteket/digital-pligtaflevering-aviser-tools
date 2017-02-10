@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
@@ -30,7 +31,7 @@ public class DeliveryMD5Validation {
     private String checksumFileName;
     private BiFunction<Path, String, String> md5Convert;
     final private HashSet<String> ignoredFiles = new HashSet<String>();
-    private Map<String, String> cashedFileListMap = new HashMap<String, String>();
+    private Map<String, String> cachedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
 
     public DeliveryMD5Validation(String deliveryFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
