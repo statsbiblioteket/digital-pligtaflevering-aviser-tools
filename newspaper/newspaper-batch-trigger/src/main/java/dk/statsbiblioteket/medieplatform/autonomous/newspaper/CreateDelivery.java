@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_DELIVERY_FINISH_LOGTEXT;
-import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.LoggingKeywords.CREATE_DELIVERY_START_LOGTEXT;
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.KibanaLoggingStrings.CREATE_DELIVERY_FINISH_LOGTEXT;
+import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.KibanaLoggingStrings.CREATE_DELIVERY_START_LOGTEXT;
 
 /**
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.

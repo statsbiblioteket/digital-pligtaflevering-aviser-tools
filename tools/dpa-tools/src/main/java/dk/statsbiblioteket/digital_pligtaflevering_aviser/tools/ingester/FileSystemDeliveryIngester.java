@@ -225,7 +225,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         String batchName = relativeFilenameFromDublinCore.get();
         long startBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.START_BATCH_INGEST, batchName);
+        log.info(KibanaLoggingStrings.START_DELIVERY_INGEST, batchName);
 
         Path deliveryPath = rootPath.resolve(batchName);
 
@@ -235,12 +235,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("Delivery directory: {}", deliveryPath);
 
-        // Original in BatchMD5Validation.readChecksums()
+        // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
-        BatchMD5Validation md5validations;
+        DeliveryMD5Validation md5validations;
         try {
-            md5validations = new BatchMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
+            md5validations = new DeliveryMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if(validationResults.size() > 0) {
@@ -279,7 +279,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
+        log.info(KibanaLoggingStrings.FINISHED_DELIVERY_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
         return subDirectoryResults;
     }
 
@@ -312,7 +312,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param md5map
      */
 
-    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, BatchMD5Validation md5map) {
+    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
