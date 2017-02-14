@@ -4,16 +4,26 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
+import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
+import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.util.xml.DOM;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
+import org.bitrepository.client.eventhandler.OperationEvent;
+import org.bitrepository.commandline.eventhandler.CompleteEventAwaiter;
+import org.bitrepository.commandline.eventhandler.PutFileEventHandler;
+import org.bitrepository.commandline.output.DefaultOutputHandler;
+import org.bitrepository.commandline.output.OutputHandler;
+import org.bitrepository.common.settings.Settings;
 import org.bitrepository.common.utils.Base16Utils;
 import org.bitrepository.common.utils.CalendarUtils;
 import org.bitrepository.modify.putfile.PutFileClient;
@@ -28,8 +38,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +57,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,38 +80,42 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
+    private static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
+    private static final String CONTENTS = "CONTENTS";
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private DomsRepository repository;
     private String ignoredFiles;
-    private PutFileClient putfileClient;
-    private final String bitrepositoryUrlPrefix;
-    private final String bitrepositoryMountpoint;
+    protected final PutFileClient putfileClient;
+    protected final Function<Path, String> fileNameToFileIDConverter;
+    protected final BiFunction<Path, String, String> md5Convert;
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
-    protected Set<String> ignoredFilesSet;
-
+    private Set<String> ignoredFilesSet;
+    private Settings settings;
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
+
+    protected final OutputHandler output = new DefaultOutputHandler(getClass());
+
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
                                       PutFileClient putfileClient,
+                                      FileNameToFileIDConverter fileNameToFileIDConverter,
+                                      FilePathToChecksumPathConverter md5Convert,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
-                                      @Named("bitrepository.ingester.baseurl") String bitrepositoryUrlPrefix,
-                                      @Named("bitrepository.sbpillar.mountpoint") String bitrepositoryMountpoint,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
-                                      WebResource restApi, EnhancedFedora efedora) {
-        this.repository = repository;
+                                      WebResource restApi, EnhancedFedora efedora,
+                                      Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
-        this.bitrepositoryUrlPrefix = bitrepositoryUrlPrefix;
-        this.bitrepositoryMountpoint = bitrepositoryMountpoint;
+        this.fileNameToFileIDConverter = fileNameToFileIDConverter;
+        this.md5Convert = md5Convert;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath;
         this.restApi = restApi;
         this.efedora = efedora;
@@ -106,6 +124,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.dpaCollectionId = dpaCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+        this.settings = settings;
         log.trace("Ignored files: {}", ignoredFilesSet);
     }
 
@@ -156,6 +175,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
         log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+        log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage,outcome);
         return "item " + domsItem + " ingested. outcome = " + outcome;
     }
 
@@ -205,7 +225,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         String batchName = relativeFilenameFromDublinCore.get();
         long startBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.START_BATCH_INGEST, batchName);
+        log.info(KibanaLoggingStrings.START_DELIVERY_INGEST, batchName);
 
         Path deliveryPath = rootPath.resolve(batchName);
 
@@ -215,16 +235,24 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("Delivery directory: {}", deliveryPath);
 
-        // Original in BatchMD5Validation.readChecksums()
+        // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
-        Map<String, String> md5map;
+        DeliveryMD5Validation md5validations;
         try {
-            md5map = Files.lines(deliveryPath.resolve("checksums.txt"))
-                    .map(s -> s.split("[,\\s]\\s*"))
-                    .collect(Collectors.toMap(a -> a[1], a -> a[0]));
+            md5validations = new DeliveryMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
+            md5validations.validation(batchName);
+            List<String> validationResults = md5validations.getValidationResult();
+            if(validationResults.size() > 0) {
+                String collectiveValidationString = new String();
+                for(String singleValidation : validationResults) {
+                    //FIXME: When the webclient is done this might need to be refactored to write this where the webclient fetches it
+                    collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
+                }
+                return Arrays.asList(ToolResult.fail("Checksum validation failed:  " + collectiveValidationString));
+            }
         } catch (Exception e) {
-            return Arrays.asList(ToolResult.fail("Could not read checksums.txt", e));
+            return Arrays.asList(ToolResult.fail("Could not process checksums.txt", e));
         }
 
             /* walk() guarantees that we have always seen the parent of a directory before we
@@ -247,11 +275,11 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5map))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5validations))
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
-        log.info(KibanaLoggingStrings.FINISHED_BATCH_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
+        log.info(KibanaLoggingStrings.FINISHED_DELIVERY_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
         return subDirectoryResults;
     }
 
@@ -284,11 +312,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param md5map
      */
 
-    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, Map<String, String> md5map) {
+    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
         // see if DOMS object exist for this directory
+
+
 
         final String currentDirectoryPid = lookupObjectFromDCIdentifierAndCreateItIfNeeded(dcIdentifier);
 
@@ -341,40 +371,49 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                 try {
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
-                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.get(filePath.toString()));
+                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
+                                    String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
+                                        //Save *.pdf files to bitrepository
                                         long startFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
-                                        // Construct the fileId with the path from the deliveryfolder to the file
-                                        final String fileId = NewspaperFileNameTranslater.getFileID(Paths.get(deliveryName, filePath.toString()).toString());
                                         Path relativePath = rootPath.relativize(path);
-                                        String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
 
-                                        BitrepositoryClientEventHandler handler = new BitrepositoryClientEventHandler(collections, pageObjectId, bitmagUrl, relativePath, checksum, efedora, SOFTWARE_VERSION);
+                                        //Construct a synchronous eventhandler
+                                        CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
+
+                                        String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
+                                        String urlEncodedFileSource = URLEncoder.encode(relativePath.toString(), CharEncoding.UTF_8);
 
                                         // Use the PutClient to ingest the file into Bitrepository
+                                        // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
+                                        // Checksum is not validated since the bitrepository return an error if the checksum is not validated
                                         putfileClient.putFile(dpaCollectionId,
-                                                new URL(urlToBitmagBatchPath + path.toString()), fileId, DEFAULT_FILE_SIZE,
-                                                checkSum, null, handler, null);
+                                                new URL(urlToBitmagBatchPath + urlEncodedFileSource), fileId, DEFAULT_FILE_SIZE,
+                                                checkSum, null, eventHandler, null);
 
-                                        ToolResult toolResult = handler.getLastToolResult();
-                                        toolResultsForThisDirectory.add(toolResult);
+
+                                        OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-
+                                        ToolResult toolResult = this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
                                         return toolResult;
 
                                     } else if (path.toString().endsWith(".xml")) {
-                                        // FIXME: check md5 checksum.
                                         // save physical bytes of XML file as "XML" data stream on page object.
 
-                                        final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
-                                        byte[] allBytes = Files.readAllBytes(path);
-                                        // String md5checksum = "FIXME";
-                                        // efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, md5checksum, allBytes, null, mimeType, "From " + path, null);
-                                        efedora.modifyDatastreamByValue(pageObjectId, "XML", null, null, allBytes, null, mimeType, "From " + path, null);
-                                        return ToolResult.ok("XML datastream added for " + path);
-
+                                        //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
+                                        FileInputStream fis = new FileInputStream(path.toFile());
+                                        String md5s = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+                                        fis.close();
+                                        if(md5s.equals(checksum)) {//If checksum is validated start ingesting otherwise return fail
+                                            final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
+                                            byte[] allBytes = Files.readAllBytes(path);
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
+                                            return ToolResult.ok("XML datastream added for " + path);
+                                        } else {
+                                            return ToolResult.fail("The checksum failed on : " + path);
+                                        }
                                     } else if (path.toString().endsWith(".verapdf")) {
                                         // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.
                                         // save physical bytes of VERAPDF file as "VERAPDF" data stream on PDF file object.
@@ -394,6 +433,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         return ToolResult.fail("path not pdf/xml: " + path);
                                     }
                                 } catch (Exception e) {
+                                    log.error(e.getMessage(), e);
                                     return ToolResult.fail("Could not process " + path, e);
                                 }
                             });
@@ -424,12 +464,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
 
-        /**
-         */
 
         // For each subdirectory in this directory, lookup the child DOMS id using its relative Path and create
         // a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the subdirectories are processed first.
-
         List<String> childDirectoryObjectIds = null;
         try {
             childDirectoryObjectIds = Files.walk(absoluteFileSystemPath, 1)
@@ -455,6 +492,54 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         return toolResultsForThisDirectory.stream();
     }
 
+
+    /**
+     * Write the result of activate putfileClient to envoke bitmagasin
+     * @param relativePath The [relative to deliveryfolder] path to the file
+     * @param finalEvent The event that is fetched from the putFileClient
+     * @param pageObjectId pageObjectId to write to fedora
+     * @param checkSum The checksum of the file
+     * @return A result of the specifik job
+     */
+    private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
+        //Writing to components has been inspired by the code i DomsJP2FileUrlRegister.register() from the project "dpa-bitrepository-ingester"
+        final String mimetype = "application/pdf";
+        ToolResult toolResult = null;
+
+        // create DOMS object for the file
+        String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + relativePath.toString());
+
+        if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
+            try {
+                // The URLEncoding needs to be done twice to get it stored correctly inside Fedora, this is not the best solution but it is the only possible solution when running with this fedora client
+                String singleEncodedFileId = URLEncoder.encode(finalEvent.getFileID(), CharEncoding.UTF_8);
+                String doubleEncodedFileId = URLEncoder.encode(singleEncodedFileId, CharEncoding.UTF_8);
+                String linkFromFedoraToBitrepository = bitmagUrl + doubleEncodedFileId;
+                // save external datastream in file object.
+                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                // Add "hasPart" relation from the page object to the file object.
+                efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
+                // Add the checksum relation to Fedora
+                efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
+                toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
+                log.info("Completed ingest of file " + finalEvent.getFileID());
+
+            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException | UnsupportedEncodingException e) {
+                log.error("ObjectId: " + fileObjectId + " relativePath: " + relativePath.toString(), e);
+                toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
+            }
+
+        } else if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.FAILED)) {
+            log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", finalEvent.getFileID(), finalEvent.getEventType());
+            toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID());
+        } else {
+            log.debug("Got an event that I really don't care about, event type: '{}' for fileID '{}'", finalEvent.getEventType(), finalEvent.getFileID());
+        }
+        return toolResult;
+    }
+
+
+
     /**
      * Ensure that we have a valid DOMS id for the given dcIdentifier.  If it is not found, create
      * a new empty DOMS object and use that.
@@ -462,7 +547,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param dcIdentifier identifier to lookup in DOMS.
      * @return an existing DOMS id.
      */
-
     protected String lookupObjectFromDCIdentifierAndCreateItIfNeeded(String dcIdentifier) {
 
         List<String> founds = lookupObjectFromDCIdentifier(dcIdentifier);

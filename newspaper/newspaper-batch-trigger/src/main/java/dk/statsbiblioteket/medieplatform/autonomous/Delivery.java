@@ -1,15 +1,14 @@
 package dk.statsbiblioteket.medieplatform.autonomous;
 
 /**
- * Quick extraction of logic from Batch
- * TODO: Needs to decide what to do about all this
+ * Delivery forms an object representation of a delivery-folder of newspapers
  */
 public class Delivery extends Item {
 
     /**
-     * The batch id as a long, ie. without the B in the start of the string
+     * The batch id as a long, ie. without the "dl_" in the start of the string
      */
-    private String batchID;
+    private String deliveryID;
 
     /**
      * The round trip number
@@ -17,27 +16,21 @@ public class Delivery extends Item {
     private Integer roundTripNumber = 1;
 
     /**
-     * Constructor
+     * DeliveryType, this can be either a std. delivery or a mutation
      */
-    public Delivery() {
-    }
+    private DeliveryType deliveryType;
+
 
     /**
-     * Constructor
+     * Constructor for Deliverys, deliverys can be of two types, either a std. delivery or a mutation
      */
-    public Delivery(String batchID) {
-        setBatchID(batchID);
-    }
-
-    /**
-     * Constructor
-     */
-    public Delivery(String batchID, Integer roundTripNumber) {
+    public Delivery(String deliveryID, Integer roundTripNumber, DeliveryType deliveryType) {
         if (roundTripNumber == null) {
             roundTripNumber = 0;
         }
-        setBatchID(batchID);
+        setDeliveryID(deliveryID);
         setRoundTripNumber(roundTripNumber);
+        this.deliveryType = deliveryType;
     }
 
     /**
@@ -60,32 +53,42 @@ public class Delivery extends Item {
      *
      * @return as above
      */
-    public String getBatchID() {
-        return batchID;
+    public String getDeliveryID() {
+        return deliveryID;
     }
+
+    /**
+     * Get the deliveryType id.
+     *
+     * @return as above
+     */
+    public DeliveryType getDeliveryType() {
+        return deliveryType;
+    }
+
 
     /**
      * Set the batch id
      *
-     * @param batchID to set
+     * @param deliveryID to set
      */
-    public void setBatchID(String batchID) {
-        this.batchID = batchID;
+    public void setDeliveryID(String deliveryID) {
+        this.deliveryID = deliveryID;
     }
 
     /**
-     * Get the full ID in the form B<batchID>-RT<roundTripNumber>
+     * Get the full ID in the form B<deliveryID>-RT<roundTripNumber>
      *
      * @return the full ID
      */
     @Override
     public String getFullID() {
-        return formatFullID(batchID, roundTripNumber);
+        return formatFullID(deliveryID, roundTripNumber);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Batch: " + getFullID());
+        StringBuilder sb = new StringBuilder("Delivery: " + getFullID());
         if (getEventList() != null && !getEventList().isEmpty()) {
             sb.append(", eventList=").append(getEventList());
         }
@@ -100,7 +103,7 @@ public class Delivery extends Item {
 
         Delivery delivery = (Delivery) o;
 
-        if (batchID != null ? !batchID.equals(delivery.batchID) : delivery.batchID != null) return false;
+        if (deliveryID != null ? !deliveryID.equals(delivery.deliveryID) : delivery.deliveryID != null) return false;
         return roundTripNumber != null ? roundTripNumber.equals(delivery.roundTripNumber) : delivery.roundTripNumber == null;
 
     }
@@ -108,7 +111,7 @@ public class Delivery extends Item {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (batchID != null ? batchID.hashCode() : 0);
+        result = 31 * result + (deliveryID != null ? deliveryID.hashCode() : 0);
         result = 31 * result + (roundTripNumber != null ? roundTripNumber.hashCode() : 0);
         return result;
     }
@@ -116,38 +119,30 @@ public class Delivery extends Item {
     /**
      * Format the batchid and roundtripnumber as a proper batch id
      *
-     * @param batchID         the batch id without the leading B
+     * @param deliveryID         the delivery id without the leading dl_
      * @param roundTripNumber the roundtrip number
-     * @return a string of the format B{batchID}-RT{roundTripNumber}
+     * @return a string of the format dl_{deliveryID}_rt{roundTripNumber}
      */
-    public static String formatFullID(String batchID, Integer roundTripNumber) {
+    public static String formatFullID(String deliveryID, Integer roundTripNumber) {
         if (roundTripNumber == null) {
             roundTripNumber = 0;
         }
-        return batchID + "_rt" + roundTripNumber;
+        return deliveryID + "_rt" + roundTripNumber;
     }
 
-    public static class BatchRoundtripID {
-        private String batchID;
+    public static class DeliveryRoundtripID {
+        private String deliveryID;
         private int roundTripNumber;
 
-        public BatchRoundtripID(String fullID) {
+        public DeliveryRoundtripID(String fullID) {
             String[] splits = fullID.split("_rt");
             if (splits.length == 2) {
                 String batchIDsplit = splits[0];
                 if (batchIDsplit.startsWith("path:")) {
                     batchIDsplit = batchIDsplit.replace("path:", "");
                 }
-//                if (batchIDsplit.startsWith("dl_")){
-//                    batchIDsplit = batchIDsplit.replace("dl_","");
-//                }
-//                try {
-//                    Long.parseLong(batchIDsplit);
-//                } catch (NumberFormatException e) {
-//                    throw new IllegalArgumentException("This is not a valid round trip id '" + fullID + "'",e);
-//                }
-//
-                batchID = batchIDsplit;
+
+                deliveryID = batchIDsplit;
                 String roundTripSplit = splits[1];
                 try {
                     roundTripNumber = Integer.parseInt(roundTripSplit);
@@ -160,13 +155,13 @@ public class Delivery extends Item {
             }
         }
 
-        public BatchRoundtripID(String batchID, int roundTripNumber) {
-            this.batchID = batchID;
+        public DeliveryRoundtripID(String deliveryID, int roundTripNumber) {
+            this.deliveryID = deliveryID;
             this.roundTripNumber = roundTripNumber;
         }
 
-        public String getBatchID() {
-            return batchID;
+        public String getDeliveryID() {
+            return deliveryID;
         }
 
         public int getRoundTripNumber() {
@@ -174,11 +169,15 @@ public class Delivery extends Item {
         }
 
         public String batchDCIdentifier() {
-            return "path:" + batchID;
+            return "path:" + deliveryID;
         }
 
         public String roundTripDCIdentifier() {
-            return "path:" + batchID + "_rt" + roundTripNumber;
+            return "path:" + deliveryID + "_rt" + roundTripNumber;
         }
+    }
+
+    public enum DeliveryType {
+        STDDELIVERY, MUTATION
     }
 }

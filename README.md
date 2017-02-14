@@ -2,6 +2,14 @@
 
 Digital Pligtaflevering af Aviser (DPA), autonomous preservation tools.
 
+This document give an overview of the project and history.
+
+Please also see:
+
+* <a href="DEVELOPERS-GUIDE.md">Developers guide to DPA</a>
+* ...
+
+
 ## Background
 
 All Danish newspapers published are collected in physical form in two

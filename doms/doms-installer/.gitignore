@@ -8,3 +8,4 @@ target/
 atlassian-ide-plugin.xml
 src/vagrant/.vagrant/
 src/vagrant/devel-config
+/src/vagrant/nohup.out

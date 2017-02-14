@@ -5,6 +5,8 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -16,6 +18,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearc
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import org.bitrepository.common.settings.Settings;
@@ -224,33 +227,70 @@ public class IngesterMain {
          * @param destination         The destination where the client places the files
          * @param settingDir          The folder where settings for bitrepositoryClient is placed
          * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
-         * @return
+         * @return PutFileClient
          */
         @Provides
         PutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
                                            @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
                                            @Named(DPA_PUTFILE_DESTINATION) String destination,
                                            @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty) {
+                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty,
+                                           Settings settings) {
 
             BitrepositoryPutFileClientStub putClient;
             if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
-                //TODO: Using the real Bitrepository client has not been testet, It is created as DPA-75
+                //This is for Authentication for bitrepository-client, This is copied directly from BitrepositoryIngesterComponent.createPutFileClient in dpa-bitrerepository-ingester
                 String certificateLocation = settingDir + File.separator + certificateProperty;
-
-                SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
-                Settings bitRepoSet = settingsLoader.getSettings();
-
                 PermissionStore permissionStore = new PermissionStore();
                 MessageAuthenticator authenticator = new BasicMessageAuthenticator(permissionStore);
                 MessageSigner signer = new BasicMessageSigner();
                 OperationAuthorizor authorizer = new BasicOperationAuthorizor(permissionStore);
-                org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(bitRepoSet.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
-                return ModifyComponentFactory.getInstance().retrievePutClient(bitRepoSet, securityManager, dpaIngesterId);
+                org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(settings.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
+                return ModifyComponentFactory.getInstance().retrievePutClient(settings, securityManager, dpaIngesterId);
             }
             return putClient;
         }
+
+        /**
+         * Provide settings for PutfileClient and for EventHandler listening for the events from ingesting
+         * @param dpaIngesterId The ID of the collection
+         * @param settingDir The directory where the collection is located seen from the putFileClient
+         * @return Settings for putfile PutfileClient and EventHandler
+         */
+        @Provides
+        Settings provideSettings(@Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                     @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
+            SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
+            return settingsLoader.getSettings();
+        }
+
+        /**
+         * Provide Function for converting filePath into an ID which is suitable for bitRepository
+         * @return and ID for the fileContent
+         */
+        @Provides
+        FileNameToFileIDConverter provideFileNameToFileIDConverter() {
+            //For creating flat filestructure for ingested files
+            //return path -> NewspaperFileNameTranslater.getFileID(path.toString());
+
+            //For creating folders for ingested files
+            return path -> path.toString();
+        }
+
+        /**
+         * Provide Function for converting filePath a for
+         * @return and ID for the fileContent
+         */
+        @Provides
+        public FilePathToChecksumPathConverter provideFilePathConverter() {
+            //This should be used for the checksums in the deliveries from Infomedia
+            return (path1, batchId) -> path1.getFileName().toString();
+
+            //This should be used for the checksums in the specifications
+            //return (path1, batchId) -> Paths.get(path1.toString(), batchId).relativize(path1).toString();
+        }
+
     }
 }

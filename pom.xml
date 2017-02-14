@@ -8,12 +8,53 @@
 
     <packaging>pom</packaging>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.javaslang</groupId>
+                <artifactId>javaslang</artifactId>
+                <version>2.0.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.dagger</groupId>
+                <artifactId>dagger</artifactId>
+                <version>2.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.dagger</groupId>
+                <artifactId>dagger-compiler</artifactId>
+                <version>2.2</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.21</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.7.21</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <module>main/dpa-api</module>
-        <module>main/dpa-verapdf</module>
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
+        <module>main/dpa-verapdf</module>
 
         <!-- folder names, not modules -->
         <module>newspaper/newspaper-batch-trigger</module>
@@ -22,7 +63,7 @@
 
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
-        <module>tools/dpa-tools-test</module>
+        <module>tools/dpa-tools-ide-launchers</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>
     </modules>
