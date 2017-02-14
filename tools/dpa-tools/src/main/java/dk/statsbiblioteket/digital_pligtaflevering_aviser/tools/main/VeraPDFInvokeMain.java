@@ -16,6 +16,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaL
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf.VeraPDFValidator;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
@@ -32,8 +33,10 @@ import javax.inject.Provider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,6 +74,7 @@ public class VeraPDFInvokeMain {
 
     }
 
+    /** @noinspection WeakerAccess*/
     @Module
     public static class VeraPDFInvokeModule {
         public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
@@ -103,7 +107,7 @@ public class VeraPDFInvokeMain {
                 long startTime = System.currentTimeMillis();
 
                 // Single doms item
-                List<ToolResult> toolResults = domsItem.allChildren().stream()
+                List<ToolResult> toolResults = domsItem.allChildren()
                         .flatMap(childDomsItem -> invokeVeraPDFOnPhysicalFiles(childDomsItem, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream))
                         .collect(Collectors.toList());
 
@@ -133,6 +137,8 @@ public class VeraPDFInvokeMain {
 
         protected Stream<ToolResult> invokeVeraPDFOnPhysicalFiles(DomsItem domsItem, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
 
+            log.trace("Inspecting {} for datastreams", domsItem);
+
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
             Optional<DomsDatastream> profileOptional = datastreams.stream()
@@ -159,38 +165,60 @@ public class VeraPDFInvokeMain {
 
             // @kfc: Det autoritative svar er at laese url'en som content peger paa, og fjerne det faste
             // bitrepositoryUrlPrefix: http://bitfinder.statsbiblioteket.dk/<collection>/
+
+            // If the URL starts with bitrepositoryUrlPrefix we rewrite the URL to look for
+            // a local file (mounted from Isilon).  If not we process the URL given (which
+            // for non-local bitrepositories might be abysmally slow).
+
+            final InputStream inputStream;
+            final String resourceName;
+
             final String url = ds.getUrl();
             if (url.startsWith(bitrepositoryUrlPrefix) == false) {
-                return Stream.of(ToolResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
-            }
-            String filename = url.substring(bitrepositoryUrlPrefix.length());  // FIXME:  Sanity check input
-            File file = null;
-            try {
-                Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(filename, CharEncoding.UTF_8));
-                file = path.toFile();
-                log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
-            } catch (UnsupportedEncodingException e) {
-                return Stream.of(ToolResult.fail(domsItem + " file '" + filename + " could not get decoded", e));
+                try {
+                    //return Stream.of(ToolResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+                    resourceName = url;
+                    inputStream = new URL(url).openStream();
+                } catch (IOException e) {
+                    return Stream.of(ToolResult.fail(domsItem + " url '" + url + " fails", e));
+                }
+            } else {
+                if (url.length() < bitrepositoryUrlPrefix.length()) {
+                    return Stream.of(ToolResult.fail(domsItem + " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
+                }
+                resourceName = url.substring(bitrepositoryUrlPrefix.length());
+                final File file;
+                try {
+                    Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(resourceName, CharEncoding.UTF_8));
+                    file = path.toFile();
+                    log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
+                    inputStream = new FileInputStream(file);
+                } catch (UnsupportedEncodingException e) {
+                    return Stream.of(ToolResult.fail(domsItem + " '" + resourceName + "' could not get decoded", e));
+                } catch (FileNotFoundException e) {
+                    return Stream.of(ToolResult.fail(domsItem + " '" + resourceName + "' not found", e));
+                }
             }
 
             long startTime = System.currentTimeMillis();
 
             byte[] veraPDF_output;
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                veraPDF_output = veraPdfInvokerProvider.get().apply(inputStream);
-            } catch (FileNotFoundException e) {
-                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + " does not exist", e));
+            try (InputStream inputStreamForVeraPDF = inputStream) {
+                veraPDF_output = veraPdfInvokerProvider.get().apply(inputStreamForVeraPDF);
             } catch (Exception e) {
-                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + " failed validation", e));
+                return Stream.of(ToolResult.fail(domsItem + " " + resourceName + " failed validation", e));
             }
-            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, file.getAbsolutePath(), (System.currentTimeMillis() - startTime));
+
+            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, resourceName, (System.currentTimeMillis() - startTime));
 
             // We have now run VeraPDF on the PDF file and has the output in hand.
             // Store it in the "VERAPDF" datastream for the object.
             // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
 
-            String comment = file.getAbsolutePath() + " at " + new java.util.Date();
-            try {
+            String comment = resourceName + " at " + new java.util.Date();
+            try
+
+            {
                 domsItem.modifyDatastreamByValue(
                         VERAPDF_DATASTREAM_NAME,
                         null, // no checksum
@@ -200,8 +228,11 @@ public class VeraPDFInvokeMain {
                         "text/xml",
                         comment,
                         null);
-            } catch (Exception e) {
-                return Stream.of(ToolResult.fail(domsItem + " file '" + file.getAbsolutePath() + "' could not save to datastream"));
+            } catch (
+                    Exception e)
+
+            {
+                return Stream.of(ToolResult.fail(domsItem + " '" + resourceName +  "' could not save to datastream"));
             }
             return Stream.of(ToolResult.ok(domsItem + " " + comment));
         }
@@ -249,8 +280,7 @@ public class VeraPDFInvokeMain {
 
         @Provides
         Function<InputStream, byte[]> getVeraPDFInvoker(@Named(DPA_VERAPDF_FLAVOR) String flavorId) {
-            //return new VeraPDFValidator(flavorId, true);
-            throw new RuntimeException("verapdf disabled - see DPA-89");
+            return new VeraPDFValidator(flavorId, true);
         }
 
         @Provides

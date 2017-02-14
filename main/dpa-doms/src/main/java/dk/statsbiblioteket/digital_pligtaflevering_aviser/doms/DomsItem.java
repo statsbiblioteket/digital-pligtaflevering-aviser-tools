@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static antlr.build.ANTLR.root;
 
@@ -146,9 +147,10 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return date;
     }
 
-    /** return all direct children nodes for the current node
+    /** return all direct children nodes for the current node.  For now the interface is a stream, but
+     * internally the whole response is built.
      */
-    public List<DomsItem> allChildren() {
+    public Stream<DomsItem> allChildren() {
         List<DomsItem> allChildrenSoFar = new ArrayList<>();
         List<DomsItem> unprocessed = new ArrayList<>();
 
@@ -157,8 +159,8 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
             DomsItem currentItem = unprocessed.remove(0);
             allChildrenSoFar.add(currentItem);
 
-            List<DomsItem> currentChildren = currentItem.children();
-            for (DomsItem child : currentChildren) {
+            Stream<DomsItem> currentChildren = currentItem.children();
+            for (DomsItem child : currentChildren.collect(Collectors.toList())) {
                 if (allChildrenSoFar.contains(child)) {
                     // seen before, malformed tree, shouldn't happen
                     log.warn("DomsID {} have {} as multiple children", root, child);
@@ -167,7 +169,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
                 }
             }
         }
-        return allChildrenSoFar;
+        return allChildrenSoFar.stream();
     }
 
     /**
@@ -177,7 +179,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      *
      * @return
      */
-    public List<DomsItem> children() {
+    public Stream<DomsItem> children() {
         log.trace("childrenFor: {}", this);
         final WebResource wr;
         wr = getDomsRepository().getWebResource().path(getDomsId().id()).path("relationships").queryParam("format", "ntriples");
@@ -199,7 +201,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
                 }
             }
         }
-        return children;
+        return children.stream();
     }
 
     @Override
