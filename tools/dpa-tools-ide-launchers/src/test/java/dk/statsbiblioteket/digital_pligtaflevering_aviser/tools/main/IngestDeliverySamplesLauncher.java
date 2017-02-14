@@ -1,11 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
-import org.junit.Test;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 
-import javax.ws.rs.HEAD;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -13,21 +10,19 @@ import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.Inge
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
-import static org.postgresql.hostchooser.HostRequirement.master;
 
 /**
  * Note:  May require a lot of memory.
  */
-public class IngesterMainTest {
-    @Test
-    public void ingestAllTestBatches() throws URISyntaxException {
+public class IngestDeliverySamplesLauncher {
 
+    public static void main(String[] args) throws Exception {
 
-        Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(this, "delivery-samples");
-        Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(this, "bitrepositorystub-storage");
+        Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLauncher.class, "delivery-samples");
+        Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLauncher.class, "bitrepositorystub-storage");
 
         // http://stackoverflow.com/a/320595/53897
-        URI l = IngesterMainTest.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        URI l = IngestDeliverySamplesLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         Path startDir = Paths.get(l);
 
         IngesterMain.main(new String[]{
