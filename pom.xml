@@ -65,7 +65,7 @@
 
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
-        <module>tools/dpa-tools-test</module>
+        <module>tools/dpa-tools-ide-launchers</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>
     </modules>
