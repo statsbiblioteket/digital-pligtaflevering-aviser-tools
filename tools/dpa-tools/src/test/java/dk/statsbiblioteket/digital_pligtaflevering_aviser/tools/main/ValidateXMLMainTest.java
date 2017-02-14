@@ -1,8 +1,9 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.Before;
 import org.xml.sax.InputSource;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -14,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test af xml validation against xsd.
@@ -110,7 +111,7 @@ public class ValidateXMLMainTest {
 
         // Look for the first instance of batchDir in the directories towards the root of the file system.
         // This will work anywhere in the source tree.  StreamEx provide three argument iterate() in Java 8.
-        Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
+        Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(startDir, batchDirPathInWorkspace);
         return batchPath.toString();
     }
 

@@ -1,7 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
-import org.junit.Test;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 
 import java.nio.file.Path;
 
@@ -10,11 +9,11 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
 /**
  *
  */
-public class CreateDeliveryMainTest {
-    @Test
-    public void createPendingBatches() {
+public class CreateDeliveryForDeliverySamplesLauncher {
 
-        Path deliveryPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(this, "delivery-samples");
+    public static void main(String[] args) {
+
+        Path deliveryPath = MavenProjectsHelper.getRequiredPathTowardsRoot(CreateDeliveryForDeliverySamplesLauncher.class, "delivery-samples");
 
         CreateDeliveryMain.main(new String[]{
                 "create-delivery.properties",

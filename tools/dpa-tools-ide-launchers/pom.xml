@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
-    <artifactId>dpa-tools-test</artifactId>
+    <artifactId>dpa-tools-ide-launchers</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -19,8 +19,6 @@
             dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.VeraPdfMain
         </appassembler-maven-plugin.mainClass1>
         <appassembler-maven-plugin.id1>dpa-tool-verapdf</appassembler-maven-plugin.id1>
-        <!-- we are currently using junit tests as IntelliJ launchers, so don't run tests automatically -->
-        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>
@@ -42,12 +40,6 @@
             <version>1.1.7</version>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-exec -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -65,14 +57,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
-                <configuration>
-                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
