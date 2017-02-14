@@ -15,7 +15,7 @@ public class VeraPDFInvokeAllLauncher {
         Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(VeraPDFInvokeAllLauncher.class, "bitrepositorystub-storage");
 
         VeraPDFInvokeMain.main(new String[]{
-                "verapdf-invoke-vagrant.properties",
+                "verapdf-invoke-all-vagrant.properties",
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });
