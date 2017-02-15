@@ -5,12 +5,12 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -18,14 +18,19 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearc
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
-import dk.statsbiblioteket.newspaper.bitrepository.ingester.NewspaperFileNameTranslater;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
+import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
+import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
+import org.bitrepository.client.eventhandler.EventHandler;
 import org.bitrepository.common.settings.Settings;
 import org.bitrepository.common.settings.SettingsProvider;
 import org.bitrepository.common.settings.XMLFileSettingsLoader;
 import org.bitrepository.modify.ModifyComponentFactory;
 import org.bitrepository.modify.putfile.PutFileClient;
+import org.bitrepository.protocol.messagebus.MessageBus;
+import org.bitrepository.protocol.messagebus.MessageBusManager;
 import org.bitrepository.protocol.security.BasicMessageAuthenticator;
 import org.bitrepository.protocol.security.BasicMessageSigner;
 import org.bitrepository.protocol.security.BasicOperationAuthorizor;
@@ -40,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -91,7 +97,6 @@ public class IngesterMain {
                 List<String> toolResults = repository.query(query)
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
-
 
                 return String.valueOf(toolResults); // FIXME: Formalize output
             };
@@ -145,8 +150,6 @@ public class IngesterMain {
         String provideIngesterId(ConfigurationMap map) {
             return map.getRequired(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY);
         }
-
-
 
         /**
          * 'base' path to where batch/deliverable can be found by bitrepositoryClient
@@ -223,21 +226,22 @@ public class IngesterMain {
          * Provides PutClient for interfacing to bitrepository
          *
          * @param testMode            If true a testclient is returned
-         * @param dpaIngesterId       The ID of the collection, the ID has to match the id of the collection created in fedora
+         * @param dpaIngesterId       The ID of the collection, the ID has to match the id of the collection created in
+         *                            fedora
          * @param destination         The destination where the client places the files
          * @param settingDir          The folder where settings for bitrepositoryClient is placed
          * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
          * @return PutFileClient
          */
         @Provides
-        PutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
-                                           @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
-                                           @Named(DPA_PUTFILE_DESTINATION) String destination,
-                                           @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                                           @Named(CERTIFICATE_PROPERTY) String certificateProperty,
-                                           Settings settings) {
+        AutoCloseablePutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
+                                                        @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                                        @Named(DPA_PUTFILE_DESTINATION) String destination,
+                                                        @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                                                        @Named(CERTIFICATE_PROPERTY) String certificateProperty,
+                                                        Settings settings) {
 
-            BitrepositoryPutFileClientStub putClient;
+            final AutoCloseablePutFileClient putClient;
             if (Boolean.parseBoolean(testMode)) {
                 putClient = new BitrepositoryPutFileClientStub(destination);
             } else {
@@ -248,26 +252,45 @@ public class IngesterMain {
                 MessageSigner signer = new BasicMessageSigner();
                 OperationAuthorizor authorizer = new BasicOperationAuthorizor(permissionStore);
                 org.bitrepository.protocol.security.SecurityManager securityManager = new BasicSecurityManager(settings.getRepositorySettings(), certificateLocation, authenticator, signer, authorizer, permissionStore, dpaIngesterId);
-                return ModifyComponentFactory.getInstance().retrievePutClient(settings, securityManager, dpaIngesterId);
+                final ModifyComponentFactory factory = ModifyComponentFactory.getInstance();
+                PutFileClient wrappedPutClient = factory.retrievePutClient(settings, securityManager, dpaIngesterId);
+                putClient = new AutoCloseablePutFileClient() {
+                    @Override
+                    public void close() throws Exception {
+                        // https://github.com/bitrepository/reference/tree/master/bitrepository-client#closing-after-finishing
+                        MessageBus messageBus = MessageBusManager.getMessageBus();
+                        if (messageBus != null) {
+                            log.trace("Closing wrappedPutFileClient {}", wrappedPutClient);
+                            messageBus.close();
+                        }
+                    }
+
+                    @Override
+                    public void putFile(String collectionID, URL url, String fileID, long sizeOfFile, ChecksumDataForFileTYPE checksumForValidationAtPillar, ChecksumSpecTYPE checksumRequestsForValidation, EventHandler eventHandler, String auditTrailInformation) {
+                        wrappedPutClient.putFile(collectionID, url, fileID, sizeOfFile, checksumForValidationAtPillar, checksumRequestsForValidation, eventHandler, auditTrailInformation);
+                    }
+                };
             }
             return putClient;
         }
 
         /**
          * Provide settings for PutfileClient and for EventHandler listening for the events from ingesting
+         *
          * @param dpaIngesterId The ID of the collection
-         * @param settingDir The directory where the collection is located seen from the putFileClient
+         * @param settingDir    The directory where the collection is located seen from the putFileClient
          * @return Settings for putfile PutfileClient and EventHandler
          */
         @Provides
         Settings provideSettings(@Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
-                                     @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
+                                 @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
             SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
             return settingsLoader.getSettings();
         }
 
         /**
          * Provide Function for converting filePath into an ID which is suitable for bitRepository
+         *
          * @return and ID for the fileContent
          */
         @Provides
@@ -281,6 +304,7 @@ public class IngesterMain {
 
         /**
          * Provide Function for converting filePath a for
+         *
          * @return and ID for the fileContent
          */
         @Provides
