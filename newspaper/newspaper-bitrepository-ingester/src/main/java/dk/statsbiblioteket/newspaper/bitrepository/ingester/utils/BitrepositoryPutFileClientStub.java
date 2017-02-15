@@ -5,7 +5,6 @@ import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.client.eventhandler.CompleteEvent;
 import org.bitrepository.client.eventhandler.EventHandler;
 import org.bitrepository.client.eventhandler.OperationEvent;
-import org.bitrepository.modify.putfile.PutFileClient;
 import org.bitrepository.protocol.OperationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -30,7 +28,7 @@ import java.util.Arrays;
  * The purpose of this class is not to have functionally god and errorconsistent code, but rather to have something that simulates the use of the ingester client.
  * <code>runningOperations</code> list.
  */
-public class BitrepositoryPutFileClientStub implements PutFileClient {
+public class BitrepositoryPutFileClientStub implements AutoCloseablePutFileClient {
     private static Logger log = LoggerFactory.getLogger(BitrepositoryPutFileClientStub.class);
     private String destinationPath;
 
@@ -100,5 +98,10 @@ public class BitrepositoryPutFileClientStub implements PutFileClient {
 
         //Get the hash's bytes and return it
         return digest.digest();
+    }
+
+    @Override
+    public void close() throws Exception {
+        log.trace("closing {}", this);
     }
 }
