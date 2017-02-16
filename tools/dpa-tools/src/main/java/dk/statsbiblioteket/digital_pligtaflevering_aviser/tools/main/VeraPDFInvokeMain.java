@@ -74,7 +74,9 @@ public class VeraPDFInvokeMain {
 
     }
 
-    /** @noinspection WeakerAccess*/
+    /**
+     * @noinspection WeakerAccess
+     */
     @Module
     public static class VeraPDFInvokeModule {
         public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
@@ -97,6 +99,7 @@ public class VeraPDFInvokeMain {
                     // Collect results for each domsId
                     .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
+                    // FIXME:  Save result on event on delivery.
                     .toString();
 
             return f;
@@ -216,9 +219,8 @@ public class VeraPDFInvokeMain {
             // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
 
             String comment = resourceName + " at " + new java.util.Date();
-            try
 
-            {
+            try {
                 domsItem.modifyDatastreamByValue(
                         VERAPDF_DATASTREAM_NAME,
                         null, // no checksum
@@ -228,11 +230,8 @@ public class VeraPDFInvokeMain {
                         "text/xml",
                         comment,
                         null);
-            } catch (
-                    Exception e)
-
-            {
-                return Stream.of(ToolResult.fail(domsItem + " '" + resourceName +  "' could not save to datastream"));
+            } catch (Exception e) {
+                return Stream.of(ToolResult.fail(domsItem + " '" + resourceName + "' could not save to datastream"));
             }
             return Stream.of(ToolResult.ok(domsItem + " " + comment));
         }

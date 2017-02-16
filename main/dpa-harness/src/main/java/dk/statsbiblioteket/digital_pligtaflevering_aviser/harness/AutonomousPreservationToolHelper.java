@@ -1,14 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
-import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -81,10 +75,13 @@ public class AutonomousPreservationToolHelper {
 
         log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
         log.debug("configuration: {}", map);
+        log.trace("------------------------------------------------------------------------------");
 
         Runtime.getRuntime().addShutdownHook(new Thread(
-                () -> log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime()
-                )));
+                () -> {
+                    log.trace("------------------------------------------------------------------------------");
+                    log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
+                }));
         try {
             String result = function.apply(map).call();
             log.trace("Result: {}", result);

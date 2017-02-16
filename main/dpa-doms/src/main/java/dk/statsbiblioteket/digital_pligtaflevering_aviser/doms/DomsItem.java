@@ -4,14 +4,24 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
+import dk.statsbiblioteket.util.xml.DOM;
+import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -209,5 +219,42 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return "DomsItem{" +
                 "domsId=" + domsId +
                 '}';
+    }
+
+    public String getDC() {
+        return domsRepository.getDC(domsId);
+    }
+
+    /** Returns the path identifier inserted by the ingester for a given node.  Throws a runtime exception
+     * if the XPath extraction failed.  Throws NoSuchElementException if no "path:" identifier is present for the
+     * object.
+     * @return
+     */
+    public String getPath() {
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NamespaceContextImpl context = new NamespaceContextImpl();
+        context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
+        xPath.setNamespaceContext(context);
+
+        String dcContent = getDC();
+        log.trace("DC={}", dcContent);
+        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true);
+
+        NodeList nodeList;
+        try {
+            nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(dom, XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            throw new RuntimeException("//dc:identifier failed in DC for " + this, e);
+        }
+        List<String> textContent = new ArrayList<>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            textContent.add(nodeList.item(i).getTextContent());
+        }
+        Optional<String> relativeFilenameFromDublinCore = textContent.stream()
+                .filter(s -> s.startsWith("path:"))
+                .map(s -> s.substring("path:".length()))
+                .findAny();
+
+        return relativeFilenameFromDublinCore.get();
     }
 }

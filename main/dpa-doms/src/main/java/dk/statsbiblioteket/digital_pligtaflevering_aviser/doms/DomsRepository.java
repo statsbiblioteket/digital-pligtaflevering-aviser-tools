@@ -141,5 +141,21 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             throw new RuntimeException("cannot load pid " + pid + " datastream " + datastreamName, e);
         }
     }
+
+    /**
+     * get the content of the DC datastream on XML form parsed into a W3C DOM structur so we can post-process it easily.
+     * EnhancedFedora does not expose the "get DC explicitly as xml" functionality directly.  Note that
+     * we work with Strings, which may result in encoding problems if ever the response includes non-ASCII characters!
+     *
+     * @param domsId id of doms object to retrieve DC datastream from.
+     * @return DC on XML form.
+     */
+    public String getDC(DomsId domsId) {
+        final String id = domsId.id();
+        final String p = "/datastreams/DC/content";
+
+        String dcContent = webResource.path(id).path(p).queryParam("format", "xml").get(String.class);
+        return dcContent;
+    }
 }
 

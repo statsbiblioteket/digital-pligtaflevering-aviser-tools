@@ -1,6 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import com.sun.jersey.api.client.WebResource;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -17,13 +16,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonMo
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import dk.statsbiblioteket.util.xml.DOM;
-import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -36,16 +32,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,72 +65,38 @@ public class ValidateXMLMain {
         );
     }
 
-
-
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, ValidateXMLModule.class})
     interface ValidateXMLComponent {
         Tool getTool();
     }
 
-    /** @noinspection Convert2MethodRef*/
+    /**
+     * @noinspection Convert2MethodRef
+     */
     @Module
     protected static class ValidateXMLModule {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_SUCCESSFULL_EVENT) String thisSucessfulEventName, QuerySpecification query, WebResource restApi, DomsRepository domsRepository) {
+        Tool provideTool(@Named(AUTONOMOUS_SUCCESSFULL_EVENT) String thisSucessfulEventName, QuerySpecification query, DomsRepository domsRepository) {
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsItem -> processChildDomsId(restApi, thisSucessfulEventName).apply(domsItem))
+                    .map(domsItem -> processChildDomsId(thisSucessfulEventName).apply(domsItem))
                     .collect(Collectors.toList())
                     .toString();
 
             return f;
-        };
-
-        /**
-         * FIXME: This functionality is copied from "FileSystemDeliveryIngester.ingestDirectoryForDomsItem" and might get copied into a general function
-         * Find the deliveryname from the domsItem, the deliveryName is found inside "DC/content" of the rountrip
-         *
-         * @param domsItem The Item to extract the deliveryName from
-         * @param restApi The restClient to use for lookup of deliveryname
-         * @return
-         */
-        private String getDeliveryId(DomsItem domsItem, WebResource restApi) throws XPathExpressionException {
-            XPath xPath = XPathFactory.newInstance().newXPath();
-            NamespaceContextImpl context = new NamespaceContextImpl();
-            context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
-            xPath.setNamespaceContext(context);
-
-            String dcContent = restApi.path(domsItem.getDomsId().id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
-
-            NodeList nodeList = null;
-            try {
-                nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
-                        DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true), XPathConstants.NODESET);
-            } catch (XPathExpressionException e) {
-                return null;
-            }
-            List<String> textContent = new ArrayList<>();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                textContent.add(nodeList.item(i).getTextContent());
-            }
-            Optional<String> relativeFilenameFromDublinCore = textContent.stream()
-                    .filter(s -> s.startsWith("path:"))
-                    .map(s -> s.substring("path:".length()))
-                    .findAny();
-            return relativeFilenameFromDublinCore.get();
         }
-
 
         /**
          * Validate all xml-contents located as child under the delivery
-         * @param restApi Rest client used for lookup in fedora
-         * @param thisSucessfulEventName The name of the Event to write is tha validation of all child-items is accepted
+         *
+         * @param thisSucessfulEventName The name of the Event to write is tha validation of all child-items is
+         *                               accepted
          * @return
          */
-        private Function<DomsItem, String> processChildDomsId(WebResource restApi, String thisSucessfulEventName) {
+        private Function<DomsItem, String> processChildDomsId(String thisSucessfulEventName) {
             return domsItem -> {
                 // Single doms item
                 List<ToolResult> toolResults = domsItem.allChildren()
@@ -154,7 +111,7 @@ public class ValidateXMLMain {
                 boolean outcome = false;
 
                 try {
-                    String deliveryName = getDeliveryId(domsItem, restApi);
+                    String deliveryName = domsItem.getPath();
                     long startDeliveryIngestTime = System.currentTimeMillis();
                     log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
@@ -162,7 +119,6 @@ public class ValidateXMLMain {
                             .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
                             .filter(s -> s.trim().length() > 0) // skip blank lines
                             .collect(Collectors.joining("\n"));
-
 
                     // outcome was successful only if no toolResults has a FALSE result.
                     outcome = failingToolResults.size() == 0;
@@ -175,8 +131,8 @@ public class ValidateXMLMain {
                     long finishedDeliveryIngestTime = System.currentTimeMillis();
                     log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
 
-                } catch(XPathExpressionException e) {
-                    failingToolResults.add(ToolResult.fail("id: " + domsItem + " " + "Failed "));
+                } catch (Exception e) {
+                    failingToolResults.add(ToolResult.fail("id: " + domsItem + " " + "Failed", e));
                 }
 
                 return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
@@ -185,6 +141,7 @@ public class ValidateXMLMain {
 
         /**
          * Start validating xml-content in fedora and return results
+         *
          * @param domsItem
          * @return
          */
@@ -210,13 +167,13 @@ public class ValidateXMLMain {
 
                 String rootnameInCurrentXmlFile = getRootTagName(inps);
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
-                if(xsdFile == null) {
+                if (xsdFile == null) {
                     return Stream.of(ToolResult.fail("id: " + domsItem + " " + "Unknown root"));
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
 
-                if(tryParsing(reader, url)) {
+                if (tryParsing(reader, url)) {
                     //If returning true the parsing is accepted
                     return Stream.of(ToolResult.ok("id: " + domsItem + " " + "XML approved"));
                 } else {
@@ -231,7 +188,8 @@ public class ValidateXMLMain {
         /**
          * Try parsing the content inside the reader against the schema located at the url
          * The function returns true if the xml is validated
-         * @param reader Reader containing the content to get parsed
+         *
+         * @param reader    Reader containing the content to get parsed
          * @param schemaUrl The url of the schema to validate against
          * @return true if validated
          */
@@ -250,9 +208,9 @@ public class ValidateXMLMain {
             }
         }
 
-
         /**
          * Get the rootname of the xml-stream delivered to the function
+         *
          * @param reader
          * @return
          * @throws ParserConfigurationException
@@ -270,6 +228,7 @@ public class ValidateXMLMain {
 
         /**
          * Previd a map between rootitems in xmlfiles and their corresponding schemafile
+         *
          * @return
          */
         protected Map<String, String> provideXsdRootMap() {
@@ -281,6 +240,7 @@ public class ValidateXMLMain {
 
         /**
          * Provide the parameter to be written as sucessfull when the component has finished
+         *
          * @param map
          * @return
          */

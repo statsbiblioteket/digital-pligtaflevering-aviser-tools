@@ -12,6 +12,7 @@ import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
+import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +27,6 @@ import org.bitrepository.commandline.output.OutputHandler;
 import org.bitrepository.common.settings.Settings;
 import org.bitrepository.common.utils.Base16Utils;
 import org.bitrepository.common.utils.CalendarUtils;
-import org.bitrepository.modify.putfile.PutFileClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
@@ -74,7 +74,7 @@ import static java.nio.file.Files.walk;
  * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
  * See ABR for details. </p>
  */
-public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String> {
+public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
 
     private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
 
@@ -86,7 +86,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private String ignoredFiles;
-    protected final PutFileClient putfileClient;
+    protected final AutoCloseablePutFileClient putfileClient;
     protected final Function<Path, String> fileNameToFileIDConverter;
     protected final BiFunction<Path, String, String> md5Convert;
     private final String urlToBitmagBatchPath;
@@ -105,7 +105,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     public FileSystemDeliveryIngester(DomsRepository repository,
                                       @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
                                       @Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl,
-                                      PutFileClient putfileClient,
+                                      AutoCloseablePutFileClient putfileClient,
                                       FileNameToFileIDConverter fileNameToFileIDConverter,
                                       FilePathToChecksumPathConverter md5Convert,
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
@@ -587,6 +587,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             return efedora.findObjectFromDCIdentifier(dcIdentifier);
         } catch (BackendInvalidCredsException | BackendMethodFailedException e) {
             throw new RuntimeException("findObjectFromDCIdentifier id=" + dcIdentifier, e);
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (putfileClient != null) {
+            putfileClient.close();
         }
     }
 }
