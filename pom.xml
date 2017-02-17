@@ -61,6 +61,8 @@
         <module>newspaper/newspaper-bitrepository-ingester</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
 
+        <!-- dashboard web interface -->
+        <module>tools/dpa-dashboard</module>
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
         <module>tools/dpa-tools-ide-launchers</module>
