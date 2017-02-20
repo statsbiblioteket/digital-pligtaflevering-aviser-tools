@@ -16,6 +16,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonMo
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import javaslang.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -99,7 +100,7 @@ public class ValidateXMLMain {
         private Function<DomsItem, String> processChildDomsId(String thisSucessfulEventName) {
             return domsItem -> {
                 // Single doms item
-                List<ToolResult> toolResults = domsItem.allChildren()
+                List<Try<ToolResult>> toolResults = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem))
                         .collect(Collectors.toList());
 
@@ -145,7 +146,7 @@ public class ValidateXMLMain {
          * @param domsItem
          * @return
          */
-        protected Stream<ToolResult> analyzeXML(DomsItem domsItem) {
+        protected Stream<Try<ToolResult>> analyzeXML(DomsItem domsItem) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -160,7 +161,8 @@ public class ValidateXMLMain {
             Map<String, String> xsdMap = provideXsdRootMap();
             DomsDatastream ds = profileOptional.get();
 
-            try {
+            return Stream.of(Try.of(() ->
+             {
                 //We are reading this textstring as a String and are aware that thish might leed to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
@@ -168,21 +170,20 @@ public class ValidateXMLMain {
                 String rootnameInCurrentXmlFile = getRootTagName(inps);
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "Unknown root"));
+                    return ToolResult.fail("id: " + domsItem + " " + "Unknown root");
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
 
                 if (tryParsing(reader, url)) {
                     //If returning true the parsing is accepted
-                    return Stream.of(ToolResult.ok("id: " + domsItem + " " + "XML approved"));
+                    return ToolResult.ok("id: " + domsItem + " " + "XML approved");
                 } else {
-                    return Stream.of(ToolResult.fail("id: " + domsItem + " " + "XML invalid"));
+                    return ToolResult.fail("id: " + domsItem + " " + "XML invalid");
                 }
-            } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
-                log.error(e.getMessage());
-                return Stream.of(ToolResult.fail("id: " + domsItem + " " + "Parserexception"));
-            }
+//            } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
+//                return ToolResult.fail("id: " + domsItem + " " + "Parserexception");
+            }));
         }
 
         /**

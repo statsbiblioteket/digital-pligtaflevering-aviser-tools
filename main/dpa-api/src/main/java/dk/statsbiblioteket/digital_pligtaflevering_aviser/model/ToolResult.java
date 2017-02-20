@@ -53,6 +53,7 @@ public class ToolResult {
      * @param throwable exception caught causing the failure
      * @return a fail ToolResult
      */
+    @Deprecated
     public static ToolResult fail(String message, Throwable throwable) {
         return new ToolResult(Boolean.FALSE, message, Optional.of(throwable));
     }
@@ -84,6 +85,7 @@ public class ToolResult {
      *
      * @return optional exception
      */
+    @Deprecated
     public Optional<Throwable> getThrowable() {
         return throwable;
     }
@@ -97,6 +99,7 @@ public class ToolResult {
         return result;
     }
 
+    @Deprecated
     public String getHumanlyReadableStackTrace() {
         if (throwable.isPresent() == false) {
             return "";
