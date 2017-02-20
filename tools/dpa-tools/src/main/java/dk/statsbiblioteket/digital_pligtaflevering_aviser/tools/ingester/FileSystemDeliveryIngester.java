@@ -61,6 +61,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
@@ -75,8 +76,6 @@ import static java.nio.file.Files.walk;
  * See ABR for details. </p>
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
-
-    private static final String SOFTWARE_VERSION = "NAME AND VERSION OF SOFTWARE"; // FIXME
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
@@ -94,6 +93,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private EnhancedFedora efedora;
     private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
     private Set<String> ignoredFilesSet;
+    private final String gitId;
     private Settings settings;
     private String bitmagUrl = null;
     private String dpaCollectionId = null;
@@ -111,6 +111,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(COLLECTIONID_PROPERTY) String dpaCollectionId,
                                       @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
                                       WebResource restApi, EnhancedFedora efedora,
+                                      @Named(DPA_GIT_ID) String gitId,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
@@ -124,6 +125,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.dpaCollectionId = dpaCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
+        this.gitId = gitId;
         this.settings = settings;
         log.trace("Ignored files: {}", ignoredFilesSet);
     }
@@ -516,9 +518,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 String doubleEncodedFileId = URLEncoder.encode(singleEncodedFileId, CharEncoding.UTF_8);
                 String linkFromFedoraToBitrepository = bitmagUrl + doubleEncodedFileId;
                 // save external datastream in file object.
-                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + SOFTWARE_VERSION);
+                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + gitId);
                 // Add "hasPart" relation from the page object to the file object.
-                efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + SOFTWARE_VERSION);
+                efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + gitId);
                 // Add the checksum relation to Fedora
                 efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
                 toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);

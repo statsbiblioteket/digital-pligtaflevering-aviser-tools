@@ -1,34 +1,28 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 
 import dagger.Module;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+
+import javax.inject.Named;
+
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
 
 /**
  * Module containing providers for typical DPA Dagger dependencies.
  */
 @Module
 public class CommonModule {
-    /**
-     * Flag indicating whether the tool should ask the JVM to dump heap when exiting.
-     *
-     * @param map configuration map
-     * @return boolean indicating if flag was set to "true".
-     */
-//    @Provides
-//    @Named(JVM_DUMPHEAP)
-//    boolean getJvmDumpheapFlag(ConfigurationMap map) {
-//        return Boolean.parseBoolean(map.getDefault(JVM_DUMPHEAP, Boolean.FALSE.toString()));
-//    }
 
-    /**
-     * Dagger mapping from {@link Tool} interface to
-     * {@link LoggingFaultBarrier} class.
-     *
-     * @param tool tool dependency which Dagger is to create to be able to invoke this provider.
+    /** We want to be able to register the version of the software actually running in production.
+     * The shell script generated to invoke autonomous components from a command line
+     * has the git branch and commit id as a system property string assignment.  The
+     * string is constructed at assembly time.
+     * @param map
      * @return
      */
-//    @Provides
-//    Tool getTool(LoggingFaultBarrier tool) {
-//        return tool;
-//    }
+    @Provides
+    @Named(DPA_GIT_ID) String provideGitId(ConfigurationMap map) {
+        return map.getDefault(DPA_GIT_ID, "(non-production)");
+    }
 }

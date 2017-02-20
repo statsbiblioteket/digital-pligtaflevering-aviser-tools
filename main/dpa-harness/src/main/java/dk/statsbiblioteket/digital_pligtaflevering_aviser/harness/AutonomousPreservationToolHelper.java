@@ -21,6 +21,9 @@ import static java.time.LocalDate.now;
  * property contains the name of the program.</p>
  */
 public class AutonomousPreservationToolHelper {
+
+    public static final String DPA_GIT_ID = "dpa.git.id";
+
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from the
      * configuration file/resource denoted by args[0], plus the remaining arguments interpreted as "key=value" lines,
@@ -42,6 +45,7 @@ public class AutonomousPreservationToolHelper {
         String configurationFileName = args[0];
 
         ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties(configurationFileName);
+        map.addSystemProperties(DPA_GIT_ID);
 
         // remainingArgs: ["a=1", "b=2", "c=3"]
         String[] remainingArgs = Arrays.copyOfRange(args, 1, args.length);
@@ -73,7 +77,9 @@ public class AutonomousPreservationToolHelper {
         Objects.requireNonNull(map, "map == null");
         final Logger log = LoggerFactory.getLogger(AutonomousPreservationToolHelper.class);
 
-        log.info("*** Started at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
+        final String gitId = map.getDefault(DPA_GIT_ID, "(non-production)");
+
+        log.info("*** Started at {} - {} ms since JVM start. git: {} ", now(), getRuntimeMXBean().getUptime(), gitId);
         log.debug("configuration: {}", map);
         log.trace("------------------------------------------------------------------------------");
 
