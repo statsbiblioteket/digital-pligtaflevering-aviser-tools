@@ -3,7 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -164,9 +164,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
 
-        // Combine the
+        // FIXME:  correct message.
         String deliveryEventMessage = failingToolResults.stream()
-                .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
+                .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
                 .filter(s -> s.trim().length() > 0) // skip blank lines
                 .collect(Collectors.joining("\n"));
 
@@ -202,7 +202,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
                     DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true), XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            return Arrays.asList(ToolResult.fail("Invalid XPath. This is a programming error.", e));
+            // FIXME: try
+            return Arrays.asList(ToolResult.fail(domsItem, "Invalid XPath. This is a programming error."));
         }
         List<String> textContent = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -222,7 +223,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // "B20160811-RT1"
 
         if (relativeFilenameFromDublinCore.isPresent() == false) {
-            return Arrays.asList(ToolResult.fail("Could not get 'path:...' identifier for " + domsItem));
+            throw new RuntimeException("Could not get 'path:...' identifier");
         }
 
         String batchName = relativeFilenameFromDublinCore.get();
@@ -232,7 +233,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         Path deliveryPath = rootPath.resolve(batchName);
 
         if (Files.notExists(deliveryPath)) {
-            return Arrays.asList(ToolResult.fail("Directory not found for delivery:  " + deliveryPath));
+            throw new RuntimeException("Directory not found for delivery:  " + deliveryPath);
         }
 
         log.trace("Delivery directory: {}", deliveryPath);
@@ -251,10 +252,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                     //FIXME: When the webclient is done this might need to be refactored to write this where the webclient fetches it
                     collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
                 }
-                return Arrays.asList(ToolResult.fail("Checksum validation failed:  " + collectiveValidationString));
+                return Arrays.asList(ToolResult.fail(domsItem, "Checksum validation failed:  " + collectiveValidationString));
             }
         } catch (Exception e) {
-            return Arrays.asList(ToolResult.fail("Could not process checksums.txt", e));
+            throw new RuntimeException("Could not process checksums.txt",e);
         }
 
             /* walk() guarantees that we have always seen the parent of a directory before we
@@ -270,14 +271,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         try {
             pathStream = walk(deliveryPath);
         } catch (IOException e) {
-            return Arrays.asList(ToolResult.fail("Could not walk " + deliveryPath, e));
+            return Arrays.asList(ToolResult.fail(domsItem, "Could not walk " + deliveryPath));
         }
 
         // We got so far so now collect the combined results for each directory.
         List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms("path:" + rootPath.relativize(path), rootPath, path, md5validations))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms(domsItem, "path:" + rootPath.relativize(path), rootPath, path, md5validations))
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
@@ -314,7 +315,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param md5map
      */
 
-    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
+    protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(DomsItem rootDomsItem, String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
@@ -337,7 +338,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         try {
             pathsInThisDirectory = Files.walk(absoluteFileSystemPath, 1);
         } catch (IOException e) {
-            return Stream.of(ToolResult.fail("Cannot walk " + absoluteFileSystemPath, e));
+            throw new RuntimeException("Cannot walk " + absoluteFileSystemPath, e);
         }
 
         Map<String, List<Path>> pathsForPage = pathsInThisDirectory
@@ -398,7 +399,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-                                        ToolResult toolResult = this.writeResultFromBitmagIngest(relativePath, finalEvent, pageObjectId, checksum);
+                                        ToolResult toolResult = this.writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, checksum);
                                         return toolResult;
 
                                     } else if (path.toString().endsWith(".xml")) {
@@ -412,9 +413,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                             final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
                                             efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
-                                            return ToolResult.ok("XML datastream added for " + path);
+                                            return ToolResult.ok(rootDomsItem, "XML datastream added for " + path);
                                         } else {
-                                            return ToolResult.fail("The checksum failed on : " + path);
+                                            return ToolResult.fail(rootDomsItem, "The checksum failed on : " + path);
                                         }
                                     } else if (path.toString().endsWith(".verapdf")) {
                                         // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.
@@ -427,16 +428,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         byte[] allBytes = Files.readAllBytes(path);
                                         if (allBytes.length > 0) {
                                             efedora.modifyDatastreamByValue(fileObjectId, "VERAPDF", null, null, allBytes, null, mimeType, "From " + path, null);
-                                            return ToolResult.ok("VERAPDF datastream added for " + path);
+                                            return ToolResult.ok(rootDomsItem, "VERAPDF datastream added for " + path);
                                         } else {
-                                            return ToolResult.ok("Skipped empty .verapdf file for " + path);
+                                            return ToolResult.ok(rootDomsItem, "Skipped empty .verapdf file for " + path);
                                         }
                                     } else {
-                                        return ToolResult.fail("path not pdf/xml: " + path);
+                                        return ToolResult.fail(rootDomsItem, "path not pdf/xml: " + path);
                                     }
                                 } catch (Exception e) {
                                     log.error(e.getMessage(), e);
-                                    return ToolResult.fail("Could not process " + path, e);
+                                    throw new RuntimeException(rootDomsItem + " Could not process " + path);
                                 }
                             });
                 }).collect(Collectors.toList());
@@ -459,9 +460,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             } else {
                 efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", domsIdsInThisDirectory.get(0), false, "comment");
             }
-            toolResultsForThisDirectory.add(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory));
+            toolResultsForThisDirectory.add(ToolResult.ok(rootDomsItem, "Added hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory));
         } catch (Exception e) {
-            toolResultsForThisDirectory.add(ToolResult.fail("Failed to add hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory, e));
+            throw new RuntimeException(rootDomsItem + " Failed to add hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory, e);
         }
 
         log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
@@ -483,9 +484,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             } else {
                 efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", childDirectoryObjectIds.get(0), false, "comment");
             }
-            toolResultsForThisDirectory.add(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds));
+            toolResultsForThisDirectory.add(ToolResult.ok(rootDomsItem, "Added hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds));
         } catch (Exception e) {
-            toolResultsForThisDirectory.add(ToolResult.fail("Could not add hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds));
+            throw new RuntimeException(rootDomsItem + " Could not add hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds);
         }
         log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
 
@@ -493,7 +494,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         return toolResultsForThisDirectory.stream();
     }
-
 
     /**
      * Write the result of activate putfileClient to envoke bitmagasin
@@ -503,7 +503,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param checkSum The checksum of the file
      * @return A result of the specifik job
      */
-    private ToolResult writeResultFromBitmagIngest(Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
+    private ToolResult writeResultFromBitmagIngest(DomsItem rootDomsItem, Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
         //Writing to components has been inspired by the code i DomsJP2FileUrlRegister.register() from the project "dpa-bitrepository-ingester"
         final String mimetype = "application/pdf";
         ToolResult toolResult = null;
@@ -523,19 +523,20 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + gitId);
                 // Add the checksum relation to Fedora
                 efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
-                toolResult = ToolResult.ok("CONTENT node added for PDF for " + pageObjectId);
+                toolResult = ToolResult.ok(rootDomsItem, "CONTENT node added for PDF for " + pageObjectId);
                 log.info("Completed ingest of file " + finalEvent.getFileID());
 
             } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException | UnsupportedEncodingException e) {
                 log.error("ObjectId: " + fileObjectId + " relativePath: " + relativePath.toString(), e);
-                toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID(), e);
+                throw new RuntimeException("Could not process " + finalEvent.getFileID(), e);
             }
 
         } else if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.FAILED)) {
             log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", finalEvent.getFileID(), finalEvent.getEventType());
-            toolResult = ToolResult.fail("Could not process " + finalEvent.getFileID());
+            toolResult = ToolResult.fail(rootDomsItem, "Could not process " + finalEvent.getFileID());
         } else {
             log.debug("Got an event that I really don't care about, event type: '{}' for fileID '{}'", finalEvent.getEventType(), finalEvent.getFileID());
+
         }
         return toolResult;
     }

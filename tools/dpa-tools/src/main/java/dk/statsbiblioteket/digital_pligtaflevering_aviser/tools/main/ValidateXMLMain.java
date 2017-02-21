@@ -7,10 +7,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +47,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
+
 /**
  * Main class for starting autonomous component
  * This component is used for validation of metadata from newspaper deliveries.
@@ -56,7 +59,7 @@ import java.util.stream.Stream;
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
 
-    public static final String AUTONOMOUS_SUCCESSFULL_EVENT = "autonomous.thisSuccessfullEvent";
+    public static final String AUTONOMOUS_THIS_EVENT = "autonomous.thisEvent";
 
     public static void main(String[] args) {
 
@@ -79,13 +82,15 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_SUCCESSFULL_EVENT) String thisSucessfulEventName, QuerySpecification query, DomsRepository domsRepository) {
+        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification query, DomsRepository domsRepository) {
+            final String agent = ValidateXMLModule.class.getSimpleName();
+
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
-                    .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsItem -> processChildDomsId(thisSucessfulEventName).apply(domsItem))
-                    .collect(Collectors.toList())
-                    .toString();
+                    .peek(domsItem -> log.trace("Processing: {}", domsItem))
+                    .map(domsItem -> processChildDomsId().apply(domsItem))
+                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.getResult()))
+                    .count() + " items processed";
 
             return f;
         }
@@ -93,50 +98,67 @@ public class ValidateXMLMain {
         /**
          * Validate all xml-contents located as child under the delivery
          *
-         * @param thisSucessfulEventName The name of the Event to write is tha validation of all child-items is
-         *                               accepted
          * @return
          */
-        private Function<DomsItem, String> processChildDomsId(String thisSucessfulEventName) {
+        private Function<DomsItem, ToolResult> processChildDomsId() {
             return domsItem -> {
+                String deliveryName = domsItem.getPath();
+                long startDeliveryIngestTime = System.currentTimeMillis();
+                log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
+
                 // Single doms item
-                List<Try<ToolResult>> toolResults = domsItem.allChildren()
+                Map<Boolean, List<Try<ToolResult>>> toolResultMap = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.partitioningBy(Try::isSuccess));
 
-                // Sort according to result
-                final Map<Boolean, List<ToolResult>> toolResultMap = toolResults.stream()
-                        .collect(Collectors.groupingBy(toolResult -> toolResult.getResult()));
+                final List<Try<ToolResult>> failed = toolResultMap.getOrDefault(FALSE, emptyList());
+                failed.forEach(
+                        t -> log.error("failed", t.getCause())
+                );
 
-                List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
-                boolean outcome = false;
+                final Map<Boolean, List<ToolResult>> notFailedMap = toolResultMap.getOrDefault(TRUE, emptyList()).stream()
+                        .map(Try::get)
+                        .collect(Collectors.partitioningBy(toolResult -> toolResult.getResult()));
 
-                try {
-                    String deliveryName = domsItem.getPath();
-                    long startDeliveryIngestTime = System.currentTimeMillis();
-                    log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
+                final List<ToolResult> successful = notFailedMap.getOrDefault(TRUE, emptyList());
+                final List<ToolResult> notSuccessful = notFailedMap.getOrDefault(FALSE, emptyList());
 
-                    String deliveryEventMessage = failingToolResults.stream()
-                            .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
-                            .filter(s -> s.trim().length() > 0) // skip blank lines
-                            .collect(Collectors.joining("\n"));
+                // we now have organized the responses in "failed", "succesful", and "notSucessful"
 
-                    // outcome was successful only if no toolResults has a FALSE result.
-                    outcome = failingToolResults.size() == 0;
-
-                    final String keyword = getClass().getSimpleName();
-                    final Date timestamp = new Date();
-
-                    domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, thisSucessfulEventName, outcome);
-
-                    long finishedDeliveryIngestTime = System.currentTimeMillis();
-                    log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
-
-                } catch (Exception e) {
-                    failingToolResults.add(ToolResult.fail("id: " + domsItem + " " + "Failed", e));
+                StringBuilder message = new StringBuilder();
+                message.append("item: " + domsItem + "\n");
+                if (failed.size() > 0) {
+                    message.append("failed (see full traces in log file)\n");
+                    message.append("==============\n");
+                    failed.forEach(tr -> message.append(tr.getCause().getMessage()).append("\n"));
+                    message.append("\n");
+                }
+                if (notSuccessful.size() > 0) {
+                    message.append("not successful\n");
+                    message.append("==============\n");
+                    notSuccessful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
+                    message.append("\n");
                 }
 
-                return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
+                if (successful.size() > 0) {
+                    message.append("successful\n");
+                    message.append("==========\n");
+                    successful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
+                    message.append("\n");
+                }
+
+                final boolean outcome = failed.size() == 0 && notSuccessful.size() == 0;
+
+                final String deliveryEventMessage = message.toString();
+
+                long finishedDeliveryIngestTime = System.currentTimeMillis();
+                log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
+
+                if (outcome == true) {
+                    return ToolResult.ok(domsItem, deliveryEventMessage);
+                } else {
+                    return ToolResult.fail(domsItem, deliveryEventMessage);
+                }
             };
         }
 
@@ -162,7 +184,7 @@ public class ValidateXMLMain {
             DomsDatastream ds = profileOptional.get();
 
             return Stream.of(Try.of(() ->
-             {
+            {
                 //We are reading this textstring as a String and are aware that thish might leed to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
@@ -170,19 +192,17 @@ public class ValidateXMLMain {
                 String rootnameInCurrentXmlFile = getRootTagName(inps);
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return ToolResult.fail("id: " + domsItem + " " + "Unknown root");
+                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root");
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
                 reader = new StringReader(ds.getDatastreamAsString());
 
-                if (tryParsing(reader, url)) {
+                if (validate(reader, url)) {
                     //If returning true the parsing is accepted
-                    return ToolResult.ok("id: " + domsItem + " " + "XML approved");
+                    return ToolResult.ok(domsItem, "id: " + domsItem + " " + "XML approved");
                 } else {
-                    return ToolResult.fail("id: " + domsItem + " " + "XML invalid");
+                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "XML invalid");
                 }
-//            } catch (IOException | SAXException | ParserConfigurationException | XPathExpressionException e) {
-//                return ToolResult.fail("id: " + domsItem + " " + "Parserexception");
             }));
         }
 
@@ -194,13 +214,13 @@ public class ValidateXMLMain {
          * @param schemaUrl The url of the schema to validate against
          * @return true if validated
          */
-        protected boolean tryParsing(Reader reader, URL schemaUrl) {
+        protected boolean validate(Reader reader, URL schemaUrl) {
             try {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
                 Schema schema = schemaFactory.newSchema(schemaUrl);
                 Validator validator = schema.newValidator();
                 validator.validate(new StreamSource(reader));
-                log.info("Validation of the xml-content is accepted");
+                log.trace("Validation of the xml-content is accepted");
                 return true;
             } catch (IOException | SAXException e) {
                 //This exception is not keept since this exception should just result in registrating that the xml is not validate
@@ -246,9 +266,9 @@ public class ValidateXMLMain {
          * @return
          */
         @Provides
-        @Named(AUTONOMOUS_SUCCESSFULL_EVENT)
+        @Named(AUTONOMOUS_THIS_EVENT)
         String thisEventName(ConfigurationMap map) {
-            return map.getRequired(AUTONOMOUS_SUCCESSFULL_EVENT);
+            return map.getRequired(AUTONOMOUS_THIS_EVENT);
         }
 
         @Provides
