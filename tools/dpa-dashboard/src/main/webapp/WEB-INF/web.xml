@@ -4,4 +4,14 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
+
+  <!-- java 8, please -->
+  <context-param>
+    <param-name>compilerSourceVM</param-name>
+    <param-value>1.8</param-value>
+  </context-param>
+  <context-param>
+    <param-name>compilerTargetVM</param-name>
+    <param-value>1.8</param-value>
+  </context-param>
 </web-app>
