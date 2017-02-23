@@ -1,4 +1,5 @@
 <%@ page import="com.sun.jersey.api.client.WebResource" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
@@ -13,10 +14,9 @@
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.ItemFactory" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.stream.Stream" %>
+<%@ page import="java.io.IOException" %>
 <%@ page import="java.util.function.Consumer" %>
+<%@ page import="java.util.stream.Stream" %>
 <html>
 <body>
 <h2>Hello World!</h2>
@@ -58,20 +58,41 @@
 
     DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
 
-    List<String> pastSuccessfulEvents = new ArrayList<>();
-    List<String> futureEvents = new ArrayList<>();
-    List<String> oldEvents = new ArrayList<>();
-    List<String> types = new ArrayList<>();
-    boolean details = true;
-    Stream<DomsItem> r = repository.query(new QuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, types, details));
+    String pastSuccessfulEvents = domsModule.providePastSuccesfulEvents(map);
+    String futureEvents = domsModule.provideFutureEvents(map);
+    String oldEvents = domsModule.provideOldEvents(map);
+    String itemTypes = domsModule.provideItemTypes(map);
 
-    r.forEach(new Consumer<DomsItem>() {
+    final QuerySpecification querySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
+    Stream<DomsItem> r = repository.query(querySpecification);
+
+    final JspWriter finalout = out;
+
+    out.println("-----<br/>");
+
+    r.forEach(new Consumer<Object>() {
+
         @Override
-        public void accept(DomsItem domsItem) {
-            System.out.println(domsItem);
+        public void accept(final Object o) {
+            try {
+                finalout.print("<p>" + o + "</p>");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     });  // fixme: go to web page
 
+    out.println("-----<br/>");
+    repository.lookup(new DomsId("uuid:08eccdec-6b59-46e5-974c-1768485beb1f")).allChildren().forEach(new Consumer<Object>() {
+        @Override
+        public void accept(final Object o) {
+            try {
+                finalout.print("<p>" + o + "</p>");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    });
 %>
 </body>
 </html>

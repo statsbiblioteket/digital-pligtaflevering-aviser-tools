@@ -242,7 +242,7 @@ public class DomsModule {
      * @return
      */
     @Provides
-    QuerySpecification providesQuerySpecification(
+    public QuerySpecification providesQuerySpecification(
             @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS) String pastSuccessfulEvents,
             @Named(AUTONOMOUS_FUTURE_EVENTS) String futureEvents,
             @Named(AUTONOMOUS_OLD_EVENTS) String oldEvents,
