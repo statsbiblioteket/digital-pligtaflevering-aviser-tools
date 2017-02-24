@@ -194,11 +194,6 @@ public class IngesterMain {
             return id -> new Item();
         }
 
-        @Provides
-        @Named("pageSize")
-        Integer providePageSize(ConfigurationMap map) {
-            return Integer.valueOf(map.getRequired("pageSize"));
-        }
 
         /**
          * returns a comma-separated set of filenames (without path) to ignore when traversing the file tree.

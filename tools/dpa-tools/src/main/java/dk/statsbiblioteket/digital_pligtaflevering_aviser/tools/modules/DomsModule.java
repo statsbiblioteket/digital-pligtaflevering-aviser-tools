@@ -77,7 +77,6 @@ public class DomsModule {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
 
-
     /**
      * Patht to the folder containing batches
      *
@@ -310,7 +309,7 @@ public class DomsModule {
      * (meaning to be compatible with the existing configuration files) we do the same silent adding
      * on "/objects/" as was done in IteratorForFedora3 constructor in item-event-framework-common.
      *
-     * @param domsUrl url to Fedora Commons instance
+     * @param domsUrl      url to Fedora Commons instance
      * @param domsUsername username for Fedora Commons instance
      * @param domsPassword password for Fedora Commons instance
      * @return ready-to-use WebResource for Fedora Commons interaction.
@@ -325,4 +324,14 @@ public class DomsModule {
         WebResource webResource = client.resource(domsUrl.endsWith("/objects/") ? domsUrl : domsUrl + "/objects/");
         return webResource;
     }
+
+    /**
+     * Return the number of responses in a single sboi query
+     */
+    @Provides
+    @Named("pageSize")
+    public Integer providePageSize(ConfigurationMap map) {
+        return Integer.valueOf(map.getRequired("pageSize"));
+    }
+
 }

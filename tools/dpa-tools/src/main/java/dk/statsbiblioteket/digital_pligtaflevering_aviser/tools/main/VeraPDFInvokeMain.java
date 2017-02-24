@@ -8,10 +8,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -121,7 +121,7 @@ public class VeraPDFInvokeMain {
                 List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
 
                 String deliveryEventMessage = failingToolResults.stream()
-                        .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" )
+                        .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
                         .filter(s -> s.trim().length() > 0) // skip blank lines
                         .collect(Collectors.joining("\n"));
 
@@ -187,7 +187,7 @@ public class VeraPDFInvokeMain {
                 }
             } else {
                 if (url.length() < bitrepositoryUrlPrefix.length()) {
-                    return Stream.of(ToolResult.fail(domsItem,  " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
+                    return Stream.of(ToolResult.fail(domsItem, " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
                 }
                 resourceName = url.substring(bitrepositoryUrlPrefix.length());
                 final File file;
@@ -258,12 +258,6 @@ public class VeraPDFInvokeMain {
             List<DomsId> l = new ArrayList<>();
             iterator.forEachRemaining(item -> l.add(new DomsId(item.getDomsID())));
             return l;
-        }
-
-        @Provides
-        @Named("pageSize")
-        Integer providePageSize(ConfigurationMap map) {
-            return Integer.valueOf(map.getRequired("pageSize"));
         }
 
         @Provides
