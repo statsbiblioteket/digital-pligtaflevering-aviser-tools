@@ -1,5 +1,4 @@
 <%@ page import="com.sun.jersey.api.client.WebResource" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
@@ -10,11 +9,13 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
 <%@ page import="dk.statsbiblioteket.doms.central.connectors.EnhancedFedora" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage" %>
+<%@ page import="dk.statsbiblioteket.medieplatform.autonomous.Event" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.Item" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.ItemFactory" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex" %>
 <%@ page import="java.io.IOException" %>
+<%@ page import="java.util.List" %>
 <%@ page import="java.util.function.Consumer" %>
 <%@ page import="java.util.stream.Stream" %>
 <html>
@@ -70,12 +71,22 @@
 
     out.println("-----<br/>");
 
-    r.forEach(new Consumer<Object>() {
+    r.forEach(new Consumer<DomsItem>() {
 
         @Override
-        public void accept(final Object o) {
+        public void accept(final DomsItem o) {
             try {
-                finalout.print("<p>" + o + "</p>");
+                final List<Event> events = o.originalEvents();
+
+                finalout.print("<h2>" + o.getPath() + "</h2><table border='1'>");
+                for (Event event : events) {
+                    finalout.print("<tr>" + "<td>" + event.isSuccess() + "<td>" + event.getDate()
+                            + "<td>" + event.getEventID() + "</tr>");
+                    if(event.getDetails().trim().length() > 0) {
+                        finalout.print("<tr><td colspan='3'><pre>" + event.getDetails() + "</pre></tr>");
+                    }
+                }
+                finalout.print("</table>\n<hr />\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -83,6 +94,7 @@
     });  // fixme: go to web page
 
     out.println("-----<br/>");
+    /*
     repository.lookup(new DomsId("uuid:08eccdec-6b59-46e5-974c-1768485beb1f")).allChildren().forEach(new Consumer<Object>() {
         @Override
         public void accept(final Object o) {
@@ -93,6 +105,7 @@
             }
         }
     });
+    */
 %>
 </body>
 </html>

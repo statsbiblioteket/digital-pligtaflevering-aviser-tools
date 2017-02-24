@@ -78,6 +78,10 @@
             <artifactId>dagger</artifactId>
             <version>2.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.javaslang</groupId>
+            <artifactId>javaslang</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

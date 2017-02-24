@@ -12,17 +12,22 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import javaslang.control.Try;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -156,6 +161,20 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
         String dcContent = webResource.path(id).path(p).queryParam("format", "xml").get(String.class);
         return dcContent;
+    }
+
+    public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
+        Objects.requireNonNull(id, "id==null");
+        String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);
+        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
+
+        PremisManipulator<Item> premisObject = Try.of(
+                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes()))
+        ).getOrElse(Try.of(
+                () -> factory.createInitialPremisBlob(/* we don't have item.getFullID() */ id)
+                ).get()
+        );
+        return premisObject;
     }
 }
 
