@@ -5,7 +5,7 @@
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
 
-  <!-- java 8, please -->
+  <!-- Jetty: java 8 in jsp, please - doesn't work though so no lambdas for now -->
   <context-param>
     <param-name>compilerSourceVM</param-name>
     <param-value>1.8</param-value>

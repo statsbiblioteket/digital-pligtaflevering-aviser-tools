@@ -15,9 +15,15 @@
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory" %>
 <%@ page import="dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex" %>
 <%@ page import="java.io.IOException" %>
+<%@ page import="java.time.Duration" %>
+<%@ page import="java.time.Instant" %>
+<%@ page import="java.time.LocalDateTime" %>
+<%@ page import="java.time.Period" %>
+<%@ page import="java.time.ZoneId" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.function.Consumer" %>
 <%@ page import="java.util.stream.Stream" %>
+<%@ page import="static java.time.temporal.ChronoUnit.DAYS" %>
 <html>
 <body>
 <h2>Hello World!</h2>
@@ -80,13 +86,29 @@
 
                 finalout.print("<h2>" + o.getPath() + "</h2><table border='1'>");
                 for (Event event : events) {
-                    finalout.print("<tr>" + "<td>" + event.isSuccess() + "<td>" + event.getDate()
-                            + "<td>" + event.getEventID() + "</tr>");
-                    if(event.getDetails().trim().length() > 0) {
+                    final Instant eventInstant = event.getDate().toInstant();
+                    LocalDateTime now = LocalDateTime.now();
+                    final LocalDateTime localDateTime = LocalDateTime.ofInstant(eventInstant, ZoneId.systemDefault());
+                    long daysAgo = DAYS.between(localDateTime.toLocalDate(), now.toLocalDate());
+
+                    Duration timeAgo = Duration.between(localDateTime, now);
+
+                    String then = daysAgo > 0 ? daysAgo + " days ago" : // months? years?
+                            timeAgo.toString();
+
+                    finalout.print("<tr>" + "<td>" + event.isSuccess() + "<td>" + event.getEventID()
+                            + "<td>" + event.getDate() + " (" + then + " ago)"
+                            + "</tr>");
+                    if (event.getDetails().trim().length() > 0) {
                         finalout.print("<tr><td colspan='3'><pre>" + event.getDetails() + "</pre></tr>");
                     }
                 }
-                finalout.print("</table>\n<hr />\n");
+                finalout.print("</table>\n" +
+                        "<form action='not-implemented' style='float:left;'><input type='submit' value='Redo X'/></form>" +
+                        "<form action='not-implemented' style='float:left;'><input type='submit' value='Redo Z'/></form>" +
+                        "<form action='not-implemented'><input type='submit' value='Manual'/></form>" +
+                        "<br/>" +
+                        " <hr />\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }

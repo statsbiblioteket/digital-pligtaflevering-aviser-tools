@@ -125,29 +125,33 @@ public class ValidateXMLMain {
 
                 // we now have organized the responses in "failed", "succesful", and "notSucessful"
 
-                StringBuilder message = new StringBuilder();
-                message.append("item: " + domsItem + "\n");
-                if (failed.size() > 0) {
-                    message.append("failed (see full traces in log file)\n");
-                    message.append("==============\n");
-                    failed.forEach(tr -> message.append(tr.getCause().getMessage()).append("\n"));
-                    message.append("\n");
-                }
-                if (notSuccessful.size() > 0) {
-                    message.append("not successful\n");
-                    message.append("==============\n");
-                    notSuccessful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
-                    message.append("\n");
-                }
-
-                if (successful.size() > 0) {
-                    message.append("successful\n");
-                    message.append("==========\n");
-                    successful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
-                    message.append("\n");
-                }
-
                 final boolean outcome = failed.size() == 0 && notSuccessful.size() == 0;
+
+                StringBuilder message = new StringBuilder();
+                if (outcome == false) {
+                    message.append("item: " + domsItem + "\n");
+                    if (failed.size() > 0) {
+                        message.append("failed (see full traces in log file)\n");
+                        message.append("==============\n");
+                        failed.forEach(tr -> message.append(tr.getCause().getMessage()).append("\n"));
+                        message.append("\n");
+                    }
+                    if (notSuccessful.size() > 0) {
+                        message.append("not successful\n");
+                        message.append("==============\n");
+                        notSuccessful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
+                        message.append("\n");
+                    }
+
+                    if (successful.size() > 0) {
+                        message.append("successful\n");
+                        message.append("==========\n");
+                        successful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
+                        message.append("\n");
+                    }
+                } else {
+                    message.append(successful.size() + " valid.");
+                }
 
                 final String deliveryEventMessage = message.toString();
 
