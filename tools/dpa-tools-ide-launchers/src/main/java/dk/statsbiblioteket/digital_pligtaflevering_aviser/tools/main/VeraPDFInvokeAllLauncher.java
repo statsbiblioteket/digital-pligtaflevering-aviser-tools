@@ -1,26 +1,21 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
-/**
- *
- */
 
-public class VeraPDFInvokeMainTest {
-    @org.junit.Test
-    public void invocationTest() throws URISyntaxException {
+public class VeraPDFInvokeAllLauncher {
+    public static void main(String[] args) throws Exception {
 
-        Path batchPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(this, "delivery-samples");
-        Path bitrepoPath = AutonomousPreservationToolHelper.getRequiredPathTowardsRoot(this, "bitrepositorystub-storage");
+        Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(VeraPDFInvokeAllLauncher.class, "delivery-samples");
+        Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(VeraPDFInvokeAllLauncher.class, "bitrepositorystub-storage");
 
         VeraPDFInvokeMain.main(new String[]{
-                "verapdf-invoke-vagrant.properties",
+                "verapdf-invoke-all-vagrant.properties",
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });

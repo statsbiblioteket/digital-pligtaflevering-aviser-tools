@@ -81,6 +81,7 @@ public class ValidateXMLMain {
         Tool getTool();
     }
 
+    /** @noinspection Convert2MethodRef*/
     @Module
     protected static class ValidateXMLModule {
         Logger log = LoggerFactory.getLogger(this.getClass());
@@ -141,7 +142,7 @@ public class ValidateXMLMain {
         private Function<DomsItem, String> processChildDomsId(WebResource restApi, String thisSucessfulEventName) {
             return domsItem -> {
                 // Single doms item
-                List<ToolResult> toolResults = domsItem.allChildren().stream()
+                List<ToolResult> toolResults = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem))
                         .collect(Collectors.toList());
 
