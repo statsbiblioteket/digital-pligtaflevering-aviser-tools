@@ -110,7 +110,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         throw new UnsupportedOperationException("use originalEvents() instead for now");
     }
 
-    public List<Event> originalEvents() {
+    public List<Event> getOriginalEvents() {
         PremisManipulator<Item> premis = getPremis();
         final Item item = premis.toItem();  // we must go through an item to get to the events.
 

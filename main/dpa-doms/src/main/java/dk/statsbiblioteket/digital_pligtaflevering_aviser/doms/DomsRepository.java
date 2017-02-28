@@ -176,5 +176,10 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         );
         return premisObject;
     }
+
+    @Override
+    public void close() throws Exception {
+        // nothing yet.
+    }
 }
 
