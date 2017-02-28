@@ -33,6 +33,8 @@ public class DeliveryMD5Validation {
     final private HashSet<String> ignoredFiles = new HashSet<String>();
     private Map<String, String> cachedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
+    private int pageCount = 0;
+    private int articleCount = 0;
 
     public DeliveryMD5Validation(String deliveryFolder, String checksumFileName, BiFunction<Path, String, String> md5Convert, String ignoredFilesString) {
         this.deliveryFolder = deliveryFolder;
@@ -82,18 +84,27 @@ public class DeliveryMD5Validation {
         //Walk through the filesystem in that delivery and confirm that all files inside the delivery is also mentioned in the checksum-file
         //It is possible to indicate some specific files whish should be ignored, they is not part of the validation
         Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()))
-                .filter(Files::isRegularFile)
                 .forEach(filePath -> {
-                    String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryName);
-                    if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
-                        //This file is one of the ignored files, just continue without doing anything
-                    } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
-                        log.trace("{} not a key in md5Map", fileIdMatchingChecksumfile);
-                        validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
+                    if(Files.isRegularFile(filePath)) {
+                        String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryName);
+                        if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
+                            //This file is one of the ignored files, just continue without doing anything
+                        } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
+                            log.trace("{} not a key in md5Map", fileIdMatchingChecksumfile);
+                            validationResult.add("There is missing a file reference in " + checksumFileName + " : " + filePath.toFile().getAbsolutePath());
+                        } else {
+                            cachedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
+                        }
                     } else {
-                        cachedFileListMap.put(Paths.get(fileIdMatchingChecksumfile).getFileName().toString(), md5Map.remove(fileIdMatchingChecksumfile));
+                        String folderPath = Paths.get(deliveryFolder).relativize(filePath).toString();
+                        if (folderPath.contains("pages")) {
+                            pageCount = filePath.toFile().listFiles().length;
+                        } else if(folderPath.contains("articles")) {
+                            articleCount = filePath.toFile().listFiles().length;
+                        }
                     }
                 });
+        log.info(KibanaLoggingStrings.DELIVERY_CONTENT_INFO, deliveryName, pageCount, articleCount);
 
         //Make sure that all files listed in "checksums.txt" exists and has the correct checksum
         for(String fileName: md5Map.keySet()) {
