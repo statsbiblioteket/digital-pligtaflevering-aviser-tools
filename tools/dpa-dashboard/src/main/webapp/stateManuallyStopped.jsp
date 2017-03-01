@@ -7,7 +7,7 @@
 <html>
 <body>
 
-<h1>Ingested files</h1>
+<h1>Manually stopped</h1>
 <%
     {
         ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
@@ -16,8 +16,8 @@
 
         DomsModule domsModule = new DomsModule();
 
-        String pastSuccessfulEvents = "Data_Archived";
-        String futureEvents = "Manually_stopped";
+        String pastSuccessfulEvents = "Manually_stopped";
+        String futureEvents = "";
         String oldEvents = "";
         String itemTypes = "doms:ContentModel_RoundTrip";
 
@@ -31,8 +31,8 @@
     <%@include file="showItem.jsp" %>
     <form action='setEventOnItem.jsp' style='float:left;' method="get">
         <input type="hidden" name="id" value="${item.domsId.id()}"/>
-        <input type="hidden" name="e" value="Manually_stopped"/>
-        <input type='submit' value='Set Manually_stopped'/>
+        <input type="hidden" name="e" value="Data_Archived"/>
+        <input type='submit' value='Set Data_Archived'/>
     </form>
 </c:forEach>
 

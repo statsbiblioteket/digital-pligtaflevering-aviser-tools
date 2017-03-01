@@ -5,7 +5,7 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
-<h1>Set event on item</h1>
+<h1>Set event ${param.id}</h1>
 <%
     ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
 
@@ -24,20 +24,30 @@
             String id = request.getParameter("id");
             String eventName = request.getParameter("e");
 
+            final String outcomeParameter = request.getParameter("outcome");
+            final String message = request.getParameter("message");
+
+            boolean outcome = outcomeParameter == null ? true : Boolean.parseBoolean(outcomeParameter);
+
             DomsItem item = repository.lookup(new DomsId(id));
             request.setAttribute("item", item);
 
-            String doIt = request.getParameter("doIt");
+            item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
+
         %>
-        DO IT!
+        <c:url value="showItem.jsp" var="showItemUrl">
+            <c:param name="id" value="${param.id}"/>
+        </c:url>
+        <c:redirect url="${showItemUrl}"/>
     </c:when>
     <c:otherwise>
-        <c:url value="setEventOnItem.jsp" var="url">
-            <c:param name="id" value="${param.id}"/>
-            <c:param name="e" value="${param.e}"/>
-            <c:param name="doIt" value="yes"/>
-        </c:url>
-        <a href="${url}">Please confirm you want to set the event <c:out value="${param.e}"/> for <c:out value="${item}"/>.</a>
+        <form action='setEventOnItem.jsp'>
+            <label>Reason: <input type="text" name="message"/></label>
+            <input type="hidden" name="id" value="${param.id}"/>
+            <input type="hidden" name="e" value="${param.e}"/>
+            <input type="hidden" name="doIt" value="yes"/>
+            <input type='submit' value='Set ${param.e}'/>
+        </form>
     </c:otherwise>
 </c:choose>
 
