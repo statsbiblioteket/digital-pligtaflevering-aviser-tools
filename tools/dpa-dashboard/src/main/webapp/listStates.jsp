@@ -1,4 +1,4 @@
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryProvider" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
@@ -13,7 +13,7 @@
 <%
     ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
 
-    DomsRepository repository = new RepositoryProvider().apply(map);
+    DomsRepository repository = new RepositoryConfigurator().apply(map);
 
     DomsModule domsModule = new DomsModule();
 

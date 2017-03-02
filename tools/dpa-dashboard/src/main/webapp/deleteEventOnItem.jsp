@@ -30,9 +30,14 @@
             boolean outcome = outcomeParameter == null ? true : Boolean.parseBoolean(outcomeParameter);
 
             DomsItem item = repository.lookup(new DomsId(id));
-            request.setAttribute("item", item);
 
-            item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
+            //
+            int i = item.removeEvents(eventName);
+
+            item.appendEvent("dashboard", new java.util.Date(),
+                    "Deleted " + i + " instances of " + eventName +
+                    (message == null ? "" : "\n" +
+                            "\nReason " + message), "EVENT_DELETED_MANUALLY", outcome);
 
         %>
         <c:url value="showItem.jsp" var="showItemUrl">
@@ -41,13 +46,20 @@
         <c:redirect url="${showItemUrl}"/>
     </c:when>
     <c:otherwise>
-        <form action='setEventOnItem.jsp'>
-            <label>Reason: <input type="text" name="message"/></label>
-            <input type="hidden" name="id" value="${param.id}"/>
-            <input type="hidden" name="e" value="${param.e}"/>
-            <input type="hidden" name="doIt" value="yes"/>
-            <input type='submit' value='Set ${param.e}'/>
-        </form>
+        Delete event "${param.e}" (timestamp ${param.time}) on ${param.id}?
+        <table border="1">
+            <tr>
+                <td>
+                    <form action='deleteEventOnItem.jsp'>
+                        <label>Give reason: <input type="text" name="message"/></label>
+                        <input type="hidden" name="id" value="${param.id}"/>
+                        <input type="hidden" name="e" value="${param.e}"/>
+                        <input type="hidden" name="doIt" value="yes"/>
+                        <input type='submit' value='Set ${param.e}'/>
+                    </form>
+                </td>
+            </tr>
+        </table>
     </c:otherwise>
 </c:choose>
 

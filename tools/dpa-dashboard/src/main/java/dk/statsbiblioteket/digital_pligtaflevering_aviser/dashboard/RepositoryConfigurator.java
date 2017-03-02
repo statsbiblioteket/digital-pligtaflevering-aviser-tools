@@ -19,7 +19,7 @@ import java.util.function.Function;
 /**
  *
  */
-public class RepositoryProvider implements Function<ConfigurationMap, DomsRepository> {
+public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRepository> {
 
     @Override
     public DomsRepository apply(ConfigurationMap map) {

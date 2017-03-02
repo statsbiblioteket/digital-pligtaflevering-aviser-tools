@@ -25,11 +25,11 @@ public class DomsDatastream {
         return datastreamProfile.getUrl();
     }
 
-    public String getID() {
+    public String getId() {
         return datastreamProfile.getID();
     }
 
     public String getDatastreamAsString() {
-        return domsRepository.getDataStreamAsString(domsItem.getDomsId().id(), getID());
+        return domsRepository.getDataStreamAsString(domsItem.getDomsId().id(), getId());
     }
 }

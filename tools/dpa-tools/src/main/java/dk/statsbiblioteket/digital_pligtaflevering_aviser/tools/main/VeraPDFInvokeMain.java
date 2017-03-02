@@ -154,7 +154,7 @@ public class VeraPDFInvokeMain {
             log.trace("Found PDF datastream on {}", domsItem);
 
             if (reuseExistingDatastream) {
-                if (datastreams.stream().filter(ds -> ds.getID().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
+                if (datastreams.stream().filter(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
                     log.trace("Reused existing VERAPDF datastream for {}", domsItem);
                     return Stream.of(ToolResult.ok(domsItem, "Reused existing VERAPDF datastream for " + domsItem));
                 }

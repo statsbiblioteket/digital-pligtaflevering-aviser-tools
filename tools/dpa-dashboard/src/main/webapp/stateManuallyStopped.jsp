@@ -12,7 +12,7 @@
     {
         ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
 
-        DomsRepository repository = new RepositoryProvider().apply(map);
+        DomsRepository repository = new RepositoryConfigurator().apply(map);
 
         DomsModule domsModule = new DomsModule();
 

@@ -138,6 +138,29 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
+    /**
+     * removeEventsFromItem removes all events of the given eventType from the given item.
+     *
+     * @param domsId    domsId to add event to
+     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
+     * @return number removed
+     */
+
+    public int removeEventsFromItem(DomsId domsId, String eventType) {
+        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
+        try {
+            return domsEventStorage.removeEventFromItem(fakeItemToGetThroughAPI, eventType);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("removeEventsFromItem failed for " + domsId, e);
+        }
+    }
+
+    /**
+     * Returns the contents of the given datastream as a String (as returned by Jersey <code>get(String.class)</code>)
+     */
+
     public String getDataStreamAsString(String pid, String datastreamName) {
         try {
             String result = efedora.getXMLDatastreamContents(pid, datastreamName, new Date().getTime());

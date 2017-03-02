@@ -171,6 +171,16 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     }
 
     /**
+     * delete all instances of a specific PREMIS event on the current item.  Use with care!
+     * @return number of events deleted.
+     */
+    public int removeEvents(String eventType) {
+        final int date = domsRepository.removeEventsFromItem(domsId, eventType);
+        requireReload();
+        return date;
+    }
+
+    /**
      * return all direct children nodes for the current node.  For now the interface is a stream, but
      * internally the whole response is built.
      */

@@ -177,7 +177,7 @@ public class ValidateXMLMain {
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
             Optional<DomsDatastream> profileOptional = datastreams.stream()
-                    .filter(ds -> ds.getID().equals("XML"))
+                    .filter(ds -> ds.getId().equals("XML"))
                     .findAny();
 
             if (profileOptional.isPresent() == false) {
