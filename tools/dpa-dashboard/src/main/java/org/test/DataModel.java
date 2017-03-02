@@ -12,6 +12,16 @@ public class DataModel {
 
     DomsItem o;
 
+    public String getCurrentEvent() {
+        return currentEvent;
+    }
+
+    public void setCurrentEvent(String currentEvent) {
+        this.currentEvent = currentEvent;
+    }
+
+    String currentEvent;
+
     public void setItem(DomsItem o) {
         this.o = o;
     }

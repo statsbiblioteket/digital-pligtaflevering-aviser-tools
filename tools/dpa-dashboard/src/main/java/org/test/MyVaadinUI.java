@@ -72,8 +72,7 @@ public class MyVaadinUI extends UI
 
         EventPanel eventPanel = new EventPanel();
         eventPanel.setVisible(false);
-        eventPanel.setSelectable(true);
-        eventPanel.setImmediate(true);
+
 
 
 
@@ -83,9 +82,7 @@ public class MyVaadinUI extends UI
 
                 ArrayList<String> alist = new ArrayList<String>();
 
-
                 Stream<DomsItem> list = fetchIt();
-                //model.setList(list);
 
                 list.forEach(new Consumer<DomsItem>() {
 
@@ -95,25 +92,18 @@ public class MyVaadinUI extends UI
                     }
                 });
 
-
-
-
                 table.readStates(eventStructureCommunication);
-
-
             }
         });
-
-
-
-
 
 
         table.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
                 infoPanel.setVisible(true);
-                infoPanel.setInfo(eventStructureCommunication, (String)(itemClickEvent.getItem().getItemProperty("State").getValue()));
+                String currentEvent = (String)(itemClickEvent.getItem().getItemProperty("State").getValue());
+                infoPanel.setInfo(eventStructureCommunication, currentEvent);
+                model.setCurrentEvent(currentEvent);
             }
         });
 
@@ -125,16 +115,10 @@ public class MyVaadinUI extends UI
 
                 String heading = (String)(itemClickEvent.getItem().getItemProperty("Batch").getValue());
 
-                eventPanel.setInfo(eventStructureCommunication, heading);
+                eventPanel.setInfo(eventStructureCommunication, model.getCurrentEvent(), heading);
             }
         });
 
-
-
-        /*DateField startDf = new DateField();
-        DateField endDf = new DateField();
-        layout.addComponent(startDf);
-        layout.addComponent(endDf);*/
         layout.addComponent(button);
 
         hlayout.addComponent(table);
