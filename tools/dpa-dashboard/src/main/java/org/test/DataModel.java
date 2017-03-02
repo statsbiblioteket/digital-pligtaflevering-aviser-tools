@@ -10,13 +10,13 @@ import java.util.stream.Stream;
 public class DataModel {
 
 
-    DomsItem[] list;
+    DomsItem o;
 
-    /*public void setList(Stream<DomsItem> list) {
-        this.list = (DomsItem[])list.toArray();
+    public void setItem(DomsItem o) {
+        this.o = o;
     }
 
-    public DomsItem[] getList() {
-        return this.list;
-    }*/
+    public DomsItem getItem() {
+        return o;
+    }
 }

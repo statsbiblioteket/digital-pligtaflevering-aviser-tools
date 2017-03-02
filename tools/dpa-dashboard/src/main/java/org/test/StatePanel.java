@@ -21,7 +21,7 @@ public class StatePanel extends Table {
         this.addContainerProperty("State", String.class, null);
         this.addContainerProperty("amount", Long.class, null);
         //this.addContainerProperty("DomsItem", Stream.class, null);
-        this.setWidth("50%");
+        this.setWidth("100%");
     }
 
     public void readStates(FetchEventStructure fetchStructure) {

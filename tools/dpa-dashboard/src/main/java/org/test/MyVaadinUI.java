@@ -31,8 +31,10 @@ import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
 
 
 /**
@@ -61,20 +63,17 @@ public class MyVaadinUI extends UI
         table.setImmediate(true);
 
 
+
         InfoPanel infoPanel = new InfoPanel();
         infoPanel.setVisible(false);
+        infoPanel.setSelectable(true);
+        infoPanel.setImmediate(true);
 
 
-        /*table.addContainerProperty("Batch", String.class, null);
-
-        table.addContainerProperty("status", String.class, null);
-
-        table.addContainerProperty("event", Integer.class, null);
-
-        table.addContainerProperty("date", Label.class, null);
-        table.setWidth("100%");*/
-
-        //table.addValueChangeListener(valueChangeListenrTable);
+        EventPanel eventPanel = new EventPanel();
+        eventPanel.setVisible(false);
+        eventPanel.setSelectable(true);
+        eventPanel.setImmediate(true);
 
 
 
@@ -97,17 +96,6 @@ public class MyVaadinUI extends UI
                 });
 
 
-                //layout.addComponent(new Label("----" + list.toArray().length));
-
-
-
-
-                /*for(String batch : alist) {
-                    Object newItemId = table.addItem();
-                    com.vaadin.data.Item row1 = table.getItem(newItemId);
-                    row1.getItemProperty("Batch").setValue(batch);
-                }*/
-
 
 
                 table.readStates(eventStructureCommunication);
@@ -117,22 +105,27 @@ public class MyVaadinUI extends UI
         });
 
 
+
+
+
+
         table.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
                 infoPanel.setVisible(true);
+                infoPanel.setInfo(eventStructureCommunication, (String)(itemClickEvent.getItem().getItemProperty("State").getValue()));
+            }
+        });
 
 
-                System.out.println(itemClickEvent.getItem().getItemProperty("State"));
+        infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent itemClickEvent) {
+                eventPanel.setVisible(true);
 
+                String heading = (String)(itemClickEvent.getItem().getItemProperty("Batch").getValue());
 
-
-
-                /*Stream<DomsItem> item = itemClickEvent.getItem().getItemProperty("");
-
-                row1.getItemProperty("DomsItem").setValue(item);*/
-                //final List<Event> events = o.originalEvents();
-
+                eventPanel.setInfo(eventStructureCommunication, heading);
             }
         });
 
@@ -146,6 +139,7 @@ public class MyVaadinUI extends UI
 
         hlayout.addComponent(table);
         hlayout.addComponent(infoPanel);
+        hlayout.addComponent(eventPanel);
         layout.addComponent(hlayout);
 
     }
