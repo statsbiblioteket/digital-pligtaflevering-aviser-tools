@@ -14,6 +14,7 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- to get Try -->
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>

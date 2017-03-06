@@ -22,16 +22,4 @@
             <param-value>1.8</param-value>
         </init-param>
     </servlet>
-
-    <!--
-    <resource-ref>
-        <res-ref-name>jdbc/mydatasource</res-ref-name>
-        <res-type>javax.sql.DataSource</res-type>
-        <res-auth>Container</res-auth>
-        <injection-target>
-            <injection-target-class>foo.T1</injection-target-class>
-            <injection-target-name>bar</injection-target-name>
-        </injection-target>
-    </resource-ref>
-    -->
 </web-app>

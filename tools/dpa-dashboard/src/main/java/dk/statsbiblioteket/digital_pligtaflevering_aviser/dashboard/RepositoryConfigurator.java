@@ -17,6 +17,10 @@ import javaslang.control.Try;
 import java.util.function.Function;
 
 /**
+ * RepositoryConfigurator captures the current (as of 2017-03-06) Dagger configuration into code so a DomsRepository can
+ * be correctly configured from a ConfigurationMap configuration.
+ * (there is currently no
+ * official solution to using Dagger 2 with web servers).
  *
  */
 public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRepository> {

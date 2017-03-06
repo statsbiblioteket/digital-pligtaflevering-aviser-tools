@@ -186,6 +186,13 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         return dcContent;
     }
 
+    /**
+     * We need the premis object for the event stream.  Unfortunately the original DomsEventStorage.getPremisForItem()
+     * method is private, so we need a copy here (adapted for try)
+     * @param id
+     * @param eventDataStreamName
+     * @return
+     */
     public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
         Objects.requireNonNull(id, "id==null");
         String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);

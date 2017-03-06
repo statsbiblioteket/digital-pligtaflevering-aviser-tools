@@ -164,7 +164,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
 
-        // FIXME:  correct message.
+        // Message saved on event are the failed results.
         String deliveryEventMessage = failingToolResults.stream()
                 .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
                 .filter(s -> s.trim().length() > 0) // skip blank lines
@@ -202,7 +202,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
                     DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true), XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
-            // FIXME: try
+            // FIXME: Rewrite using try instead of fail+exception.  It is an unexpected situation though.
             return Arrays.asList(ToolResult.fail(domsItem, "Invalid XPath. This is a programming error."));
         }
         List<String> textContent = new ArrayList<>();

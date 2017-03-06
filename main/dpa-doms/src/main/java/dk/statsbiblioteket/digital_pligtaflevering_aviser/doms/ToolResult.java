@@ -4,6 +4,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
  * ToolResult is a helper class for returning a tuple of (result, message[, throwable]) for individual
  * processing steps in a stream, in order for the final collector to decide the overall outcome.  Inspired
  * by the ResultCollector in the newspaper project.
+ *
+ * FIXME:  AVIS-64 mentioned that the use of DomsItem instead of DomsId might be a memory bottleneck.
  */
 public class ToolResult {
     final private DomsItem item;

@@ -110,6 +110,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         throw new UnsupportedOperationException("use originalEvents() instead for now");
     }
 
+    // FIXME:  Refactor getOriginalEvents() into events().  It was introduced to figure out what was needed to be exposed in DomsEvent.
     public List<Event> getOriginalEvents() {
         PremisManipulator<Item> premis = getPremis();
         final Item item = premis.toItem();  // we must go through an item to get to the events.
