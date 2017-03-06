@@ -1,3 +1,7 @@
+THESE INSTRUCTIONS ARE COPIED AS-IS FROM "digital-pligtaflevering-aviser-tools" WHERE THE
+VAGRANT IMAGE WAS FIRST USED IN A PROJECT.
+
+
 Before starting:
 ===
 

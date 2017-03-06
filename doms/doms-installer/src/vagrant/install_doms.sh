@@ -13,7 +13,7 @@ mkdir -p $STORAGE_DIR
 export TMPDIR=$HOME/tmp
 mkdir -p $TMPDIR
 
-installer="/target/doms-installer-*-testbed.tar.gz"
+installer="/target/artifacts-copied/doms-installer-testbed.tar.gz"
 
 echo "Getting doms from $installer"
 

@@ -218,6 +218,15 @@
             <version>1.9-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <!-- doms-installer reference to be installed inside vagrant if requested -->
+        <dependency>
+            <groupId>dk.statsbiblioteket.doms.installer</groupId>
+            <artifactId>doms-installer</artifactId>
+            <!--    <version>1.26-SNAPSHOT</version>-->
+            <version>1.25</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -338,7 +347,9 @@
                         <configuration>
                             <rules>
                                 <requireFilesExist>
-                                    <message>*** devel-config not present - check README.md for cloning instructions ***</message>
+                                    <message>*** devel-config not present - check README.md for cloning instructions
+                                        ***
+                                    </message>
                                     <files>
                                         <file>${project.basedir}/src/vagrant/devel-config</file>
                                     </files>
@@ -366,18 +377,27 @@
                                 <artifactItem>
                                     <groupId>org.bitrepository.reference</groupId>
                                     <artifactId>bitrepository-integration</artifactId>
-                                    <type>tar.gz</type>
                                     <classifier>quickstart</classifier>
+                                    <type>tar.gz</type>
+
                                     <overWrite>yes</overWrite>
                                     <outputDirectory>${project.build.directory}/artifacts-copied/</outputDirectory>
                                     <destFileName>bitrepository-integration-quickstart.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>dk.statsbiblioteket.doms.installer</groupId>
+                                    <artifactId>doms-installer</artifactId>
+                                    <classifier>testbed</classifier>
+                                    <type>tar.gz</type>
+                                    <overWrite>yes</overWrite>
+                                    <outputDirectory>${project.build.directory}/artifacts-copied/</outputDirectory>
+                                    <destFileName>doms-installer-testbed.tar.gz</destFileName>
                                 </artifactItem>
                             </artifactItems>
                             <!-- other configurations here -->
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
         </plugins>
     </build>
