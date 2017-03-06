@@ -2,7 +2,7 @@
 
     Current copy adapted from Avisprojektet.
 -->
-<configuration debug="true" packagingData="true">
+<configuration debug="false" packagingData="true">
     <timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss.SSS"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

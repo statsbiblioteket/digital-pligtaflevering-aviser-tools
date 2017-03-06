@@ -46,7 +46,7 @@ public class ValidateXMLMainTest {
                     Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
                     URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
                     BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
-                    assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.tryParsing(in, xsdUrl));
+                    assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.validate(in, xsdUrl));
                 } catch (Exception e) {
                     assertEquals(e.getMessage(), true, false);
                 }
@@ -88,7 +88,7 @@ public class ValidateXMLMainTest {
         Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
         URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        return xmlValidatorModule.tryParsing(in, xsdUrl);
+        return xmlValidatorModule.validate(in, xsdUrl);
     }
 
 

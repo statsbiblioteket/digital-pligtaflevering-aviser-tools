@@ -77,7 +77,6 @@ public class DomsModule {
         return map.getRequired(DOMS_PIDGENERATOR_URL);
     }
 
-
     /**
      * Patht to the folder containing batches
      *
@@ -235,14 +234,20 @@ public class DomsModule {
      * Extracts a QuerySpecification from configuration parameters.  The semantics are the same as
      * for the Newspaper Autonomous components.
      *
-     * @param pastSuccessfulEvents
-     * @param futureEvents
-     * @param oldEvents
-     * @param itemTypes
+     * @param pastSuccessfulEvents Comma separated list of event names which must have been completed successfully
+     *                             previously for item to be considered.  An empty string will include template objects
+     *                             which is seldomly wanted.
+     * @param futureEvents         Comma separated list of events which must not have happened yet regardless of their
+     *                             outcome.
+     * @param oldEvents            Comma separated list of events which 1) must never have happened, or 2) have happened
+     *                             but a datastream (any datastream other than EVENTS which holds the events) have been
+     *                             written to since that event occured (the time stamp of the datastream is newer than
+     *                             the time stamp of the event).
+     * @param itemTypes            Comma separated list of types which item MUST have to be considered.
      * @return
      */
     @Provides
-    QuerySpecification providesQuerySpecification(
+    public QuerySpecification providesQuerySpecification(
             @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS) String pastSuccessfulEvents,
             @Named(AUTONOMOUS_FUTURE_EVENTS) String futureEvents,
             @Named(AUTONOMOUS_OLD_EVENTS) String oldEvents,
@@ -256,7 +261,7 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of events which must have been completed successfully for item to be considered.
+     * Comma separated list of events which must have been completed successfully previously for item to be considered.
      *
      * @param map configuration map containing the value.
      * @return
@@ -268,7 +273,7 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of events which must not yet have happened (FIXME:  Successfully?) for item to be
+     * Comma separated list of events which may not yet have happened (FIXME:  Successfully?) for item to be
      * considered.
      *
      * @param map configuration map containing the value.
@@ -293,7 +298,7 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of types which item must have to be considere.
+     * Comma separated list of types which item must have to be considered.
      *
      * @param map configuration map containing the value.
      * @return configuration value (mandatory)
@@ -310,7 +315,7 @@ public class DomsModule {
      * (meaning to be compatible with the existing configuration files) we do the same silent adding
      * on "/objects/" as was done in IteratorForFedora3 constructor in item-event-framework-common.
      *
-     * @param domsUrl url to Fedora Commons instance
+     * @param domsUrl      url to Fedora Commons instance
      * @param domsUsername username for Fedora Commons instance
      * @param domsPassword password for Fedora Commons instance
      * @return ready-to-use WebResource for Fedora Commons interaction.
@@ -325,4 +330,14 @@ public class DomsModule {
         WebResource webResource = client.resource(domsUrl.endsWith("/objects/") ? domsUrl : domsUrl + "/objects/");
         return webResource;
     }
+
+    /**
+     * Return the number of responses in a single sboi query
+     */
+    @Provides
+    @Named("pageSize")
+    public Integer providePageSize(ConfigurationMap map) {
+        return Integer.valueOf(map.getRequired("pageSize"));
+    }
+
 }

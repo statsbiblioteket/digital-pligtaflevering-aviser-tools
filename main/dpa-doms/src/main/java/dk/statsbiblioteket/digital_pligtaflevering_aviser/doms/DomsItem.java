@@ -4,14 +4,28 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.RepositoryItem;
 import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.ObjectProfile;
+import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.Event;
+import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
+import dk.statsbiblioteket.util.xml.DOM;
+import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,7 +107,16 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     @Override
     public Collection<DomsEvent> events() {
-        throw new UnsupportedOperationException("not implemented yet");
+        throw new UnsupportedOperationException("use originalEvents() instead for now");
+    }
+
+    // FIXME:  Refactor getOriginalEvents() into events().  It was introduced to figure out what was needed to be exposed in DomsEvent.
+    public List<Event> getOriginalEvents() {
+        PremisManipulator<Item> premis = getPremis();
+        final Item item = premis.toItem();  // we must go through an item to get to the events.
+
+        return item.getEventList();
+
     }
 
     /**
@@ -139,7 +162,8 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return new DomsItem(new DomsId(id), domsRepository);
     }
 
-    /** append a PREMIS event on the current item
+    /**
+     * append a PREMIS event on the current item
      */
     public Date appendEvent(String agent, Date timestamp, String details, String eventType, boolean outcome) {
         final Date date = domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
@@ -147,7 +171,18 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return date;
     }
 
-    /** return all direct children nodes for the current node.  For now the interface is a stream, but
+    /**
+     * delete all instances of a specific PREMIS event on the current item.  Use with care!
+     * @return number of events deleted.
+     */
+    public int removeEvents(String eventType) {
+        final int date = domsRepository.removeEventsFromItem(domsId, eventType);
+        requireReload();
+        return date;
+    }
+
+    /**
+     * return all direct children nodes for the current node.  For now the interface is a stream, but
      * internally the whole response is built.
      */
     public Stream<DomsItem> allChildren() {
@@ -174,7 +209,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     /**
      * Return all children nodes recursively from current node
-     *
+     * <p>
      * Logic lifted from https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
      *
      * @return
@@ -210,4 +245,49 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
                 "domsId=" + domsId +
                 '}';
     }
+
+    public String getDC() {
+        return domsRepository.getDC(domsId);
+    }
+
+    /**
+     * Returns the path identifier inserted by the ingester for a given node.  Throws a runtime exception
+     * if the XPath extraction failed.  Throws NoSuchElementException if no "path:" identifier is present for the
+     * object.
+     *
+     * @return
+     */
+    public String getPath() {
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NamespaceContextImpl context = new NamespaceContextImpl();
+        context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
+        xPath.setNamespaceContext(context);
+
+        String dcContent = getDC();
+        log.trace("DC={}", dcContent);
+        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true);
+
+        NodeList nodeList;
+        try {
+            nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(dom, XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            throw new RuntimeException("//dc:identifier failed in DC for " + this, e);
+        }
+        List<String> textContent = new ArrayList<>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            textContent.add(nodeList.item(i).getTextContent());
+        }
+        Optional<String> relativeFilenameFromDublinCore = textContent.stream()
+                .filter(s -> s.startsWith("path:"))
+                .map(s -> s.substring("path:".length()))
+                .findAny();
+
+        return relativeFilenameFromDublinCore.get();
+    }
+
+    // BACKPORT - DomsEventStorage.getPremisForItem() is private so adapted from that.
+    public PremisManipulator<Item> getPremis() {
+        return domsRepository.getPremisFor(domsId.id(), DomsEventStorageFactory.EVENTS);
+    }
+
 }

@@ -26,12 +26,14 @@
             <version>master-SNAPSHOT</version>
         </dependency>
 
+
         <!-- slf4j production backend. -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.0.12</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -46,7 +48,38 @@
                 </configuration>
             </plugin>
 
-            <!-- http://stackoverflow.com/a/7957042/53897 -->
+            <!-- get git information from file system - https://github.com/ktoso/maven-git-commit-id-plugin#using-the-plugin -->
+            <!--
+                 [INFO] [GitCommitIdMojo] git.commit.id.abbrev = f422323
+                 [INFO] [GitCommitIdMojo] git.commit.user.email = tra@statsbiblioteket.dk
+                 [INFO] [GitCommitIdMojo] git.commit.message.full = DPA-64: Initial dashboard skeleton to show XSD-validation output.
+                 [INFO] [GitCommitIdMojo] git.commit.id = f42232310c9625eae13c491a9e44c1accaba4b1b
+                 [INFO] [GitCommitIdMojo] git.commit.message.short = DPA-64: Initial dashboard skeleton to show XSD-validation output.
+                 [INFO] [GitCommitIdMojo] git.commit.user.name = Thorbjoern Ravn Andersen
+                 [INFO] [GitCommitIdMojo] git.build.user.name = Thorbjoern Ravn Andersen
+                 [INFO] [GitCommitIdMojo] git.build.user.email = tra@statsbiblioteket.dk
+                 [INFO] [GitCommitIdMojo] git.branch = DPA-64
+                 [INFO] [GitCommitIdMojo] git.commit.time = 17.02.2017 @ 13:53:31 CET
+                 [INFO] [GitCommitIdMojo] git.build.time = 20.02.2017 @ 09:59:00 CET
+            -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <!-- 2.0.4 is the newest that does not require Maven 3.3 -->
+                <version>2.0.4</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+            </plugin>
+
+
+            <!-- http://stackoverflow.com/a/7957042/53897 - create classes/META-INF/maven/dependencies.properties-->
             <plugin>
                 <groupId>org.apache.servicemix.tooling</groupId>
                 <artifactId>depends-maven-plugin</artifactId>
@@ -60,8 +93,7 @@
                 </executions>
             </plugin>
 
-            <!-- http://stackoverflow.com/a/11729432/53897 -->
-
+            <!-- http://stackoverflow.com/a/11729432/53897 - create classes/META-INF/maven/dependency-tree.txt -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -117,7 +149,9 @@
                     FIXME: Consider if we need a full thread dump when task fails: http://stackoverflow.com/a/2788423/53897
                     For OOM VisualVM can extract it from the hprof file.
                     -->
+                    <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
+                        -Ddpa.git.id=${git.branch}_${git.commit.id.abbrev}
                         -verbose:gc
                         -XX:+PrintGCDetails
                         -XX:+PrintGCDateStamps
@@ -157,7 +191,8 @@
                                 </program>
                                 -->
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ValidateXMLMain
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ValidateXMLMain
                                     </mainClass>
                                     <id>dpa-validate-xml</id>
                                 </program>

@@ -8,35 +8,49 @@
 
     <packaging>pom</packaging>
 
+    <properties>
+        <dpa.slf4j.version>1.7.21</dpa.slf4j.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
+            <!-- to get Try -->
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>
                 <version>2.0.5</version>
             </dependency>
+
             <dependency>
                 <groupId>com.google.dagger</groupId>
                 <artifactId>dagger</artifactId>
                 <version>2.2</version>
             </dependency>
+
             <dependency>
                 <groupId>com.google.dagger</groupId>
                 <artifactId>dagger-compiler</artifactId>
                 <version>2.2</version>
                 <optional>true</optional>
             </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.21</version>
+                <version>${dpa.slf4j.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>1.7.21</version>
+                <version>${dpa.slf4j.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${dpa.slf4j.version}</version>
             </dependency>
 
             <dependency>
@@ -61,6 +75,8 @@
         <module>newspaper/newspaper-bitrepository-ingester</module>
         <module>newspaper/newspaper-prompt-doms-ingester</module>
 
+        <!-- dashboard web interface -->
+        <module>tools/dpa-dashboard</module>
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
         <module>tools/dpa-tools-ide-launchers</module>

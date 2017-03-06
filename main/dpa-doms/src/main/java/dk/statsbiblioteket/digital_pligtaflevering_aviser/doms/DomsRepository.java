@@ -12,17 +12,22 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
+import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import javaslang.control.Try;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -133,6 +138,29 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
+    /**
+     * removeEventsFromItem removes all events of the given eventType from the given item.
+     *
+     * @param domsId    domsId to add event to
+     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
+     * @return number removed
+     */
+
+    public int removeEventsFromItem(DomsId domsId, String eventType) {
+        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
+        try {
+            return domsEventStorage.removeEventFromItem(fakeItemToGetThroughAPI, eventType);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("removeEventsFromItem failed for " + domsId, e);
+        }
+    }
+
+    /**
+     * Returns the contents of the given datastream as a String (as returned by Jersey <code>get(String.class)</code>)
+     */
+
     public String getDataStreamAsString(String pid, String datastreamName) {
         try {
             String result = efedora.getXMLDatastreamContents(pid, datastreamName, new Date().getTime());
@@ -140,6 +168,48 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         } catch (BackendInvalidCredsException | BackendInvalidResourceException | BackendMethodFailedException e) {
             throw new RuntimeException("cannot load pid " + pid + " datastream " + datastreamName, e);
         }
+    }
+
+    /**
+     * get the content of the DC datastream on XML form parsed into a W3C DOM structur so we can post-process it easily.
+     * EnhancedFedora does not expose the "get DC explicitly as xml" functionality directly.  Note that
+     * we work with Strings, which may result in encoding problems if ever the response includes non-ASCII characters!
+     *
+     * @param domsId id of doms object to retrieve DC datastream from.
+     * @return DC on XML form.
+     */
+    public String getDC(DomsId domsId) {
+        final String id = domsId.id();
+        final String p = "/datastreams/DC/content";
+
+        String dcContent = webResource.path(id).path(p).queryParam("format", "xml").get(String.class);
+        return dcContent;
+    }
+
+    /**
+     * We need the premis object for the event stream.  Unfortunately the original DomsEventStorage.getPremisForItem()
+     * method is private, so we need a copy here (adapted for try)
+     * @param id
+     * @param eventDataStreamName
+     * @return
+     */
+    public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
+        Objects.requireNonNull(id, "id==null");
+        String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);
+        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
+
+        PremisManipulator<Item> premisObject = Try.of(
+                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes()))
+        ).getOrElse(Try.of(
+                () -> factory.createInitialPremisBlob(/* we don't have item.getFullID() */ id)
+                ).get()
+        );
+        return premisObject;
+    }
+
+    @Override
+    public void close() throws Exception {
+        // nothing yet.
     }
 }
 
