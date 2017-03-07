@@ -11,4 +11,4 @@ buildNumber.properties
 .idea/
 *.iml
 *.hprof
-.gitignore
+/vagrant/scripts/nohup.out
