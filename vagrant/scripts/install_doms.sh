@@ -42,6 +42,16 @@ echo "XMLTAPES_DBPASS=xmltapesIndexPass" >> $installerDir/bin/setenv.sh
 PGPASSWORD=xmltapesIndexPass psql -d xmltapesObjectIndex -U xmltapesIndex -h localhost -f $installerDir/extras/xmltapes-*/config/sql/postgres-index-schema.sql
 PGPASSWORD=xmltapesIndexPass psql -d xmltapesDatastreamIndex -U xmltapesIndex -h localhost -f $installerDir/extras/xmltapes-*/config/sql/postgres-index-schema.sql
 
+# We need minor adjustments of some configuration files (http://stackoverflow.com/a/30614728/53897)
+# 1) change from newspaper to DPA collection
+xmlstarlet ed -P --inplace --update '//entry[key/text()="collectionPID"]/value' -v doms:DPA_Collection $installerDir/data/templates/storage_newspapr.xml.template
+
+# 2) make "doms.sh update" react quicker!
+xmlstarlet ed -P --inplace --update '//Parameter[@name="fedora.updatetracker.delay"]/@value' -v 10000 $installerDir/data/templates/context.xml.default.template
+xmlstarlet ed -P --inplace --update '//Parameter[@name="fedora.updatetracker.period"]/@value' -v 2000 $installerDir/data/templates/context.xml.default.template
+# done
+
+
 $installerDir/bin/install.sh $INSTALL_DIR
 
 # rm -r $installerDir
