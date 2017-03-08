@@ -91,7 +91,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
-    private List<String> collections = Arrays.asList("doms:Newspaper_Collection"); // FIXME.
+    private List<String> collections = Arrays.asList("doms:DPA_Collection"); // FIXME.  Refer to constant
     private Set<String> ignoredFilesSet;
     private final String gitId;
     private Settings settings;

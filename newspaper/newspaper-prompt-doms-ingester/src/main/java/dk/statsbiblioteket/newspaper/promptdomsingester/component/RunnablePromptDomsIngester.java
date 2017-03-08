@@ -45,7 +45,7 @@ public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableCom
             } else {
                 IngesterInterface ingester = SimpleFedoraIngester.getNewspaperInstance(
                         eFedora, new String[]{getProperties().getProperty(
-                                ConfigConstants.DOMS_COLLECTION, "doms:Newspaper_Collection")} );
+                                ConfigConstants.DOMS_COLLECTION, "doms:DPA_Collection")} );
                 ingester.ingest(createIterator(batch));
             }
         } catch (Exception e) {

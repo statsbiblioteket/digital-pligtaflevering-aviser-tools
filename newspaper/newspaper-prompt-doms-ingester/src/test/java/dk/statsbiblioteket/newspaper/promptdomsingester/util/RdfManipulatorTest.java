@@ -17,7 +17,7 @@ public class RdfManipulatorTest {
             "  <rdf:Description rdf:about=\"info:fedora/uuid:65e7ece1-1b90-4f12-9f8f-c8e77b354f66\">\n" +
             "    <hasModel xmlns=\"info:fedora/fedora-system:def/model#\" rdf:resource=\"info:fedora/doms:ContentModel_RoundTrip\"></hasModel>\n" +
             "    <hasModel xmlns=\"info:fedora/fedora-system:def/model#\" rdf:resource=\"info:fedora/doms:ContentModel_DOMS\"></hasModel>\n" +
-            "    <doms:isPartOfCollection rdf:resource=\"info:fedora/doms:Newspaper_Collection\"></doms:isPartOfCollection>\n" +
+            "    <doms:isPartOfCollection rdf:resource=\"info:fedora/doms:DPA_Collection\"></doms:isPartOfCollection>\n" +
             "    <hasPart xmlns=\"info:fedora/fedora-system:def/relations-external#\" rdf:resource=\"info:fedora/uuid:05d840bf-8bb6-48e5-b214-2ab39f6259f8\"></hasPart>\n" +
             "    <hasPart xmlns=\"info:fedora/fedora-system:def/relations-external#\" rdf:resource=\"info:fedora/uuid:c625596a-9bbc-4331-b55c-beb55a3b80fe\"></hasPart>\n" +
             "  </rdf:Description>\n" +
