@@ -17,11 +17,19 @@ public class Pages
     @XmlElement(name = "page")
     private List<Page> pages = new ArrayList<Page>();
 
-    public void addPage(Page article) {
-        this.pages.add(article);
+    /**
+     * add a page to the list
+     * @param page
+     */
+    public void addPage(Page page) {
+        this.pages.add(page);
     }
 
-    public void setPages(List<Page> articles) {
-        this.pages = articles;
+    /**
+     * overwrite the list of pages
+     * @param pages
+     */
+    public void setPages(List<Page> pages) {
+        this.pages = pages;
     }
 }

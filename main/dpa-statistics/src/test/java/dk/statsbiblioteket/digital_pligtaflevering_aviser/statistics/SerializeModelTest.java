@@ -47,42 +47,42 @@ public class SerializeModelTest {
 
 
     /**
-     * Test against an output with 6 broken rules, one of them is UNKNOWN
+     * Test that Article can get serialized into an xml-file, and that the xml-file contains the name of the article
      * @throws Exception
      */
     @Test
     public void testArticleSerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testTitleSerialize.xml");
+        File tempFile = createTestFile("/tmp/testArticleSerialize.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(Article.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Article article = new Article("ArticleTestName");
         jaxbMarshaller.marshal(article, tempFile);
         String xmlResult = convertStreamToString(tempFile);
-        XMLAssert.assertXpathEvaluatesTo("ArticleTestName", "//articleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("ArticleTestName", "//@articleName", xmlResult);
     }
 
     /**
-     * Test of an output with no broken rules
+     * Page that Article can get serialized into an xml-file, and that the xml-file contains the name of the article
      * @throws Exception
      */
     @Test
     public void testPageSerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testTitleSerialize.xml");
+        File tempFile = createTestFile("/tmp/testPageSerialize.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(Page.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Page article = new Page("PageTestName");
         jaxbMarshaller.marshal(article, tempFile);
         String xmlResult = convertStreamToString(tempFile);
-        XMLAssert.assertXpathEvaluatesTo("PageTestName", "//pageName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("PageTestName", "//@pageName", xmlResult);
     }
 
 
     /**
-     * Test of an output with no broken rules
+     * Page that Title can get serialized into an xml-file, and that the xml-file contains the name of the article
      * @throws Exception
      */
     @Test
@@ -102,21 +102,19 @@ public class SerializeModelTest {
         title.addPage(new Page("title12"));
         title.addPage(new Page("title13"));
 
-        Title title2 = new Title("TitleName2");
-        title2.addArticle(new Article("title01"));
-        title2.addArticle(new Article("title02"));
-        title2.addArticle(new Article("title03"));
-
-        title2.addPage(new Page("title11"));
-        title2.addPage(new Page("title12"));
-        title2.addPage(new Page("title13"));
-
-        QName qName = new QName("com.codenotfound.jaxb.model", "test");
-        JAXBElement<Title> root = new JAXBElement<Title>(qName, Title.class, title);
-
-        jaxbMarshaller.marshal(root, tempFile);
+        jaxbMarshaller.marshal(title, tempFile);
         String xmlResult = convertStreamToString(tempFile);
-        XMLAssert.assertXpathEvaluatesTo("TitleName1", "//titleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("TitleName1", "//title/@titleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("title01", "//title/articles/article/@articleName", xmlResult);
+
+        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title01']", xmlResult);
+        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title02']", xmlResult);
+        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title03']", xmlResult);
+
+        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title11']", xmlResult);
+        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title12']", xmlResult);
+        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title13']", xmlResult);
+
     }
 
 
@@ -149,11 +147,11 @@ public class SerializeModelTest {
 
         Title titleAdd2 = new Title("test2");
         deliveryStatistics.addTitle(titleAdd2);
-        titleAdd2.addArticle(new Article("articlea1"));
-        titleAdd2.addArticle(new Article("articlea2"));
-        titleAdd2.addArticle(new Article("articlea2"));
-        titleAdd2.addArticle(new Article("articlea2"));
-        titleAdd2.addArticle(new Article("articlea2"));
+        titleAdd2.addArticle(new Article("article1"));
+        titleAdd2.addArticle(new Article("article2"));
+        titleAdd2.addArticle(new Article("article2"));
+        titleAdd2.addArticle(new Article("article2"));
+        titleAdd2.addArticle(new Article("article2"));
 
         titleAdd2.addPage(new Page("page1"));
         titleAdd2.addPage(new Page("page2"));
@@ -161,10 +159,20 @@ public class SerializeModelTest {
         jaxbMarshaller.marshal(deliveryStatistics, tempFile);
         String xmlResult = convertStreamToString(tempFile);
 
-        XMLAssert.assertXpathEvaluatesTo("dl_213232", "//deliveryStatistics/deliveryName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("test1", "//deliveryStatistics/titles/title/titleName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("article1", "//deliveryStatistics/titles/title/articles/article/articleName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("page1", "//deliveryStatistics/titles/title/pages/page/pageName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("dl_213232", "//deliveryStatistics/@deliveryName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("test1", "//deliveryStatistics/titles/title/@titleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("article1", "//deliveryStatistics/titles/title/articles/article/@articleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("page1", "//deliveryStatistics/titles/title/pages/page/@pageName", xmlResult);
+
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title[@titleName = 'test1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title[@titleName = 'test2']", xmlResult);
+
+
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/pages/page[@pageName = 'page1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/pages/page[@pageName = 'page2']", xmlResult);
+
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/articles/article[@articleName = 'article1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/articles/article[@articleName = 'article2']", xmlResult);
     }
 
 
@@ -181,6 +189,8 @@ public class SerializeModelTest {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(tempFile);
         assertEquals(deserializedObject.getDeliveryName(), "dl_213232");
+
+        assertEquals(deserializedObject.getTitles().getTitles().size(), 2);
     }
 
     /**

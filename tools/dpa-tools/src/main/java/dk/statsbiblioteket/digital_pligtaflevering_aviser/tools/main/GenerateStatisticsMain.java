@@ -81,8 +81,8 @@ public class GenerateStatisticsMain {
                 String deliveryName = domsItem.getPath();
                 long startDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
-                DeliveryStatistics deliveryStatistics = parser.processChildDomsIdToStream().apply(domsItem);
-                byte[] statisticsStream = parser.processChildDomsIdToStreamttt().apply(deliveryStatistics);
+                DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(domsItem);
+                byte[] statisticsStream = parser.processDeliveryStatisticsToBytestream().apply(deliveryStatistics);
                 String settingDate = new java.util.Date().toString();
 
 

@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics;
 
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -8,7 +8,9 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement
 public class Page implements java.io.Serializable {
-    String pageName;
+
+    //The name of the article is really just the name of tne metadata file
+    private String pageName;
 
     public Page() {
     }
@@ -17,7 +19,7 @@ public class Page implements java.io.Serializable {
         this.pageName = pageName;
     }
 
-    @XmlElement
+    @XmlAttribute
     public void setPageName(String pageName) {
         this.pageName = pageName;
     }

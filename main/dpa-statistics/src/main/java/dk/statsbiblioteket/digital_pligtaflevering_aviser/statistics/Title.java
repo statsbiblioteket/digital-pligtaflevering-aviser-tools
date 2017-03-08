@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
 @XmlRootElement
 public class Title implements java.io.Serializable {
 
-    @XmlElement(name = "titleName")
+    @XmlAttribute(name = "titleName")
     private String titleName;
 
     @XmlElement(name = "articles")
@@ -22,36 +23,40 @@ public class Title implements java.io.Serializable {
     public Title() {
     }
 
+    /**
+     * construct the title with a titleName and an empty list of pages and articles
+     * @param titleName
+     */
     public Title(String titleName) {
         this.titleName = titleName;
     }
 
 
-    public String getTitleName() {
-        return titleName;
-    }
-
-    public void setTitle(String titleName) {
+    public void setTitleName(String titleName) {
         this.titleName = titleName;
     }
 
+    /**
+     * add a new article to the list of articles
+     * @param name
+     */
     public void addArticle(Article name) {
         articles.addArticle(name);
     }
 
+    /**
+     * Set the entire list of pages
+     * @param articles
+     */
     public void setPages(List<Page> articles) {
         this.pages.setPages(articles);
     }
 
+    /**
+     * Add a new page
+     * @param name
+     */
     public void addPage(Page name) {
         pages.addPage(name);
     }
-
-    /*public List<Page> getPages() {
-        return pages.getPages();
-    }*/
-
-    /*public List<Article> getArticles() {
-        return articles.getArticles();
-    }*/
 }

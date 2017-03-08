@@ -18,14 +18,26 @@ public class Titles
     @XmlElement(name = "title")
     private List<Title> titles = new ArrayList<Title>();
 
+    /**
+     * Get all Titles as a list
+     * @return
+     */
     public List<Title> getTitles() {
         return titles;
     }
 
+    /**
+     * Add a Title
+     * @param title
+     */
     public void addTitle(Title title) {
         this.titles.add(title);
     }
 
+    /**
+     * Set all Titles
+     * @param titles
+     */
     public void setTitles(List<Title> titles) {
         this.titles = titles;
     }

@@ -18,14 +18,26 @@ public class Articles
     @XmlElement(name = "article")
     private List<Article> articles = new ArrayList<Article>();
 
+    /**
+     * Get the list of articles
+     * @return
+     */
     public List<Article> getArticles() {
         return articles;
     }
 
+    /**
+     * Add article to the list of articles
+     * @param article
+     */
     public void addArticle(Article article) {
         this.articles.add(article);
     }
 
+    /**
+     * overwrite the list of articles
+     * @param articles
+     */
     public void setArticles(List<Article> articles) {
         this.articles = articles;
     }

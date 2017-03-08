@@ -14,10 +14,14 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * Created by mmj on 3/3/17.
+ * Parser for parsing between DomsItem, DeliveryStatistics an an xml-based bytestream
  */
 public class DomsParser {
 
+    /**
+     * Find all childItems from a DomsItem
+     * @return
+     */
     public Function<DomsItem, Iterator<DomsItem>> processChildDomsId() {
         return domsItem -> {
 
@@ -29,8 +33,11 @@ public class DomsParser {
         };
     }
 
-
-    public Function<DomsItem, DeliveryStatistics> processChildDomsIdToStream() {
+    /**
+     * initiate a DeliveryStatistics based on a DomsItem in doms
+     * @return DeliveryStatistics
+     */
+    public Function<DomsItem, DeliveryStatistics> processDomsIdToStream() {
         return domsItem -> {
 
             Iterator<DomsItem> roundtripIterator = this.processChildDomsId().apply(domsItem);
@@ -65,8 +72,11 @@ public class DomsParser {
         };
     }
 
-
-    public Function<DeliveryStatistics, byte[]> processChildDomsIdToStreamttt() {
+    /**
+     * convert DeliveryStatistics into a bytseArray which can be saved in doms
+     * @return
+     */
+    public Function<DeliveryStatistics, byte[]> processDeliveryStatisticsToBytestream() {
         return domsItem -> {
             ByteArrayOutputStream deliveryArrayStream = new ByteArrayOutputStream();
             try {
@@ -80,6 +90,5 @@ public class DomsParser {
             }
             return deliveryArrayStream.toByteArray();
         };
-
     }
 }
