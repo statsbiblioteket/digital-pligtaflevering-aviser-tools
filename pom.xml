@@ -69,6 +69,7 @@
         <module>main/dpa-doms</module>
         <module>main/dpa-bitrepository</module>
         <module>main/dpa-verapdf</module>
+        <module>main/dpa-statistics</module>
 
         <!-- folder names, not modules -->
         <module>newspaper/newspaper-batch-trigger</module>
