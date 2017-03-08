@@ -53,7 +53,8 @@
     <AlarmDestination>topic://quick-start.alarms</AlarmDestination>
     <MessageBusConfiguration>
       <Name>Local ActiveMQ</Name>
-      <URL>failover:(tcp://localhost:61616?keepAlive=true)</URL>
+      <!-- http://activemq.apache.org/tcp-transport-reference.html -->
+      <URL>failover:(tcp://localhost:61616?keepAlive=true&amp;daemon=true)</URL>
     </MessageBusConfiguration>
   </ProtocolSettings>
   <ClientSettings>

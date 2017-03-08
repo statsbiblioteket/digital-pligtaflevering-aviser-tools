@@ -8,10 +8,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -74,7 +74,9 @@ public class VeraPDFInvokeMain {
 
     }
 
-    /** @noinspection WeakerAccess*/
+    /**
+     * @noinspection WeakerAccess
+     */
     @Module
     public static class VeraPDFInvokeModule {
         public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
@@ -97,6 +99,7 @@ public class VeraPDFInvokeMain {
                     // Collect results for each domsId
                     .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
+                    // FIXME:  Save result on event on delivery.
                     .toString();
 
             return f;
@@ -118,7 +121,7 @@ public class VeraPDFInvokeMain {
                 List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
 
                 String deliveryEventMessage = failingToolResults.stream()
-                        .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n" + tr.getHumanlyReadableStackTrace())
+                        .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
                         .filter(s -> s.trim().length() > 0) // skip blank lines
                         .collect(Collectors.joining("\n"));
 
@@ -151,9 +154,9 @@ public class VeraPDFInvokeMain {
             log.trace("Found PDF datastream on {}", domsItem);
 
             if (reuseExistingDatastream) {
-                if (datastreams.stream().filter(ds -> ds.getID().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
+                if (datastreams.stream().filter(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
                     log.trace("Reused existing VERAPDF datastream for {}", domsItem);
-                    return Stream.of(ToolResult.ok("Reused existing VERAPDF datastream for " + domsItem));
+                    return Stream.of(ToolResult.ok(domsItem, "Reused existing VERAPDF datastream for " + domsItem));
                 }
             }
 
@@ -180,11 +183,11 @@ public class VeraPDFInvokeMain {
                     resourceName = url;
                     inputStream = new URL(url).openStream();
                 } catch (IOException e) {
-                    return Stream.of(ToolResult.fail(domsItem + " url '" + url + " fails", e));
+                    throw new RuntimeException(domsItem + " url '" + url + " fails", e);
                 }
             } else {
                 if (url.length() < bitrepositoryUrlPrefix.length()) {
-                    return Stream.of(ToolResult.fail(domsItem + " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
+                    return Stream.of(ToolResult.fail(domsItem, " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
                 }
                 resourceName = url.substring(bitrepositoryUrlPrefix.length());
                 final File file;
@@ -194,9 +197,9 @@ public class VeraPDFInvokeMain {
                     log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
                     inputStream = new FileInputStream(file);
                 } catch (UnsupportedEncodingException e) {
-                    return Stream.of(ToolResult.fail(domsItem + " '" + resourceName + "' could not get decoded", e));
+                    throw new RuntimeException(domsItem + " '" + resourceName + "' could not get decoded", e);
                 } catch (FileNotFoundException e) {
-                    return Stream.of(ToolResult.fail(domsItem + " '" + resourceName + "' not found", e));
+                    throw new RuntimeException(domsItem + " '" + resourceName + "' not found", e);
                 }
             }
 
@@ -206,7 +209,7 @@ public class VeraPDFInvokeMain {
             try (InputStream inputStreamForVeraPDF = inputStream) {
                 veraPDF_output = veraPdfInvokerProvider.get().apply(inputStreamForVeraPDF);
             } catch (Exception e) {
-                return Stream.of(ToolResult.fail(domsItem + " " + resourceName + " failed validation", e));
+                throw new RuntimeException(domsItem + " " + resourceName + " failed validation", e);
             }
 
             log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, resourceName, (System.currentTimeMillis() - startTime));
@@ -216,9 +219,8 @@ public class VeraPDFInvokeMain {
             // Unfortunately ObjectProfile does not have a method for this, so we ask Fedora directly.
 
             String comment = resourceName + " at " + new java.util.Date();
-            try
 
-            {
+            try {
                 domsItem.modifyDatastreamByValue(
                         VERAPDF_DATASTREAM_NAME,
                         null, // no checksum
@@ -228,13 +230,10 @@ public class VeraPDFInvokeMain {
                         "text/xml",
                         comment,
                         null);
-            } catch (
-                    Exception e)
-
-            {
-                return Stream.of(ToolResult.fail(domsItem + " '" + resourceName +  "' could not save to datastream"));
+            } catch (Exception e) {
+                throw new RuntimeException(domsItem + " '" + resourceName + "' could not save to datastream");
             }
-            return Stream.of(ToolResult.ok(domsItem + " " + comment));
+            return Stream.of(ToolResult.ok(domsItem, comment));
         }
 
         @Provides
@@ -259,12 +258,6 @@ public class VeraPDFInvokeMain {
             List<DomsId> l = new ArrayList<>();
             iterator.forEachRemaining(item -> l.add(new DomsId(item.getDomsID())));
             return l;
-        }
-
-        @Provides
-        @Named("pageSize")
-        Integer providePageSize(ConfigurationMap map) {
-            return Integer.valueOf(map.getRequired("pageSize"));
         }
 
         @Provides

@@ -20,5 +20,4 @@ public class CreateDeliveryForDeliverySamplesLauncher {
                 "autonomous.agent=register-batch-trigger",
                 ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + deliveryPath.toString()});
     }
-
 }
