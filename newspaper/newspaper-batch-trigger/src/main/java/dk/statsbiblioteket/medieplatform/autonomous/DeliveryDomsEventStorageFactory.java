@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Delivery> {
 
     public static final String DELIVERY_TEMPLATE = "doms:Template_Delivery";
-    public static final String ROUND_TRIP_TEMPLATE = "doms:Template_RoundTrip";
+    public static final String ROUND_TRIP_TEMPLATE = "doms:Template_DPARoundTrip";
     public static final String HAS_PART = "info:fedora/fedora-system:def/relations-external#hasPart";
 
     protected String deliveryTemplate = DELIVERY_TEMPLATE;
