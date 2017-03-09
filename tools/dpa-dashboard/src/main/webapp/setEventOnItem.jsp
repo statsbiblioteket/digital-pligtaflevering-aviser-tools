@@ -1,5 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryProvider" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
@@ -9,7 +9,7 @@
 <%
     ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
 
-    DomsRepository repository = new RepositoryConfigurator().apply(map);
+    DomsRepository repository = new RepositoryProvider().apply(map);
 %>
 <c:choose>
     <c:when test="${empty param.id}">

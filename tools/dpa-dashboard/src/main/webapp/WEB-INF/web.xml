@@ -1,25 +1,45 @@
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
-                             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" version="3.1">
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
 
-    <display-name>Archetype Created Web Application</display-name>
+    <display-name>Vaadins webapp</display-name>
 
-    <!-- Jetty: java 8 in jsp, please - doesn't work though so no lambdas for now -->
-    <servlet id="jsp">
-        <!-- This is a dummy servlet snippet stolen from the net to configure the embedded
-        JSP compiler in Jetty, so warnings are disabled -->
-        <!--suppress ServletWithoutMappingInspection -->
-        <servlet-name>jsp</servlet-name>
-        <!--suppress WebProperties -->
-        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+    <context-param>
+        <description>Vaadin production mode</description>
+        <param-name>productionMode</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <context-param> <!--All config values should be set with default values here -->
+        <param-name>example.name</param-name>
+        <param-value>example.value</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>
+            dk.statsbiblioteket.sbutil.webservices.configuration.ConfigContextListener
+        </listener-class>
+    </listener>
+
+
+    <servlet>
+        <servlet-name>Vaadin Application Servlet</servlet-name>
+        <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
         <init-param>
-            <param-name>compilerSourceVM</param-name>
-            <param-value>1.8</param-value>
+            <description>Vaadin UI to display</description>
+            <param-name>UI</param-name>
+            <param-value>org.kb.ui.NewspaperUI</param-value>
         </init-param>
-        <init-param>
-            <param-name>compilerTargetVM</param-name>
-            <param-value>1.8</param-value>
+                <init-param>
+            <description>Application widgetset</description>
+            <param-name>widgetset</param-name>
+            <param-value>org.kb.ui.AppWidgetSet</param-value>
         </init-param>
     </servlet>
+    <servlet-mapping>
+        <servlet-name>Vaadin Application Servlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
 </web-app>
