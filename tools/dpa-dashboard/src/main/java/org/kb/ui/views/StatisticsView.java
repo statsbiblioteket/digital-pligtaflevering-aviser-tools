@@ -25,6 +25,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.kb.ui.DataModel;
+import org.kb.ui.panels.ArticleTable;
 import org.kb.ui.panels.DeliveryListPanel;
 import org.kb.ui.panels.EventPanel;
 import org.kb.ui.FetchEventStructure;
@@ -65,6 +66,11 @@ public class StatisticsView extends VerticalLayout implements View {
         //titPanel.setVisible(false);
 
 
+        ArticleTable table1 = new ArticleTable();
+        table1.setVisible(false);
+        ArticleTable table2 = new ArticleTable();
+        table2.setVisible(false);
+
 
 
         SearchPanel button = new SearchPanel();
@@ -94,9 +100,30 @@ public class StatisticsView extends VerticalLayout implements View {
             }
         });
 
+
+        titPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent itemClickEvent) {
+
+
+
+                table1.setVisible(true);
+
+
+
+                table2.setVisible(true);
+
+
+
+            }
+        });
+
+
         layout.addComponent(button);
         hlayout.addComponent(infoPanel);
         hlayout.addComponent(titPanel);
+        hlayout.addComponent(table1);
+        hlayout.addComponent(table2);
         layout.addComponent(hlayout);
 
 

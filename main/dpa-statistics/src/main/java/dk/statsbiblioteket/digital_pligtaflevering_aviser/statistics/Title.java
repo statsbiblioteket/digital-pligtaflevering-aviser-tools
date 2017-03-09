@@ -36,6 +36,18 @@ public class Title implements java.io.Serializable {
         this.titleName = titleName;
     }
 
+    public String getTitle() {
+        return this.titleName;
+    }
+
+    public int getNoOfArticles() {
+        return this.articles.getArticles().size();
+    }
+
+    public int getNoOfPages() {
+        return this.pages.getPages().size();
+    }
+
     /**
      * add a new article to the list of articles
      * @param name

@@ -18,6 +18,14 @@ public class Pages
     private List<Page> pages = new ArrayList<Page>();
 
     /**
+     * Get the list of articles
+     * @return
+     */
+    public List<Page> getPages() {
+        return pages;
+    }
+
+    /**
      * add a page to the list
      * @param page
      */

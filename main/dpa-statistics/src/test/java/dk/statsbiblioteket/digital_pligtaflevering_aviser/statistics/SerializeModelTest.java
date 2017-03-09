@@ -6,10 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
