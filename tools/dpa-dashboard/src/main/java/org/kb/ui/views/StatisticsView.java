@@ -9,18 +9,11 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.kb.ui.DataModel;
-import org.kb.ui.panels.FileListTable;
-import org.kb.ui.panels.DeliveryListPanel;
 import org.kb.ui.FetchEventStructure;
+import org.kb.ui.panels.DeliveryInformationPanel;
 import org.kb.ui.panels.SearchPanel;
-import org.kb.ui.panels.TitleListPanel;
 import org.kb.ui.panels.XmlView;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -40,7 +33,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         final VerticalLayout mainhlayout = new VerticalLayout();
         final VerticalLayout layout = new VerticalLayout();
-        final HorizontalLayout tabelsLayout = new HorizontalLayout();
+        final DeliveryInformationPanel tabelsLayout = new DeliveryInformationPanel(parser);
         final HorizontalLayout viewLayout = new HorizontalLayout();
         mainhlayout.setWidth("100%");
         mainhlayout.setHeight("100%");
@@ -48,17 +41,6 @@ public class StatisticsView extends VerticalLayout implements View {
         tabelsLayout.setWidth("100%");
         layout.setMargin(true);
         addComponent(layout);
-
-        DeliveryListPanel infoPanel = new DeliveryListPanel();
-
-        TitleListPanel titPanel = new TitleListPanel();
-
-        FileListTable table1 = new FileListTable(Article.class);
-        table1.setEnabled(false);
-
-        FileListTable table2 = new FileListTable(Page.class);
-        table2.setEnabled(false);
-
 
         Embedded pdf = new Embedded(null, null);
 
@@ -70,41 +52,11 @@ public class StatisticsView extends VerticalLayout implements View {
         SearchPanel button = new SearchPanel();
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-                infoPanel.setInfo(eventStructureCommunication, "Data_Archived");
+                tabelsLayout.setBatch(eventStructureCommunication, "Data_Archived");
             }
         });
 
-
-        infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
-            @Override
-            public void itemClick(ItemClickEvent itemClickEvent) {
-
-                com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
-                DomsItem dItem = infoPanel.getDomsItem(selectedItem);
-
-                DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
-
-                titPanel.setInfo(delStat);
-                table1.setEnabled(false);
-                table2.setEnabled(false);
-            }
-        });
-
-
-        titPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
-            @Override
-            public void itemClick(ItemClickEvent itemClickEvent) {
-                table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
-                table1.setEnabled(true);
-                table1.setInfo(((Title)itemClickEvent.getItemId()).getArticle());
-                table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
-                table2.setEnabled(true);
-                table2.setInfo(((Title)itemClickEvent.getItemId()).getPage());
-            }
-        });
-
-
-        table2.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+        tabelsLayout.addFileSelectedListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
@@ -131,10 +83,6 @@ public class StatisticsView extends VerticalLayout implements View {
         addComponent(pdf);
 
         layout.addComponent(button);
-        tabelsLayout.addComponent(infoPanel);
-        tabelsLayout.addComponent(titPanel);
-        tabelsLayout.addComponent(table1);
-        tabelsLayout.addComponent(table2);
 
         mainhlayout.addComponent(tabelsLayout);
         viewLayout.addComponent(pdf);
