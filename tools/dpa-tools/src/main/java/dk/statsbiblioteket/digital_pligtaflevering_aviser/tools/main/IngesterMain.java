@@ -95,6 +95,7 @@ public class IngesterMain {
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
                 List<String> toolResults = repository.query(query)
+                        .peek(domsItem -> log.info("Procesing {}", domsItem))
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 

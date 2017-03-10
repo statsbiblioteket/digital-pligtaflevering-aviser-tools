@@ -44,7 +44,7 @@ PGPASSWORD=xmltapesIndexPass psql -d xmltapesDatastreamIndex -U xmltapesIndex -h
 
 # We need minor adjustments of some configuration files (http://stackoverflow.com/a/30614728/53897)
 # 1) change from newspaper to DPA collection
-xmlstarlet ed -P --inplace --update '//entry[key/text()="collectionPID"]/value' -v doms:DPA_Collection $installerDir/data/templates/storage_newspapr.xml.template
+# xmlstarlet ed -P --inplace --update '//entry[key/text()="collectionPID"]/value' -v doms:DPA_Collection $installerDir/data/templates/storage_newspapr.xml.template
 
 # 2) make "doms.sh update" react quicker!
 xmlstarlet ed -P --inplace --update '//Parameter[@name="fedora.updatetracker.delay"]/@value' -v 10000 $installerDir/data/templates/context.xml.default.template

@@ -57,6 +57,7 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         int pageSize = domsModule.providePageSize(map);
 
         SBOIEventIndex sboiEventIndex = Try.of(
+                // FIXME: Use provider instead of constructor
                 () -> new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize)
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
