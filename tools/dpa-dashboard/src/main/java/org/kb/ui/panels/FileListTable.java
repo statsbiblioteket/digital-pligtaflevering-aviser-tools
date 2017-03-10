@@ -31,6 +31,10 @@ public class FileListTable extends VerticalLayout {
         super.setEnabled(enabled);
     }
 
+    public void setCaption(String caption) {
+        table.setCaption(caption);
+    }
+
     public void setInfo(List delStat) {
 
         beans.removeAllItems();
