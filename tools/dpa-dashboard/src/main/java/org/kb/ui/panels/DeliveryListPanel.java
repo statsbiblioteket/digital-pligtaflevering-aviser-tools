@@ -19,38 +19,21 @@ import java.util.stream.Stream;
  */
 public class DeliveryListPanel extends VerticalLayout {
 
-    Table table;
-
-    HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
+    private Table table;
+    private HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
 
     public DeliveryListPanel() {
 
-
-
         // Bind a table to it
         table = new Table("Beans of All Sorts");
-
         table.addContainerProperty("Batch", String.class, null);
-
-
-
         table.setWidth("100%");
         table.setSelectable(true);
         table.setImmediate(true);
-
-
         this.addComponent(table);
     }
 
-    /*
-
-        DomsItem titleItem = items.iterator().next();
-
-        //DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(titleItem);
-     */
-
     public void setInfo(FetchEventStructure fetchStructure, String info) {
-
 
         Stream<DomsItem> items = fetchStructure.getState(info);
         itemList.clear();
@@ -76,8 +59,4 @@ public class DeliveryListPanel extends VerticalLayout {
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }
-
-
-
-
 }

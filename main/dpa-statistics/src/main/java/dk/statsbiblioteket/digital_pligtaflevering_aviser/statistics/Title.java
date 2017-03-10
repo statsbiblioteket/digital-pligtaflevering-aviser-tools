@@ -48,6 +48,15 @@ public class Title implements java.io.Serializable {
         return this.pages.getPages().size();
     }
 
+    public List<Article> getArticle() {
+        return this.articles.getArticles();
+    }
+
+    public List<Page> getPage() {
+        return this.pages.getPages();
+    }
+
+
     /**
      * add a new article to the list of articles
      * @param name
@@ -58,10 +67,10 @@ public class Title implements java.io.Serializable {
 
     /**
      * Set the entire list of pages
-     * @param articles
+     * @param pages
      */
-    public void setPages(List<Page> articles) {
-        this.pages.setPages(articles);
+    public void setPages(List<Page> pages) {
+        this.pages.setPages(pages);
     }
 
     /**

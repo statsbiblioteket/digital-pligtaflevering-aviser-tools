@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  * Created by mmj on 3/2/17.
  */
 public class StatePanel extends Table {
-    String[] stateList = {"Manually_stopped", "Data_Created", "Data_Archived"};
+    private String[] stateList = {"Manually_stopped", "Data_Created", "Data_Archived"};
 
     public StatePanel() {
         super("States");

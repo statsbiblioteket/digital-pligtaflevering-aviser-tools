@@ -11,14 +11,12 @@ import com.vaadin.ui.VerticalLayout;
  */
 public class SearchPanel extends HorizontalLayout {
 
-    DateField startDf = new DateField();
-    DateField endDf = new DateField();
-    Button button = new Button("Search");
-    Label info = new Label();
-
+    private DateField startDf = new DateField();
+    private DateField endDf = new DateField();
+    private Button button = new Button("Search");
+    private Label info = new Label();
 
     public SearchPanel() {
-
         this.addComponent(startDf);
         this.addComponent(endDf);
         this.addComponent(button);
@@ -27,9 +25,5 @@ public class SearchPanel extends HorizontalLayout {
 
     public void addClickListener(Button.ClickListener listener) {
         button.addClickListener(listener);
-
-        /*FetchEventStructure f = new FetchEventStructure();
-        info.setValue("" + f.getStateIngested().toArray().length);*/
     }
-
 }

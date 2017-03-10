@@ -199,7 +199,7 @@ public class SerializeModelTest {
      */
     private File createTestFile(String filename) throws IOException {
         File f = Paths.get(filename).toFile();
-        f.deleteOnExit();
+        //f.deleteOnExit();
         return f;
     }
 

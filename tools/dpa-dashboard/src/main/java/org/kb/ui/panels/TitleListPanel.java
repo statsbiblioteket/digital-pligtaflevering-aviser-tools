@@ -19,11 +19,9 @@ import java.util.stream.Stream;
  */
 public class TitleListPanel extends VerticalLayout {
 
-    BeanItemContainer<Title> beans;
-
-    Table table;
-
-    HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
+    private BeanItemContainer<Title> beans;
+    private Table table;
+    private HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
 
     public TitleListPanel() {
         beans = new BeanItemContainer<Title>(Title.class);
@@ -34,40 +32,18 @@ public class TitleListPanel extends VerticalLayout {
         table.setWidth("100%");
         table.setSelectable(true);
         table.setImmediate(true);
-
-
-
-
-
-
+        table.setVisibleColumns(new String[]{"title", "noOfArticles", "noOfPages"});
         this.addComponent(table);
     }
 
-    /*
-
-        DomsItem titleItem = items.iterator().next();
-
-        //DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(titleItem);
-     */
-
     public void setInfo(DeliveryStatistics delStat) {
-
         table.setCaption(delStat.getDeliveryName());
         beans.removeAllItems();
 
         for(Title title : delStat.getTitles().getTitles()) {
-
             beans.addBean(title);
-
-
-            /*Object newItemId = table.addItem();
-            com.vaadin.data.Item row1 = table.getItem(newItemId);
-            row1.getItemProperty("Batch").setValue(o.getPath());
-            itemList.put(row1, o);*/
         }
-
-
-        //beans.addAll(delStat.getTitles().getTitles());
+        Object o = table.getColumnHeaders();
     }
 
     public DomsItem getDomsItem(com.vaadin.data.Item item) {
@@ -77,8 +53,4 @@ public class TitleListPanel extends VerticalLayout {
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }
-
-
-
-
 }

@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  */
 public class EventPanel extends VerticalLayout {
 
-    HorizontalLayout buttonLayout = new HorizontalLayout();
-    Table table = new Table("Events");
+    private HorizontalLayout buttonLayout = new HorizontalLayout();
+    private Table table = new Table("Events");
 
     public EventPanel() {
         table.setCaption("Events");

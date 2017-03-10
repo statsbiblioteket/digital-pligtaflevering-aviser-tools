@@ -19,20 +19,9 @@ public class InfoPanel extends Table {
         this.setWidth("100%");
     }
 
-    /*
-
-        DomsItem titleItem = items.iterator().next();
-
-        //DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(titleItem);
-     */
-
     public void setInfo(FetchEventStructure fetchStructure, String info) {
 
-
         Stream<DomsItem> items = fetchStructure.getState(info);
-
-
-
         items.forEach(new Consumer<DomsItem>() {
             @Override
             public void accept(final DomsItem o) {
@@ -40,16 +29,10 @@ public class InfoPanel extends Table {
                 com.vaadin.data.Item row1 = getItem(newItemId);
                 row1.getItemProperty("Batch").setValue(o.getPath());
             }
-
         });
-
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         super.addItemClickListener(listener);
     }
-
-
-
-
 }

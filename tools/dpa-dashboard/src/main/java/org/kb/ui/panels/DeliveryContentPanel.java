@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  */
 public class DeliveryContentPanel extends VerticalLayout {
 
-    HorizontalLayout buttonLayout = new HorizontalLayout();
-    Table table = new Table("Events");
+    private HorizontalLayout buttonLayout = new HorizontalLayout();
+    private Table table = new Table("Events");
 
     public DeliveryContentPanel() {
         table.setCaption("Events");
@@ -56,10 +56,7 @@ public class DeliveryContentPanel extends VerticalLayout {
                     Iterator<dk.statsbiblioteket.medieplatform.autonomous.Event> it = events.iterator();
 
                     while(it.hasNext()) {
-
-
                         dk.statsbiblioteket.medieplatform.autonomous.Event event = it.next();
-
                         Object newItemId = table.addItem();
                         com.vaadin.data.Item row1 = table.getItem(newItemId);
                         row1.getItemProperty("Event").setValue(event.getEventID());

@@ -38,11 +38,8 @@ import java.util.stream.Stream;
  */
 public class StatusView extends VerticalLayout implements View {
 
-
-    FetchEventStructure eventStructureCommunication = new FetchEventStructure();
-    DataModel model = new DataModel();
-
-
+    private FetchEventStructure eventStructureCommunication = new FetchEventStructure();
+    private DataModel model = new DataModel();
 
     public StatusView() {
 
@@ -52,26 +49,17 @@ public class StatusView extends VerticalLayout implements View {
         layout.setMargin(true);
         addComponent(layout);
 
-        String[] ss = {"Batch", "status","event","date"};
-
-
         StatePanel table = new StatePanel();
         table.setSelectable(true);
         table.setImmediate(true);
-
-
 
         InfoPanel infoPanel = new InfoPanel();
         infoPanel.setVisible(false);
         infoPanel.setSelectable(true);
         infoPanel.setImmediate(true);
 
-
         EventPanel eventPanel = new EventPanel();
         eventPanel.setVisible(false);
-
-
-
 
         SearchPanel button = new SearchPanel();
         button.addClickListener(new Button.ClickListener() {
@@ -122,28 +110,7 @@ public class StatusView extends VerticalLayout implements View {
         hlayout.addComponent(infoPanel);
         hlayout.addComponent(eventPanel);
         layout.addComponent(hlayout);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
 
 
     private Stream<DomsItem> fetchIt() {
@@ -194,11 +161,6 @@ public class StatusView extends VerticalLayout implements View {
 
             final QuerySpecification querySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
             r = repository.query(querySpecification);
-
-
-
-
-
 
         } catch (Exception e) {
             e.printStackTrace();
