@@ -7,16 +7,21 @@ import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.kb.ui.DataModel;
 import org.kb.ui.FetchEventStructure;
+import org.kb.ui.NewspaperUI;
 import org.kb.ui.panels.DeliveryInformationPanel;
+import org.kb.ui.panels.DeliveryInformationPanel2;
+import org.kb.ui.panels.DeliveryMainPanel;
 import org.kb.ui.panels.SearchPanel;
 import org.kb.ui.panels.XmlView;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.Inet4Address;
 import java.net.URLEncoder;
 
 /**
@@ -29,11 +34,22 @@ public class StatisticsView extends VerticalLayout implements View {
     private DomsParser parser = new DomsParser();
 
 
-    public StatisticsView() {
+    public StatisticsView(String type) {
 
         final VerticalLayout mainhlayout = new VerticalLayout();
         final VerticalLayout layout = new VerticalLayout();
-        final DeliveryInformationPanel tabelsLayout = new DeliveryInformationPanel(parser);
+
+        DeliveryMainPanel tabelsLayout;
+
+        if("Std".equals(type)) {
+            tabelsLayout = new DeliveryInformationPanel(parser);
+        } else {
+            tabelsLayout = new DeliveryInformationPanel2(parser);
+        }
+
+
+
+
         final HorizontalLayout viewLayout = new HorizontalLayout();
         mainhlayout.setWidth("100%");
         mainhlayout.setHeight("100%");
@@ -61,7 +77,7 @@ public class StatisticsView extends VerticalLayout implements View {
             public void itemClick(ItemClickEvent itemClickEvent) {
 
                 try {
-                    String fileUrl = "http://localhost:58709/var/reference1pillar/dpaviser/folderDir/"+ URLEncoder.encode(itemClickEvent.getItem().toString()+"", "UTF-8");
+                    String fileUrl = "http://"+ NewspaperUI.address+":58709/var/reference1pillar/dpaviser/folderDir/"+ URLEncoder.encode(itemClickEvent.getItem().toString()+"", "UTF-8");
                     pdf.setSource(new ExternalResource(fileUrl+".pdf"));
 
                 } catch (UnsupportedEncodingException e) {

@@ -9,7 +9,7 @@ public class FileComponent {
     private String sectionName;
 
     public FileComponent(String fileName, String titleName, String sectionName) {
-        this.fileName = titleName;
+        this.fileName = fileName;
         this.titleName = titleName;
         this.sectionName = sectionName;
     }

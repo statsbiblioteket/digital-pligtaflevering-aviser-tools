@@ -13,6 +13,7 @@ public class SearchPanel extends HorizontalLayout {
 
     private DateField startDf = new DateField();
     private DateField endDf = new DateField();
+
     private Button button = new Button("Search");
     private Label info = new Label();
 

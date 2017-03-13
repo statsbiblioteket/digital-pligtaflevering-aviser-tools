@@ -14,7 +14,7 @@ import org.kb.ui.FetchEventStructure;
 /**
  * Created by mmj on 3/10/17.
  */
-public class DeliveryInformationPanel extends HorizontalLayout {
+public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     DomsParser parser;
 
