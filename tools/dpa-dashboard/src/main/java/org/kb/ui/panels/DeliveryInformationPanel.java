@@ -21,14 +21,14 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
     DeliveryListPanel infoPanel = new DeliveryListPanel();
     TitleListPanel titPanel = new TitleListPanel();
 
-    FileListTable table1 = new FileListTable(Article.class);
+    //FileListTable table1 = new FileListTable(Article.class);
     FileListTable table2 = new FileListTable(Page.class);
 
     public DeliveryInformationPanel(DomsParser parser) {
         this.setWidth("100%");
 
         this.parser = parser;
-        table1.setEnabled(false);
+        //table1.setEnabled(false);
         table2.setEnabled(false);
 
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
@@ -41,7 +41,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
 
                 titPanel.setInfo(delStat);
-                table1.setEnabled(false);
+                //table1.setEnabled(false);
                 table2.setEnabled(false);
             }
         });
@@ -51,10 +51,10 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
         titPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
+                /*table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
                 table1.setEnabled(true);
                 table1.setInfo(((Title)itemClickEvent.getItemId()).getArticle());
-                table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
+                table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());*/
                 table2.setEnabled(true);
                 table2.setInfo(((Title)itemClickEvent.getItemId()).getPage());
             }
@@ -62,7 +62,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
         this.addComponent(infoPanel);
         this.addComponent(titPanel);
-        this.addComponent(table1);
+        //this.addComponent(table1);
         this.addComponent(table2);
     }
 

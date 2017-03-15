@@ -33,6 +33,12 @@ public class TitleListPanel extends VerticalLayout {
         table.setSelectable(true);
         table.setImmediate(true);
         table.setVisibleColumns(new String[]{"title", "noOfArticles", "noOfPages"});
+
+        //table.setColumnExpandRatio();
+
+        table.setColumnExpandRatio("title", 0.8f);
+        table.setColumnExpandRatio("noOfArticles", 0.1f);
+        table.setColumnExpandRatio("noOfPages", 0.1f);
         this.addComponent(table);
     }
 

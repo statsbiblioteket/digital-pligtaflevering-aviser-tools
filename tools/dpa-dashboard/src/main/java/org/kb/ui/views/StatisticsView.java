@@ -77,7 +77,11 @@ public class StatisticsView extends VerticalLayout implements View {
             public void itemClick(ItemClickEvent itemClickEvent) {
 
                 try {
-                    String fileUrl = "http://"+ NewspaperUI.address+":58709/var/reference1pillar/dpaviser/folderDir/"+ URLEncoder.encode(itemClickEvent.getItem().toString()+"", "UTF-8");
+
+                    Object page = itemClickEvent.getItem().getItemProperty("pageName");
+
+
+                    String fileUrl = "http://172.18.100.153:58709/var/reference1pillar/dpaviser/folderDir/"+ URLEncoder.encode(page+"", "UTF-8");
                     pdf.setSource(new ExternalResource(fileUrl+".pdf"));
 
                 } catch (UnsupportedEncodingException e) {
@@ -89,14 +93,9 @@ public class StatisticsView extends VerticalLayout implements View {
         });
 
 
-
-        File pdfFile = new File("");
-        //Embedded pdf = new Embedded(null, new FileResource(pdfFile));
-
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
         pdf.setHeight("500px");
-        addComponent(pdf);
 
         layout.addComponent(button);
 
