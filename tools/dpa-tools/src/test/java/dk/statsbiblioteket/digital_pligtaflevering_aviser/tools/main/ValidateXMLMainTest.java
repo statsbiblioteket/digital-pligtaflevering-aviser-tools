@@ -1,9 +1,11 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.junit.Before;
 import org.xml.sax.InputSource;
 
+import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -74,6 +76,16 @@ public class ValidateXMLMainTest {
     @org.junit.Test
     public void analyzeFailingXMLPageTest() throws Exception {
         assertEquals("Test of failing page", false, validatePath("xmlValidation/pageFailTest.xml"));
+    }
+
+
+    @org.junit.Test
+    public void fetchArticleTest() throws Exception {
+        URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/pageCorrectTest.xml");
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
+        DomsParser domsParser = new DomsParser();
+        String sectionName = domsParser.getSectionName(new InputSource(in));
+        assertEquals("Test of approved article", "Kultur", sectionName);
     }
 
     /**

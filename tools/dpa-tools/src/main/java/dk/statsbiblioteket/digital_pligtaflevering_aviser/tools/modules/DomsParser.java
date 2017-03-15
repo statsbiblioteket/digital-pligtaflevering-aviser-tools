@@ -1,15 +1,38 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import javaslang.control.Try;
+import net.sf.saxon.dom.DOMNodeList;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -24,12 +47,9 @@ public class DomsParser {
      */
     public Function<DomsItem, Iterator<DomsItem>> processChildDomsId() {
         return domsItem -> {
-
-            String deliveryName = domsItem.getPath();
-            Stream<DomsItem> ss =domsItem.children();
-            Iterator<DomsItem> it = ss.iterator();
-
-            return it;
+            Stream<DomsItem> domsChildren =domsItem.children();
+            Iterator<DomsItem> itemIterator = domsChildren.iterator();
+            return itemIterator;
         };
     }
 
@@ -49,7 +69,8 @@ public class DomsParser {
 
                 DomsItem titleItem = roundtripIterator.next();
                 Iterator<DomsItem> titleSubfolder = this.processChildDomsId().apply(titleItem);
-                Title title = new Title(titleItem.getPath());
+                String titleName = titleItem.getPath();
+                Title title = new Title(titleName.substring(titleName.indexOf("/")+1));
                 deliveryStatistics.addTitle(title);
 
                 while(titleSubfolder.hasNext()) {
@@ -59,10 +80,31 @@ public class DomsParser {
                     while(fileItemIterator.hasNext()) {
                         DomsItem fileItem = fileItemIterator.next();
                         String titleSubfolderItemName = titleSubfolderItem.getPath();
+                        String fileItemName = fileItem.getPath();
+
+                        //fileItemName = fileItemName.substring(fileItemName.lastIndexOf("/"));
                         if(titleSubfolderItemName.contains("articles")) {
-                            title.addArticle(new Article(fileItem.getPath()));
+                            title.addArticle(new Article(fileItemName));
                         } else if(titleSubfolderItemName.contains("pages")) {
-                            title.addPage(new Page(fileItem.getPath()));
+
+                            final List<DomsDatastream> datastreams = fileItem.datastreams();
+                            Optional<DomsDatastream> profileOptional = datastreams.stream()
+                                    .filter(ds -> ds.getId().equals("XML"))
+                                    .findAny();
+
+                            if (profileOptional.isPresent()) {
+                                try {
+                                    DomsDatastream ds = profileOptional.get();
+                                    //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                                    StringReader reader = new StringReader(ds.getDatastreamAsString());
+                                    InputSource inps = new InputSource(reader);
+                                    String rootnameInCurrentXmlFile = getSectionName(inps);
+                                    title.addPage(new Page(fileItemName, rootnameInCurrentXmlFile));
+
+                                } catch (Exception e) {
+                                    return null;
+                                }
+                            }
                         }
                     }
                 }
@@ -71,6 +113,27 @@ public class DomsParser {
             return deliveryStatistics;
         };
     }
+
+    /**
+     * Find the sectionName inside metadata of an xml-file descriping a page
+     * @param reader
+     * @return
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     * @throws XPathExpressionException
+     */
+    public String getSectionName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        Document xmlDocument = builder.parse(reader);
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression expr = xpath.compile("/pdfinfo/positional/sectionname");
+        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
+        return sectionName;
+    }
+
 
     /**
      * convert DeliveryStatistics into a bytseArray which can be saved in doms
