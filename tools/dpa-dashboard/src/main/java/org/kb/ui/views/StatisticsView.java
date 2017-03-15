@@ -4,6 +4,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
@@ -36,34 +37,56 @@ public class StatisticsView extends VerticalLayout implements View {
 
     public StatisticsView(String type) {
 
-        final VerticalLayout mainhlayout = new VerticalLayout();
+        Layout mainhlayout;
+
         final VerticalLayout layout = new VerticalLayout();
 
         DeliveryMainPanel tabelsLayout;
+        Embedded pdf = new Embedded(null, null);
+        pdf.setMimeType("application/pdf");
+        pdf.setType(Embedded.TYPE_BROWSER);
 
-        if("Std".equals(type)) {
-            tabelsLayout = new DeliveryInformationPanel(parser);
-        } else {
-            tabelsLayout = new DeliveryInformationPanel2(parser);
+
+        switch(type) {
+            case "1v1":
+                tabelsLayout = new DeliveryInformationPanel(parser);
+                mainhlayout = new VerticalLayout();
+                pdf.setWidth("500px");
+                pdf.setHeight("750px");
+                break;
+            case "1v2":
+                tabelsLayout = new DeliveryInformationPanel(parser);
+                mainhlayout = new HorizontalLayout();
+                pdf.setWidth("1000px");
+                pdf.setHeight("1500px");
+                tabelsLayout.setHeight("1500px");
+                break;
+            case "2v1":
+                tabelsLayout = new DeliveryInformationPanel2(parser);
+                mainhlayout = new VerticalLayout();
+                pdf.setWidth("500px");
+                pdf.setHeight("750px");
+                break;
+            case "2v2":
+                tabelsLayout = new DeliveryInformationPanel2(parser);
+                mainhlayout = new HorizontalLayout();
+                pdf.setWidth("1000px");
+                pdf.setHeight("1500px");
+                tabelsLayout.setHeight("1500px");
+                break;
+            default:
+                tabelsLayout = new DeliveryInformationPanel(parser);
+                mainhlayout = new HorizontalLayout();
         }
-
-
-
 
         final HorizontalLayout viewLayout = new HorizontalLayout();
         mainhlayout.setWidth("100%");
         mainhlayout.setHeight("100%");
 
         tabelsLayout.setWidth("100%");
+        tabelsLayout.setHeight("100%");
         layout.setMargin(true);
         addComponent(layout);
-
-        Embedded pdf = new Embedded(null, null);
-
-        XmlView treeView = new XmlView();
-        treeView.setWidth("500px");
-
-
 
         SearchPanel button = new SearchPanel();
         button.addClickListener(new Button.ClickListener() {
@@ -93,15 +116,10 @@ public class StatisticsView extends VerticalLayout implements View {
         });
 
 
-        pdf.setMimeType("application/pdf");
-        pdf.setType(Embedded.TYPE_BROWSER);
-        pdf.setHeight("500px");
-
         layout.addComponent(button);
 
         mainhlayout.addComponent(tabelsLayout);
         viewLayout.addComponent(pdf);
-        viewLayout.addComponent(treeView);
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
     }

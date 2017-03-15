@@ -28,6 +28,7 @@ public class DeliveryListPanel extends VerticalLayout {
         table = new Table("Beans of All Sorts");
         table.addContainerProperty("Batch", String.class, null);
         table.setWidth("100%");
+        table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
         this.addComponent(table);

@@ -26,6 +26,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     public DeliveryInformationPanel(DomsParser parser) {
         this.setWidth("100%");
+        this.setHeight("100%");
 
         this.parser = parser;
         //table1.setEnabled(false);

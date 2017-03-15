@@ -21,8 +21,10 @@ public class NewspaperUI extends UI
     Navigator navigator;
     protected static final String MAINVIEW = "";
     protected static final String STATUSVIEW = "status";
-    protected static final String STATISTICSVIEW = "statistics";
-    protected static final String STATISTICSVIEW2 = "statistics2";
+    protected static final String STATISTICSVIEW1 = "1v1";
+    protected static final String STATISTICSVIEW2 = "1v2";
+    protected static final String STATISTICSVIEW3 = "2v1";
+    protected static final String STATISTICSVIEW4 = "2v2";
 
 
     FetchEventStructure eventStructureCommunication = new FetchEventStructure();
@@ -43,8 +45,10 @@ public class NewspaperUI extends UI
         // Create and register the views
         navigator.addView(MAINVIEW, new MainView());
         navigator.addView(STATUSVIEW, new StatusView());
-        navigator.addView(STATISTICSVIEW, new StatisticsView("Std"));
-        navigator.addView(STATISTICSVIEW2, new StatisticsView("Other"));
+        navigator.addView(STATISTICSVIEW1, new StatisticsView("1v1"));
+        navigator.addView(STATISTICSVIEW2, new StatisticsView("1v2"));
+        navigator.addView(STATISTICSVIEW3, new StatisticsView("2v1"));
+        navigator.addView(STATISTICSVIEW4, new StatisticsView("2v2"));
     }
 
 }
