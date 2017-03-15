@@ -72,7 +72,7 @@ public class SerializeModelTest {
         JAXBContext jaxbContext = JAXBContext.newInstance(Page.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        Page article = new Page("PageTestName");
+        Page article = new Page("PageTestName", "section");
         jaxbMarshaller.marshal(article, tempFile);
         String xmlResult = convertStreamToString(tempFile);
         XMLAssert.assertXpathEvaluatesTo("PageTestName", "//@pageName", xmlResult);
@@ -96,9 +96,9 @@ public class SerializeModelTest {
         title.addArticle(new Article("title02"));
         title.addArticle(new Article("title03"));
 
-        title.addPage(new Page("title11"));
-        title.addPage(new Page("title12"));
-        title.addPage(new Page("title13"));
+        title.addPage(new Page("title11", "section"));
+        title.addPage(new Page("title12", "section"));
+        title.addPage(new Page("title13", "section"));
 
         jaxbMarshaller.marshal(title, tempFile);
         String xmlResult = convertStreamToString(tempFile);
@@ -138,9 +138,9 @@ public class SerializeModelTest {
         titleAdd1.addArticle(new Article("article1"));
         titleAdd1.addArticle(new Article("article2"));
 
-        titleAdd1.addPage(new Page("page1"));
-        titleAdd1.addPage(new Page("page2"));
-        titleAdd1.addPage(new Page("page3"));
+        titleAdd1.addPage(new Page("page1", "section"));
+        titleAdd1.addPage(new Page("page2", "section"));
+        titleAdd1.addPage(new Page("page3", "section"));
 
 
         Title titleAdd2 = new Title("test2");
@@ -151,8 +151,8 @@ public class SerializeModelTest {
         titleAdd2.addArticle(new Article("article2"));
         titleAdd2.addArticle(new Article("article2"));
 
-        titleAdd2.addPage(new Page("page1"));
-        titleAdd2.addPage(new Page("page2"));
+        titleAdd2.addPage(new Page("page1", "section"));
+        titleAdd2.addPage(new Page("page2", "section"));
 
         jaxbMarshaller.marshal(deliveryStatistics, tempFile);
         String xmlResult = convertStreamToString(tempFile);

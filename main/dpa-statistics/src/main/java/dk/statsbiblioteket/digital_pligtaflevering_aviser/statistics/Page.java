@@ -11,12 +11,14 @@ public class Page implements java.io.Serializable {
 
     //The name of the article is really just the name of tne metadata file
     private String pageName;
+    private String sectionName;
 
     public Page() {
     }
 
-    public Page(String pageName) {
+    public Page(String pageName, String sectionName) {
         this.pageName = pageName;
+        this.sectionName = sectionName;
     }
 
     @XmlAttribute
@@ -26,5 +28,14 @@ public class Page implements java.io.Serializable {
 
     public String getPageName() {
         return pageName;
+    }
+
+    public String getSectionName() {
+        return sectionName;
+    }
+
+    @XmlAttribute
+    public void setSectionName(String sectionName) {
+        this.sectionName = sectionName;
     }
 }
