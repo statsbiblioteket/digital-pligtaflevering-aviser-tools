@@ -2,6 +2,7 @@ package org.kb.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.HorizontalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
@@ -9,6 +10,14 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.kb.ui.FetchEventStructure;
+import org.xml.sax.InputSource;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -39,9 +48,34 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
                 DomsItem dItem = infoPanel.getDomsItem(selectedItem);
 
-                DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
+                //DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
 
-                titPanel.setInfo(delStat);
+
+
+                final List<DomsDatastream> datastreams = dItem.datastreams();
+                Optional<DomsDatastream> profileOptional = datastreams.stream()
+                        .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                        .findAny();
+
+
+                if (profileOptional.isPresent()) {
+                    try {
+                        DomsDatastream ds = profileOptional.get();
+                        //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                        StringReader reader = new StringReader(ds.getDatastreamAsString());
+                        InputSource inps = new InputSource(reader);
+
+                        //File tempFile = new File("/tmp/pathstream");
+                        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
+                        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                        DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
+
+                        titPanel.setInfo(deserializedObject);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 //table1.setEnabled(false);
                 table2.setEnabled(false);
             }
