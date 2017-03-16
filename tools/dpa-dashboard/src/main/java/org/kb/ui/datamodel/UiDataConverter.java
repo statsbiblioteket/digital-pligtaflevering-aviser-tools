@@ -1,4 +1,4 @@
-package org.kb.ui.tableBeans;
+package org.kb.ui.datamodel;
 
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;

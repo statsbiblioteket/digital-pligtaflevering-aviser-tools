@@ -11,6 +11,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliverySta
 import org.kb.ui.FetchEventStructure;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -48,10 +49,24 @@ public class DeliveryListPanel extends VerticalLayout {
                 row1.getItemProperty("Batch").setValue(o.getPath());
                 itemList.put(row1, o);
             }
-
         });
+    }
+
+
+    public void setTheStuff(HashSet<String> list) {
+
+
+        itemList.clear();
+        table.removeAllItems();
+
+        for(String item : list) {
+            Object newItemId = table.addItem();
+            com.vaadin.data.Item row1 = table.getItem(newItemId);
+            row1.getItemProperty("Batch").setValue(item);
+        }
 
     }
+
 
     public DomsItem getDomsItem(com.vaadin.data.Item item) {
         return itemList.get(item);

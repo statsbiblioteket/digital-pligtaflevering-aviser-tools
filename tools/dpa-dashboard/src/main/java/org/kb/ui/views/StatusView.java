@@ -22,7 +22,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import org.kb.ui.DataModel;
+import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.panels.EventPanel;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.panels.InfoPanel;
@@ -65,6 +65,8 @@ public class StatusView extends VerticalLayout implements View {
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
 
+
+
                 ArrayList<String> alist = new ArrayList<String>();
 
                 Stream<DomsItem> list = fetchIt();
@@ -78,6 +80,8 @@ public class StatusView extends VerticalLayout implements View {
                 });
 
                 table.readStates(eventStructureCommunication);
+
+
             }
         });
 
@@ -149,7 +153,7 @@ public class StatusView extends VerticalLayout implements View {
             DomsEventStorage<Item> domsEventStorage = domsModule.provideDomsEventStorage(domsURL, domsPidgeneratorUrl, domsUserName, domsPassword, itemFactory);
             int pageSize = 10;//domsModule.providePageSize(map);
 
-            SBOIEventIndex sboiEventIndex = new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
+            SBOIEventIndex<Item> sboiEventIndex = new SBOIEventIndex<>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
             WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
             DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);

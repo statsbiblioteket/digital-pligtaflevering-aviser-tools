@@ -1,20 +1,17 @@
 package org.kb.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.HorizontalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.kb.ui.FetchEventStructure;
+import org.kb.ui.datamodel.DataModel;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
-import java.io.File;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Optional;
@@ -25,19 +22,18 @@ import java.util.Optional;
  */
 public class DeliveryInformationPanel extends DeliveryMainPanel {
 
-    DomsParser parser;
 
-    DeliveryListPanel infoPanel = new DeliveryListPanel();
-    TitleListPanel titPanel = new TitleListPanel();
+    private DeliveryListPanel infoPanel = new DeliveryListPanel();
+    private TitleListPanel titPanel = new TitleListPanel();
 
-    //FileListTable table1 = new FileListTable(Article.class);
-    FileListTable table2 = new FileListTable(Page.class);
+    //private FileListTable table1 = new FileListTable(Article.class);
+    private FileListTable table2 = new FileListTable(Page.class);
 
-    public DeliveryInformationPanel(DomsParser parser) {
+    public DeliveryInformationPanel(DataModel model) {
         this.setWidth("100%");
         this.setHeight("100%");
 
-        this.parser = parser;
+        //this.parser = parser;
         //table1.setEnabled(false);
         table2.setEnabled(false);
 
@@ -45,39 +41,43 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
-                com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
-                DomsItem dItem = infoPanel.getDomsItem(selectedItem);
 
-                //DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
+                    com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
+                    DomsItem dItem = infoPanel.getDomsItem(selectedItem);
 
-
-
-                final List<DomsDatastream> datastreams = dItem.datastreams();
-                Optional<DomsDatastream> profileOptional = datastreams.stream()
-                        .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
-                        .findAny();
+                    //DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
 
 
-                if (profileOptional.isPresent()) {
-                    try {
-                        DomsDatastream ds = profileOptional.get();
-                        //We are reading this textstring as a String and are aware that thish might leed to encoding problems
-                        StringReader reader = new StringReader(ds.getDatastreamAsString());
-                        InputSource inps = new InputSource(reader);
 
-                        //File tempFile = new File("/tmp/pathstream");
-                        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
-                        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                        DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
+                    final List<DomsDatastream> datastreams = dItem.datastreams();
+                    Optional<DomsDatastream> profileOptional = datastreams.stream()
+                            .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                            .findAny();
 
-                        titPanel.setInfo(deserializedObject);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                    if (profileOptional.isPresent()) {
+                        try {
+                            DomsDatastream ds = profileOptional.get();
+                            //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                            StringReader reader = new StringReader(ds.getDatastreamAsString());
+                            InputSource inps = new InputSource(reader);
+
+                            //File tempFile = new File("/tmp/pathstream");
+                            JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
+                            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                            DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
+
+                            titPanel.setInfo(deserializedObject);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                //table1.setEnabled(false);
-                table2.setEnabled(false);
+                    //table1.setEnabled(false);
+                    table2.setEnabled(false);
+
+
+
             }
         });
 
@@ -100,6 +100,13 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
         //this.addComponent(table1);
         this.addComponent(table2);
     }
+
+    public void getTitles() {
+
+        titPanel.getTitles();
+
+    }
+
 
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         table2.addItemClickListener(listener);

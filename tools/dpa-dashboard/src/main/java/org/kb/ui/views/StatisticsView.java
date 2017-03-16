@@ -4,25 +4,20 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
-import org.kb.ui.DataModel;
+import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.FetchEventStructure;
-import org.kb.ui.NewspaperUI;
 import org.kb.ui.panels.DeliveryInformationPanel;
 import org.kb.ui.panels.DeliveryInformationPanel2;
 import org.kb.ui.panels.DeliveryMainPanel;
 import org.kb.ui.panels.SearchPanel;
-import org.kb.ui.panels.XmlView;
-import java.io.File;
+
 import java.io.UnsupportedEncodingException;
-import java.net.Inet4Address;
 import java.net.URLEncoder;
 
 /**
@@ -32,7 +27,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
     private FetchEventStructure eventStructureCommunication = new FetchEventStructure();
     private DataModel model = new DataModel();
-    private DomsParser parser = new DomsParser();
+
 
 
     public StatisticsView(String type) {
@@ -49,33 +44,33 @@ public class StatisticsView extends VerticalLayout implements View {
 
         switch(type) {
             case "1v1":
-                tabelsLayout = new DeliveryInformationPanel(parser);
+                tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new VerticalLayout();
                 pdf.setWidth("500px");
                 pdf.setHeight("750px");
                 break;
             case "1v2":
-                tabelsLayout = new DeliveryInformationPanel(parser);
+                tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new HorizontalLayout();
                 pdf.setWidth("1000px");
                 pdf.setHeight("1500px");
                 tabelsLayout.setHeight("1500px");
                 break;
             case "2v1":
-                tabelsLayout = new DeliveryInformationPanel2(parser);
+                tabelsLayout = new DeliveryInformationPanel2(model);
                 mainhlayout = new VerticalLayout();
                 pdf.setWidth("500px");
                 pdf.setHeight("750px");
                 break;
             case "2v2":
-                tabelsLayout = new DeliveryInformationPanel2(parser);
+                tabelsLayout = new DeliveryInformationPanel2(model);
                 mainhlayout = new HorizontalLayout();
                 pdf.setWidth("1000px");
                 pdf.setHeight("1500px");
                 tabelsLayout.setHeight("1500px");
                 break;
             default:
-                tabelsLayout = new DeliveryInformationPanel(parser);
+                tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new HorizontalLayout();
         }
 
@@ -91,7 +86,18 @@ public class StatisticsView extends VerticalLayout implements View {
         SearchPanel button = new SearchPanel();
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-                tabelsLayout.setBatch(eventStructureCommunication, "Data_Archived");
+
+                if("SEARCHBUTTON".equals(event.getButton().getId())) {
+
+                    tabelsLayout.setBatch(eventStructureCommunication, "Data_Archived");
+
+                } else if("STOREBUTTON".equals(event.getButton().getId())) {
+
+                    tabelsLayout.getTitles();
+
+                    //System.out.println(pp);
+                }
+
             }
         });
 

@@ -2,11 +2,16 @@ package org.kb.ui;
 
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.UI;
 import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
+import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.views.MainView;
 import org.kb.ui.views.StatisticsView;
 import org.kb.ui.views.StatusView;
+
+import javax.servlet.ServletContext;
+import java.io.File;
 
 
 /**
@@ -33,7 +38,7 @@ public class NewspaperUI extends UI
     @Override
     protected void init(VaadinRequest request) {
 
-        ConfigCollection.getProperties().getProperty("productionMode");
+        String productionMode = ConfigCollection.getProperties().getProperty("productionMode");
 
         address = request.getRemoteAddr();
 
@@ -45,10 +50,10 @@ public class NewspaperUI extends UI
         // Create and register the views
         navigator.addView(MAINVIEW, new MainView());
         navigator.addView(STATUSVIEW, new StatusView());
-        navigator.addView(STATISTICSVIEW1, new StatisticsView("1v1"));
-        navigator.addView(STATISTICSVIEW2, new StatisticsView("1v2"));
-        navigator.addView(STATISTICSVIEW3, new StatisticsView("2v1"));
-        navigator.addView(STATISTICSVIEW4, new StatisticsView("2v2"));
+        navigator.addView(STATISTICSVIEW1, new StatisticsView(STATISTICSVIEW1));
+        navigator.addView(STATISTICSVIEW2, new StatisticsView(STATISTICSVIEW2));
+        navigator.addView(STATISTICSVIEW3, new StatisticsView(STATISTICSVIEW3));
+        navigator.addView(STATISTICSVIEW4, new StatisticsView(STATISTICSVIEW4));
     }
 
 }

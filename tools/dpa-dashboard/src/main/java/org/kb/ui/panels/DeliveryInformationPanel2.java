@@ -1,20 +1,23 @@
 package org.kb.ui.panels;
 
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Table;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.kb.ui.FetchEventStructure;
-import org.kb.ui.tableBeans.FileComponent;
+import org.kb.ui.datamodel.DataModel;
+import org.kb.ui.datamodel.DataformatConverter;
+import org.kb.ui.datamodel.FileComponent;
+import org.xml.sax.InputSource;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -25,33 +28,35 @@ import java.util.stream.Stream;
 public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
-    private DomsParser parser;
-    private FileListTable table = new FileListTable(FileComponent.class);
+    private DataModel model;
+    private DeliveryListPanel infoPanel = new DeliveryListPanel();
+    private FileListTable table = new FileListTable(Page.class);
+    private ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
 
-    ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
 
-
-    public DeliveryInformationPanel2(DomsParser parser) {
+    public DeliveryInformationPanel2(DataModel model) {
         this.setWidth("100%");
 
 
-        this.parser = parser;
+        infoPanel.setTheStuff(model.getTitles());
+
+
+        this.model = model;
+        this.addComponent(infoPanel);
+        //this.addComponent(titPanel);
+        //this.addComponent(table1);
         this.addComponent(table);
     }
 
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-
+        table.addItemClickListener(listener);
     }
 
 
     public void setBatch(FetchEventStructure eventStructureCommunication, String info) {
 
         table.setEnabled(true);
-
-
-
-
-
+        DataformatConverter yy = new DataformatConverter();
 
         Stream<DomsItem> items = eventStructureCommunication.getState(info);
 
@@ -63,11 +68,49 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 row1.getItemProperty("Batch").setValue(o.getPath());
                 itemList.put(row1, o);*/
 
-                DeliveryStatistics delStat =parser.processDomsIdToStream().apply(o);
 
-                table.setCaption(delStat.getDeliveryName());
 
-                for(Title title : delStat.getTitles().getTitles()) {
+
+                final List<DomsDatastream> datastreams = o.datastreams();
+                Optional<DomsDatastream> profileOptional = datastreams.stream()
+                        .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                        .findAny();
+
+
+                if (profileOptional.isPresent()) {
+                    try {
+                        DomsDatastream ds = profileOptional.get();
+                        //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                        StringReader reader = new StringReader(ds.getDatastreamAsString());
+                        InputSource inps = new InputSource(reader);
+
+                        //File tempFile = new File("/tmp/pathstream");
+                        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
+                        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                        DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
+                        yy.setIt(deserializedObject);
+
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+
+
+
+
+
+                //delStat.
+
+
+
+
+
+
+                /*for(Title title : delStat.getTitles().getTitles()) {
 
                     List<Article> articles = title.getArticle();
                     for(Article art : articles) {
@@ -79,7 +122,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                         alr.add(new FileComponent(o.getPath(),title.getTitle(),art.getPageName()));
                     }
 
-                }
+                }*/
 
 
 
@@ -91,7 +134,14 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
         });
 
-        table.setInfo(alr);
+        ArrayList<Title> titleList = yy.getIt("bt");
+
+
+        table.setCaption("bt");
+        table.setInfo(titleList.get(0).getPage());
+
+
+        //table.setInfo(alr);
 
 
 

@@ -1,4 +1,4 @@
-package org.kb.ui.tableBeans;
+package org.kb.ui.datamodel;
 
 /**
  * Created by mmj on 3/9/17.

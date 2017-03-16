@@ -70,6 +70,7 @@ public class DeliveryContentPanel extends VerticalLayout {
 
     }
 
+
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }
