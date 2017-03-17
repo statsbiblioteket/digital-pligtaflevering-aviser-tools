@@ -8,7 +8,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -87,6 +89,27 @@ public class DataModel {
             e.printStackTrace();
         }
         return new HashSet<String>();
+    }
+
+
+    HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
+
+    public void initiateDeliveries(String info) {
+        Stream<DomsItem> items = eventFetch.getState(info);
+        items.forEach(new Consumer<DomsItem>() {
+            @Override
+            public void accept(final DomsItem o) {
+                deliveryList.put(o.getPath(), o);
+            }
+        });
+    }
+
+    public DomsItem getDeliveryFromName(String name) {
+        return deliveryList.get(name);
+    }
+
+    public Set<String> getInitiatedDeliveries() {
+        return deliveryList.keySet();
     }
 
 

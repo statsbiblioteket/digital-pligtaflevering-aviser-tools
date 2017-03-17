@@ -29,7 +29,7 @@ public class SingleStringListPanel extends VerticalLayout {
 
         // Bind a table to it
         table = new Table("Beans of All Sorts");
-        table.addContainerProperty("Batch", String.class, null);
+        table.addContainerProperty("Item", String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);
@@ -48,7 +48,7 @@ public class SingleStringListPanel extends VerticalLayout {
             public void accept(final DomsItem o) {
                 Object newItemId = table.addItem();
                 com.vaadin.data.Item row1 = table.getItem(newItemId);
-                row1.getItemProperty("Batch").setValue(o.getPath());
+                row1.getItemProperty("Item").setValue(o.getPath());
                 itemList.put(row1, o);
             }
         });
@@ -64,7 +64,7 @@ public class SingleStringListPanel extends VerticalLayout {
         for(String item : list) {
             Object newItemId = table.addItem();
             com.vaadin.data.Item row1 = table.getItem(newItemId);
-            row1.getItemProperty("Batch").setValue(item);
+            row1.getItemProperty("Item").setValue(item);
             //itemList.put(row1, o);
         }
 

@@ -23,8 +23,9 @@ import java.util.Optional;
 public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
-    private SingleStringListPanel infoPanel = new SingleStringListPanel();
-    private TitleListPanel titPanel = new TitleListPanel();
+    private SingleStringListPanel deliveryListPanel = new SingleStringListPanel();
+    private TitleListPanel titleListPanel = new TitleListPanel();
+    private SingleStringListPanel dummySectionTable = new SingleStringListPanel();
     private DataModel model;
     //private FileListTable table1 = new FileListTable(Article.class);
     private FileListTable fileSelectionPanel = new FileListTable(Page.class);
@@ -38,13 +39,13 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
         //table1.setEnabled(false);
         fileSelectionPanel.setEnabled(false);
 
-        infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+        deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
 
                     com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
-                    DomsItem dItem = infoPanel.getDomsItem(selectedItem);
+                    DomsItem dItem = deliveryListPanel.getDomsItem(selectedItem);
 
                     //DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
 
@@ -68,7 +69,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                             DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
 
-                            titPanel.setInfo(deserializedObject);
+                            titleListPanel.setInfo(deserializedObject);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -84,7 +85,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
 
-        titPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+        titleListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
                 /*table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());
@@ -96,15 +97,15 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             }
         });
 
-        this.addComponent(infoPanel);
-        this.addComponent(titPanel);
-        //this.addComponent(table1);
+        this.addComponent(deliveryListPanel);
+        this.addComponent(titleListPanel);
+        this.addComponent(dummySectionTable);
         this.addComponent(fileSelectionPanel);
     }
 
     public void getTitles() {
 
-        //titPanel.getTitles();
+        //titleListPanel.getTitles();
 
     }
 
@@ -115,9 +116,20 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
     public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
-        infoPanel.setInfo(eventStructureCommunication, "Data_Archived");
+
+
+
+
+
+
+
+
+
+
+
+        deliveryListPanel.setInfo(eventStructureCommunication, "Data_Archived");
 
         /*ArrayList<String> list = model.getDeliveries("Data_Archived");
-        infoPanel.setTheStuff(list);*/
+        deliveryListPanel.setTheStuff(list);*/
     }
 }
