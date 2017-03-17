@@ -3,8 +3,12 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import org.apache.commons.codec.CharEncoding;
 
 import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.function.Function;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 
@@ -15,6 +19,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 public class BitRepositoryModule {
 
     public static final String BITREPOSITORY_SBPILLAR_MOUNTPOINT = "bitrepository.sbpillar.mountpoint";
+    public static final String PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID = "provide.encode.public.url.for.fileid";
 
     /** This is the base url for the public exposure of a given file ingested in the BitRepository.  This
      * is stored as the URL of the CONTENTS datastream.
@@ -42,4 +47,18 @@ public class BitRepositoryModule {
     }
 
 
+    @Provides
+    @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID)
+    public Function<String, String> provideEncodePublicURLForFileID(@Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl) {
+        return fileID -> {
+            String singleEncodedFileId = null;
+            try {
+                singleEncodedFileId = URLEncoder.encode(fileID, CharEncoding.UTF_8);
+                String doubleEncodedFileId = URLEncoder.encode(singleEncodedFileId, CharEncoding.UTF_8);
+                return bitmagUrl + doubleEncodedFileId;
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
 }
