@@ -10,20 +10,22 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import org.kb.ui.FetchEventStructure;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * Created by mmj on 3/2/17.
  */
-public class DeliveryListPanel extends VerticalLayout {
+public class SingleStringListPanel extends VerticalLayout {
 
     private Table table;
     private HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
 
-    public DeliveryListPanel() {
+    public SingleStringListPanel() {
 
         // Bind a table to it
         table = new Table("Beans of All Sorts");
@@ -53,7 +55,7 @@ public class DeliveryListPanel extends VerticalLayout {
     }
 
 
-    public void setTheStuff(HashSet<String> list) {
+    public void setTheStuff(Collection<String> list) {
 
 
         itemList.clear();
@@ -63,6 +65,7 @@ public class DeliveryListPanel extends VerticalLayout {
             Object newItemId = table.addItem();
             com.vaadin.data.Item row1 = table.getItem(newItemId);
             row1.getItemProperty("Batch").setValue(item);
+            //itemList.put(row1, o);
         }
 
     }

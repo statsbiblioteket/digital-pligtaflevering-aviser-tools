@@ -14,7 +14,7 @@ public class DeliveryMainPanel extends HorizontalLayout {
     }
 
 
-    public void setBatch(FetchEventStructure eventStructureCommunication, String info) {
+    public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
 
     }
 

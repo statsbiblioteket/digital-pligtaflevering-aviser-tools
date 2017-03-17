@@ -2,21 +2,56 @@ package org.kb.ui.datamodel;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
+import org.kb.ui.FetchEventStructure;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Created by mmj on 3/2/17.
  */
 public class DataModel {
 
-
     private DomsItem domsItem;
     private String currentEvent;
     private DomsParser parser = new DomsParser();
+    private String selectedDelivery;
+    private String selectedTitle;
+    private FetchEventStructure eventFetch = new FetchEventStructure();
+
+
+    public void setParser(DomsParser parser) {
+        this.parser = parser;
+    }
+
+    public String getSelectedDelivery() {
+        return selectedDelivery;
+    }
+
+    public void setSelectedDelivery(String selectedDelivery) {
+        this.selectedDelivery = selectedDelivery;
+    }
+
+    public String getSelectedTitle() {
+        return selectedTitle;
+    }
+
+    public void setSelectedTitle(String selectedTitle) {
+        this.selectedTitle = selectedTitle;
+    }
+
+    public FetchEventStructure getEventFetch() {
+        return eventFetch;
+    }
+
+    public void setEventFetch(FetchEventStructure eventFetch) {
+        this.eventFetch = eventFetch;
+    }
 
     public String getCurrentEvent() {
         return currentEvent;
@@ -55,4 +90,19 @@ public class DataModel {
     }
 
 
+    public ArrayList<String> getDeliveries(String info) {
+
+        ArrayList<String> returnList = new ArrayList<String>();
+
+        Stream<DomsItem> items = eventFetch.getState(info);
+
+
+        items.forEach(new Consumer<DomsItem>() {
+            @Override
+            public void accept(final DomsItem o) {
+                returnList.add(o.getPath());
+            }
+        });
+        return returnList;
+    }
 }

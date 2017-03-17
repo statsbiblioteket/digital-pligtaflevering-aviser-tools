@@ -89,7 +89,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 if("SEARCHBUTTON".equals(event.getButton().getId())) {
 
-                    tabelsLayout.setBatch(eventStructureCommunication, "Data_Archived");
+                    tabelsLayout.performInitialSearch(eventStructureCommunication, "Data_Archived");
 
                 } else if("STOREBUTTON".equals(event.getButton().getId())) {
 

@@ -23,19 +23,20 @@ import java.util.Optional;
 public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
-    private DeliveryListPanel infoPanel = new DeliveryListPanel();
+    private SingleStringListPanel infoPanel = new SingleStringListPanel();
     private TitleListPanel titPanel = new TitleListPanel();
-
+    private DataModel model;
     //private FileListTable table1 = new FileListTable(Article.class);
-    private FileListTable table2 = new FileListTable(Page.class);
+    private FileListTable fileSelectionPanel = new FileListTable(Page.class);
 
     public DeliveryInformationPanel(DataModel model) {
         this.setWidth("100%");
         this.setHeight("100%");
 
+        this.model = model;
         //this.parser = parser;
         //table1.setEnabled(false);
-        table2.setEnabled(false);
+        fileSelectionPanel.setEnabled(false);
 
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
@@ -74,7 +75,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                     }
 
                     //table1.setEnabled(false);
-                    table2.setEnabled(false);
+                    fileSelectionPanel.setEnabled(false);
 
 
 
@@ -90,30 +91,33 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 table1.setEnabled(true);
                 table1.setInfo(((Title)itemClickEvent.getItemId()).getArticle());
                 table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());*/
-                table2.setEnabled(true);
-                table2.setInfo(((Title)itemClickEvent.getItemId()).getPage());
+                fileSelectionPanel.setEnabled(true);
+                fileSelectionPanel.setInfo(((Title)itemClickEvent.getItemId()).getPage());
             }
         });
 
         this.addComponent(infoPanel);
         this.addComponent(titPanel);
         //this.addComponent(table1);
-        this.addComponent(table2);
+        this.addComponent(fileSelectionPanel);
     }
 
     public void getTitles() {
 
-        titPanel.getTitles();
+        //titPanel.getTitles();
 
     }
 
 
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-        table2.addItemClickListener(listener);
+        fileSelectionPanel.addItemClickListener(listener);
     }
 
 
-    public void setBatch(FetchEventStructure eventStructureCommunication, String info) {
+    public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
         infoPanel.setInfo(eventStructureCommunication, "Data_Archived");
+
+        /*ArrayList<String> list = model.getDeliveries("Data_Archived");
+        infoPanel.setTheStuff(list);*/
     }
 }

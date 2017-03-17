@@ -65,12 +65,8 @@ public class StatusView extends VerticalLayout implements View {
         button.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
 
-
-
                 ArrayList<String> alist = new ArrayList<String>();
-
                 Stream<DomsItem> list = fetchIt();
-
                 list.forEach(new Consumer<DomsItem>() {
 
                     @Override
@@ -80,8 +76,6 @@ public class StatusView extends VerticalLayout implements View {
                 });
 
                 table.readStates(eventStructureCommunication);
-
-
             }
         });
 
@@ -101,9 +95,7 @@ public class StatusView extends VerticalLayout implements View {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
                 eventPanel.setVisible(true);
-
                 String heading = (String)(itemClickEvent.getItem().getItemProperty("Batch").getValue());
-
                 eventPanel.setInfo(eventStructureCommunication, model.getCurrentEvent(), heading);
             }
         });
