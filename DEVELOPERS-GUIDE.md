@@ -2,7 +2,18 @@ Developers Guide to DPA
 ===
 
 This document contains information relevant to a developer who needs
-to work on DPA.
+to work on DPA.  
+
+DPA requires a properly configured DOMS and Bitrepository.  The exact locations
+are configured through properties provided to the main method.
+
+DPA has been developed against a local installation
+of DOMS+Bitrepository running in a VirtualBox image controlled by Vagrant. 
+To get the full benefit a similar setup is recommended.
+
+Note:  You probably need at least 12 GB RAM to comfortably work with the Vagrant box
+running.  
+
 
 Java
 --
@@ -14,8 +25,8 @@ intended to be platform agnostic, and considered a bug if not.
 Maven 
 --
 
-Please notice that your local Maven settings must point to sbforge to
-be able to resolve dependencies properly!
+**Please notice that your local Maven settings must point to sbforge to
+be able to resolve dependencies properly!**
 
 DPA is a self-contained multi-module Maven project, which additionally
 use a virtual machine with DOMS and a reference Bitrepository for
@@ -33,23 +44,20 @@ IntelliJ has been used as the primary IDE.  Use the usual File -> Open
 on the root of the project to open it.   If some dependencies are
 missing you most likely need to fix your `~/.m2/settings.xml` file.
 
-See the <a
-href="tools/dpa-tools-ide-launchers">`dpa-tools-ide-launchers`
-project</a> for launchers to be used inside IDE's to invoke the
+See [tools/dpa-tools-ide-launchers](tools/dpa-tools-ide-launchers) 
+project for launchers to be used inside IDE's to invoke the
 autonomous components with the project resourcers (and the vagrant
 image running).
 
-
-Deployment
---
-
-`dpa-tools` has the main methods for the autonomous components.
-`dpa-tools-deployment` has the "generate shell scripts and create
-bundle" functionality.
-
-See <a
-href="tools/dpa-tools-ide-launchers/README.md">tools/dpa-tools-ide-launchers/README.md</a>
-for details.
+The project should be IDE-agnostic and a pure Maven project.  If not, please fix as needed.  
+Also do not put IDE specific files in the git repository.
 
 
+Vagrant
+---
 
+TRA has worked with vagrant 1.8.6 downloaded directly from 
+https://www.vagrantup.com/downloads.html - the version coming with 
+Ubuntu was too old when the project began.
+
+See [vagrant/README.md](vagrant/README.md) for further information.

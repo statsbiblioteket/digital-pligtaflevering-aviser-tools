@@ -19,7 +19,7 @@
         String pastSuccessfulEvents = "Manually_stopped";
         String futureEvents = "";
         String oldEvents = "";
-        String itemTypes = "doms:ContentModel_RoundTrip";
+        String itemTypes = "doms:ContentModel_DPARoundTrip";
 
         final QuerySpecification querySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
         List<DomsItem> l = repository.query(querySpecification).collect(Collectors.toList());
