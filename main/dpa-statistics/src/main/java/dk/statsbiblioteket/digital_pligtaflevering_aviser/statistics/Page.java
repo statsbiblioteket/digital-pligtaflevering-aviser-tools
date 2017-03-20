@@ -12,6 +12,8 @@ public class Page implements java.io.Serializable {
     //The name of the article is really just the name of tne metadata file
     private String pageName;
     private String sectionName;
+    private String sectionNumber;
+    private String pageNumber;
 
     public Page() {
     }
@@ -20,6 +22,14 @@ public class Page implements java.io.Serializable {
         this.pageName = pageName;
         this.sectionName = sectionName;
     }
+
+    public Page(String pageName, String sectionName, String sectionNumber, String pageNumber) {
+        this.pageName = pageName;
+        this.sectionName = sectionName;
+        this.sectionNumber = sectionNumber;
+        this.pageNumber = pageNumber;
+    }
+
 
     @XmlAttribute
     public void setPageName(String pageName) {
@@ -37,5 +47,24 @@ public class Page implements java.io.Serializable {
     @XmlAttribute
     public void setSectionName(String sectionName) {
         this.sectionName = sectionName;
+    }
+
+
+    public String getSectionNumber() {
+        return sectionNumber;
+    }
+
+    @XmlAttribute
+    public void setSectionNumber(String sectionNumber) {
+        this.sectionNumber = sectionNumber;
+    }
+
+    public String getPageNumber() {
+        return pageNumber;
+    }
+
+    @XmlAttribute
+    public void setPageNumber(String pageNumber) {
+        this.pageNumber = pageNumber;
     }
 }

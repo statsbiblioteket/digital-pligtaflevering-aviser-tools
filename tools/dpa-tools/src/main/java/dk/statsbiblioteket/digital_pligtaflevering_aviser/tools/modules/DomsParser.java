@@ -98,8 +98,15 @@ public class DomsParser {
                                     //We are reading this textstring as a String and are aware that thish might leed to encoding problems
                                     StringReader reader = new StringReader(ds.getDatastreamAsString());
                                     InputSource inps = new InputSource(reader);
-                                    String rootnameInCurrentXmlFile = getSectionName(inps);
-                                    title.addPage(new Page(fileItemName, rootnameInCurrentXmlFile));
+
+                                    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                                    DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                                    Document xmlDocument = builder.parse(inps);
+
+                                    String rootnameInCurrentXmlFile = getSectionName(xmlDocument);
+                                    String sectionNumber = getSectionNumber(xmlDocument);
+                                    String pageNumber = getPageNumber(xmlDocument);
+                                    title.addPage(new Page(fileItemName, rootnameInCurrentXmlFile, sectionNumber, pageNumber));
 
                                 } catch (Exception e) {
                                     return null;
@@ -116,20 +123,34 @@ public class DomsParser {
 
     /**
      * Find the sectionName inside metadata of an xml-file descriping a page
-     * @param reader
+     * @param xmlDocument
      * @return
      * @throws ParserConfigurationException
      * @throws IOException
      * @throws SAXException
      * @throws XPathExpressionException
      */
-    public String getSectionName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = builderFactory.newDocumentBuilder();
-        Document xmlDocument = builder.parse(reader);
+    public String getSectionName(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         XPathExpression expr = xpath.compile("/pdfinfo/positional/sectionname");
+        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
+        return sectionName;
+    }
+
+    public String getSectionNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression expr = xpath.compile("/pdfinfo/positional/sectionnumber");
+        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
+        return sectionName;
+    }
+
+    public String getPageNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression expr = xpath.compile("/pdfinfo/positional/pagenumber");
         String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
         return sectionName;
     }

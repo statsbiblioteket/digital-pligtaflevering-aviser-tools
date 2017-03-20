@@ -3,8 +3,11 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.junit.Before;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -84,7 +87,12 @@ public class ValidateXMLMainTest {
         URL xmlurl = getClass().getClassLoader().getResource("xmlValidation/pageCorrectTest.xml");
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
         DomsParser domsParser = new DomsParser();
-        String sectionName = domsParser.getSectionName(new InputSource(in));
+
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = builderFactory.newDocumentBuilder();
+        Document xmlDocument = builder.parse(new InputSource(in));
+
+        String sectionName = domsParser.getSectionName(xmlDocument);
         assertEquals("Test of approved article", "Kultur", sectionName);
     }
 
