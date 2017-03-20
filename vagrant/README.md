@@ -26,9 +26,8 @@ they are stored in Nexus):
 
     mvn clean package
 
-Start vagrant (using virtualbox provider):
+Start vagrant in any folder inside the project (using virtualbox provider):
 
-    cd src/vagrant
     vagrant up
 
 (may take 5-10 minutes and download quite a bit the first time).  

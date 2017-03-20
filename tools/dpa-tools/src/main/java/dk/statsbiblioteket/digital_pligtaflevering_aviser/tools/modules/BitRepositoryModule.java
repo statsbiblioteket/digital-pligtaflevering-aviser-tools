@@ -3,9 +3,9 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import javaslang.control.Try;
 
 import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,16 +59,10 @@ public class BitRepositoryModule {
         return fileID -> {
             Path path = Paths.get(fileID);
 
-            StringBuilder sb = new StringBuilder(bitmagUrl);
-
             StringJoiner sj = new StringJoiner("/");
             for (Path name : path) {
-                try {
-                    // We must encode _twice_ to get #'s right in the DOMS external link.
-                    sj.add(URLEncoder.encode(URLEncoder.encode(name.toString(), "UTF-8"), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                // We must encode _twice_ to get #'s right in the DOMS external link.
+                sj.add(Try.of(() -> URLEncoder.encode(URLEncoder.encode(name.toString(), "UTF-8"), "UTF-8")).get());
             }
             return bitmagUrl + sj;
         };
