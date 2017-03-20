@@ -3,7 +3,7 @@ Before starting:
 ===
 
 Important:  The vagrant box now requires 8 GB RAM.  This mean you will
-need at least 16 GB RAM to be able to do anything interesting.
+need at least 12 GB RAM to be able to do anything interesting.
 
 This was tested with a manually downloaded VirtualBox 5.0.20->5.1.14
 on Ubuntu 16.04 LTS->16.10 with OpenJDK 8 as java.
@@ -31,7 +31,7 @@ Start vagrant (using virtualbox provider):
     cd src/vagrant
     vagrant up
 
-(may take 5-10 minutes and download quite a bit the first time).
+(may take 5-10 minutes and download quite a bit the first time).  
 
 Now download Zulu OpenJDK 8, install Bit Repository and DOMS and run a
 tiny web server on top of the Bit Repository file system so we can
@@ -46,7 +46,8 @@ which can be followed with e.g.
 
     tail -F nohup.out
 
-When finished the system is ready.
+When finished the system is ready.  Note:  This is very brittle - if anything doesn't work as expected
+there might be an error hiding in the log somewhere.  Download URL's tend to move around over time.
 
 **You now have a local, empty DOMS and Bit repository**.
 

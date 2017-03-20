@@ -35,4 +35,9 @@ and programmers, hence it was refactored into plain main-classes.
 Note that there can be multiple launchers with different
 configurations for the same autonomous component.
 
+A given launcher can - if documented in the Javadoc for the class - 
+assume the existance of services either in vagrant (on localhost)
+or on an internal server, but must fail loudly fast
+if a required service does not exist.
+
 /tra 2017-02-14

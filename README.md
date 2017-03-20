@@ -273,6 +273,8 @@ stored externally in the Bitrepository) which is a "hasFile" relation.
 
 # VeraPDF
 
+(2017-03-20:  This information is outdated.  DPA-24 include a request for this document to be updated)
+
 As of 2016-06-30 the initial prototype uses the VeraPDF REST
 interface.
 
