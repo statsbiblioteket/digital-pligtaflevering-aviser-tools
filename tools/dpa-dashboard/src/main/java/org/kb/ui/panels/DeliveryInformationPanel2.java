@@ -26,7 +26,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     private DataModel model;
     private SingleStringListPanel infoPanel = new SingleStringListPanel();
-    private SingleStringListPanel deliveryPanel = new SingleStringListPanel();
+    private DeliveryListPanel deliveryPanel = new DeliveryListPanel();
     private SingleStringListPanel dummySectionTable = new SingleStringListPanel();
     private FileListTable fileSelectionPanel = new FileListTable(Page.class);
     private ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
@@ -49,7 +49,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("Item").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("Name").getValue();
                 model.setSelectedDelivery(page.toString());
                 showTheSelectedPage();
             }

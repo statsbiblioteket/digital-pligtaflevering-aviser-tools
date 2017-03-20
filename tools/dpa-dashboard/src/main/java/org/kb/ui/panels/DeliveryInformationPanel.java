@@ -23,7 +23,7 @@ import java.util.Optional;
 public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
-    private SingleStringListPanel deliveryListPanel = new SingleStringListPanel();
+    private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
     private TitleListPanel titleListPanel = new TitleListPanel();
     private SingleStringListPanel dummySectionTable = new SingleStringListPanel();
     private DataModel model;
