@@ -1,3 +1,0 @@
-export CATALINA_OPTS="-Dorg.apache.activemq.default.directory.prefix="$CACHE_DIR$/" -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError"
-export FEDORA_HOME=$FEDORA_DIR$/
-export METHOD_SCRIPTS=$FEDORA_HOME/../scripts

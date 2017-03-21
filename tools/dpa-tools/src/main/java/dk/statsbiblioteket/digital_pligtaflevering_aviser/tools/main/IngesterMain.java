@@ -95,6 +95,7 @@ public class IngesterMain {
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
                 List<String> toolResults = repository.query(query)
+                        .peek(domsItem -> log.info("Procesing {}", domsItem))
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
@@ -148,9 +149,9 @@ public class IngesterMain {
          * @return
          */
         @Provides
-        @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY)
+        @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID)
         String provideIngesterId(ConfigurationMap map) {
-            return map.getRequired(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY);
+            return map.getRequired(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID);
         }
 
         /**
@@ -232,7 +233,7 @@ public class IngesterMain {
          */
         @Provides
         AutoCloseablePutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
-                                                        @Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+                                                        @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
                                                         @Named(DPA_PUTFILE_DESTINATION) String destination,
                                                         @Named(SETTINGS_DIR_PROPERTY) String settingDir,
                                                         @Named(CERTIFICATE_PROPERTY) String certificateProperty,
@@ -284,7 +285,7 @@ public class IngesterMain {
          * @return Settings for putfile PutfileClient and EventHandler
          */
         @Provides
-        Settings provideSettings(@Named(FileSystemDeliveryIngester.COLLECTIONID_PROPERTY) String dpaIngesterId,
+        Settings provideSettings(@Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
                                  @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
             SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
             final Settings settings = settingsLoader.getSettings();

@@ -16,6 +16,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
 import javax.inject.Named;
@@ -27,6 +28,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTON
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_OLD_EVENTS;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_PAST_SUCCESSFUL_EVENTS;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
@@ -34,6 +36,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_DELAY_BETWEEN_RETRIES;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDORA_RETRIES;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.SBOI_PAGESIZE;
 import static java.util.Arrays.asList;
 
 /**
@@ -135,24 +138,20 @@ public class DomsModule {
     }
 
     /**
-     * Create Modified_SBOIEventIndex from dependencies provided by Dagger.
-     *
-     * @param summaLocation            URL for summa
-     * @param premisManipulatorFactory factory for premisManipulators
-     * @param domsEventStorage         event storage
-     * @param pageSize                 items to get from summa at a time.
-     * @return
+     * Create Modified_SBOIEventIndex from dependencies provided by Dagger so we can search in the right collection.
      */
     @Provides
-    public SBOIEventIndex<Item> provideSBOIEventIndex(@Named(AUTONOMOUS_SBOI_URL) String summaLocation,
-                                                      PremisManipulatorFactory<Item> premisManipulatorFactory,
-                                                      DomsEventStorage<Item> domsEventStorage,
-                                                      @Named("pageSize") int pageSize) {
+    public SBOIEventIndex<Item> provideSBOIEventIndex(
+                    @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+            PremisManipulatorFactory<Item> premisManipulatorFactory,
+            DomsEventStorage<Item> domsEventStorage,
+            @Named(SBOI_PAGESIZE) int pageSize,
+            @Named(DOMS_COLLECTION) String recordBase) {
+
         try {
-            SBOIEventIndex<Item> sboiEventIndex = new SBOIEventIndex<>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize);
-            return sboiEventIndex;
+            return new SBOIEventIndex_RecordBaseAsParameter<Item>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
         } catch (MalformedURLException e) {
-            throw new RuntimeException("new Modified_SBOIEventIndex(...)", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -335,9 +334,15 @@ public class DomsModule {
      * Return the number of responses in a single sboi query
      */
     @Provides
-    @Named("pageSize")
+    @Named(SBOI_PAGESIZE)
     public Integer providePageSize(ConfigurationMap map) {
-        return Integer.valueOf(map.getRequired("pageSize"));
+        return Integer.valueOf(map.getRequired(SBOI_PAGESIZE));
+    }
+
+    @Provides
+    @Named(DOMS_COLLECTION)
+    public String provideDomsCollection(ConfigurationMap map){
+        return map.getRequired(DOMS_COLLECTION);
     }
 
 }
