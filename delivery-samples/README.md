@@ -19,7 +19,7 @@ The batch dl_20160913_rt1 is mainly based on metadataexamples from Infomedia
 
 Generating checksum-file
 ---
-md5sums.txt generated with
+checksums.txt generated with
 
     find verapdf -type f | sort | xargs md5sum > md5sums.txt
 

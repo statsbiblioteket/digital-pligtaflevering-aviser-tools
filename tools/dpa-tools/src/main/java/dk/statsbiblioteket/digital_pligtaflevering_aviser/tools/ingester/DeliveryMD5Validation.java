@@ -86,7 +86,7 @@ public class DeliveryMD5Validation {
         Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()))
                 .forEach(filePath -> {
                     if(Files.isRegularFile(filePath)) {
-                        String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryName);
+                        String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryFolder + "/" + deliveryName);
                         if (ignoredFiles.contains(fileIdMatchingChecksumfile)) {
                             //This file is one of the ignored files, just continue without doing anything
                         } else if(!md5Map.containsKey(fileIdMatchingChecksumfile)) {
