@@ -1,0 +1,88 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+        <artifactId>dpa-root</artifactId>
+        <version>master-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.vagrant</groupId>
+    <artifactId>vagrant</artifactId>
+    <version>master-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <!-- ensure that developer-config/ is present! -->
+            <!-- http://maven.apache.org/enforcer/enforcer-rules/requireFilesExist.html -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-files-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireFilesExist>
+                                    <message>*** devel-config not present - check README.md for cloning instructions
+                                        ***
+                                    </message>
+                                    <files>
+                                        <file>${project.basedir}/src/vagrant/devel-config</file>
+                                    </files>
+                                </requireFilesExist>
+                            </rules>
+                            <fail>false</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <!-- https://maven.apache.org/plugins/maven-dependency-plugin/examples/copying-artifacts.html -->
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.bitrepository.reference</groupId>
+                                    <artifactId>bitrepository-integration</artifactId>
+                                    <classifier>quickstart</classifier>
+                                    <type>tar.gz</type>
+
+                                    <overWrite>yes</overWrite>
+                                    <outputDirectory>${project.build.directory}/artifacts-copied/</outputDirectory>
+                                    <destFileName>bitrepository-integration-quickstart.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>dk.statsbiblioteket.doms.installer</groupId>
+                                    <artifactId>doms-installer</artifactId>
+                                    <classifier>testbed</classifier>
+                                    <type>tar.gz</type>
+                                    <overWrite>yes</overWrite>
+                                    <outputDirectory>${project.build.directory}/artifacts-copied/</outputDirectory>
+                                    <destFileName>doms-installer-testbed.tar.gz</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

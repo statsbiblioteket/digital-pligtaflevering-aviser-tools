@@ -127,14 +127,14 @@ and switch to work on one of those.
 
 # Vagrant
 
-It is necessary to have DOMS and a Zookeeper instance available in
-order to do _anything_.  For local development work, an Ubuntu
-14.04-based Vagrant image is available which during the Maven build
-will install and populate a DOMS instance (using the latest artifacts
-from the SB Nexus server - this may require access credentials), a PID
-generator and Apache Zookeeper.  As Bitmagasinet is very complex and
-the full functionality is not needed post-ingestion we have added a
-"just use the file system"-mode in the Bitmagasin ingester.
+In order to do development against a developer-local instance of
+DOMS and Bitrepository an Ubuntu 14.04-based Vagrant image is used. 
+Vagrant was chosen in order to be able to do rollbacks to snapshots
+in VirtualBox.
+[See vagrant/README.md for further information](vagrant/README.md).
+ 
+
+
 
 # Flow
 
@@ -272,6 +272,8 @@ stored externally in the Bitrepository) which is a "hasFile" relation.
 
 
 # VeraPDF
+
+(2017-03-20:  This information is outdated.  DPA-24 include a request for this document to be updated)
 
 As of 2016-06-30 the initial prototype uses the VeraPDF REST
 interface.

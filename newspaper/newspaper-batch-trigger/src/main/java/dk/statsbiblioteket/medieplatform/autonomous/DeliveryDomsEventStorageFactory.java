@@ -9,14 +9,15 @@ import java.net.MalformedURLException;
 
 /**
  * Factory implementation of a DomsEventStorageFactory which generates a DeliveryDomsEventStorage-object
+ * @noinspection WeakerAccess
  */
 public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Delivery> {
 
-    public static final String BATCH_TEMPLATE = "doms:Template_Batch";
-    public static final String ROUND_TRIP_TEMPLATE = "doms:Template_RoundTrip";
+    public static final String DELIVERY_TEMPLATE = "doms:Template_Delivery";
+    public static final String ROUND_TRIP_TEMPLATE = "doms:Template_DPARoundTrip";
     public static final String HAS_PART = "info:fedora/fedora-system:def/relations-external#hasPart";
 
-    protected String batchTemplate = BATCH_TEMPLATE;
+    protected String deliveryTemplate = DELIVERY_TEMPLATE;
     protected String roundTripTemplate = ROUND_TRIP_TEMPLATE;
     protected String hasPartRelation = HAS_PART;
 
@@ -35,6 +36,6 @@ public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Del
         if (itemFactory == null){
             itemFactory = new DeliveryItemFactory();
         }
-        return new DeliveryDomsEventStorage(fedora, premisIdentifierType, batchTemplate, roundTripTemplate, hasPartRelation, eventsDatastream, itemFactory);
+        return new DeliveryDomsEventStorage(fedora, premisIdentifierType, deliveryTemplate, roundTripTemplate, hasPartRelation, eventsDatastream, itemFactory);
     }
 }

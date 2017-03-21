@@ -60,6 +60,21 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- bitrepository reference implementation to be installed inside vagrant -->
+            <dependency>
+                <groupId>org.bitrepository.reference</groupId>
+                <artifactId>bitrepository-integration</artifactId>
+                <version>1.9</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- doms-installer reference to be installed inside vagrant -->
+            <dependency>
+                <groupId>dk.statsbiblioteket.doms.installer</groupId>
+                <artifactId>doms-installer</artifactId>
+                <version>1.26-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

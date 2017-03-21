@@ -23,7 +23,7 @@
 
 <%=
 repository.query(domsModule.providesQuerySpecification(
-        "Manually_stopped", "", "", "doms:ContentModel_RoundTrip")
+        "Manually_stopped", "", "", "doms:ContentModel_DPARoundTrip")
 ).count()
 %>
 
@@ -31,7 +31,7 @@ repository.query(domsModule.providesQuerySpecification(
 
 <%=
 repository.query(domsModule.providesQuerySpecification(
-        "Data_Created", "Data_Archived,Manually_stopped", "", "doms:ContentModel_RoundTrip")
+        "Data_Created", "Data_Archived,Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
 ).count()
 %>
 
@@ -39,12 +39,12 @@ repository.query(domsModule.providesQuerySpecification(
 
 <%=
 repository.query(domsModule.providesQuerySpecification(
-        "Data_Archived", "Manually_stopped", "", "doms:ContentModel_RoundTrip")
+        "Data_Archived", "Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
 ).count()
 %>
 <%
     repository.query(domsModule.providesQuerySpecification(
-            "Data_Archived", "Manually_stopped", "", "doms:ContentModel_RoundTrip")
+            "Data_Archived", "Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
     ).forEach(i -> {
         try {
             finalout.println(i.getPath() + " ");
