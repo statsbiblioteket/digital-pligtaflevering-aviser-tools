@@ -37,15 +37,18 @@ public class ValidateMD5FileTest {
         //Check against expected function
         DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         boolean validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("CHECKSUM", validated, true);
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, true);
 
         //Check against wron function
         md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("CHECKSUM", validated, false);
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
     }
 
-
+    /**
+     * MD5SUMS.txt is the old checksum format from Infomedia, the deliveries is not supplied in that way anymore, but the functionality is still tested
+     * @throws Exception
+     */
     @org.junit.Test
     public void analyzeDeliveriesAgainstMD5SUMS() throws Exception {
 
@@ -54,20 +57,21 @@ public class ValidateMD5FileTest {
         //Check against wron function
         DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         boolean validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("CHECKSUM", validated, false);
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
 
         //Check against expected function
         md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
         validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("CHECKSUM", validated, true);
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, true);
     }
 
 
     /**
      * Provide Function for converting filePath as written in MD5SUMS.txt
+     * The FilePathToChecksumPathConverter supplied by this method demonstartes the encoding of filepath as used in old deliveries from Infomedia
      * @return and ID for the fileContent
      */
-    public FilePathToChecksumPathConverter providePreviousFilePathConverter() {
+    private FilePathToChecksumPathConverter providePreviousFilePathConverter() {
 
         //This formatter uses the old checksum-format
         return (path1, batchName) -> path1.getFileName().toString();
