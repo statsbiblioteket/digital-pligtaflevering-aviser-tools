@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ValidateMD5FileTest {
 
+    private IngesterMain.IngesterModule ingesterModule = new IngesterMain.IngesterModule();
     private String batchFolder;
 
 
@@ -29,43 +30,51 @@ public class ValidateMD5FileTest {
 
 
     @org.junit.Test
-    public void analyzeDeliveriesAgainstChecksums1() throws Exception {
+    public void analyzeDeliveriesAgainstChecksums() throws Exception {
 
         String folder = getBatchFolder();
-        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", provideFilePathConverter(true), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
-        boolean bb = md5Validator.validation("dl_20160811_rt1");
-        List<String> results = md5Validator.getValidationResult();
 
-        assertEquals("CHECKSUM", bb, true);
+        //Check against expected function
+        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        boolean validated = md5Validator.validation("dl_20160811_rt1");
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, true);
+
+        //Check against wron function
+        md5Validator = new DeliveryMD5Validation(folder, "checksums.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        validated = md5Validator.validation("dl_20160811_rt1");
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
     }
 
-
+    /**
+     * MD5SUMS.txt is the old checksum format from Infomedia, the deliveries is not supplied in that way anymore, but the functionality is still tested
+     * @throws Exception
+     */
     @org.junit.Test
-    public void analyzeDeliveriesAgainstChecksums2() throws Exception {
+    public void analyzeDeliveriesAgainstMD5SUMS() throws Exception {
 
         String folder = getBatchFolder();
 
-        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", provideFilePathConverter(false), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
-        boolean bb = md5Validator.validation("dl_20160811_rt1");
-        List<String> results = md5Validator.getValidationResult();
+        //Check against wron function
+        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        boolean validated = md5Validator.validation("dl_20160811_rt1");
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
 
-        assertEquals("CHECKSUM", bb, true);
+        //Check against expected function
+        md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+        validated = md5Validator.validation("dl_20160811_rt1");
+        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, true);
     }
 
 
     /**
-     * Provide Function for converting filePath a for
+     * Provide Function for converting filePath as written in MD5SUMS.txt
+     * The FilePathToChecksumPathConverter supplied by this method demonstartes the encoding of filepath as used in old deliveries from Infomedia
      * @return and ID for the fileContent
      */
-    public FilePathToChecksumPathConverter provideFilePathConverter(boolean InfomediaFormat) {
+    private FilePathToChecksumPathConverter providePreviousFilePathConverter() {
 
-        if(InfomediaFormat) {
-            //This should be used for the checksums in the deliveries from Infomedia
-            return (path1, batchName) -> path1.getFileName().toString();
-        } else {
-            //This should be used for the checksums in the specifications
-            return (path1, batchName) -> Paths.get(batchFolder, batchName).relativize(path1).toString();
-        }
+        //This formatter uses the old checksum-format
+        return (path1, batchName) -> path1.getFileName().toString();
     }
 
 
