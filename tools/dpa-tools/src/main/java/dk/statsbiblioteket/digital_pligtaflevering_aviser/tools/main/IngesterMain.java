@@ -307,17 +307,14 @@ public class IngesterMain {
         }
 
         /**
-         * Provide Function for converting filePath a for
+         * Provide Function for converting filePath to the path relative to where the delivery is located
          *
          * @return and ID for the fileContent
          */
         @Provides
         public FilePathToChecksumPathConverter provideFilePathConverter() {
-            //This should be used for the checksums in the deliveries from Infomedia
-            return (path1, batchId) -> path1.getFileName().toString();
-
             //This should be used for the checksums in the specifications
-            //return (path1, batchId) -> Paths.get(path1.toString(), batchId).relativize(path1).toString();
+            return (path1, deliveryFolderName) -> Paths.get(deliveryFolderName).relativize(path1).toString();
         }
 
     }
