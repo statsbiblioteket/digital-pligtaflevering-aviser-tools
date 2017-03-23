@@ -20,6 +20,7 @@ public class FileListTable extends VerticalLayout {
         // Bind a table to it
         table = new Table("files", beans);
         table.setWidth("100%");
+        table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
         this.addComponent(table);

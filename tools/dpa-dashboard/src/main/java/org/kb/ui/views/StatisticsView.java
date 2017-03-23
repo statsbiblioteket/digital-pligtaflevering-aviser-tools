@@ -47,8 +47,9 @@ public class StatisticsView extends VerticalLayout implements View {
 
     private FetchEventStructure eventStructureCommunication = new FetchEventStructure();
     private DataModel model = new DataModel();
-
-
+    Link link = new Link("Metadatlink", null);
+    Embedded pdf = new Embedded(null, null);
+    String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
 
     public StatisticsView(String type) {
 
@@ -57,8 +58,8 @@ public class StatisticsView extends VerticalLayout implements View {
         final VerticalLayout layout = new VerticalLayout();
 
         DeliveryMainPanel tabelsLayout;
-        Link link = new Link("Metadatlink", null);
-        Embedded pdf = new Embedded(null, null);
+
+
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
 
@@ -104,8 +105,8 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.setMargin(true);
         addComponent(layout);
 
-        SearchPanel button = new SearchPanel();
-        button.addClickListener(new Button.ClickListener() {
+        SearchPanel searchPanel = new SearchPanel();
+        searchPanel.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
 
                 if("SEARCHBUTTON".equals(event.getButton().getId())) {
@@ -126,8 +127,9 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 try {
                     Object page = itemClickEvent.getItem().getItemProperty("pageName");
-                    String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
-                    StreamResource recou= createStreamResource(path+URLEncoder.encode(page.toString(), "UTF-8")+".pdf");
+
+
+                    StreamResource recou= createStreamResource(page.toString());
                     pdf.setSource(recou);
 
                     Resource resource = new ExternalResource(path+URLEncoder.encode(page.toString(), "UTF-8")+".xml");
@@ -141,7 +143,7 @@ public class StatisticsView extends VerticalLayout implements View {
         });
 
 
-        layout.addComponent(button);
+        layout.addComponent(searchPanel);
 
         mainhlayout.addComponent(tabelsLayout);
         viewLayout.addComponent(pdf);
@@ -152,12 +154,17 @@ public class StatisticsView extends VerticalLayout implements View {
 
 
 
+
     private StreamResource createStreamResource(final String fileUrl) {
         StreamResource recource = new StreamResource(new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 try {
-                    URL uu = new URL(fileUrl);
+
+                    String pathString = path+fileUrl.replaceAll("#", "%23")+".pdf";
+                    System.out.println(pathString);
+
+                    URL uu = new URL(pathString);
                     InputStream inps = uu.openStream();
                     return inps;
                 } catch (IOException e) {
@@ -165,7 +172,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
                 }
             }
-        }, "fileUrl.pdf");
+        }, "test.pdf");
         recource.setMIMEType("application/pdf");
         return recource;
     }

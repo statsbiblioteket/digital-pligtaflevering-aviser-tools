@@ -25,17 +25,9 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
     private TitleListPanel titleListPanel = new TitleListPanel();
-    private SingleStringListPanel dummySectionTable = new SingleStringListPanel();
-    private DataModel model;
-    //private FileListTable table1 = new FileListTable(Article.class);
-    private FileListTable fileSelectionPanel = new FileListTable(Page.class);
 
     public DeliveryInformationPanel(DataModel model) {
-        this.setWidth("100%");
-        this.setHeight("100%");
-
-        this.model = model;
-        //this.parser = parser;
+        super(model);
         //table1.setEnabled(false);
         fileSelectionPanel.setEnabled(false);
 
@@ -43,13 +35,11 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
+                com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
+                String selectedDelivery = selectedItem.getItemProperty("Name").getValue().toString();
+                DomsItem dItem = model.getDeliveryFromName(selectedDelivery);
 
-                    com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
-                    DomsItem dItem = deliveryListPanel.getDomsItem(selectedItem);
-
-                    //DeliveryStatistics delStat =parser.processDomsIdToStream().apply(dItem);
-
-
+                    //DomsItem dItem = deliveryListPanel.getDomsItem(selectedItem);
 
                     final List<DomsDatastream> datastreams = dItem.datastreams();
                     Optional<DomsDatastream> profileOptional = datastreams.stream()
@@ -64,7 +54,6 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                             StringReader reader = new StringReader(ds.getDatastreamAsString());
                             InputSource inps = new InputSource(reader);
 
-                            //File tempFile = new File("/tmp/pathstream");
                             JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
                             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                             DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
@@ -97,10 +86,18 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             }
         });
 
+
         this.addComponent(deliveryListPanel);
         this.addComponent(titleListPanel);
         this.addComponent(dummySectionTable);
         this.addComponent(fileSelectionPanel);
+
+
+        this.setExpandRatio(deliveryListPanel, 0.2f);
+        this.setExpandRatio(titleListPanel, 0.2f);
+        this.setExpandRatio(dummySectionTable, 0.2f);
+        this.setExpandRatio(fileSelectionPanel, 0.4f);
+
     }
 
     public void getTitles() {
@@ -110,24 +107,15 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
     }
 
 
-    public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-        fileSelectionPanel.addItemClickListener(listener);
-    }
+
 
 
     public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
 
+        model.initiateDeliveries("Data_Archived");
+        deliveryListPanel.setTheStuff(model.getInitiatedDeliveries());
 
-
-
-
-
-
-
-
-
-
-        deliveryListPanel.setInfo(eventStructureCommunication, "Data_Archived");
+        //deliveryListPanel.setInfo(eventStructureCommunication, "Data_Archived");
 
         /*ArrayList<String> list = model.getDeliveries("Data_Archived");
         deliveryListPanel.setTheStuff(list);*/

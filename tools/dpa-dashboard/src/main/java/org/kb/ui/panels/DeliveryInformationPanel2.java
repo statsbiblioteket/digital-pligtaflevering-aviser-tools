@@ -14,6 +14,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,24 +26,19 @@ import java.util.Optional;
 public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
-    private DataModel model;
-    private SingleStringListPanel infoPanel = new SingleStringListPanel();
-    private DeliveryListPanel deliveryPanel = new DeliveryListPanel();
-    private SingleStringListPanel dummySectionTable = new SingleStringListPanel();
-    private FileListTable fileSelectionPanel = new FileListTable(Page.class);
-    private ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
+    protected SingleStringListPanel infoPanel = new SingleStringListPanel();
+    protected DeliveryListPanel deliveryPanel = new DeliveryListPanel();
+    protected ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
 
 
     public DeliveryInformationPanel2(DataModel model) {
-        this.setWidth("100%");
-
-
+        super(model);
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
                 Object page = itemClickEvent.getItem().getItemProperty("Item").getValue();
                 model.setSelectedTitle(page.toString());
-                showTheSelectedPage();
+                showTheSelectedTitle();
             }
         });
 
@@ -51,14 +48,11 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
             public void itemClick(ItemClickEvent itemClickEvent) {
                 Object page = itemClickEvent.getItem().getItemProperty("Name").getValue();
                 model.setSelectedDelivery(page.toString());
-                showTheSelectedPage();
+                showTheSelectedTitle();
             }
         });
 
 
-
-
-        this.model = model;
         this.addComponent(infoPanel);
         this.addComponent(deliveryPanel);
         this.addComponent(dummySectionTable);
@@ -69,7 +63,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         fileSelectionPanel.addItemClickListener(listener);
     }
 
-    private void showTheSelectedPage() {
+    private void showTheSelectedTitle() {
 
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
@@ -109,6 +103,21 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 }
 
 
+                Iterator<Page> it = selectedTitleObj.getPage().iterator();
+                HashSet<String> hset = new HashSet<String>();
+
+                while(it.hasNext()) {
+
+                    Page page = it.next();
+                    hset.add(page.getSectionNumber());
+
+
+                }
+
+                dummySectionTable.setTheStuff(hset);
+
+
+
                 fileSelectionPanel.setEnabled(true);
                 fileSelectionPanel.setInfo(selectedTitleObj.getPage());
 
@@ -117,7 +126,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 e.printStackTrace();
             }
         }
-
     }
 
 

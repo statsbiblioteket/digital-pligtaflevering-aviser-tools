@@ -1,7 +1,10 @@
 package org.kb.ui.panels;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -27,35 +30,42 @@ public class DeliveryListPanel extends VerticalLayout {
 
         // Bind a table to it
         table = new Table("Beans of All Sorts");
+        table.addContainerProperty("Checked", Boolean.class, null);
         table.addContainerProperty("Date", Date.class, null);
         table.addContainerProperty("Name", String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
+
+        table.setVisibleColumns(new String[]{"Checked", "Date", "Name"});
+
+        //table.setColumnExpandRatio();
+
+        table.setColumnExpandRatio("Checked", 0.1f);
+        table.setColumnExpandRatio("Date", 0.5f);
+        table.setColumnExpandRatio("Name", 0.4f);
+
+
+        /*table.addGeneratedColumn("Checked",
+                new CheckBoxColumnGenerator());*/
+
         this.addComponent(table);
     }
 
-    public void setInfo(FetchEventStructure fetchStructure, String info) {
 
-        Stream<DomsItem> items = fetchStructure.getState(info);
-        itemList.clear();
-        table.removeAllItems();
 
-        items.forEach(new Consumer<DomsItem>() {
-            @Override
-            public void accept(final DomsItem o) {
-                Object newItemId = table.addItem();
-                Item row1 = table.getItem(newItemId);
-                try {
-                    row1.getItemProperty("Date").setValue(UiDataConverter.getDateFromDeliveryItemDirectoryName(o.getPath()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                row1.getItemProperty("Name").setValue(o.getPath());
-                itemList.put(row1, o);
-            }
-        });
+
+
+    class CheckBoxColumnGenerator implements Table.ColumnGenerator {
+
+        @Override
+        public Component generateCell(Table source, Object itemId,
+                                      Object columnId) {
+            Property prop = source.getItem(itemId).getItemProperty("Checked"); // if using getItemProperty(columnId) here instead of this the prop will be null
+
+            return new CheckBox(null, prop);
+        }
     }
 
 

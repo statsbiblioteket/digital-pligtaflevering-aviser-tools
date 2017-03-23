@@ -33,6 +33,7 @@ public class TitleListPanel extends VerticalLayout {
         table = new Table("Tilte bean", beans);
 
         table.setWidth("100%");
+        table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
         table.setVisibleColumns(new String[]{"title", "noOfArticles", "noOfPages"});
