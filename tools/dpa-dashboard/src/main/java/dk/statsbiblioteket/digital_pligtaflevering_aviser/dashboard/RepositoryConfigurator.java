@@ -54,7 +54,7 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         PremisManipulatorFactory<Item> premisManipulatorFactory = domsModule.providePremisManipulatorFactory(itemFactory);
 
         DomsEventStorage<Item> domsEventStorage = domsModule.provideDomsEventStorage(domsURL, domsPidgeneratorUrl, domsUserName, domsPassword, itemFactory);
-        int pageSize = domsModule.providePageSize(map);
+        int pageSize = 9999;//domsModule.providePageSize(map);
 
         SBOIEventIndex sboiEventIndex = Try.of(
                 // FIXME: Use provider instead of constructor
@@ -62,7 +62,12 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
-        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
+
+
+        DomsRepository repository = new RepositoryProvider().apply(map);
+
+
+//        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
         return repository;
     }
 }

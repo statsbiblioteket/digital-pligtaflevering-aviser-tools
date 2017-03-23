@@ -12,6 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter;
 import javaslang.control.Try;
 
 import java.util.function.Function;
@@ -53,7 +54,7 @@ public class RepositoryProvider implements Function<ConfigurationMap, DomsReposi
         int pageSize = domsModule.providePageSize(map);
 
         SBOIEventIndex sboiEventIndex = Try.of(
-                () -> new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize)
+                () -> new SBOIEventIndex_RecordBaseAsParameter(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, "doms_sboi_dpaCollection")
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
