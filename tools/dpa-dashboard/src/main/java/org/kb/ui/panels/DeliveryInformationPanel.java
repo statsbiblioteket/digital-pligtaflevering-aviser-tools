@@ -8,6 +8,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
+import org.kb.ui.datamodel.UiDataConverter;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
@@ -67,8 +68,6 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                     //table1.setEnabled(false);
                     fileSelectionPanel.setEnabled(false);
 
-
-
             }
         });
 
@@ -81,21 +80,26 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 table1.setEnabled(true);
                 table1.setInfo(((Title)itemClickEvent.getItemId()).getArticle());
                 table1.setCaption(((Title)itemClickEvent.getItemId()).getTitle());*/
+
+                List<Page> pages = ((Title)itemClickEvent.getItemId()).getPage();
+
+                sectionSectionTable.setInfo(UiDataConverter.sectionConverter(pages.iterator()).values());
+
                 fileSelectionPanel.setEnabled(true);
-                fileSelectionPanel.setInfo(((Title)itemClickEvent.getItemId()).getPage());
+                fileSelectionPanel.setInfo(pages);
             }
         });
 
 
         this.addComponent(deliveryListPanel);
         this.addComponent(titleListPanel);
-        this.addComponent(dummySectionTable);
+        this.addComponent(sectionSectionTable);
         this.addComponent(fileSelectionPanel);
 
 
         this.setExpandRatio(deliveryListPanel, 0.2f);
         this.setExpandRatio(titleListPanel, 0.2f);
-        this.setExpandRatio(dummySectionTable, 0.2f);
+        this.setExpandRatio(sectionSectionTable, 0.2f);
         this.setExpandRatio(fileSelectionPanel, 0.4f);
 
     }
@@ -118,6 +122,6 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
         //deliveryListPanel.setInfo(eventStructureCommunication, "Data_Archived");
 
         /*ArrayList<String> list = model.getDeliveries("Data_Archived");
-        deliveryListPanel.setTheStuff(list);*/
+        deliveryListPanel.setTableContent(list);*/
     }
 }

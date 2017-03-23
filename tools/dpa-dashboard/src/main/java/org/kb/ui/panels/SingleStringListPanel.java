@@ -55,7 +55,7 @@ public class SingleStringListPanel extends VerticalLayout {
     }
 
 
-    public void setTheStuff(Collection<String> list) {
+    public void setTableContent(Collection<String> list) {
 
 
         itemList.clear();

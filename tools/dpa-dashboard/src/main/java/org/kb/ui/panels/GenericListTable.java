@@ -4,21 +4,23 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Created by mmj on 3/9/17.
  */
-public class FileListTable extends VerticalLayout {
+public class GenericListTable extends VerticalLayout {
 
     private BeanItemContainer beans;
     private Table table;
 
-    public FileListTable(Class c) {
+    public GenericListTable(Class c) {
         beans=new BeanItemContainer(c);
 
         // Bind a table to it
-        table = new Table("files", beans);
+        table = new Table(c.getName(), beans);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);
@@ -36,7 +38,13 @@ public class FileListTable extends VerticalLayout {
         table.setCaption(caption);
     }
 
-    public void setInfo(List delStat) {
+    public void cleanTable() {
+        table.removeAllItems();
+    }
+
+
+
+    public void setInfo(Collection delStat) {
 
         beans.removeAllItems();
 

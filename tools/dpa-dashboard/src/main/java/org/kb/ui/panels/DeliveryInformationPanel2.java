@@ -8,13 +8,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.datamodel.FileComponent;
+import org.kb.ui.datamodel.UiDataConverter;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
         this.addComponent(infoPanel);
         this.addComponent(deliveryPanel);
-        this.addComponent(dummySectionTable);
+        this.addComponent(sectionSectionTable);
         this.addComponent(fileSelectionPanel);
     }
 
@@ -64,6 +64,9 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
     }
 
     private void showTheSelectedTitle() {
+
+        sectionSectionTable.cleanTable();
+        fileSelectionPanel.setEnabled(false);
 
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
@@ -102,21 +105,8 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                     return;
                 }
 
-
                 Iterator<Page> it = selectedTitleObj.getPage().iterator();
-                HashSet<String> hset = new HashSet<String>();
-
-                while(it.hasNext()) {
-
-                    Page page = it.next();
-                    hset.add(page.getSectionNumber());
-
-
-                }
-
-                dummySectionTable.setTheStuff(hset);
-
-
+                sectionSectionTable.setInfo(UiDataConverter.sectionConverter(it).values());
 
                 fileSelectionPanel.setEnabled(true);
                 fileSelectionPanel.setInfo(selectedTitleObj.getPage());
@@ -133,6 +123,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
         model.initiateDeliveries("Data_Archived");
         deliveryPanel.setTheStuff(model.getInitiatedDeliveries());
-        infoPanel.setTheStuff(model.getTitles());
+        infoPanel.setTableContent(model.getTitles());
     }
 }

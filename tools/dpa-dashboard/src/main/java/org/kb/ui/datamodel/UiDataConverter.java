@@ -12,7 +12,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,9 +39,6 @@ public class UiDataConverter {
                 list.add(c);
             }
         }
-
-
-
         return list;
     }
 
@@ -63,11 +63,16 @@ public class UiDataConverter {
         } else {
             return null;
         }
-
-
-
-
     }
 
 
+    public static HashMap sectionConverter(Iterator<Page> pageIterator) {
+        HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();
+
+        while(pageIterator.hasNext()) {
+            Page page = pageIterator.next();
+            hset.put(page.getSectionNumber(), new TitleComponent(page.getSectionName(), page.getSectionNumber(), 0, 0));
+        }
+        return hset;
+    }
 }

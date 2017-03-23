@@ -5,9 +5,7 @@ import com.vaadin.ui.HorizontalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
-import org.kb.ui.datamodel.FileComponent;
-
-import java.util.ArrayList;
+import org.kb.ui.datamodel.TitleComponent;
 
 /**
  * Created by mmj on 3/10/17.
@@ -15,8 +13,9 @@ import java.util.ArrayList;
 public class DeliveryMainPanel extends HorizontalLayout {
 
     protected DataModel model;//
-    protected SingleStringListPanel dummySectionTable = new SingleStringListPanel();//
-    protected FileListTable fileSelectionPanel = new FileListTable(Page.class);//
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class);//
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class);//
+
 
     public DeliveryMainPanel() {
         this.setWidth("100%");
