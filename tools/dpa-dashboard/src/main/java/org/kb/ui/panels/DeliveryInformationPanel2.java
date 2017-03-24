@@ -118,11 +118,9 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         }
     }
 
-
-    public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
-
-        model.initiateDeliveries("Data_Archived");
+    public void performIt() {
         deliveryPanel.setTheStuff(model.getInitiatedDeliveries());
         infoPanel.setTableContent(model.getTitles());
     }
+
 }

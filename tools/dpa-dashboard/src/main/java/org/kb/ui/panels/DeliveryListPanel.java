@@ -8,15 +8,12 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.UiDataConverter;
 
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * Created by mmj on 3/2/17.
@@ -30,6 +27,7 @@ public class DeliveryListPanel extends VerticalLayout {
 
         // Bind a table to it
         table = new Table("Beans of All Sorts");
+
         table.addContainerProperty("Checked", Boolean.class, null);
         table.addContainerProperty("Date", Date.class, null);
         table.addContainerProperty("Name", String.class, null);
@@ -47,8 +45,9 @@ public class DeliveryListPanel extends VerticalLayout {
         table.setColumnExpandRatio("Name", 0.4f);
 
 
-        /*table.addGeneratedColumn("Checked",
-                new CheckBoxColumnGenerator());*/
+
+
+        table.addGeneratedColumn("Checked", new CheckBoxColumnGenerator());
 
         this.addComponent(table);
     }
@@ -64,7 +63,11 @@ public class DeliveryListPanel extends VerticalLayout {
                                       Object columnId) {
             Property prop = source.getItem(itemId).getItemProperty("Checked"); // if using getItemProperty(columnId) here instead of this the prop will be null
 
-            return new CheckBox(null, prop);
+            CheckBox c = new CheckBox(null, prop);
+
+            c.setHeight("13px");
+
+            return c;
         }
     }
 

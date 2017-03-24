@@ -4,9 +4,14 @@ import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.kb.ui.datamodel.DeliveryStuff;
+import org.kb.ui.datamodel.TitleDeliveryHierachy;
 import org.kb.ui.datamodel.UiDataConverter;
 
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -44,12 +49,34 @@ public class TestClass {
 
 
             System.out.println("TEST_DONE");
-
-
         }
+    }
+
+
+    @Test
+    public void testIng2() throws Exception {
+
+
+        TitleDeliveryHierachy t = new TitleDeliveryHierachy();
+        t.addDeliveryToTitle("JP", "dl_1234567_rt1");
+        t.addDeliveryToTitle("JP", "dl_2234567_rt1");
+        t.addDeliveryToTitle("JP", "dl_3234567_rt1");
+        t.addDeliveryToTitle("bt", "dl_1234567_rt1");
+        t.addDeliveryToTitle("bt", "dl_2234567_rt1");
+        t.addDeliveryToTitle("bt", "dl_3234567_rt1");
+        t.addDeliveryToTitle("JP", "dl_3234567_rt2");
 
 
 
+        /*Wrapper wrapper = tabelsLayout.getTitles();*/
+        File tempFile = new File("/home/mmj/tools/tomcat",  "test.xml");
+        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(t, tempFile);
+
+        System.out.println("TEST_DONE");
 
     }
 

@@ -9,6 +9,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.datamodel.UiDataConverter;
+import org.kb.ui.datamodel.Wrapper;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
@@ -39,6 +40,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
                 String selectedDelivery = selectedItem.getItemProperty("Name").getValue().toString();
                 DomsItem dItem = model.getDeliveryFromName(selectedDelivery);
+                model.setSelectedDelivery(selectedDelivery);
 
                     //DomsItem dItem = deliveryListPanel.getDomsItem(selectedItem);
 
@@ -104,24 +106,13 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     }
 
-    public void getTitles() {
+    public Wrapper getTitles() {
 
-        //titleListPanel.getTitles();
-
+        return titleListPanel.getTitles();
     }
 
 
-
-
-
-    public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
-
-        model.initiateDeliveries("Data_Archived");
+    public void performIt() {
         deliveryListPanel.setTheStuff(model.getInitiatedDeliveries());
-
-        //deliveryListPanel.setInfo(eventStructureCommunication, "Data_Archived");
-
-        /*ArrayList<String> list = model.getDeliveries("Data_Archived");
-        deliveryListPanel.setTableContent(list);*/
     }
 }

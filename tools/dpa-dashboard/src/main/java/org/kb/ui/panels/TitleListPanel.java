@@ -38,8 +38,6 @@ public class TitleListPanel extends VerticalLayout {
         table.setImmediate(true);
         table.setVisibleColumns(new String[]{"title", "noOfArticles", "noOfPages"});
 
-        //table.setColumnExpandRatio();
-
         table.setColumnExpandRatio("title", 0.8f);
         table.setColumnExpandRatio("noOfArticles", 0.1f);
         table.setColumnExpandRatio("noOfPages", 0.1f);
@@ -58,22 +56,19 @@ public class TitleListPanel extends VerticalLayout {
         Object o = table.getColumnHeaders();
     }
 
-    public void getTitles() {
+    public Wrapper getTitles() {
+        Wrapper wrapper = new Wrapper();
         try {
 
-            JAXBContext jaxbContext = JAXBContext.newInstance(Wrapper.class);
-            Wrapper wrapper = new Wrapper();
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
 
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             wrapper.setHashtable(titleList);
 
-            File tempFile = new File("/home/mmj/tools/tomcat", "titleList.xml");
-            jaxbMarshaller.marshal(wrapper, tempFile);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return wrapper;
     }
 
 

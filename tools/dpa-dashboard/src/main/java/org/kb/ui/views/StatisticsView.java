@@ -3,7 +3,6 @@ package org.kb.ui.views;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.DownloadStream;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
@@ -14,38 +13,42 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import org.kb.ui.datamodel.DataModel;
-import org.kb.ui.FetchEventStructure;
+
+import org.kb.ui.datamodel.TitleDeliveryHierachy;
 import org.kb.ui.panels.DeliveryInformationPanel;
 import org.kb.ui.panels.DeliveryInformationPanel2;
 import org.kb.ui.panels.DeliveryMainPanel;
 import org.kb.ui.panels.SearchPanel;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
-import javax.imageio.ImageIO;
-import javax.servlet.ServletContext;
-import javax.ws.rs.core.Application;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
 
 /**
  * Created by mmj on 3/8/17.
  */
 public class StatisticsView extends VerticalLayout implements View {
 
-    private FetchEventStructure eventStructureCommunication = new FetchEventStructure();
     private DataModel model = new DataModel();
     Link link = new Link("Metadatlink", null);
     Embedded pdf = new Embedded(null, null);
@@ -111,11 +114,85 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 if("SEARCHBUTTON".equals(event.getButton().getId())) {
 
-                    tabelsLayout.performInitialSearch(eventStructureCommunication, "Data_Archived");
+
+                    model.initiateDeliveries("Data_Archived");
+
+                    tabelsLayout.performIt();
 
                 } else if("STOREBUTTON".equals(event.getButton().getId())) {
+                    try {
 
-                    tabelsLayout.getTitles();
+                        TitleDeliveryHierachy t = new TitleDeliveryHierachy();
+
+                        Iterator<String> titles = model.getInitiatedDeliveries().iterator();
+
+
+
+
+                        while(titles.hasNext()) {
+
+                            String title = titles.next();
+
+                            final List<DomsDatastream> datastreams = model.getDeliveryFromName(title).datastreams();
+                            Optional<DomsDatastream> profileOptional = datastreams.stream()
+                                    .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                                    .findAny();
+
+
+                            if (profileOptional.isPresent()) {
+
+                                DomsDatastream ds = profileOptional.get();
+                                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                                StringReader reader = new StringReader(ds.getDatastreamAsString());
+                                InputSource inps = new InputSource(reader);
+
+                                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                                DocumentBuilder builder = factory.newDocumentBuilder();
+                                Document doc = builder.parse(inps);
+                                XPathFactory xPathfactory = XPathFactory.newInstance();
+                                XPath xpath = xPathfactory.newXPath();
+                                XPathExpression expr = xpath.compile("/deliveryStatistics/titles/title/@titleName");
+                                NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+                                for(int i = 0; i< nl.getLength(); i++) {
+
+                                    String titleItem = nl.item(i).getNodeValue();
+
+                                    t.addDeliveryToTitle(nl.item(i).getNodeValue(), title);
+
+                                    /*XPathExpression expr2 = xpath.compile("/deliveryStatistics/titles/title/[@titleName = ]pages");
+                                    NodeList nl2 = (NodeList) expr2.evaluate(doc, XPathConstants.NODESET);
+
+                                    System.out.println(nl2.getLength());*/
+
+
+
+                                }
+
+                            }
+
+
+
+                        }
+
+
+
+
+                        /*Wrapper wrapper = tabelsLayout.getTitles();*/
+                        File tempFile = new File("/home/mmj/tools/tomcat",  searchPanel.getSelectedDate().toString() + ".xml");
+                        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
+                        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+                        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+                        jaxbMarshaller.marshal(t, tempFile);
+
+
+
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -152,11 +229,12 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.addComponent(mainhlayout);
     }
 
-
+    int count = 0;//TODO: MAKE THAT BETTER
 
 
     private StreamResource createStreamResource(final String fileUrl) {
-        StreamResource recource = new StreamResource(new StreamResource.StreamSource() {
+        count++;
+        StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 try {
@@ -172,15 +250,16 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
                 }
             }
-        }, "test.pdf");
-        recource.setMIMEType("application/pdf");
-        return recource;
+        }, "tst" + count + ".pdf");
+        resource.setMIMEType("application/pdf");
+        resource.setCacheTime(1000);
+        return resource;
     }
 
 
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        Notification.show("Welcome to Status");
+        Notification.show("DPA Delivery validation");
     }
 
 }

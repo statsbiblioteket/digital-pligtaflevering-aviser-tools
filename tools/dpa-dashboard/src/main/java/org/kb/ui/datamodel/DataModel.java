@@ -24,6 +24,7 @@ public class DataModel {
     private DomsParser parser = new DomsParser();
     private String selectedDelivery;
     private String selectedTitle;
+    private HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
     private FetchEventStructure eventFetch = new FetchEventStructure();
 
 
@@ -92,7 +93,7 @@ public class DataModel {
     }
 
 
-    HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
+
 
     public void initiateDeliveries(String info) {
         Stream<DomsItem> items = eventFetch.getState(info);

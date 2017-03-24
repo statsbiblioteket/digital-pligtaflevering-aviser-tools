@@ -6,6 +6,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.datamodel.TitleComponent;
+import org.kb.ui.datamodel.Wrapper;
 
 /**
  * Created by mmj on 3/10/17.
@@ -34,14 +35,14 @@ public class DeliveryMainPanel extends HorizontalLayout {
         fileSelectionPanel.addItemClickListener(listener);
     }
 
-
-    public void performInitialSearch(FetchEventStructure eventStructureCommunication, String info) {
+    public void performIt() {
 
     }
 
 
-    public void getTitles() {
 
+    public Wrapper getTitles() {
 
+        return null;
     }
 }
