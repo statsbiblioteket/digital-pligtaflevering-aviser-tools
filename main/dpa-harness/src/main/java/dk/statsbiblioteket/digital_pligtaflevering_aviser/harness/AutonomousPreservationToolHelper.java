@@ -71,9 +71,9 @@ public class AutonomousPreservationToolHelper {
      * expected to return.
      *
      * @param map      configuration map to pass into <code>function</code>
-     * @param function function creating a populated Tool from a configuration map.
+     * @param toolFunction function creating a populated Tool from a configuration map.
      */
-    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Tool> function) {
+    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Tool> toolFunction) {
         Objects.requireNonNull(map, "map == null");
         final Logger log = LoggerFactory.getLogger(AutonomousPreservationToolHelper.class);
 
@@ -88,8 +88,9 @@ public class AutonomousPreservationToolHelper {
                     log.trace("------------------------------------------------------------------------------");
                     log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
                 }));
+
         try {
-            String result = function.apply(map).call();
+            String result = toolFunction.apply(map).call();
             log.trace("Result: {}", result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);

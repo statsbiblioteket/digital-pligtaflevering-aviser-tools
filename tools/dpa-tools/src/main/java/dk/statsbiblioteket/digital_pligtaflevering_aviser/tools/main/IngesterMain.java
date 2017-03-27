@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
@@ -21,6 +22,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.Inges
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
+import javaslang.control.Try;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.client.eventhandler.EventHandler;
@@ -43,13 +45,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
@@ -82,16 +92,23 @@ public class IngesterMain {
 
     @Module
     protected static class IngesterModule {
+        private static final String JMX_OBJECT_NAME = "jmx.object.name";
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          QuerySpecification query,
                          DomsRepository repository,
-                         FileSystemDeliveryIngester ingester
+                         FileSystemDeliveryIngester ingester,
+                         @Named(JMX_OBJECT_NAME) String jmxObjectName
         ) {
 
             return () -> {
+                if (jmxObjectName != null && jmxObjectName.isEmpty() == false) {
+                    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+                    ObjectName name = new ObjectName(jmxObjectName);
+                    mbs.registerMBean(ingester, name);
+                }
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
                 List<String> toolResults = repository.query(query)
@@ -195,7 +212,6 @@ public class IngesterMain {
             return id -> new Item();
         }
 
-
         /**
          * returns a comma-separated set of filenames (without path) to ignore when traversing the file tree.
          * Naming is kept the same as in Avisprojektet to keep configuration files similar
@@ -254,6 +270,7 @@ public class IngesterMain {
                 PutFileClient wrappedPutClient = factory.retrievePutClient(settings, securityManager, dpaIngesterId);
                 putClient = new AutoCloseablePutFileClient() {
                     boolean closed = false;
+
                     @Override
                     public void close() throws Exception {
                         // https://github.com/bitrepository/reference/tree/master/bitrepository-client#closing-after-finishing
@@ -317,5 +334,39 @@ public class IngesterMain {
             return (path1, deliveryFolderName) -> Paths.get(deliveryFolderName).relativize(path1).toString();
         }
 
+        @Provides
+        public Function<Path, Stream<Path>> provideDeliveriesForAbsolutePath() {
+            return absolutePath -> Try.of(() ->
+                    Files.walk(absolutePath, 1)
+                            .filter(Files::isRegularFile)
+                            .sorted()
+            ).get();
+        }
+
+        @Provides
+        Function<List<ToolResult>, String> provideEventMessageForToolResults() {
+            return toolResult -> {
+                // naive initial solution.
+                final Map<Boolean, List<ToolResult>> toolResultMap = toolResult.stream()
+                        .collect(Collectors.groupingBy(tr -> tr.getResult()));
+
+                List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
+
+                if (failingToolResults.size() == 0) {
+                    return toolResultMap.getOrDefault(Boolean.TRUE, Collections.emptyList()).size() + " successful";
+                } else {
+                    String result = failingToolResults.stream()
+                            .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
+                            .filter(s -> s.trim().length() > 0) // skip blank lines
+                            .collect(Collectors.joining("\n"));
+                    return result;
+                }
+            };
+        }
+
+        @Provides
+        @Named(JMX_OBJECT_NAME) String provideJmxObjectName(ConfigurationMap map) {
+            return map.getRequired(JMX_OBJECT_NAME);
+        }
     }
-}
+};
