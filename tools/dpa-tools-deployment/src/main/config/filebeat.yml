@@ -1,0 +1,30 @@
+filebeat.prospectors:
+
+- input_type: log
+
+  paths:
+    - /home/dpaviser/work/*/logs/dpa*.log
+
+  fields:
+    beat_id: "prd_dpa"
+
+  fields_under_root: true
+
+
+exclude_lines: ["DEBUG"]
+
+
+output.logstash:
+  hosts: ["vanth:5044"]
+
+output.file:
+
+  path: /tmp
+
+  filename: filebeatout
+
+logging.to_files: true
+logging.files:
+  path: /tmp
+
+  name: mybeatlog
