@@ -35,7 +35,7 @@ public class DeliveryMainPanel extends HorizontalLayout {
         fileSelectionPanel.addItemClickListener(listener);
     }
 
-    public void performIt() {
+    public void performIt() throws Exception {
 
     }
 

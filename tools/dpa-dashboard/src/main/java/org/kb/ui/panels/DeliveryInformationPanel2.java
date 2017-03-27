@@ -15,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
     protected DeliveryListPanel deliveryPanel = new DeliveryListPanel();
-    protected ArrayList<FileComponent> alr = new ArrayList<FileComponent>();
 
 
     public DeliveryInformationPanel2(DataModel model) {
@@ -88,7 +88,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
 
-                //File tempFile = new File("/tmp/pathstream");
                 JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                 DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
@@ -111,16 +110,14 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 fileSelectionPanel.setEnabled(true);
                 fileSelectionPanel.setInfo(selectedTitleObj.getPage());
 
-                System.out.println(deserializedObject);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void performIt() {
+    public void performIt() throws Exception {
         deliveryPanel.setTheStuff(model.getInitiatedDeliveries());
         infoPanel.setTableContent(model.getTitles());
     }
-
 }

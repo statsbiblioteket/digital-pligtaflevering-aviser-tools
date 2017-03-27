@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -111,88 +112,21 @@ public class StatisticsView extends VerticalLayout implements View {
         SearchPanel searchPanel = new SearchPanel();
         searchPanel.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
+                try {
 
                 if("SEARCHBUTTON".equals(event.getButton().getId())) {
-
-
+                    model.setSelectedMonth(searchPanel.getSelectedDate());
                     model.initiateDeliveries("Data_Archived");
-
                     tabelsLayout.performIt();
 
                 } else if("STOREBUTTON".equals(event.getButton().getId())) {
-                    try {
 
-                        TitleDeliveryHierachy t = new TitleDeliveryHierachy();
+                    model.initiateTitleHierachy();
+                    model.saveCurrentTitleHierachy(searchPanel.getSelectedDate());
+                }
 
-                        Iterator<String> titles = model.getInitiatedDeliveries().iterator();
-
-
-
-
-                        while(titles.hasNext()) {
-
-                            String title = titles.next();
-
-                            final List<DomsDatastream> datastreams = model.getDeliveryFromName(title).datastreams();
-                            Optional<DomsDatastream> profileOptional = datastreams.stream()
-                                    .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
-                                    .findAny();
-
-
-                            if (profileOptional.isPresent()) {
-
-                                DomsDatastream ds = profileOptional.get();
-                                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
-                                StringReader reader = new StringReader(ds.getDatastreamAsString());
-                                InputSource inps = new InputSource(reader);
-
-                                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                                DocumentBuilder builder = factory.newDocumentBuilder();
-                                Document doc = builder.parse(inps);
-                                XPathFactory xPathfactory = XPathFactory.newInstance();
-                                XPath xpath = xPathfactory.newXPath();
-                                XPathExpression expr = xpath.compile("/deliveryStatistics/titles/title/@titleName");
-                                NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-                                for(int i = 0; i< nl.getLength(); i++) {
-
-                                    String titleItem = nl.item(i).getNodeValue();
-
-                                    t.addDeliveryToTitle(nl.item(i).getNodeValue(), title);
-
-                                    /*XPathExpression expr2 = xpath.compile("/deliveryStatistics/titles/title/[@titleName = ]pages");
-                                    NodeList nl2 = (NodeList) expr2.evaluate(doc, XPathConstants.NODESET);
-
-                                    System.out.println(nl2.getLength());*/
-
-
-
-                                }
-
-                            }
-
-
-
-                        }
-
-
-
-
-                        /*Wrapper wrapper = tabelsLayout.getTitles();*/
-                        File tempFile = new File("/home/mmj/tools/tomcat",  searchPanel.getSelectedDate().toString() + ".xml");
-                        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
-                        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-                        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                        jaxbMarshaller.marshal(t, tempFile);
-
-
-
-
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
             }
