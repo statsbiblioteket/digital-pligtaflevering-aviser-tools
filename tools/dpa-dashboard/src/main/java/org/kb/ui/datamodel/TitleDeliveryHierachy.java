@@ -1,17 +1,10 @@
 package org.kb.ui.datamodel;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * Created by mmj on 3/23/17.
@@ -20,24 +13,31 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TitleDeliveryHierachy {
 
-    @XmlElement(name = "titlexx")
-    HashMap<String, DeliveryStuffs> deliveryStructure = new HashMap<String, DeliveryStuffs>();
+    @XmlElement(name = "title")
+    HashMap<String, DeliveryIdentifiers> deliveryStructure = new HashMap<String, DeliveryIdentifiers>();
 
 
-    public void addDeliveryToTitle(String title, String delivery) {
+    public void addDeliveryToTitle(String title, DeliveryIdentifier ds) {
 
-
-        DeliveryStuffs deliveys;
+        DeliveryIdentifiers deliveys;
         if(deliveryStructure.containsKey(title)) {
             deliveys = deliveryStructure.get(title);
         } else {
-            deliveys = new DeliveryStuffs();
+            deliveys = new DeliveryIdentifiers();
             deliveryStructure.put(title, deliveys);
         }
 
-
-        deliveys.addTitle(new DeliveryStuff(delivery));
+        deliveys.addDeliverie(ds);
     }
 
+    public void setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String comment) {
+        DeliveryIdentifiers jjj = deliveryStructure.get(title);
+        for(DeliveryIdentifier delId : jjj.getDeliveries()) {
+            if(delivery.equals(delId)) {
 
+                delId.setChecked(checked);
+                delId.setComment(comment);
+            }
+        }
+    }
 }

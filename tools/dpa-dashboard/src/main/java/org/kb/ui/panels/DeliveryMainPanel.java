@@ -3,10 +3,12 @@ package org.kb.ui.panels;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import org.kb.ui.FetchEventStructure;
 import org.kb.ui.datamodel.DataModel;
 import org.kb.ui.datamodel.TitleComponent;
 import org.kb.ui.datamodel.Wrapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mmj on 3/10/17.
@@ -39,6 +41,9 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     }
 
+    public List runThrough() {
+        return new ArrayList();
+    }
 
 
     public Wrapper getTitles() {

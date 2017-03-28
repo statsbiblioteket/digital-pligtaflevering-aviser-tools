@@ -1,25 +1,56 @@
-package org.kb.ui.panels;
+package org.kb.ui.windows;
 
+
+import com.google.gwt.user.client.ui.TextBox;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by mmj on 3/9/17.
  */
-public class GenericListTable extends VerticalLayout {
+public class ResultStorePanel extends VerticalLayout {
 
-    private String checkedColumnName;
+
+    private TextField initials = new TextField();
+    private DateField date = new DateField();
+    private TextArea area = new TextArea("Check description");
+
+
     private BeanItemContainer beans;
     private Table table;
 
-    public GenericListTable(Class c) {
+    public ResultStorePanel() {
+        super();
+        this.setSpacing(true);
+
+        // Set the date to present
+        date.setValue(new Date());
+        area.setRows(10);
+        area.setWidth("500px");
+
+        this.addComponent(initials);
+        this.addComponent(date);
+        this.addComponent(area);
+
+    }
+
+
+
+    public ResultStorePanel(Class c) {
         beans=new BeanItemContainer(c);
 
         // Bind a table to it
@@ -31,11 +62,6 @@ public class GenericListTable extends VerticalLayout {
         this.addComponent(table);
     }
 
-    public GenericListTable(Class c, String checkedColumn) {
-        this(c);
-        checkedColumnName = checkedColumn;
-        table.addGeneratedColumn(checkedColumn, new GenericListTable.CheckBoxColumnGenerator());
-    }
 
 
     public void setEnabled(boolean enabled) {
@@ -61,17 +87,6 @@ public class GenericListTable extends VerticalLayout {
     }
 
 
-    class CheckBoxColumnGenerator implements Table.ColumnGenerator {
-
-        @Override
-        public Component generateCell(Table source, Object itemId, Object columnId) {
-            Property prop = source.getItem(itemId).getItemProperty(checkedColumnName);
-            CheckBox c = new CheckBox(null, prop);
-            c.setReadOnly(c.getValue());
-            c.setHeight("13px");
-            return c;
-        }
-    }
 
     public List getSelections() {
         //Object selectedIds = table.getValue();

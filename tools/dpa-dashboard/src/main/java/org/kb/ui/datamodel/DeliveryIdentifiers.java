@@ -1,7 +1,5 @@
 package org.kb.ui.datamodel;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -13,34 +11,34 @@ import java.util.List;
 /**
  * Titles in a newspaper, Serializable to make it convertible between a stream of xml and an objectmodel
  */
-@XmlRootElement(name = "titles")
+@XmlRootElement(name = "deliveries")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class DeliveryStuffs
+public class DeliveryIdentifiers
 {
-    @XmlElement(name = "title")
-    private List<DeliveryStuff> titles = new ArrayList<DeliveryStuff>();
+    @XmlElement(name = "delivey")
+    private List<DeliveryIdentifier> deliveries = new ArrayList<DeliveryIdentifier>();
 
     /**
      * Get all Titles as a list
      * @return
      */
-    public List<DeliveryStuff> getTitles() {
-        return titles;
+    public List<DeliveryIdentifier> getDeliveries() {
+        return deliveries;
     }
 
     /**
      * Add a Title
-     * @param title
+     * @param delivery
      */
-    public void addTitle(DeliveryStuff title) {
-        this.titles.add(title);
+    public void addDeliverie(DeliveryIdentifier delivery) {
+        this.deliveries.add(delivery);
     }
 
     /**
      * Set all Titles
-     * @param titles
+     * @param deliveries
      */
-    public void setTitles(List<DeliveryStuff> titles) {
-        this.titles = titles;
+    public void setDeliveries(List<DeliveryIdentifier> deliveries) {
+        this.deliveries = deliveries;
     }
 }

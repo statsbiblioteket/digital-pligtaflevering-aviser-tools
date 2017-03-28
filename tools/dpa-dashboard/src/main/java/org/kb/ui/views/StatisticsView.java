@@ -12,37 +12,22 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.PopupView;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import com.vaadin.ui.Window;
 import org.kb.ui.datamodel.DataModel;
 
-import org.kb.ui.datamodel.TitleDeliveryHierachy;
 import org.kb.ui.panels.DeliveryInformationPanel;
 import org.kb.ui.panels.DeliveryInformationPanel2;
 import org.kb.ui.panels.DeliveryMainPanel;
 import org.kb.ui.panels.SearchPanel;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -51,18 +36,15 @@ import java.util.Optional;
 public class StatisticsView extends VerticalLayout implements View {
 
     private DataModel model = new DataModel();
-    Link link = new Link("Metadatlink", null);
-    Embedded pdf = new Embedded(null, null);
-    String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
+    private Link link = new Link("Metadatlink", null);
+    private Embedded pdf = new Embedded(null, null);
+    private String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
 
     public StatisticsView(String type) {
 
         Layout mainhlayout;
-
         final VerticalLayout layout = new VerticalLayout();
-
         DeliveryMainPanel tabelsLayout;
-
 
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
@@ -118,11 +100,23 @@ public class StatisticsView extends VerticalLayout implements View {
                     model.setSelectedMonth(searchPanel.getSelectedDate());
                     model.initiateDeliveries("Data_Archived");
                     tabelsLayout.performIt();
-
                 } else if("STOREBUTTON".equals(event.getButton().getId())) {
-
                     model.initiateTitleHierachy();
                     model.saveCurrentTitleHierachy(searchPanel.getSelectedDate());
+                } else if("SAVECHECK".equals(event.getButton().getId())) {
+
+
+
+                    List list = tabelsLayout.runThrough();
+
+
+
+
+
+
+
+
+
                 }
 
                 } catch (Exception e) {

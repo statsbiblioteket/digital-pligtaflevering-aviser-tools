@@ -4,7 +4,6 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
 
 import java.util.Date;
 
@@ -16,19 +15,22 @@ public class SearchPanel extends HorizontalLayout {
     private DateField startDf = new DateField();
 
     private Button searchButton = new Button("Search");
-    private Button storeTitlesButton = new Button("store titles");
+    private Button storeTitlesButton = new Button("Store titles");
+    private Button saveButton = new Button("Save check");
     private Label info = new Label();
 
     public SearchPanel() {
 
         searchButton.setId("SEARCHBUTTON");
         storeTitlesButton.setId("STOREBUTTON");
+        saveButton.setId("SAVECHECK");
         startDf.setResolution(DateField.RESOLUTION_MONTH);
         startDf.setValue(new Date());
 
         this.addComponent(startDf);
         this.addComponent(searchButton);
         this.addComponent(storeTitlesButton);
+        this.addComponent(saveButton);
         this.addComponent(info);
     }
 
@@ -39,5 +41,6 @@ public class SearchPanel extends HorizontalLayout {
     public void addClickListener(Button.ClickListener listener) {
         searchButton.addClickListener(listener);
         storeTitlesButton.addClickListener(listener);
+        saveButton.addClickListener(listener);
     }
 }

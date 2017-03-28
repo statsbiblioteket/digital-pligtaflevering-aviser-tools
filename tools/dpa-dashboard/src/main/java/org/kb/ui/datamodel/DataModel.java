@@ -10,7 +10,6 @@ import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -23,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -106,22 +104,11 @@ public class DataModel {
         }
 
         return currentlySelectedTitleHiearachy.deliveryStructure.keySet();
-
-
-        /*try {
-            File tempFile = new File("/home/mmj/tools/tomcat", "titleList.xml");
-            JAXBContext jaxbContext = JAXBContext.newInstance(Wrapper.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            Wrapper deserializedObject = (Wrapper)jaxbUnmarshaller.unmarshal(tempFile);
-            return deserializedObject.getHashtable();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new HashSet<String>();*/
     }
 
-
+    public List<DeliveryIdentifier> getDeliverysFromTitle(String title) {
+        return currentlySelectedTitleHiearachy.deliveryStructure.get(title).getDeliveries();
+    }
 
 
     public void initiateDeliveries(String info) {
@@ -133,6 +120,43 @@ public class DataModel {
             }
         });
     }
+
+    public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String comment) {
+        currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, comment);
+    }
+
+
+
+    public void writeToCurrentItemInFedora(String deliveryName, String titleName) {
+
+        domsItem = getDeliveryFromName(deliveryName);
+        DomsItem selectedTitleItem = null;
+
+        Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(domsItem);
+        while(titleSubfolder.hasNext()) {
+            DomsItem titleItem = titleSubfolder.next();
+            String itemPath = titleItem.getPath();
+
+            if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
+                selectedTitleItem = titleItem;
+
+                byte[] statisticsStream = "DUMMYSTREAM".getBytes();
+                String settingDate = new java.util.Date().toString();
+
+                selectedTitleItem.modifyDatastreamByValue(
+                        "TESTITEM",
+                        null, // no checksum
+                        null, // no checksum
+                        statisticsStream,
+                        null,
+                        "text/xml",
+                        null,
+                        null);
+            }
+        }
+    }
+
+
 
     public void initiateTitleHierachy() throws Exception {
         currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
@@ -166,10 +190,12 @@ public class DataModel {
                 for(int i = 0; i< nl.getLength(); i++) {
                     String titleItem = nl.item(i).getNodeValue();
 
-                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/titles/title/articles");
-                    //NodeList articles = (NodeList) articleExpression.evaluate(doc, XPathConstants.NODESET);
-                    //articles.getLength()
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(titleItem, delivery);
+                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/articles/article");
+                    NodeList articles = (NodeList) articleExpression.evaluate(doc, XPathConstants.NODESET);
+                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/pages/page");
+                    NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
+
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(titleItem, new DeliveryIdentifier(delivery, articles.getLength(), pages.getLength()));
                 }
             }
         }
@@ -183,7 +209,7 @@ public class DataModel {
     public void saveCurrentTitleHierachy(Date selectedMonth) throws Exception {
         currentlySelectedMonth = dateFormat.format(selectedMonth);
 
-        /*Wrapper wrapper = tabelsLayout.getTitles();*/
+        /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
         File tempFile = new File("/home/mmj/tools/tomcat",  currentlySelectedMonth + ".xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

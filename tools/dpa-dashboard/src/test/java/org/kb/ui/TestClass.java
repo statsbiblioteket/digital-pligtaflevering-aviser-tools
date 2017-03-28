@@ -1,10 +1,12 @@
 package org.kb.ui;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.kb.ui.datamodel.DeliveryStuff;
+import org.kb.ui.datamodel.DeliveryIdentifier;
 import org.kb.ui.datamodel.TitleDeliveryHierachy;
 import org.kb.ui.datamodel.UiDataConverter;
 
@@ -13,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,17 +61,27 @@ public class TestClass {
 
 
         TitleDeliveryHierachy t = new TitleDeliveryHierachy();
-        t.addDeliveryToTitle("JP", "dl_1234567_rt1");
-        t.addDeliveryToTitle("JP", "dl_2234567_rt1");
-        t.addDeliveryToTitle("JP", "dl_3234567_rt1");
-        t.addDeliveryToTitle("bt", "dl_1234567_rt1");
-        t.addDeliveryToTitle("bt", "dl_2234567_rt1");
-        t.addDeliveryToTitle("bt", "dl_3234567_rt1");
-        t.addDeliveryToTitle("JP", "dl_3234567_rt2");
+
+        DeliveryIdentifier ds = new DeliveryIdentifier("dl_1234567_rt1", 1, 2);
+        ds.addArticle(new Article("q"));
+        ds.addArticle(new Article("a"));
+        ds.addArticle(new Article("x"));
+        ds.addPages(new Page("p1","p2"));
+        ds.addPages(new Page("p3","p4"));
+        ds.addPages(new Page("p5","p777"));
+
+
+        t.addDeliveryToTitle("JP", ds);
+        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_2234567_rt1", 3, 4));
+        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_1234567_rt1", 0, 0));
+        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_2234567_rt1", 0, 0));
+        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_3234567_rt2", 0, 0));
 
 
 
-        /*Wrapper wrapper = tabelsLayout.getTitles();*/
+        /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
         File tempFile = new File("/home/mmj/tools/tomcat",  "test.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
