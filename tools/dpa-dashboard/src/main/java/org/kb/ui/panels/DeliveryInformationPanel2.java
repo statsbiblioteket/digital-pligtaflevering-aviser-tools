@@ -55,7 +55,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("title").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("name").getValue();
                 model.setSelectedDelivery(page.toString());
                 showTheSelectedTitle();
             }

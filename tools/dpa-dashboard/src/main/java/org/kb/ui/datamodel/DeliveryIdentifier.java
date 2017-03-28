@@ -24,6 +24,7 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
     @XmlAttribute(name = "noOfArticle")
     int noOfArticles;
+
     @XmlAttribute(name = "noOfPage")
     int noOfPages;
 
