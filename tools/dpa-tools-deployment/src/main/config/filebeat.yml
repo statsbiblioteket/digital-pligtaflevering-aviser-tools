@@ -3,6 +3,8 @@ filebeat.prospectors:
 - input_type: log
 
   paths:
+  #Path to location of logfiles to forward to Kibana, this need to be changed to where the logfiles is located
+  # /dpa*.log should be keept to only use logfiles from autonomous components for dpa-project
     - /home/dpaviser/work/*/logs/dpa*.log
 
   fields:
@@ -15,6 +17,7 @@ exclude_lines: ["DEBUG"]
 
 
 output.logstash:
+  # The host needs to be configured to where the logstash is running
   hosts: ["vanth:5044"]
 
 output.file:
