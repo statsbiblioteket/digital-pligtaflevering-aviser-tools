@@ -23,14 +23,16 @@ public class DeliveryIdentifier implements java.io.Serializable {
     private Pages pages = new Pages();
 
     @XmlAttribute(name = "noOfArticle")
-    int noOfArticles;
+    private int noOfArticles;
 
     @XmlAttribute(name = "noOfPage")
-    int noOfPages;
+    private int noOfPages;
 
-    boolean checked = false;
+    private boolean checked = false;
 
-    String comment;
+    private String comment;
+
+    private String initials;
 
 
     public DeliveryIdentifier() {
@@ -98,5 +100,14 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
     public String getComment() {
         return this.comment;
+    }
+
+    @XmlAttribute
+    public void setInitials(String initials) {
+        this.initials = initials;
+    }
+
+    public String getInitials() {
+        return this.initials;
     }
 }

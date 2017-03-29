@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class TitleDeliveryHierachy {
 
     @XmlElement(name = "title")
-    HashMap<String, DeliveryIdentifiers> deliveryStructure = new HashMap<String, DeliveryIdentifiers>();
+    private HashMap<String, DeliveryIdentifiers> deliveryStructure = new HashMap<String, DeliveryIdentifiers>();
 
 
     public void addDeliveryToTitle(String title, DeliveryIdentifier ds) {
@@ -30,14 +30,24 @@ public class TitleDeliveryHierachy {
         deliveys.addDeliverie(ds);
     }
 
-    public void setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String comment) {
+    public DeliveryIdentifier setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment) {
         DeliveryIdentifiers jjj = deliveryStructure.get(title);
         for(DeliveryIdentifier delId : jjj.getDeliveries()) {
-            if(delivery.equals(delId)) {
+            if(delivery.equals(delId.getName())) {
 
                 delId.setChecked(checked);
+                delId.setInitials(initials);
                 delId.setComment(comment);
+                return delId;
+
+
             }
         }
+        return null;
     }
+
+    public HashMap<String, DeliveryIdentifiers> getDeliveryStructure() {
+        return deliveryStructure;
+    }
+
 }

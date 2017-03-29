@@ -12,10 +12,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.PopupView;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import org.kb.ui.datamodel.DataModel;
 
 import org.kb.ui.panels.DeliveryInformationPanel;
@@ -101,8 +98,8 @@ public class StatisticsView extends VerticalLayout implements View {
                     model.initiateDeliveries("Data_Archived");
                     tabelsLayout.performIt();
                 } else if("STOREBUTTON".equals(event.getButton().getId())) {
-                    model.initiateTitleHierachy();
-                    model.saveCurrentTitleHierachy(searchPanel.getSelectedDate());
+                    model.initiateTitleHierachyFromFedora();
+                    model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());
                 } else if("SAVECHECK".equals(event.getButton().getId())) {
 
 

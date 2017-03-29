@@ -136,7 +136,8 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 String selectedTitle = model.getSelectedTitle();
 
                 final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
-                dialog.setDialogContent(new ResultStorePanel());
+                ResultStorePanel storePanel = new ResultStorePanel();
+                dialog.setDialogContent(storePanel);
                 dialog.setModal(true);
 
 
@@ -145,7 +146,12 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                     public void buttonClick(Button.ClickEvent event) {
 
                         UI.getCurrent().removeWindow(dialog);
-                        model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, "TESTING");
+
+
+
+
+
+                        model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
 
                     }});
 
@@ -170,6 +176,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     public void performIt() throws Exception {
         //deliveryPanel.setTheStuff(model.getInitiatedDeliveries());
-        infoPanel.setTableContent(model.getTitles());
+        infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
 }

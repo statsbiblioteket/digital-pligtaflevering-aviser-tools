@@ -78,6 +78,13 @@ public class ResultStorePanel extends VerticalLayout {
     }
 
 
+    public String getInitials() {
+        return initials.getValue();
+    }
+
+    public String getComment() {
+        return area.getValue();
+    }
 
     public void setInfo(Collection delStat) {
         beans.removeAllItems();
