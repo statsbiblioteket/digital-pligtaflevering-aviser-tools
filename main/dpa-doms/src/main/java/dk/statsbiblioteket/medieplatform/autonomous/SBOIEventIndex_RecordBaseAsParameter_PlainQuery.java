@@ -7,10 +7,10 @@ import java.net.MalformedURLException;
  * SBOIEventIndex in a dependent artifact.  A Provider is necessary as the constructor can throw checked
  * exceptions.
  */
-public class SBOIEventIndex_RecordBaseAsParameter<T extends Item> extends SBOIEventIndex<T> {
+public class SBOIEventIndex_RecordBaseAsParameter_PlainQuery<T extends Item> extends SBOIEventIndex<T> {
     private final String recordBase;
 
-    public SBOIEventIndex_RecordBaseAsParameter(
+    public SBOIEventIndex_RecordBaseAsParameter_PlainQuery(
             String summaLocation,
             PremisManipulatorFactory<T> premisManipulatorFactory,
             DomsEventStorage<T> domsEventStorage,
@@ -21,11 +21,16 @@ public class SBOIEventIndex_RecordBaseAsParameter<T extends Item> extends SBOIEv
     }
 
     @Override
-    protected String toQueryString(Query query) {
-        String originalQuery = super.toQueryString(query);
-        String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
-        String strippedQuery = originalQuery.substring(originalQueryPrefix.length());
-        String newQuery = spaced("recordBase:" + recordBase) + strippedQuery;
-        return newQuery;
+    protected String toQueryString(Query<T> query) {
+        final String finalQuery;
+        if (query instanceof PlainQuery) {
+            finalQuery = spaced("recordBase:" + recordBase) + " " + query;
+        } else {
+            String originalQuery = super.toQueryString(query);
+            String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
+            String strippedQuery = originalQuery.substring(originalQueryPrefix.length());
+            finalQuery = spaced("recordBase:" + recordBase) + strippedQuery;
+        }
+        return finalQuery;
     }
 }
