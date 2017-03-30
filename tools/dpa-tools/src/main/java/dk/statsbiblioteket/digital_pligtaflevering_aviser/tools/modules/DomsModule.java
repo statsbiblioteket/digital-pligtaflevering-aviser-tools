@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.EventQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
@@ -230,7 +231,7 @@ public class DomsModule {
     }
 
     /**
-     * Extracts a QuerySpecification from configuration parameters.  The semantics are the same as
+     * Extracts a EventQuerySpecification from configuration parameters.  The semantics are the same as
      * for the Newspaper Autonomous components.
      *
      * @param pastSuccessfulEvents Comma separated list of event names which must have been completed successfully
@@ -246,13 +247,13 @@ public class DomsModule {
      * @return
      */
     @Provides
-    public QuerySpecification providesQuerySpecification(
+    public QuerySpecification providesWorkToDoQuerySpecification(
             @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS) String pastSuccessfulEvents,
             @Named(AUTONOMOUS_FUTURE_EVENTS) String futureEvents,
             @Named(AUTONOMOUS_OLD_EVENTS) String oldEvents,
             @Named(AUTONOMOUS_ITEM_TYPES) String itemTypes) {
         // http://stackoverflow.com/a/7488676/53897
-        return new QuerySpecification(
+        return new EventQuerySpecification(
                 asList(pastSuccessfulEvents.split("\\s*,\\s*")),
                 asList(futureEvents.split("\\s*,\\s*")),
                 asList(oldEvents.split("\\s*,\\s*")),

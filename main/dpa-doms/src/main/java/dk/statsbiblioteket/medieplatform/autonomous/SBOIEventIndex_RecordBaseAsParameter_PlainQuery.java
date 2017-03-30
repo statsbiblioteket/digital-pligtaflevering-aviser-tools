@@ -22,15 +22,12 @@ public class SBOIEventIndex_RecordBaseAsParameter_PlainQuery<T extends Item> ext
 
     @Override
     protected String toQueryString(Query<T> query) {
-        final String finalQuery;
-        if (query instanceof PlainQuery) {
-            finalQuery = spaced("recordBase:" + recordBase) + " " + query;
-        } else {
-            String originalQuery = super.toQueryString(query);
-            String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
-            String strippedQuery = originalQuery.substring(originalQueryPrefix.length());
-            finalQuery = spaced("recordBase:" + recordBase) + strippedQuery;
-        }
+
+        String originalQuery = super.toQueryString(query);
+        String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
+        String strippedQuery = originalQuery.substring(originalQueryPrefix.length());
+
+        final String finalQuery = spaced("recordBase:" + recordBase) + strippedQuery;
         return finalQuery;
     }
 }

@@ -97,7 +97,7 @@ public class IngesterMain {
 
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                         QuerySpecification query,
+                         QuerySpecification workToDoQuery,
                          DomsRepository repository,
                          FileSystemDeliveryIngester ingester,
                          @Named(JMX_OBJECT_NAME) String jmxObjectName
@@ -111,7 +111,7 @@ public class IngesterMain {
                 }
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
-                List<String> toolResults = repository.query(query)
+                List<String> toolResults = repository.query(workToDoQuery)
                         .peek(domsItem -> log.info("Procesing {}", domsItem))
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());

@@ -1,5 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.EventQuerySpecification" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.stream.Collectors" %>
@@ -21,8 +21,8 @@
         String oldEvents = "";
         String itemTypes = "doms:ContentModel_DPARoundTrip";
 
-        final QuerySpecification querySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
-        List<DomsItem> l = repository.query(querySpecification).collect(Collectors.toList());
+        final EventQuerySpecification eventQuerySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
+        List<DomsItem> l = repository.query(eventQuerySpecification).collect(Collectors.toList());
         request.setAttribute("l", l);
     }
 %>

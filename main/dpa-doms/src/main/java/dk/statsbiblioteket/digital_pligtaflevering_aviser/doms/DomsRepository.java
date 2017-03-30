@@ -15,12 +15,19 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SolrJConnector;
 import javaslang.control.Try;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -30,10 +37,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
+
 /**
  *
  */
 public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecification, DomsItem> {
+    private final HttpSolrServer summaSearch;
     private SBOIEventIndex<Item> sboiEventIndex;
     private WebResource webResource;
     private EnhancedFedora efedora;
@@ -46,11 +56,15 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource, EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage) {
+    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource,
+                          EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
+                          @Named(AUTONOMOUS_SBOI_URL) String summaLocation) {
         this.sboiEventIndex = sboiEventIndex;
         this.webResource = webResource;
         this.efedora = efedora;
         this.domsEventStorage = domsEventStorage;
+        this.summaSearch = new SolrJConnector(summaLocation).getSolrServer();
+
     }
 
     @Override
@@ -58,14 +72,18 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
         // -- Create and populate SBIO query and return the DOMS ids found as a stream.
 
+        if (querySpecification instanceof EventQuerySpecification == false) {
+            throw new UnsupportedOperationException("Bad query specification instance");
+        }
+        EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
+
         EventTrigger.Query<Item> eventTriggerQuery = new EventTrigger.Query<>();
+        eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
+        eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
+        eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
+        eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
 
-        eventTriggerQuery.getPastSuccessfulEvents().addAll(querySpecification.getPastSuccessfulEvents());
-        eventTriggerQuery.getFutureEvents().addAll(querySpecification.getFutureEvents());
-        eventTriggerQuery.getOldEvents().addAll(querySpecification.getOldEvents());
-        eventTriggerQuery.getTypes().addAll(querySpecification.getTypes());
-
-        boolean details = querySpecification.getDetails();
+        boolean details = eventQuerySpecification.getDetails();
 
         try {
             // To keep it simple, read in the whole response as a list and create the stream from that.
@@ -88,7 +106,40 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             throw e;
         } catch (CommunicationException e) {
             // well?
-            throw new RuntimeException("failed query for " + querySpecification, e);
+            throw new RuntimeException("failed query for " + eventQuerySpecification, e);
+        }
+    }
+
+    @Override
+    public long count(QuerySpecification queryX) {
+        if (queryX instanceof SBOIQuerySpecification == false) {
+            throw new UnsupportedOperationException("bad query type");
+        }
+        SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) queryX;
+        final String q = sboiQuerySpecification.getQ();
+
+        try {
+            // Adapted from SolrProxyIterator.search()
+            SolrQuery query = new SolrQuery();
+            query.setQuery(q);
+            // no rows of data, just the meta data including the result count.
+            query.setRows(0);
+            query.setStart(0);
+            // IMPORTANT! Only use facets if needed.
+            query.set("facet", "false"); //very important. Must overwrite to false. Facets are very slow and expensive.
+            query.setFields(SBOIEventIndex.UUID, SBOIEventIndex.LAST_MODIFIED);
+            boolean details = false;
+            if (!details) {
+                query.addField(SBOIEventIndex.PREMIS_NO_DETAILS);
+            }
+
+            query.addSort(SBOIEventIndex.SORT_DATE, SolrQuery.ORDER.asc);
+
+            QueryResponse response = summaSearch.query(query, SolrRequest.METHOD.POST);
+            SolrDocumentList results = response.getResults();
+            return results.getNumFound();
+        } catch (SolrServerException e) {
+            throw new RuntimeException("q=" + q, e);
         }
     }
 
@@ -189,6 +240,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     /**
      * We need the premis object for the event stream.  Unfortunately the original DomsEventStorage.getPremisForItem()
      * method is private, so we need a copy here (adapted for try)
+     *
      * @param id
      * @param eventDataStreamName
      * @return

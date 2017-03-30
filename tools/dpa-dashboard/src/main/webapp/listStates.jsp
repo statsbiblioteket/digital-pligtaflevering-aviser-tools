@@ -4,6 +4,7 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
 <%@ page import="java.io.IOException" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification" %>
 <html>
 <body>
 <i>Note:  New events require a Summa update job to run before being reflected in this overview!</i>
@@ -22,28 +23,23 @@
 <h2><a href="stateManuallyStopped.jsp">Manually stopped</a></h2>
 
 <%=
-repository.query(domsModule.providesQuerySpecification(
-        "Manually_stopped", "", "", "doms:ContentModel_DPARoundTrip")
-).count()
+repository.count(new SBOIQuerySpecification("recordBase:doms_sboi_dpaCollection"))
 %>
 
 <h2><a href="stateCreated.jsp">Ready to ingest</a></h2>
 
 <%=
-repository.query(domsModule.providesQuerySpecification(
-        "Data_Created", "Data_Archived,Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
-).count()
+repository.count(new SBOIQuerySpecification("recordBase:doms_sboi_dpaCollection"))
 %>
 
 <h2><a href="stateIngested.jsp">Ingested</a></h2>
 
+
 <%=
-repository.query(domsModule.providesQuerySpecification(
-        "Data_Archived", "Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
-).count()
+repository.count(new SBOIQuerySpecification("recordBase:doms_sboi_dpaCollection"))
 %>
 <%
-    repository.query(domsModule.providesQuerySpecification(
+    repository.query(domsModule.providesWorkToDoQuerySpecification(
             "Data_Archived", "Manually_stopped", "", "doms:ContentModel_DPARoundTrip")
     ).forEach(i -> {
         try {

@@ -62,7 +62,7 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
-        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
+        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage, summaLocation);
         return repository;
     }
 }
