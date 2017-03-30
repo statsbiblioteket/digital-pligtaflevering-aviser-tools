@@ -16,6 +16,7 @@ import java.util.List;
 public class GenericListTable extends VerticalLayout {
 
     private String checkedColumnName;
+    private String columnFilter;
     private BeanItemContainer beans;
     private Table table;
 
@@ -52,7 +53,6 @@ public class GenericListTable extends VerticalLayout {
     }
 
 
-
     public void setInfo(Collection delStat) {
         beans.removeAllItems();
         for(Object o : delStat) {
@@ -73,10 +73,10 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
-    public List getSelections() {
-        //Object selectedIds = table.getValue();
+    public Object getSelection() {
+        Object selectedIds = table.getValue();
 
-        return (List)table.getVisibleItemIds();
+        return selectedIds;
 
     }
 

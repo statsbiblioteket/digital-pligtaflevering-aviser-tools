@@ -14,6 +14,7 @@ import org.xml.sax.InputSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,11 +80,20 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             public void itemClick(ItemClickEvent itemClickEvent) {
 
                 List<Page> pages = ((Title)itemClickEvent.getItemId()).getPage();
-
-                sectionSectionTable.setInfo(UiDataConverter.sectionConverter(pages.iterator()).values());
-
+                sectionSectionTable.setInfo(UiDataConverter.sectionConverter(pages.iterator(), null).values());
                 fileSelectionPanel.setEnabled(true);
-                fileSelectionPanel.setInfo(pages);
+
+                if(selectedSection != null) {
+                    List<Page> filteredPages = new ArrayList<Page>();
+                    for(Page page : pages) {
+                        if(selectedSection.equals(page.getSectionNumber())) {
+                            filteredPages.add(page);
+                        }
+                    }
+                    fileSelectionPanel.setInfo(filteredPages);
+                } else {
+                    fileSelectionPanel.setInfo(pages);
+                }
             }
         });
 

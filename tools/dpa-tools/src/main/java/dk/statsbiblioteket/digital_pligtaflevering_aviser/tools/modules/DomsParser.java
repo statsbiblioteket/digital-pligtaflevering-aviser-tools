@@ -103,10 +103,10 @@ public class DomsParser {
                                     DocumentBuilder builder = builderFactory.newDocumentBuilder();
                                     Document xmlDocument = builder.parse(inps);
 
-                                    String rootnameInCurrentXmlFile = getSectionName(xmlDocument);
+                                    String sectionName = getSectionName(xmlDocument);
                                     String sectionNumber = getSectionNumber(xmlDocument);
                                     String pageNumber = getPageNumber(xmlDocument);
-                                    title.addPage(new Page(fileItemName, rootnameInCurrentXmlFile, sectionNumber, pageNumber));
+                                    title.addPage(new Page(fileItemName, sectionName, sectionNumber, pageNumber));
 
                                 } catch (Exception e) {
                                     return null;

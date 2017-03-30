@@ -61,12 +61,21 @@ public class UiDataConverter {
     }
 
 
-    public static HashMap sectionConverter(Iterator<Page> pageIterator) {
+    /**
+     * Convert a pageiterator into a hashMap of pages, and use filter if delivered
+     * @param pageIterator
+     * @param sectionNumber
+     * @return
+     */
+    public static HashMap sectionConverter(Iterator<Page> pageIterator, String sectionNumber) {
         HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();
 
         while(pageIterator.hasNext()) {
             Page page = pageIterator.next();
-            hset.put(page.getSectionNumber(), new TitleComponent(page.getSectionName(), page.getSectionNumber(), 0, 0));
+
+            if(sectionNumber == null || sectionNumber.equals(page.getSectionNumber())) {
+                hset.put(page.getSectionNumber(), new TitleComponent(page.getSectionName(), page.getSectionNumber(), 0, 0));
+            }
         }
         return hset;
     }

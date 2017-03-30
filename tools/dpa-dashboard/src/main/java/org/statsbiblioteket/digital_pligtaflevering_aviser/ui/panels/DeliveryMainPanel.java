@@ -18,6 +18,7 @@ public class DeliveryMainPanel extends HorizontalLayout {
     protected DataModel model;//
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class);//
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class);//
+    protected String selectedSection = null;
 
 
     public DeliveryMainPanel() {
@@ -32,6 +33,10 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     }
 
+    public void addPageList(List<Page> pagelist) {
+        fileSelectionPanel.setInfo(pagelist);
+    }
+
 
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
@@ -43,11 +48,5 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     public List runThrough() {
         return new ArrayList();
-    }
-
-
-    public Wrapper getTitles() {
-
-        return null;
     }
 }

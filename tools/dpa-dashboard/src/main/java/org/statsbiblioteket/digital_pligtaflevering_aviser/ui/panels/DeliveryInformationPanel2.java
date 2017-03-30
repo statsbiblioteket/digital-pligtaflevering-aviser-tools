@@ -4,6 +4,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
@@ -11,6 +12,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataCo
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,20 +36,11 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 String selectedTitle = page.toString();
 
                 model.setSelectedTitle(selectedTitle);
-
-
-                /*try {
-                    model.initiateTitleHierachyFromFedora();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
-
+                selectedSection = null;
                 showTheSelectedTitle();
                 List<DeliveryIdentifier> list = model.getDeliverysFromTitle(selectedTitle);
 
                 deliveryPanel.setInfo(list);
-
-
             }
         });
 
@@ -58,18 +51,18 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 Object page = itemClickEvent.getItem().getItemProperty("name").getValue();
                 model.setSelectedDelivery(page.toString());
 
-
                 model.selectTitleDelivery();
-                /*try {
-                    model.initiateTitleHierachyFromFedora();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
+                selectedSection = null;
+                showTheSelectedTitle();
 
+            }
+        });
 
-
-
-
+        sectionSectionTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent itemClickEvent) {
+                Object selection = itemClickEvent.getItem().getItemProperty("sectionNumber").getValue();
+                selectedSection = selection.toString();
                 showTheSelectedTitle();
             }
         });
@@ -87,7 +80,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     private void showTheSelectedTitle() {
 
-        sectionSectionTable.cleanTable();
+
         fileSelectionPanel.setEnabled(false);
 
         String selectedDelivery = model.getSelectedDelivery();
@@ -96,21 +89,36 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
             return;
         }
 
-        Title it = model.getTitleObj(selectedDelivery, selectedTitle);
-        if(it==null) {
+        Title title = model.getTitleObj(selectedDelivery, selectedTitle);
+        if(title==null) {
             return;
         }
-        sectionSectionTable.setInfo(UiDataConverter.sectionConverter(it.getPage().iterator()).values());
+
         fileSelectionPanel.setEnabled(true);
-        fileSelectionPanel.setInfo(it.getPage());
+
+        List<Page> pages = title.getPage();
+
+        if(selectedSection != null) {
+            List<Page> filteredPages = new ArrayList<Page>();
+            for(Page page : pages) {
+                if(selectedSection.equals(page.getSectionNumber())) {
+                    filteredPages.add(page);
+                }
+            }
+            fileSelectionPanel.setInfo(filteredPages);
+        } else {
+            sectionSectionTable.cleanTable();
+            sectionSectionTable.setInfo(UiDataConverter.sectionConverter(title.getPage().iterator(), null).values());
+            fileSelectionPanel.setInfo(pages);
+        }
     }
 
     public List runThrough() {
 
-        List<DeliveryIdentifier> deliveryList = deliveryPanel.getSelections();
+        DeliveryIdentifier deliveryList = (DeliveryIdentifier)deliveryPanel.getSelection();
 
-        for(DeliveryIdentifier deliveryId : deliveryList) {
-            if(deliveryId.isChecked()) {
+        /*for(DeliveryIdentifier deliveryId : deliveryList) {
+            if(deliveryId.isChecked()) {*/
 
                 String selectedDelivery = model.getSelectedDelivery();
                 String selectedTitle = model.getSelectedTitle();
@@ -129,15 +137,9 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 UI.getCurrent().addWindow(dialog);
                 dialog.setListener(new Button.ClickListener() {
                     public void buttonClick(Button.ClickEvent event) {
-
                         UI.getCurrent().removeWindow(dialog);
-
-
                         model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
-
                     }});
-
-
 
                 dialog.addCloseListener(new Window.CloseListener() {
                     // inline close-listener
@@ -146,12 +148,9 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                         UI.getCurrent().removeWindow(dialog);
                     }
                 });
-
-
-            }
-        }
-
-        return deliveryList;
+            /*}
+        }*/
+        return null;
     }
 
 
