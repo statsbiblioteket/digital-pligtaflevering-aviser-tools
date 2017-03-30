@@ -30,7 +30,7 @@
         <init-param>
             <description>Vaadin UI to display</description>
             <param-name>UI</param-name>
-            <param-value>org.kb.ui.NewspaperUI</param-value>
+            <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI</param-value>
         </init-param>
                 <init-param>
             <description>Application widgetset</description>
