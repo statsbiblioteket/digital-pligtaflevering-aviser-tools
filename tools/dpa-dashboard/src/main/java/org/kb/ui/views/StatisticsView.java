@@ -13,6 +13,7 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.kb.ui.datamodel.DataModel;
 
 import org.kb.ui.panels.DeliveryInformationPanel;
@@ -36,6 +37,7 @@ public class StatisticsView extends VerticalLayout implements View {
     private Link link = new Link("Metadatlink", null);
     private Embedded pdf = new Embedded(null, null);
     private String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
+    private Page currentSelectedPage;
 
     public StatisticsView(String type) {
 
@@ -57,8 +59,8 @@ public class StatisticsView extends VerticalLayout implements View {
             case "1v2":
                 tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new HorizontalLayout();
-                pdf.setWidth("1000px");
-                pdf.setHeight("1500px");
+                pdf.setWidth("900px");
+                pdf.setHeight("1300px");
                 tabelsLayout.setHeight("1500px");
                 break;
             case "2v1":
@@ -70,8 +72,8 @@ public class StatisticsView extends VerticalLayout implements View {
             case "2v2":
                 tabelsLayout = new DeliveryInformationPanel2(model);
                 mainhlayout = new HorizontalLayout();
-                pdf.setWidth("1000px");
-                pdf.setHeight("1500px");
+                pdf.setWidth("900px");
+                pdf.setHeight("1300px");
                 tabelsLayout.setHeight("1500px");
                 break;
             default:
@@ -79,7 +81,8 @@ public class StatisticsView extends VerticalLayout implements View {
                 mainhlayout = new HorizontalLayout();
         }
 
-        final HorizontalLayout viewLayout = new HorizontalLayout();
+        final VerticalLayout viewLayout = new VerticalLayout();
+        final HorizontalLayout viewControlLayout = new HorizontalLayout();
         mainhlayout.setWidth("100%");
         mainhlayout.setHeight("100%");
 
@@ -101,6 +104,9 @@ public class StatisticsView extends VerticalLayout implements View {
                     model.initiateTitleHierachyFromFedora();
                     model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());
                 } else if("SAVECHECK".equals(event.getButton().getId())) {
+
+
+
 
 
 
@@ -128,13 +134,16 @@ public class StatisticsView extends VerticalLayout implements View {
             public void itemClick(ItemClickEvent itemClickEvent) {
 
                 try {
-                    Object page = itemClickEvent.getItem().getItemProperty("pageName");
 
 
-                    StreamResource recou= createStreamResource(page.toString());
-                    pdf.setSource(recou);
+                    currentSelectedPage = (Page)itemClickEvent.getItemId();
 
-                    Resource resource = new ExternalResource(path+URLEncoder.encode(page.toString(), "UTF-8")+".xml");
+
+
+                    StreamResource streamRecource= createStreamResource(currentSelectedPage.getPageName());
+                    pdf.setSource(streamRecource);
+
+                    Resource resource = new ExternalResource(path+URLEncoder.encode(currentSelectedPage.getPageName(), "UTF-8")+".xml");
                     link.setResource(resource);
                     link.setDescription("Link to Second Page");
 
@@ -145,11 +154,25 @@ public class StatisticsView extends VerticalLayout implements View {
         });
 
 
+        Button confirmViewButton = new Button("Confirmed");
+        confirmViewButton.addClickListener(new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+
+                model.addTextToCurrentItem(currentSelectedPage);
+
+            }});
+
+
         layout.addComponent(searchPanel);
 
         mainhlayout.addComponent(tabelsLayout);
+
+        viewControlLayout.addComponent(confirmViewButton);
+        viewControlLayout.addComponent(link);
+
+        viewLayout.addComponent(viewControlLayout);
         viewLayout.addComponent(pdf);
-        viewLayout.addComponent(link);
+
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
     }

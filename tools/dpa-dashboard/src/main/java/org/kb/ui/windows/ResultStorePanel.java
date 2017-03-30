@@ -1,20 +1,15 @@
 package org.kb.ui.windows;
 
-
-import com.google.gwt.user.client.ui.TextBox;
-import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import org.kb.ui.datamodel.DeliveryIdentifier;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +31,14 @@ public class ResultStorePanel extends VerticalLayout {
     public ResultStorePanel() {
         super();
         this.setSpacing(true);
+        beans=new BeanItemContainer(Page.class);
+        // Bind a table to it
+        table = new Table("Approved", beans);
+        table.setWidth("100%");
+        table.setHeight("100%");
+        table.setSelectable(true);
+        table.setImmediate(true);
+        this.addComponent(table);
 
         // Set the date to present
         date.setValue(new Date());
@@ -48,20 +51,18 @@ public class ResultStorePanel extends VerticalLayout {
 
     }
 
-
-
-    public ResultStorePanel(Class c) {
-        beans=new BeanItemContainer(c);
-
-        // Bind a table to it
-        table = new Table(c.getName(), beans);
-        table.setWidth("100%");
-        table.setHeight("100%");
-        table.setSelectable(true);
-        table.setImmediate(true);
-        this.addComponent(table);
+    public void setValues(DeliveryIdentifier item) {
+        for(Page o : item.getPages()) {
+            beans.addBean(o);
+        }
     }
 
+    /*public void setInfo(Collection delStat) {
+        beans.removeAllItems();
+        for(Object o : delStat) {
+            beans.addBean(o);
+        }
+    }*/
 
 
     public void setEnabled(boolean enabled) {
@@ -71,10 +72,6 @@ public class ResultStorePanel extends VerticalLayout {
 
     public void setCaption(String caption) {
         table.setCaption(caption);
-    }
-
-    public void cleanTable() {
-        table.removeAllItems();
     }
 
 

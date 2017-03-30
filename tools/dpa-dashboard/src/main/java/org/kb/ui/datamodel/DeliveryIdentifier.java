@@ -19,7 +19,7 @@ public class DeliveryIdentifier implements java.io.Serializable {
     @XmlElement(name = "articles")
     private Articles articles = new Articles();
 
-    @XmlElement(name = "pages")
+
     private Pages pages = new Pages();
 
     @XmlAttribute(name = "noOfArticle")
@@ -61,8 +61,13 @@ public class DeliveryIdentifier implements java.io.Serializable {
         articles.addArticle(fileName);
     }
 
+    @XmlElement
     public void setPages(List<Page> pages) {
         this.pages.setPages(pages);
+    }
+
+    public List<Page> getPages() {
+        return this.pages.getPages();
     }
 
     public void setArticles(List<Article> articles) {

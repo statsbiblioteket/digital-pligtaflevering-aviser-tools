@@ -12,10 +12,10 @@ import java.util.Iterator;
 /**
  * Created by mmj on 3/29/17.
  */
-public class DeliverySerializer {
+public class DeliveryFilesystemSerializer {
 
 
-    public static void saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
+    public static synchronized void saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
