@@ -12,6 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.PlainEventTriggerQuery;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
@@ -38,12 +39,14 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 
 /**
  *
  */
 public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecification, DomsItem> {
     private final HttpSolrServer summaSearch;
+    private final String recordBase;
     private SBOIEventIndex<Item> sboiEventIndex;
     private WebResource webResource;
     private EnhancedFedora efedora;
@@ -58,13 +61,15 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     @Inject
     public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource,
                           EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
-                          @Named(AUTONOMOUS_SBOI_URL) String summaLocation) {
+                          @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+                          @Named(DOMS_COLLECTION) String recordBase) {
         this.sboiEventIndex = sboiEventIndex;
         this.webResource = webResource;
         this.efedora = efedora;
         this.domsEventStorage = domsEventStorage;
         this.summaSearch = new SolrJConnector(summaLocation).getSolrServer();
 
+        this.recordBase = recordBase;
     }
 
     @Override
@@ -72,19 +77,26 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
         // -- Create and populate SBIO query and return the DOMS ids found as a stream.
 
-        if (querySpecification instanceof EventQuerySpecification == false) {
+        final EventTrigger.Query<Item> eventTriggerQuery;
+        final boolean details;
+
+        if (querySpecification instanceof EventQuerySpecification) {
+            EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
+
+            eventTriggerQuery = new EventTrigger.Query<>();
+            eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
+            eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
+            eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
+            eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
+
+            details = eventQuerySpecification.getDetails();
+        } else if (querySpecification instanceof SBOIQuerySpecification) {
+            SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
+            eventTriggerQuery = new PlainEventTriggerQuery<>(sboiQuerySpecification.getQ());
+            details = false;
+        } else {
             throw new UnsupportedOperationException("Bad query specification instance");
         }
-        EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
-
-        EventTrigger.Query<Item> eventTriggerQuery = new EventTrigger.Query<>();
-        eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
-        eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
-        eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
-        eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
-
-        boolean details = eventQuerySpecification.getDetails();
-
         try {
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
@@ -106,8 +118,9 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             throw e;
         } catch (CommunicationException e) {
             // well?
-            throw new RuntimeException("failed query for " + eventQuerySpecification, e);
+            throw new RuntimeException("failed query for " + querySpecification, e);
         }
+
     }
 
     @Override
@@ -115,8 +128,9 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         if (queryX instanceof SBOIQuerySpecification == false) {
             throw new UnsupportedOperationException("bad query type");
         }
+        // Emulate SBOIEventIndex construction of query string.
         SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) queryX;
-        final String q = sboiQuerySpecification.getQ();
+        final String q = " " + ("recordBase:" + recordBase).trim() + " " + sboiQuerySpecification.getQ();
 
         try {
             // Adapted from SolrProxyIterator.search()

@@ -23,6 +23,9 @@ public class SBOIEventIndex_RecordBaseAsParameter_PlainQuery<T extends Item> ext
     @Override
     protected String toQueryString(Query<T> query) {
 
+        if (query instanceof PlainEventTriggerQuery) {
+            return spaced("recordBase:" + recordBase) + ((PlainEventTriggerQuery) query).getQ();
+        }
         String originalQuery = super.toQueryString(query);
         String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
         String strippedQuery = originalQuery.substring(originalQueryPrefix.length());

@@ -1,9 +1,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.EventQuerySpecification" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
 <%@ page import="static java.time.temporal.ChronoUnit.DAYS" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
@@ -26,8 +28,11 @@
         String oldEvents = "";
         String itemTypes = "doms:ContentModel_DPARoundTrip";
 
-        final EventQuerySpecification eventQuerySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
-        List<DomsItem> l = repository.query(eventQuerySpecification).collect(Collectors.toList());
+        // domsModule.providesWorkToDoQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
+        final QuerySpecification querySpecification = new SBOIQuerySpecification(
+                "+item_model:\"doms:ContentModel_DPARoundTrip\" AND +success_event:Data_Archived"
+        );
+        List<DomsItem> l = repository.query(querySpecification).collect(Collectors.toList());
         request.setAttribute("l", l);
     }
 %>
@@ -37,9 +42,9 @@
     <table border="1" style="border-collapse:collapse;">
         <c:forEach var="event" items="${item.originalEvents}">
             <tr>
-                <td><c:out value="${event.success}"/></td>
-                <td><c:out value="${event.eventID}"/></td>
-                <td><c:out value="${event.date}"/></td>
+                <td>${event.success}</td>
+                <td>${event.eventID}</td>
+                <td>${event.date}</td>
                 <td>
                     <form action="deleteEventOnItem.jsp">
                         <input type="submit" value="Delete ${event.eventID}"/>
@@ -50,7 +55,9 @@
             </tr>
             <c:if test="${not empty event.details}">
                 <tr>
-                    <td colspan="4"><pre>${event.details}</pre></td>
+                    <td colspan="4">
+                        <Disabledpre>${fn:substring(event.details, 0, 1000)}</Disabledpre>
+                    </td>
                 </tr>
             </c:if>
         </c:forEach>
