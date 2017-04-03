@@ -138,9 +138,9 @@ public class SerializeModelTest {
         titleAdd1.addArticle(new Article("article1"));
         titleAdd1.addArticle(new Article("article2"));
 
-        titleAdd1.addPage(new Page("page1", "section", "pname", "pno"));
-        titleAdd1.addPage(new Page("page2", "section", "pname", "pno"));
-        titleAdd1.addPage(new Page("page3", "section", "pname", "pno"));
+        titleAdd1.addPage(new Page("uuid1", "page1", "section", "pname", "pno"));
+        titleAdd1.addPage(new Page("uuid2", "page2", "section", "pname", "pno"));
+        titleAdd1.addPage(new Page("uuid3", "page3", "section", "pname", "pno"));
 
 
         Title titleAdd2 = new Title("test2");
@@ -151,8 +151,8 @@ public class SerializeModelTest {
         titleAdd2.addArticle(new Article("article2"));
         titleAdd2.addArticle(new Article("article2"));
 
-        titleAdd2.addPage(new Page("page1", "section", "pname", "pno"));
-        titleAdd2.addPage(new Page("page2", "section", "pname", "pno"));
+        titleAdd2.addPage(new Page("uuid4", "page1", "section", "pname", "pno"));
+        titleAdd2.addPage(new Page("uuid5", "page2", "section", "pname", "pno"));
 
         jaxbMarshaller.marshal(deliveryStatistics, tempFile);
         String xmlResult = convertStreamToString(tempFile);

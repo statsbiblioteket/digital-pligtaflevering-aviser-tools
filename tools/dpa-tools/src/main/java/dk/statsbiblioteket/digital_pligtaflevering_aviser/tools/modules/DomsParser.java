@@ -65,53 +65,53 @@ public class DomsParser {
             DeliveryStatistics deliveryStatistics = new DeliveryStatistics();
             deliveryStatistics.setDeliveryName(domsItem.getPath());
 
-            while(roundtripIterator.hasNext()) {
+            while (roundtripIterator.hasNext()) {
 
                 DomsItem titleItem = roundtripIterator.next();
                 Iterator<DomsItem> titleSubfolder = this.processChildDomsId().apply(titleItem);
                 String titleName = titleItem.getPath();
-                Title title = new Title(titleName.substring(titleName.indexOf("/")+1));
+                Title title = new Title(titleName.substring(titleName.indexOf("/") + 1));
                 deliveryStatistics.addTitle(title);
 
-                while(titleSubfolder.hasNext()) {
+                while (titleSubfolder.hasNext()) {
                     DomsItem titleSubfolderItem = titleSubfolder.next();
-                    Stream<DomsItem> fileStream =titleSubfolderItem.children();
+                    Stream<DomsItem> fileStream = titleSubfolderItem.children();
                     Iterator<DomsItem> fileItemIterator = fileStream.iterator();
-                    while(fileItemIterator.hasNext()) {
+                    while (fileItemIterator.hasNext()) {
                         DomsItem fileItem = fileItemIterator.next();
                         String titleSubfolderItemName = titleSubfolderItem.getPath();
                         String fileItemName = fileItem.getPath();
+                        final List<DomsDatastream> datastreams = fileItem.datastreams();
+                        Optional<DomsDatastream> profileOptional = datastreams.stream()
+                                .filter(ds -> ds.getId().equals("XML"))
+                                .findAny();
 
-                        //fileItemName = fileItemName.substring(fileItemName.lastIndexOf("/"));
-                        if(titleSubfolderItemName.contains("articles")) {
-                            title.addArticle(new Article(fileItemName));
-                        } else if(titleSubfolderItemName.contains("pages")) {
+                        if (profileOptional.isPresent()) {
+                            try {
+                                DomsDatastream ds = profileOptional.get();
+                                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                                StringReader reader = new StringReader(ds.getDatastreamAsString());
+                                InputSource inps = new InputSource(reader);
 
-                            final List<DomsDatastream> datastreams = fileItem.datastreams();
-                            Optional<DomsDatastream> profileOptional = datastreams.stream()
-                                    .filter(ds -> ds.getId().equals("XML"))
-                                    .findAny();
+                                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                                DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                                Document xmlDocument = builder.parse(inps);
 
-                            if (profileOptional.isPresent()) {
-                                try {
-                                    DomsDatastream ds = profileOptional.get();
-                                    //We are reading this textstring as a String and are aware that thish might leed to encoding problems
-                                    StringReader reader = new StringReader(ds.getDatastreamAsString());
-                                    InputSource inps = new InputSource(reader);
+                                String sectionName = getSectionName(xmlDocument);
+                                String sectionNumber = getSectionNumber(xmlDocument);
+                                String pageNumber = getPageNumber(xmlDocument);
+                                String id = fileItem.getDomsId().id();
 
-                                    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                                    DocumentBuilder builder = builderFactory.newDocumentBuilder();
-                                    Document xmlDocument = builder.parse(inps);
-
-                                    String sectionName = getSectionName(xmlDocument);
-                                    String sectionNumber = getSectionNumber(xmlDocument);
-                                    String pageNumber = getPageNumber(xmlDocument);
-                                    title.addPage(new Page(fileItemName, sectionName, sectionNumber, pageNumber));
-
-                                } catch (Exception e) {
-                                    return null;
+                                //fileItemName = fileItemName.substring(fileItemName.lastIndexOf("/"));
+                                if (titleSubfolderItemName.contains("articles")) {
+                                    title.addArticle(new Article(id, fileItemName, sectionName, sectionNumber, pageNumber));
+                                } else if (titleSubfolderItemName.contains("pages")) {
+                                    title.addPage(new Page(id, fileItemName, sectionName, sectionNumber, pageNumber));
                                 }
+                            } catch (Exception e) {
+                                return null;
                             }
+
                         }
                     }
                 }
@@ -134,7 +134,7 @@ public class DomsParser {
 
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("/pdfinfo/positional/sectionname");
+        XPathExpression expr = xpath.compile("//sectionname");
         String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
         return sectionName;
     }
@@ -142,7 +142,7 @@ public class DomsParser {
     public String getSectionNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("/pdfinfo/positional/sectionnumber");
+        XPathExpression expr = xpath.compile("//sectionnumber");
         String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
         return sectionName;
     }
@@ -150,7 +150,7 @@ public class DomsParser {
     public String getPageNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("/pdfinfo/positional/pagenumber");
+        XPathExpression expr = xpath.compile("//pagenumber");
         String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
         return sectionName;
     }
