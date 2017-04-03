@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
+import com.google.common.base.Joiner;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -254,12 +255,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if (validationResults.size() > 0) {
-                String collectiveValidationString = new String();
-                for (String singleValidation : validationResults) {
-                    //FIXME: When the webclient is done this might need to be refactored to write this where the webclient fetches it
-                    collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
-                }
-                return Arrays.asList(ToolResult.fail(domsItem, "Checksum validation failed:  " + collectiveValidationString));
+                String collectiveValidationString = Joiner.on("\n").join(validationResults);
+                return Arrays.asList(ToolResult.fail(domsItem, "Checksum validation failed:\n\n" + collectiveValidationString));
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not process checksums.txt", e);

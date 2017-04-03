@@ -12,7 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
-import dk.statsbiblioteket.medieplatform.autonomous.PlainEventTriggerQuery;
+import dk.statsbiblioteket.medieplatform.autonomous.PassQThrough_Query;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
@@ -92,7 +92,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             details = eventQuerySpecification.getDetails();
         } else if (querySpecification instanceof SBOIQuerySpecification) {
             SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
-            eventTriggerQuery = new PlainEventTriggerQuery<>(sboiQuerySpecification.getQ());
+            eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
             details = false;
         } else {
             throw new UnsupportedOperationException("Bad query specification instance");

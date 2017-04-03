@@ -17,7 +17,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter_PlainQuery;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
 import javax.inject.Named;
@@ -150,7 +150,7 @@ public class DomsModule {
             @Named(DOMS_COLLECTION) String recordBase) {
 
         try {
-            return new SBOIEventIndex_RecordBaseAsParameter_PlainQuery<Item>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
+            return new SBOIEventIndex_DigitalPligtafleveringAviser<Item>(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

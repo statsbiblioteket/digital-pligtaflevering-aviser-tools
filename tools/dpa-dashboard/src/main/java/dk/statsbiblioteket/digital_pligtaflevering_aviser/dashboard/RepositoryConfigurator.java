@@ -12,7 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter_PlainQuery;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import javaslang.control.Try;
 
 import java.util.function.Function;
@@ -61,7 +61,7 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         SBOIEventIndex sboiEventIndex = Try.of(
                 // FIXME: Use provider instead of constructor
                 () -> {
-                    return new SBOIEventIndex_RecordBaseAsParameter_PlainQuery(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
+                    return new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
                 }
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);

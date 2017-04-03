@@ -4,12 +4,14 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.SBOIConstants" %>
 <html>
 <body>
 <i>Bem&aelig;rk: Data fremvist afspejler den aktuelle tilstand i SBIO Summa.  Data &aelig;ndres direkte i DOMS, og
     der g&aring;r "noget tid" inden SBOI Summa-indekset opdateres!</i>
 <p/>
-<%= new java.util.Date() %>
+<%= new java.util.Date() %><%!
+%>
 <h1>Oversigt</h1>
 <%
     ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
@@ -49,7 +51,7 @@
         </td>
         <td align="right">
             <%=
-            repository.count(new SBOIQuerySpecification(""))
+            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_READY_TO_INGEST))
             %>
         </td>
     </tr>

@@ -1,7 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 /**
- *
+ * SBOIQuerySpecification holds a plain query string for asking SBOI.  It is prepended with
+ * recordBase:.... so typically must start with an " AND " - clause.
  */
 public class SBOIQuerySpecification implements QuerySpecification {
     /**

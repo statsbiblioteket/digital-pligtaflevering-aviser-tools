@@ -9,7 +9,7 @@ are configured through properties provided to the main method.
 
 DPA has been developed against a local installation
 of DOMS+Bitrepository running in a VirtualBox image controlled by Vagrant. 
-To get the full benefit a similar setup is recommended.
+To get the full benefit a similar setup is recommended.  
 
 Note:  You probably need at least 12 GB RAM to comfortably work with the Vagrant box
 running.  
