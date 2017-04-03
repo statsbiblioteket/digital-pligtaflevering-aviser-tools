@@ -13,6 +13,9 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
@@ -25,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -38,6 +43,7 @@ public class StatisticsView extends VerticalLayout implements View {
     private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
     private String fedoraPath = "http://localhost:7880/fedora/objects/";
     private Page currentSelectedPage;
+    private Article currentSelectedArticle;
 
     public StatisticsView(String type) {
 
@@ -134,16 +140,55 @@ public class StatisticsView extends VerticalLayout implements View {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
+
                 try {
+                    if("ARTICLE".equals(itemClickEvent.getComponent().getId())) {
+                        currentSelectedArticle = (Article)itemClickEvent.getItemId();
+                        currentSelectedPage = null;
 
-                    currentSelectedPage = (Page)itemClickEvent.getItemId();
 
-                    StreamResource streamRecource= createStreamResource(currentSelectedPage.getPageName());
-                    pdf.setSource(streamRecource);
 
-                    Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
-                    link.setResource(resource);
-                    link.setDescription("Link to Second Page");
+                        pdf.setVisible(false);
+
+                        Resource resource = new ExternalResource(fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
+                        link.setResource(resource);
+                        link.setDescription("Link to Second Page");
+                    } else if("PAGE".equals(itemClickEvent.getComponent().getId())) {
+                        currentSelectedPage = (Page)itemClickEvent.getItemId();
+                        currentSelectedArticle = null;
+
+                        pdf.setVisible(true);
+
+
+
+
+
+                        String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
+
+                        StreamResource streamRecource= createStreamResource(path);
+                        pdf.setSource(streamRecource);
+
+                        /*DomsItem dItem = f.lookup("uuid:f1642d44-fe50-441e-bedb-99562a034353");
+
+                        String path = dItem.getPath();
+
+                        final List<DomsDatastream> datastreams = dItem.datastreams();
+                        Optional<DomsDatastream> profileOptional = datastreams.stream()
+                                .filter(ds -> ds.getId().equals("XML"))
+                                .findAny();*/
+
+
+                        System.out.println(path);
+
+
+
+
+
+                        Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
+                        link.setResource(resource);
+                        link.setDescription("Link to Second Page");
+                    }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -184,6 +229,8 @@ public class StatisticsView extends VerticalLayout implements View {
             @Override
             public InputStream getStream() {
                 try {
+
+
 
                     String pathString = bitRepoPath +fileUrl.replaceAll("#", "%23")+".pdf";
                     System.out.println(pathString);

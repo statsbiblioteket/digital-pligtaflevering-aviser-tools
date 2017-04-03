@@ -44,9 +44,6 @@ public class DeliveryListPanel extends VerticalLayout {
         table.setColumnExpandRatio("Date", 0.5f);
         table.setColumnExpandRatio("Name", 0.4f);
 
-
-
-
         table.addGeneratedColumn("Checked", new CheckBoxColumnGenerator());
 
         this.addComponent(table);
@@ -59,21 +56,16 @@ public class DeliveryListPanel extends VerticalLayout {
     class CheckBoxColumnGenerator implements Table.ColumnGenerator {
 
         @Override
-        public Component generateCell(Table source, Object itemId,
-                                      Object columnId) {
+        public Component generateCell(Table source, Object itemId, Object columnId) {
             Property prop = source.getItem(itemId).getItemProperty("Checked"); // if using getItemProperty(columnId) here instead of this the prop will be null
-
             CheckBox c = new CheckBox(null, prop);
-
             c.setHeight("13px");
-
             return c;
         }
     }
 
 
     public void setTheStuff(Collection<String> list) {
-
 
         itemList.clear();
         table.removeAllItems();
@@ -91,11 +83,6 @@ public class DeliveryListPanel extends VerticalLayout {
             //itemList.put(row1, o);
         }
 
-    }
-
-
-    public DomsItem getDomsItem(Item item) {
-        return itemList.get(item);
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {

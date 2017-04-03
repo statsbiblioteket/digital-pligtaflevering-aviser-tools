@@ -4,6 +4,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -24,7 +25,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"});
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"}, "DELIVERY");
 
 
     public DeliveryInformationPanel2(DataModel model) {
@@ -72,16 +73,25 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         this.addComponent(deliveryPanel);
         this.addComponent(sectionSectionTable);
         this.addComponent(fileSelectionPanel);
+        this.addComponent(articleSelectionPanel);
+
+        this.setExpandRatio(infoPanel, 0.1f);
+        this.setExpandRatio(deliveryPanel, 0.2f);
+        this.setExpandRatio(sectionSectionTable, 0.2f);
+        this.setExpandRatio(fileSelectionPanel, 0.4f);
+        this.setExpandRatio(articleSelectionPanel, 0.1f);
     }
 
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
+        articleSelectionPanel.addItemClickListener(listener);
     }
 
     private void showTheSelectedTitle() {
 
 
         fileSelectionPanel.setEnabled(false);
+        articleSelectionPanel.setEnabled(false);
 
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
@@ -95,8 +105,11 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         }
 
         fileSelectionPanel.setEnabled(true);
+        articleSelectionPanel.setEnabled(true);
 
         List<Page> pages = title.getPage();
+        List<Article> articles = title.getArticle();
+        articleSelectionPanel.setInfo(articles);
 
         if(selectedSection != null) {
             List<Page> filteredPages = new ArrayList<Page>();

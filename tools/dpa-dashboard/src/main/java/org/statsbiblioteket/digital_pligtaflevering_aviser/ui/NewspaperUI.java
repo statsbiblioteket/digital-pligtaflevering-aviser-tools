@@ -28,8 +28,6 @@ public class NewspaperUI extends UI
     protected static final String STATISTICSVIEW4 = "2v2";
 
 
-    FetchEventStructure eventStructureCommunication = new FetchEventStructure();
-    DataModel model = new DataModel();
 
     @Override
     protected void init(VaadinRequest request) {

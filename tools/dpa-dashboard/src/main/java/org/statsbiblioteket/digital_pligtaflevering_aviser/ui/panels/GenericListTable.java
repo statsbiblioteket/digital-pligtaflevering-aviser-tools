@@ -32,7 +32,7 @@ public class GenericListTable extends VerticalLayout {
         this.addComponent(table);
     }
 
-    public GenericListTable(Class c, String checkedColumn, String[] visibleColumns) {
+    public GenericListTable(Class c, String checkedColumn, String[] visibleColumns, String tableId) {
         this(c);
         checkedColumnName = checkedColumn;
         if(checkedColumnName!=null) {
@@ -42,6 +42,7 @@ public class GenericListTable extends VerticalLayout {
         if(visibleColumns!=null) {
             table.setVisibleColumns(visibleColumns);
         }
+        table.setId(tableId);
     }
 
 
@@ -82,9 +83,7 @@ public class GenericListTable extends VerticalLayout {
 
     public Object getSelection() {
         Object selectedIds = table.getValue();
-
         return selectedIds;
-
     }
 
 

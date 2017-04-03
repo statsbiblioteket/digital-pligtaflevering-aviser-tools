@@ -61,6 +61,8 @@ public class DataModel {
 
 
 
+
+
     public Set<String> getTitles() throws Exception {
         if(currentlySelectedTitleHiearachy==null) {
             initiateTitleHierachyFromFedora();
@@ -121,6 +123,10 @@ public class DataModel {
 
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
         return fedoraSerializer.getTitleObj(selectedDelivery, selectedTitle);
+    }
+
+    public DomsItem getItemFromUuid(String id) {
+        return fedoraSerializer.getItemFromUuid(id);
     }
 
 

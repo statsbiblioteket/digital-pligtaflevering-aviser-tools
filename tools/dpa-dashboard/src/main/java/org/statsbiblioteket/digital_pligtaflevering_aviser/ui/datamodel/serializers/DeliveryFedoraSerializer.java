@@ -50,6 +50,10 @@ public class DeliveryFedoraSerializer {
         });
     }
 
+    public DomsItem getItemFromUuid(String id) {
+        return eventFetch.lookup(id);
+    }
+
 
     public DomsItem getDeliveryFromName(String name) {
         return deliveryList.get(name);
@@ -144,14 +148,7 @@ public class DeliveryFedoraSerializer {
                     return null;
                 }
 
-                //Iterator<Page> it = selectedTitleObj.getPage().iterator();
-
                 return selectedTitleObj;
-
-                /*sectionSectionTable.setInfo(UiDataConverter.sectionConverter(it).values());
-
-                fileSelectionPanel.setEnabled(true);
-                fileSelectionPanel.setInfo(selectedTitleObj.getPage());*/
 
             } catch (Exception e) {
                 e.printStackTrace();
