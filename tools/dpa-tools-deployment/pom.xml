@@ -126,7 +126,7 @@
                     http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html
                     -->
                     <platforms>
-                        <platform>all</platform>
+                        <platform>unix</platform>
                     </platforms>
                     <configurationDirectory>conf</configurationDirectory>
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
