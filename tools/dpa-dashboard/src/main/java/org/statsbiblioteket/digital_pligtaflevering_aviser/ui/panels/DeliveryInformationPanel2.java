@@ -24,7 +24,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"});
 
 
     public DeliveryInformationPanel2(DataModel model) {

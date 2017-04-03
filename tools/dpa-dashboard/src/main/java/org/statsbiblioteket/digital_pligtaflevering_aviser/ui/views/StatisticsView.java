@@ -35,7 +35,8 @@ public class StatisticsView extends VerticalLayout implements View {
     private DataModel model = new DataModel();
     private Link link = new Link("Metadatlink", null);
     private Embedded pdf = new Embedded(null, null);
-    private String path = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
+    private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
+    private String fedoraPath = "http://localhost:7880/fedora/objects/";
     private Page currentSelectedPage;
 
     public StatisticsView(String type) {
@@ -46,6 +47,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
+        link.setTargetName("_blank");
 
 
         switch(type) {
@@ -134,15 +136,12 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 try {
 
-
                     currentSelectedPage = (Page)itemClickEvent.getItemId();
-
-
 
                     StreamResource streamRecource= createStreamResource(currentSelectedPage.getPageName());
                     pdf.setSource(streamRecource);
 
-                    Resource resource = new ExternalResource(path+URLEncoder.encode(currentSelectedPage.getPageName(), "UTF-8")+".xml");
+                    Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
                     link.setResource(resource);
                     link.setDescription("Link to Second Page");
 
@@ -186,7 +185,7 @@ public class StatisticsView extends VerticalLayout implements View {
             public InputStream getStream() {
                 try {
 
-                    String pathString = path+fileUrl.replaceAll("#", "%23")+".pdf";
+                    String pathString = bitRepoPath +fileUrl.replaceAll("#", "%23")+".pdf";
                     System.out.println(pathString);
 
                     URL uu = new URL(pathString);

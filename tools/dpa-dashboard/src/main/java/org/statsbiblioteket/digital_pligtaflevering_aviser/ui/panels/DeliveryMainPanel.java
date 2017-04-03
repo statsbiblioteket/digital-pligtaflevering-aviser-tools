@@ -16,8 +16,8 @@ import java.util.List;
 public class DeliveryMainPanel extends HorizontalLayout {
 
     protected DataModel model;//
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class);//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class);//
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, new String[]{"sectionName", "sectionNumber"});//
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"pageName", "pageNumber", "sectionName", "sectionNumber"});//
     protected String selectedSection = null;
 
 

@@ -16,7 +16,7 @@ import java.util.List;
 public class GenericListTable extends VerticalLayout {
 
     private String checkedColumnName;
-    private String columnFilter;
+    private String[] columnFilter;
     private BeanItemContainer beans;
     private Table table;
 
@@ -32,10 +32,16 @@ public class GenericListTable extends VerticalLayout {
         this.addComponent(table);
     }
 
-    public GenericListTable(Class c, String checkedColumn) {
+    public GenericListTable(Class c, String checkedColumn, String[] visibleColumns) {
         this(c);
         checkedColumnName = checkedColumn;
-        table.addGeneratedColumn(checkedColumn, new GenericListTable.CheckBoxColumnGenerator());
+        if(checkedColumnName!=null) {
+            table.addGeneratedColumn(checkedColumnName, new GenericListTable.CheckBoxColumnGenerator());
+        }
+        columnFilter = visibleColumns;
+        if(visibleColumns!=null) {
+            table.setVisibleColumns(visibleColumns);
+        }
     }
 
 
@@ -58,6 +64,7 @@ public class GenericListTable extends VerticalLayout {
         for(Object o : delStat) {
             beans.addBean(o);
         }
+
     }
 
 

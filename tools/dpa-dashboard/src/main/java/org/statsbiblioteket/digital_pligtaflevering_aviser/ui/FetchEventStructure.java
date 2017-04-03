@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  */
 public class FetchEventStructure {
 
-    ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+    ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/home/mmj/projects/digital-pligtaflevering-aviser-tools/tools/dpa-dashboard/src/test/resources/backend.properties");
     DomsRepository repository = new RepositoryProvider().apply(map);
     DomsModule domsModule = new DomsModule();
 
@@ -37,6 +37,13 @@ public class FetchEventStructure {
         }
         return null;
     }
+
+    public DomsItem lookup(String id) {
+        DomsItem item = repository.lookup(new DomsId(id));
+        System.out.println(item);
+        return item;
+    }
+
 
 
     public Stream<DomsItem> getStateManuallyStopped() {
