@@ -8,6 +8,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecificatio
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
@@ -45,10 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import java.io.File;
-import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -92,7 +90,6 @@ public class IngesterMain {
 
     @Module
     protected static class IngesterModule {
-        private static final String JMX_OBJECT_NAME = "jmx.object.name";
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
@@ -100,19 +97,15 @@ public class IngesterMain {
                          QuerySpecification workToDoQuery,
                          DomsRepository repository,
                          FileSystemDeliveryIngester ingester,
-                         @Named(JMX_OBJECT_NAME) String jmxObjectName
+                         DefaultToolMXBean mxBean
         ) {
 
             return () -> {
-                if (jmxObjectName != null && jmxObjectName.isEmpty() == false) {
-                    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-                    ObjectName name = new ObjectName(jmxObjectName);
-                    mbs.registerMBean(ingester, name);
-                }
                 final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
 
                 List<String> toolResults = repository.query(workToDoQuery)
                         .peek(domsItem -> log.info("Procesing {}", domsItem))
+                        .peek(domsItem -> mxBean.currentId = domsItem.toString())
                         .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
                         .collect(Collectors.toList());
 
@@ -364,9 +357,6 @@ public class IngesterMain {
             };
         }
 
-        @Provides
-        @Named(JMX_OBJECT_NAME) String provideJmxObjectName(ConfigurationMap map) {
-            return map.getRequired(JMX_OBJECT_NAME);
-        }
+
     }
 };

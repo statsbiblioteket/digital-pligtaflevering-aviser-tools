@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -105,6 +106,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     protected final Function<String, String> encodePublicURLForFileID;
     protected final Function<Path, Stream<Path>> deliveriesForPath;
     private final Function<List<ToolResult>, String> eventMessageForToolResults;
+    private final DefaultToolMXBean mxBean;
     private String status;
 
     @Inject
@@ -121,6 +123,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
                                       Function<Path, Stream<Path>> deliveriesForPath,
                                       Function<List<ToolResult>, String> eventMessageForToolResults,
+                                      DefaultToolMXBean mxBean,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
@@ -132,6 +135,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.encodePublicURLForFileID = encodePublicURLForFileID;
         this.deliveriesForPath = deliveriesForPath;
         this.eventMessageForToolResults = eventMessageForToolResults;
+        this.mxBean = mxBean;
 
         this.bitmagUrl = bitmagUrl;
         this.bitrepositoryIngesterCollectionId = bitrepositoryIngesterCollectionId;
@@ -249,6 +253,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
 
+        mxBean.details = "Checking checksums for " + deliveryPath;
+
         DeliveryMD5Validation md5validations;
         try {
             md5validations = new DeliveryMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
@@ -364,10 +370,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                     final String id = entry.getKey();
                     String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
                     final List<Path> filesForPage = entry.getValue();
+                    mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
                     return filesForPage.stream()
                             .sorted()
                             .map(path -> {
                                 log.trace("Page file {} for {}", path, id);
+                                mxBean.idsProcessed++;
                                 try {
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
