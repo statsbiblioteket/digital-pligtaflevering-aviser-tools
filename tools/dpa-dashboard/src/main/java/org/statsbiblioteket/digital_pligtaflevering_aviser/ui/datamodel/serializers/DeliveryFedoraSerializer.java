@@ -103,7 +103,7 @@ public class DeliveryFedoraSerializer {
                     XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/pages/page");
                     NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
 
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(titleItem, new DeliveryIdentifier(delivery, articles.getLength(), pages.getLength()));
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(titleItem, new DeliveryIdentifier(delivery, titleItem, articles.getLength(), pages.getLength()));
                 }
             }
         }

@@ -1,11 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifiers;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Iterator;
 
@@ -19,11 +19,11 @@ public class DeliveryFilesystemSerializer {
 
         String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
-        if(!folderForThis.exists()) {
+        if (!folderForThis.exists()) {
             folderForThis.mkdir();
         }
 
-        Iterator<String> keyIterator = currentlySelectedTitleHiearachy.getDeliveryStructure().keySet().iterator();
+        Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -31,29 +31,43 @@ public class DeliveryFilesystemSerializer {
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
 
-        while(keyIterator.hasNext()) {
+        while (keyIterator.hasNext()) {
 
-            String currentKey = keyIterator.next();
-            String currentTitleDeliveryFile = currentFolder + "/" + currentKey;
-            File folderForThisTitle = new File(currentTitleDeliveryFile);
-            if(!folderForThisTitle.exists()) {
-                folderForThisTitle.mkdir();
-            }
+            DeliveryIdentifier deliId = keyIterator.next();
 
-            DeliveryIdentifiers deli = currentlySelectedTitleHiearachy.getDeliveryStructure().get(currentKey);
+            String deliName = deliId.getDeliveryName();
+            String deliTitle = deliId.getNewspaperTitle();
+            File folderForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
 
-            for(DeliveryIdentifier deliId : deli.getDeliveries()) {
-
-                String deliName = deliId.getName();
-                File folderForThisTitleDelivery = new File(currentTitleDeliveryFile + "/" + deliName + ".xml");
-
-                if(!folderForThisTitleDelivery.exists()) {
-                    jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
-                }
+            if (!folderForThisTitleDelivery.exists()) {
+                jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
             }
         }
     }
 
+
+    public static TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
+        TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
+
+        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+        File folderForThis = new File(currentFolder);
+        if (!folderForThis.exists()) {
+            return null;
+        }
+
+        File[] listOfFiles = folderForThis.listFiles();
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
+
+        for (File titleFolder : listOfFiles) {
+
+            DeliveryIdentifier deli = (DeliveryIdentifier) jaxbUnMarshaller.unmarshal(titleFolder);
+            currentlySelectedTitleHiearachy.addDeliveryToTitle(deli.getDeliveryName(), deli);
+
+        }
+        return currentlySelectedTitleHiearachy;
+    }
 
 
     public static void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {

@@ -1,22 +1,15 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Wrapper;
-import org.xml.sax.InputSource;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 
 /**
@@ -30,48 +23,21 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     public DeliveryInformationPanel(DataModel model) {
         super(model);
-        //table1.setEnabled(false);
         fileSelectionPanel.setEnabled(false);
 
         deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-
                 com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
                 String selectedDelivery = selectedItem.getItemProperty("Name").getValue().toString();
-                DomsItem dItem = model.getDeliveryFromName(selectedDelivery);
                 model.setSelectedDelivery(selectedDelivery);
-
-                    //DomsItem dItem = deliveryListPanel.getDomsItem(selectedItem);
-
-                    final List<DomsDatastream> datastreams = dItem.datastreams();
-                    Optional<DomsDatastream> profileOptional = datastreams.stream()
-                            .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
-                            .findAny();
-
-
-                    if (profileOptional.isPresent()) {
-                        try {
-                            DomsDatastream ds = profileOptional.get();
-                            //We are reading this textstring as a String and are aware that thish might leed to encoding problems
-                            StringReader reader = new StringReader(ds.getDatastreamAsString());
-                            InputSource inps = new InputSource(reader);
-
-                            JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
-                            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                            DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
-
-                            titleListPanel.setInfo(deserializedObject);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    //table1.setEnabled(false);
-                    fileSelectionPanel.setEnabled(false);
-
+                List<DeliveryIdentifier> l = model.getOtherFromDelivery();
+                titleListPanel.setInfo(l);
             }
         });
+
+
+
 
 
 
@@ -79,7 +45,27 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
-                List<Page> pages = ((Title)itemClickEvent.getItemId()).getPage();
+                Object titleSelect = itemClickEvent.getItem().getItemProperty("newspaperTitle").getValue();
+                model.setSelectedTitle(titleSelect.toString());
+
+
+                String selectedDelivery = model.getSelectedDelivery();
+                String selectedTitle = model.getSelectedTitle();
+
+
+
+
+                if(selectedDelivery==null || selectedTitle==null) {
+                    return;
+                }
+
+                Title title = model.getTitleObj(selectedDelivery, selectedTitle);
+                if(title==null) {
+                    return;
+                }
+
+
+                List<Page> pages = title.getPage();
                 sectionSectionTable.setInfo(UiDataConverter.sectionConverter(pages.iterator(), null).values());
                 fileSelectionPanel.setEnabled(true);
 
@@ -111,13 +97,14 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
     }
 
-    public Wrapper getTitles() {
-
-        return titleListPanel.getTitles();
-    }
 
 
-    public void performIt() {
+    public void performIt()  {
+        try {
+            model.initiateTitleHierachyFromFilesystem();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         deliveryListPanel.setTheStuff(model.getInitiatedDeliveries());
     }
 }

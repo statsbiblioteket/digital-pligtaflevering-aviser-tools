@@ -14,7 +14,9 @@ import java.util.List;
 public class DeliveryIdentifier implements java.io.Serializable {
 
 
-    private String name;
+    private String deliveryName;
+
+    private String newspaperTitle;
 
     @XmlElement(name = "articles")
     private Articles articles = new Articles();
@@ -42,20 +44,31 @@ public class DeliveryIdentifier implements java.io.Serializable {
      * construct the title with a titleName and an empty list of pages and articles
      * @param name
      */
-    public DeliveryIdentifier(String name, int noOfArticles, int noOfPages) {
-        this.name = name;
+    public DeliveryIdentifier(String deliveryName, String newspaperTitle, int noOfArticles, int noOfPages) {
+        this.deliveryName = deliveryName;
+        this.newspaperTitle = newspaperTitle;
         this.noOfArticles = noOfArticles;
         this.noOfPages = noOfPages;
     }
 
     @XmlAttribute
-    public void setName(String name) {
-        this.name = name;
+    public void setDeliveryName(String deliveryName) {
+        this.deliveryName = deliveryName;
     }
 
-    public String getName() {
-        return this.name;
+    public String getDeliveryName() {
+        return this.deliveryName;
     }
+
+    @XmlAttribute
+    public void setNewspaperTitle(String newspaperTitle) {
+        this.newspaperTitle = newspaperTitle;
+    }
+
+    public String getNewspaperTitle() {
+        return this.newspaperTitle;
+    }
+
 
     public void addArticle(Article fileName) {
         articles.addArticle(fileName);

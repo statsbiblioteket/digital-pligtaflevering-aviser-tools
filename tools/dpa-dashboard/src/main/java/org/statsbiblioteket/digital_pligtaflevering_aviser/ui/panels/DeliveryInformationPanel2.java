@@ -25,7 +25,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"}, "DELIVERY");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", null/*new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"}*/, "DELIVERY");
 
 
     public DeliveryInformationPanel2(DataModel model) {
@@ -49,7 +49,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("name").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("deliveryName").getValue();
                 model.setSelectedDelivery(page.toString());
 
                 model.selectTitleDelivery();

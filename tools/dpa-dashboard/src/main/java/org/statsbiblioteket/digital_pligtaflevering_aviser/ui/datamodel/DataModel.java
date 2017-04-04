@@ -4,15 +4,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +42,13 @@ public class DataModel {
         this.selectedDelivery = selectedDelivery;
     }
 
+    public List<Delivery> getTitlesFromDelivery() {
+        ArrayList<Delivery> del = new ArrayList<Delivery>();
+
+return del;
+
+    }
+
     public String getSelectedTitle() {
         return selectedTitle;
     }
@@ -64,27 +69,17 @@ public class DataModel {
 
 
 
-    public Set<String> getTitles() throws Exception {
-        if(currentlySelectedTitleHiearachy==null) {
-            initiateTitleHierachyFromFedora();
-        }
-        return currentlySelectedTitleHiearachy.getDeliveryStructure().keySet();
-    }
-
-    public Set<String> getTitlesFromFileSystem() throws Exception {
+    public List<String> getTitlesFromFileSystem() throws Exception {
         if(currentlySelectedTitleHiearachy==null) {
             initiateTitleHierachyFromFilesystem();
         }
-        return currentlySelectedTitleHiearachy.getDeliveryStructure().keySet();
+
+        return currentlySelectedTitleHiearachy.getAllTitles();
     }
 
     public void selectTitleDelivery() {
-        List<DeliveryIdentifier> delList = currentlySelectedTitleHiearachy.getDeliveryStructure().get(selectedTitle).getDeliveries();
-        for(DeliveryIdentifier delItem : delList) {
-            if(selectedDelivery.equals(delItem.getName())) {
-                selectedDelItem = delItem;
-            }
-        }
+
+        selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
     }
 
     public void addCheckedPage(Page page) {
@@ -101,9 +96,12 @@ public class DataModel {
     }
 
     public List<DeliveryIdentifier> getDeliverysFromTitle(String title) {
-        return currentlySelectedTitleHiearachy.getDeliveryStructure().get(title).getDeliveries();
+        return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
     }
 
+    public List<DeliveryIdentifier> getOtherFromDelivery() {
+        return currentlySelectedTitleHiearachy.getOtherStructure(selectedDelivery);
+    }
 
     public void initiateDeliveries(String info) {
         fedoraSerializer.initiateDeliveries(info);
@@ -147,26 +145,7 @@ public class DataModel {
 
 
     public void initiateTitleHierachyFromFilesystem() throws Exception {
-        currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
-        Iterator<String> titles = this.getInitiatedDeliveries().iterator();
-
-        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
-        File folderForThis = new File(currentFolder);
-        if(!folderForThis.exists()) {
-            folderForThis.mkdir();
-        }
-        File[] listOfFiles = folderForThis.listFiles();
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
-        Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
-
-        for(File titleFolder : listOfFiles) {
-            File[] listOfXmls = titleFolder.listFiles();
-            for(File xmlFile : listOfXmls) {
-                DeliveryIdentifier deli = (DeliveryIdentifier)jaxbUnMarshaller.unmarshal(xmlFile);
-                currentlySelectedTitleHiearachy.addDeliveryToTitle(titleFolder.getName(), deli);
-            }
-        }
+        currentlySelectedTitleHiearachy = DeliveryFilesystemSerializer.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
 
