@@ -126,12 +126,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
         }
     }
 
-    public List runThrough() {
-
-        DeliveryIdentifier deliveryList = (DeliveryIdentifier)deliveryPanel.getSelection();
-
-        /*for(DeliveryIdentifier deliveryId : deliveryList) {
-            if(deliveryId.isChecked()) {*/
+    public void setCheckedState() {
 
                 String selectedDelivery = model.getSelectedDelivery();
                 String selectedTitle = model.getSelectedTitle();
@@ -161,9 +156,6 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                         UI.getCurrent().removeWindow(dialog);
                     }
                 });
-            /*}
-        }*/
-        return null;
     }
 
 

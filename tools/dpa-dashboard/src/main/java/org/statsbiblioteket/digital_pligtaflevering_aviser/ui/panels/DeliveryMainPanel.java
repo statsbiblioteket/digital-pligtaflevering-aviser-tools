@@ -42,7 +42,7 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     }
 
-    public List runThrough() {
-        return new ArrayList();
+    public void setCheckedState() {
+
     }
 }

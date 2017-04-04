@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
@@ -86,8 +87,12 @@ public class DataModel {
         }
     }
 
-    public void addTextToCurrentItem(Page page) {
+    public void addCheckedPage(Page page) {
         selectedDelItem.addPages(page);
+    }
+
+    public void addCheckedArticle(Article article) {
+        selectedDelItem.addArticle(article);
     }
 
 

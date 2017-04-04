@@ -13,8 +13,7 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -27,9 +26,6 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -56,7 +52,7 @@ public class StatisticsView extends VerticalLayout implements View {
         link.setTargetName("_blank");
 
 
-        switch(type) {
+        switch (type) {
             case "1v1":
                 tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new VerticalLayout();
@@ -103,31 +99,16 @@ public class StatisticsView extends VerticalLayout implements View {
             public void buttonClick(Button.ClickEvent event) {
                 try {
 
-                if("SEARCHBUTTON".equals(event.getButton().getId())) {
-                    model.setSelectedMonth(searchPanel.getSelectedDate());
-                    model.initiateDeliveries("Data_Archived");
-                    tabelsLayout.performIt();
-                } else if("STOREBUTTON".equals(event.getButton().getId())) {
-                    model.initiateTitleHierachyFromFedora();
-                    model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());
-                } else if("SAVECHECK".equals(event.getButton().getId())) {
-
-
-
-
-
-
-                    tabelsLayout.runThrough();
-
-
-
-
-
-
-
-
-
-                }
+                    if ("SEARCHBUTTON".equals(event.getButton().getId())) {
+                        model.setSelectedMonth(searchPanel.getSelectedDate());
+                        model.initiateDeliveries("Data_Archived");
+                        tabelsLayout.performIt();
+                    } else if ("STOREBUTTON".equals(event.getButton().getId())) {
+                        model.initiateTitleHierachyFromFedora();
+                        model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());
+                    } else if ("SAVECHECK".equals(event.getButton().getId())) {
+                        tabelsLayout.setCheckedState();
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -142,47 +123,25 @@ public class StatisticsView extends VerticalLayout implements View {
 
 
                 try {
-                    if("ARTICLE".equals(itemClickEvent.getComponent().getId())) {
-                        currentSelectedArticle = (Article)itemClickEvent.getItemId();
+                    if ("ARTICLE".equals(itemClickEvent.getComponent().getId())) {
+                        currentSelectedArticle = (Article) itemClickEvent.getItemId();
                         currentSelectedPage = null;
-
-
 
                         pdf.setVisible(false);
 
                         Resource resource = new ExternalResource(fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
                         link.setResource(resource);
                         link.setDescription("Link to Second Page");
-                    } else if("PAGE".equals(itemClickEvent.getComponent().getId())) {
-                        currentSelectedPage = (Page)itemClickEvent.getItemId();
+                    } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
+                        currentSelectedPage = (Page) itemClickEvent.getItemId();
                         currentSelectedArticle = null;
 
                         pdf.setVisible(true);
 
-
-
-
-
                         String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
 
-                        StreamResource streamRecource= createStreamResource(path);
+                        StreamResource streamRecource = createStreamResource(path);
                         pdf.setSource(streamRecource);
-
-                        /*DomsItem dItem = f.lookup("uuid:f1642d44-fe50-441e-bedb-99562a034353");
-
-                        String path = dItem.getPath();
-
-                        final List<DomsDatastream> datastreams = dItem.datastreams();
-                        Optional<DomsDatastream> profileOptional = datastreams.stream()
-                                .filter(ds -> ds.getId().equals("XML"))
-                                .findAny();*/
-
-
-                        System.out.println(path);
-
-
-
-
 
                         Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
                         link.setResource(resource);
@@ -201,9 +160,14 @@ public class StatisticsView extends VerticalLayout implements View {
         confirmViewButton.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
 
-                model.addTextToCurrentItem(currentSelectedPage);
-
-            }});
+                if(currentSelectedPage!=null) {
+                    model.addCheckedPage(currentSelectedPage);
+                }
+                if(currentSelectedArticle!=null) {
+                    model.addCheckedArticle(currentSelectedArticle);
+                }
+            }
+        });
 
 
         layout.addComponent(searchPanel);
@@ -231,8 +195,7 @@ public class StatisticsView extends VerticalLayout implements View {
                 try {
 
 
-
-                    String pathString = bitRepoPath +fileUrl.replaceAll("#", "%23")+".pdf";
+                    String pathString = bitRepoPath + fileUrl.replaceAll("#", "%23") + ".pdf";
                     System.out.println(pathString);
 
                     URL uu = new URL(pathString);
