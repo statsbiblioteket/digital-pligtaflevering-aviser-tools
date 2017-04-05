@@ -16,7 +16,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
     public DeliveryInformationPanel(DataModel model) {
         super(model);
         fileSelectionPanel.setEnabled(false);
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"});
+
         deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -29,10 +29,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
         });
 
 
-
-
-
-
+        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"});
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -53,11 +50,11 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
     public void insertInitialTableValues()  {
-        try {
+        /*try {
             model.initiateTitleHierachyFromFilesystem();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        deliveryListPanel.setTheStuff(model.getInitiatedDeliveries());
+        }*/
+        deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
 }

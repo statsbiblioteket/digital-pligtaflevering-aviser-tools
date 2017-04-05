@@ -26,7 +26,7 @@ public class DeliveryListPanel extends VerticalLayout {
     public DeliveryListPanel() {
 
         // Bind a table to it
-        table = new Table("Beans of All Sorts");
+        table = new Table("Deliveries");
 
         table.addContainerProperty("Checked", Boolean.class, null);
         table.addContainerProperty("Date", Date.class, null);
@@ -38,8 +38,6 @@ public class DeliveryListPanel extends VerticalLayout {
 
         table.setVisibleColumns(new String[]{"Checked", "Date", "Name"});
 
-        //table.setColumnExpandRatio();
-
         table.setColumnExpandRatio("Checked", 0.1f);
         table.setColumnExpandRatio("Date", 0.5f);
         table.setColumnExpandRatio("Name", 0.4f);
@@ -48,9 +46,6 @@ public class DeliveryListPanel extends VerticalLayout {
 
         this.addComponent(table);
     }
-
-
-
 
 
     class CheckBoxColumnGenerator implements Table.ColumnGenerator {
@@ -64,8 +59,11 @@ public class DeliveryListPanel extends VerticalLayout {
         }
     }
 
-
-    public void setTheStuff(Collection<String> list) {
+    /**
+     * Insert values into the table
+     * @param list
+     */
+    public void setValues(Collection<String> list) {
 
         itemList.clear();
         table.removeAllItems();
@@ -80,9 +78,7 @@ public class DeliveryListPanel extends VerticalLayout {
                 e.printStackTrace();
             }
             row1.getItemProperty("Name").setValue(item);
-            //itemList.put(row1, o);
         }
-
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {

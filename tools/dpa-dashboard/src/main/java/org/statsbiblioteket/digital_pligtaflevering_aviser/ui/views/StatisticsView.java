@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
+import com.sun.jndi.toolkit.url.Uri;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -13,8 +14,10 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
@@ -27,7 +30,9 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 
 
 /**
@@ -38,6 +43,7 @@ public class StatisticsView extends VerticalLayout implements View {
     private DataModel model = new DataModel();
     private Link link = new Link("Metadatlink", null);
     private Embedded pdf = new Embedded(null, null);
+    private DeliveryMainPanel tabelsLayout;
     private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
     private String fedoraPath = "http://localhost:7880/fedora/objects/";
     private Page currentSelectedPage;
@@ -48,7 +54,7 @@ public class StatisticsView extends VerticalLayout implements View {
         MenuBar header = new MenuBar();
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
-        DeliveryMainPanel tabelsLayout;
+
 
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
@@ -109,6 +115,7 @@ public class StatisticsView extends VerticalLayout implements View {
                 tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new HorizontalLayout();
         }
+        tabelsLayout.setVisible(false);
 
         final VerticalLayout viewLayout = new VerticalLayout();
         final HorizontalLayout viewControlLayout = new HorizontalLayout();
@@ -125,14 +132,30 @@ public class StatisticsView extends VerticalLayout implements View {
             public void buttonClick(Button.ClickEvent event) {
                 try {
 
-                    if ("SEARCHBUTTON".equals(event.getButton().getId())) {
+                    if ("PREPAREBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
+                        if(model.isMonthInitiated(searchPanel.getSelectedDate())) {
+                            Notification.show("This mont is allready prepared");
+                            tabelsLayout.insertInitialTableValues();
+                            panelPrepare(false);
+                            return;
+                        }
                         model.initiateDeliveries("Statistics_generated");
-                        //model.initiateTitleHierachyFromFedora();
-                        tabelsLayout.insertInitialTableValues();
-                    } else if ("STOREBUTTON".equals(event.getButton().getId())) {
                         model.initiateTitleHierachyFromFedora();
-                        model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());
+
+                        panelPrepare(true);
+                    } else if ("START".equals(event.getButton().getId())) {
+                        model.setSelectedMonth(searchPanel.getSelectedDate());
+                        if(!model.isMonthInitiated(searchPanel.getSelectedDate())) {
+                            Notification.show("This mont is not prepared");
+                            tabelsLayout.insertInitialTableValues();
+                            panelPrepare(false);
+                            return;
+                        }
+                        model.initiateDeliveries("Statistics_generated");
+                        model.initiateTitleHierachyFromFilesystem();
+                        tabelsLayout.insertInitialTableValues();
+                        panelPrepare(true);
                     } else if ("SAVECHECK".equals(event.getButton().getId())) {
                         tabelsLayout.setCheckedState();
                     }
@@ -164,12 +187,10 @@ public class StatisticsView extends VerticalLayout implements View {
                         currentSelectedArticle = null;
 
                         pdf.setVisible(true);
-
                         String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
-
-                        StreamResource streamRecource = createStreamResource(path);
+                        final URI uri = new URI(null, null, bitRepoPath + path + ".pdf", null);
+                        StreamResource streamRecource = createStreamResource(uri);
                         pdf.setSource(streamRecource);
-
                         Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
                         link.setResource(resource);
                         link.setDescription("Link to Second Page");
@@ -211,29 +232,27 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.addComponent(mainhlayout);
     }
 
-    int count = 0;//TODO: MAKE THAT BETTER
+    private void panelPrepare(boolean prepare) {
+        pdf.setVisible(prepare);
+        link.setVisible(prepare);
+        tabelsLayout.setVisible(prepare);
+    }
 
 
-    private StreamResource createStreamResource(final String fileUrl) {
-        count++;
-        StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
+    private synchronized StreamResource createStreamResource(final URI uri) throws Exception {
+
+        final StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 try {
-
-
-                    String pathString = bitRepoPath + fileUrl.replaceAll("#", "%23") + ".pdf";
-                    System.out.println(pathString);
-
-                    URL uu = new URL(pathString);
-                    InputStream inps = uu.openStream();
+                    InputStream inps = uri.toURL().openStream();
                     return inps;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return null;
                 }
             }
-        }, "tst" + count + ".pdf");
+        }, "page.pdf"  );
         resource.setMIMEType("application/pdf");
         resource.setCacheTime(1000);
         return resource;

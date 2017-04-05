@@ -15,12 +15,15 @@ import java.util.Iterator;
 public class DeliveryFilesystemSerializer {
 
 
-    public static synchronized void saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
+    public synchronized boolean saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             folderForThis.mkdir();
+        }
+        else {
+            return false;
         }
 
         Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
@@ -43,10 +46,19 @@ public class DeliveryFilesystemSerializer {
                 jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
             }
         }
+        return true;
+    }
+
+    public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
+
+        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+
+        File folderForThis = new File(currentFolder);
+        return folderForThis.exists();
     }
 
 
-    public static TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
+    public TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
         TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
 
         String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
@@ -63,14 +75,14 @@ public class DeliveryFilesystemSerializer {
         for (File titleFolder : listOfFiles) {
 
             DeliveryIdentifier deli = (DeliveryIdentifier) jaxbUnMarshaller.unmarshal(titleFolder);
-            currentlySelectedTitleHiearachy.addDeliveryToTitle(deli.getDeliveryName(), deli);
+            currentlySelectedTitleHiearachy.addDeliveryToTitle(deli);
 
         }
         return currentlySelectedTitleHiearachy;
     }
 
 
-    public static void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
+    public void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = "/home/mmj/tools/tomcat/" + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 

@@ -39,11 +39,11 @@ public class DeliveryFedoraSerializer {
 
     private FetchEventStructure eventFetch = new FetchEventStructure();
     private HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
-    private DomsItem domsItem;
     private DomsParser parser = new DomsParser();
 
 
     public void initiateDeliveries(String info) {
+        deliveryList.clear();
         Stream<DomsItem> items = eventFetch.getCustomState(info);
         items.forEach(new Consumer<DomsItem>() {
             @Override
@@ -106,7 +106,7 @@ public class DeliveryFedoraSerializer {
                     XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/pages/page");
                     NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
 
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(titleItem, new DeliveryIdentifier(delivery, titleItem, articles.getLength(), pages.getLength()));
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryIdentifier(delivery, titleItem, articles.getLength(), pages.getLength()));
                 }
             }
         }
@@ -176,7 +176,7 @@ public class DeliveryFedoraSerializer {
 
     public void writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
-        domsItem = getDeliveryFromName(deliveryName);
+        DomsItem domsItem = getDeliveryFromName(deliveryName);
         DomsItem selectedTitleItem = null;
 
         Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(domsItem);

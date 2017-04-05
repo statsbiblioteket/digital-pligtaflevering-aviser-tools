@@ -1,13 +1,8 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.util.List;
 

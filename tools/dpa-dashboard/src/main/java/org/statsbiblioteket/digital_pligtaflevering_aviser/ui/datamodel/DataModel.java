@@ -4,12 +4,10 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -114,7 +112,7 @@ public class DataModel {
         try {
             DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment);
 
-            DeliveryFilesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, deli);
+            filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, deli);
             fedoraSerializer.writeStuff(deli);
 
 
@@ -146,7 +144,7 @@ public class DataModel {
 
 
     public void initiateTitleHierachyFromFilesystem() throws Exception {
-        currentlySelectedTitleHiearachy = DeliveryFilesystemSerializer.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
+        currentlySelectedTitleHiearachy = filesystemSerializer.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
 
@@ -155,9 +153,14 @@ public class DataModel {
     }
 
 
-    public void saveCurrentTitleHierachyToFilesystem(Date selectedMonth) throws Exception {
+    public boolean saveCurrentTitleHierachyToFilesystem(Date selectedMonth) throws Exception {
         currentlySelectedMonth = dateFormat.format(selectedMonth);
-        DeliveryFilesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+        return filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+    }
+
+    public boolean isMonthInitiated(Date selectedMonth) {
+        currentlySelectedMonth = dateFormat.format(selectedMonth);
+        return filesystemSerializer.isMonthInitiated(currentlySelectedMonth);
     }
 
 

@@ -23,7 +23,7 @@ public class TitleDeliveryHierachy {
     private ArrayList<DeliveryIdentifier> otherStructure = new ArrayList<DeliveryIdentifier>();
 
 
-    public void addDeliveryToTitle(String title, DeliveryIdentifier ds) {
+    public void addDeliveryToTitle(DeliveryIdentifier ds) {
         otherStructure.add(ds);
     }
 
@@ -44,7 +44,7 @@ public class TitleDeliveryHierachy {
 
 
     public DeliveryIdentifier getDeliveryTitleCheckStatus(String title, String delivery) {
-        return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).collect(Collectors.toList()).get(0);
+        return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
     }
 
 
