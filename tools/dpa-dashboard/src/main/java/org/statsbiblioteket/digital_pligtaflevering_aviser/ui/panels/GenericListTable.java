@@ -45,6 +45,13 @@ public class GenericListTable extends VerticalLayout {
         table.setId(tableId);
     }
 
+    public void setVisibleColumns(String[] visibleColumns) {
+        columnFilter = visibleColumns;
+        if(visibleColumns!=null) {
+            table.setVisibleColumns(visibleColumns);
+        }
+    }
+
 
     public void setEnabled(boolean enabled) {
         beans.removeAllItems();

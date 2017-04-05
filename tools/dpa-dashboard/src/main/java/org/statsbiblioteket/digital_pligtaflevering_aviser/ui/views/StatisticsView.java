@@ -129,7 +129,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         model.initiateDeliveries("Statistics_generated");
                         //model.initiateTitleHierachyFromFedora();
-                        tabelsLayout.performIt();
+                        tabelsLayout.insertInitialTableValues();
                     } else if ("STOREBUTTON".equals(event.getButton().getId())) {
                         model.initiateTitleHierachyFromFedora();
                         model.saveCurrentTitleHierachyToFilesystem(searchPanel.getSelectedDate());

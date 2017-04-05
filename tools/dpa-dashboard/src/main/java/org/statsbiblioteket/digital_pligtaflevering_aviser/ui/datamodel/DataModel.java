@@ -25,6 +25,7 @@ public class DataModel {
     private DeliveryIdentifier selectedDelItem;
     private String selectedDelivery;
     private String selectedTitle;
+    private String selectedSection = null;
     private String currentlySelectedMonth;
     private TitleDeliveryHierachy currentlySelectedTitleHiearachy;
 
@@ -42,15 +43,17 @@ public class DataModel {
         this.selectedDelivery = selectedDelivery;
     }
 
-    public List<Delivery> getTitlesFromDelivery() {
-        ArrayList<Delivery> del = new ArrayList<Delivery>();
-
-return del;
-
-    }
 
     public String getSelectedTitle() {
         return selectedTitle;
+    }
+
+    public String getSelectedSection() {
+        return selectedSection;
+    }
+
+    public void setSelectedSection(String selectedSection) {
+        this.selectedSection = selectedSection;
     }
 
     public void setSelectedTitle(String selectedTitle) {
