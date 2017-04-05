@@ -13,6 +13,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +22,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +44,7 @@ public class DeliveryFedoraSerializer {
 
 
     public void initiateDeliveries(String info) {
-        Stream<DomsItem> items = eventFetch.getState(info);
+        Stream<DomsItem> items = eventFetch.getCustomState(info);
         items.forEach(new Consumer<DomsItem>() {
             @Override
             public void accept(final DomsItem o) {
@@ -158,13 +161,20 @@ public class DeliveryFedoraSerializer {
     }
 
 
+    public void writeStuff(DeliveryIdentifier deli) throws JAXBException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(deli, os);
+        writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
+    }
 
 
 
 
-
-
-    public void writeToCurrentItemInFedora(String deliveryName, String titleName) {
+    public void writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
         domsItem = getDeliveryFromName(deliveryName);
         DomsItem selectedTitleItem = null;
@@ -177,7 +187,7 @@ public class DeliveryFedoraSerializer {
             if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
                 selectedTitleItem = titleItem;
 
-                byte[] statisticsStream = "DUMMYSTREAM".getBytes();
+
                 String settingDate = new java.util.Date().toString();
 
                 selectedTitleItem.modifyDatastreamByValue(

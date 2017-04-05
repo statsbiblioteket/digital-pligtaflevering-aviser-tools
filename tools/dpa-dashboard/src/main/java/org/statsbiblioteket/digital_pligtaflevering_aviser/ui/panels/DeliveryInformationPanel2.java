@@ -25,7 +25,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", null/*new String[]{"checked", "initials", "name", "noOfArticles", "noOfPages"}*/, "DELIVERY");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "deliveryName", "noOfArticles", "noOfPages"}, "DELIVERY");
 
 
     public DeliveryInformationPanel2(DataModel model) {
@@ -128,40 +128,36 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     public void setCheckedState() {
 
-                String selectedDelivery = model.getSelectedDelivery();
-                String selectedTitle = model.getSelectedTitle();
+        String selectedDelivery = model.getSelectedDelivery();
+        String selectedTitle = model.getSelectedTitle();
+        DeliveryIdentifier item = model.getCurrentDelItem();
 
-                DeliveryIdentifier item = model.getCurrentDelItem();
+        final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
+        ResultStorePanel storePanel = new ResultStorePanel();
 
+        dialog.setDialogContent(storePanel);
+        dialog.setValues(item);
+        dialog.setModal(true);
 
-                final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
-                ResultStorePanel storePanel = new ResultStorePanel();
+        UI.getCurrent().addWindow(dialog);
+        dialog.setListener(new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+                UI.getCurrent().removeWindow(dialog);
+                model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
+            }});
 
-                dialog.setDialogContent(storePanel);
-                dialog.setValues(item);
-                dialog.setModal(true);
+        dialog.addCloseListener(new Window.CloseListener() {
+            // inline close-listener
+            public void windowClose(Window.CloseEvent e) {
 
-
-                UI.getCurrent().addWindow(dialog);
-                dialog.setListener(new Button.ClickListener() {
-                    public void buttonClick(Button.ClickEvent event) {
-                        UI.getCurrent().removeWindow(dialog);
-                        model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
-                    }});
-
-                dialog.addCloseListener(new Window.CloseListener() {
-                    // inline close-listener
-                    public void windowClose(Window.CloseEvent e) {
-
-                        UI.getCurrent().removeWindow(dialog);
-                    }
-                });
+                UI.getCurrent().removeWindow(dialog);
+            }
+        });
     }
 
 
 
     public void performIt() throws Exception {
-        //deliveryPanel.setTheStuff(model.getInitiatedDeliveries());
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
 }

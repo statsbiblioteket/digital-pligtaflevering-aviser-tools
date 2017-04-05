@@ -11,11 +11,13 @@ import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
 
@@ -43,6 +45,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
     public StatisticsView(String type) {
 
+        MenuBar header = new MenuBar();
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
         DeliveryMainPanel tabelsLayout;
@@ -52,27 +55,50 @@ public class StatisticsView extends VerticalLayout implements View {
         link.setTargetName("_blank");
 
 
+
+        MenuBar.Command configCommand = new MenuBar.Command() {
+            public void menuSelected(MenuBar.MenuItem selectedItem) {
+                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW1);
+            }
+        };
+
+        MenuBar.Command otherCommand1 = new MenuBar.Command() {
+            public void menuSelected(MenuBar.MenuItem selectedItem) {
+                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW1);
+            }
+        };
+
+        MenuBar.Command otherCommand2 = new MenuBar.Command() {
+            public void menuSelected(MenuBar.MenuItem selectedItem) {
+                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW3);
+            }
+        };
+
+        header.addItem("config", configCommand);
+        header.addItem("panel1", otherCommand1);
+        header.addItem("panel2", otherCommand2);
+
         switch (type) {
-            case "1v1":
+            case NewspaperUI.STATISTICSVIEW1:
                 tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new VerticalLayout();
                 pdf.setWidth("500px");
                 pdf.setHeight("750px");
                 break;
-            case "1v2":
+            case NewspaperUI.STATISTICSVIEW2:
                 tabelsLayout = new DeliveryInformationPanel(model);
                 mainhlayout = new HorizontalLayout();
                 pdf.setWidth("900px");
                 pdf.setHeight("1300px");
                 tabelsLayout.setHeight("1500px");
                 break;
-            case "2v1":
+            case NewspaperUI.STATISTICSVIEW3:
                 tabelsLayout = new DeliveryInformationPanel2(model);
                 mainhlayout = new VerticalLayout();
                 pdf.setWidth("500px");
                 pdf.setHeight("750px");
                 break;
-            case "2v2":
+            case NewspaperUI.STATISTICSVIEW4:
                 tabelsLayout = new DeliveryInformationPanel2(model);
                 mainhlayout = new HorizontalLayout();
                 pdf.setWidth("900px");
@@ -101,7 +127,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                     if ("SEARCHBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        model.initiateDeliveries("Data_Archived");
+                        model.initiateDeliveries("Statistics_generated");
                         //model.initiateTitleHierachyFromFedora();
                         tabelsLayout.performIt();
                     } else if ("STOREBUTTON".equals(event.getButton().getId())) {
@@ -170,7 +196,7 @@ public class StatisticsView extends VerticalLayout implements View {
             }
         });
 
-
+        layout.addComponent(header);
         layout.addComponent(searchPanel);
 
         mainhlayout.addComponent(tabelsLayout);

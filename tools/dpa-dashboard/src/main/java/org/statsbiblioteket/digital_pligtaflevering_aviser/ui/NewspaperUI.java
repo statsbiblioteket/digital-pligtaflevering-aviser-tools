@@ -4,28 +4,23 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
 import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatusView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.MainView;
-
 
 /**
  * The Application's "main" class
  */
 @SuppressWarnings("serial")
-public class NewspaperUI extends UI
-{
-
+public class NewspaperUI extends UI {
     public static String address = "localhost";
-
-    Navigator navigator;
-    protected static final String MAINVIEW = "";
-    protected static final String STATUSVIEW = "status";
-    protected static final String STATISTICSVIEW1 = "1v1";
-    protected static final String STATISTICSVIEW2 = "1v2";
-    protected static final String STATISTICSVIEW3 = "2v1";
-    protected static final String STATISTICSVIEW4 = "2v2";
+    private Navigator navigator;
+    public static final String MAINVIEW = "";
+    public static final String STATUSVIEW = "status";
+    public static final String STATISTICSVIEW1 = "1v1";
+    public static final String STATISTICSVIEW2 = "1v2";
+    public static final String STATISTICSVIEW3 = "2v1";
+    public static final String STATISTICSVIEW4 = "2v2";
 
 
 
@@ -35,8 +30,7 @@ public class NewspaperUI extends UI
         String productionMode = ConfigCollection.getProperties().getProperty("productionMode");
 
         address = request.getRemoteAddr();
-
-        getPage().setTitle("Navigation Example");
+        getPage().setTitle("DPA");
 
         // Create a navigator to control the views
         navigator = new Navigator(this, this);

@@ -72,7 +72,7 @@ public class DeliveryFilesystemSerializer {
 
     public static void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = "/home/mmj/tools/tomcat/" + folderForThisXml + ".xml";
+        String currentFolder = "/home/mmj/tools/tomcat/" + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

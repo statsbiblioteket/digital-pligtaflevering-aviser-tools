@@ -40,7 +40,6 @@ public class FetchEventStructure {
 
     public DomsItem lookup(String id) {
         DomsItem item = repository.lookup(new DomsId(id));
-        System.out.println(item);
         return item;
     }
 
@@ -62,13 +61,16 @@ public class FetchEventStructure {
         );
     }
 
+    public Stream<DomsItem> getCustomState(String state) {
+        return repository.query(domsModule.providesQuerySpecification(
+                state, "", "", "doms:ContentModel_DPARoundTrip")
+        );
+    }
+
     public void setEvent(String id, String eventName, String outcomeParameter, String message) {
 
-
         boolean outcome = outcomeParameter == null ? true : Boolean.parseBoolean(outcomeParameter);
-
         DomsItem item = repository.lookup(new DomsId(id));
-
         item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
     }
 

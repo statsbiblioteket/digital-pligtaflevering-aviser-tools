@@ -19,7 +19,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
-    private TitleListPanel titleListPanel = new TitleListPanel();
+    private GenericListTable titleListPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
 
     public DeliveryInformationPanel(DataModel model) {
         super(model);
@@ -48,12 +48,8 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 Object titleSelect = itemClickEvent.getItem().getItemProperty("newspaperTitle").getValue();
                 model.setSelectedTitle(titleSelect.toString());
 
-
                 String selectedDelivery = model.getSelectedDelivery();
                 String selectedTitle = model.getSelectedTitle();
-
-
-
 
                 if(selectedDelivery==null || selectedTitle==null) {
                     return;

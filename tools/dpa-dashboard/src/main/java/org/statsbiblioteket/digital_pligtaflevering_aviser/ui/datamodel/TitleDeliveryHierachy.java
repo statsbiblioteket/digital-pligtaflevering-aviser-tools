@@ -35,7 +35,11 @@ public class TitleDeliveryHierachy {
 
 
     public DeliveryIdentifier setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment) {
-        return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).collect(Collectors.toList()).get(0);
+        DeliveryIdentifier delId = getDeliveryTitleCheckStatus(title, delivery);
+        delId.setChecked(checked);
+        delId.setInitials(initials);
+        delId.setComment(comment);
+        return delId;
     }
 
 
@@ -45,15 +49,13 @@ public class TitleDeliveryHierachy {
 
 
     public List<String> getAllTitles() {
-
         List<DeliveryIdentifier> f = otherStructure.stream().filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());
-        List<String> ll = new ArrayList<String>();
+        List<String> titleList = new ArrayList<String>();
 
         for(DeliveryIdentifier a : f) {
-            ll.add(a.getNewspaperTitle());
+            titleList.add(a.getNewspaperTitle());
         }
-
-        return ll;
+        return titleList;
     }
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {

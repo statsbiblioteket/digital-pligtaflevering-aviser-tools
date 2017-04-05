@@ -111,17 +111,17 @@ return del;
         try {
             DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment);
 
-            DeliveryFilesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth + "/" + titleName + "/" + deliveryName, deli);
+            DeliveryFilesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, deli);
+            fedoraSerializer.writeStuff(deli);
+
+
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-
-    public void writeToCurrentItemInFedora(String deliveryName, String titleName) {
-        fedoraSerializer.writeToCurrentItemInFedora(deliveryName, titleName);
-    }
 
 
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
@@ -135,11 +135,9 @@ return del;
 
 
     public void initiateTitleHierachyFromFedora() throws Exception {
-
         if(currentlySelectedTitleHiearachy!=null) {
             return;
         }
-
         currentlySelectedTitleHiearachy = fedoraSerializer.getTitleHierachyFromFedora();
     }
 
