@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context docBase="${user.home}/services/tomcat-apps/dpa-dashboard.war">
+  <Parameter name="mypapp-p1" value="myapp value1" override="false" description="description" />
+  <Parameter name="config.path" value="${user.home}/services/conf" override="false" description="config path" />
+</Context>
+

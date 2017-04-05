@@ -3,7 +3,7 @@ The binary tarball sent to drift will have this structure:
     bin/
     conf/
     libs/
-    wars/
+    tomcat-apps/
     
 
 The file layout in devel (dpaviser@achernar)/stage/production 
@@ -14,8 +14,8 @@ will be similar to:
     services/bin
     services/conf
     services/libs
+    services/tomcat-apps
     services/webapps
-    services/wars
     var/
 
 The individual folders contain the following:
