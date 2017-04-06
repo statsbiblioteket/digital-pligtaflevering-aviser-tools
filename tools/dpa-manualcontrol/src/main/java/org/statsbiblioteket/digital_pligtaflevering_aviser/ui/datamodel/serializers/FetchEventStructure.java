@@ -1,6 +1,5 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryProvider;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;

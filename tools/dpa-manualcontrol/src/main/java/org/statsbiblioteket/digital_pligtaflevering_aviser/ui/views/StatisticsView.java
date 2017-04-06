@@ -1,6 +1,5 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
-import com.sun.jndi.toolkit.url.Uri;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -17,7 +16,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
@@ -28,11 +26,8 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryInf
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryInformationPanel2;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLEncoder;
 
 
 /**
@@ -64,57 +59,54 @@ public class StatisticsView extends VerticalLayout implements View {
 
         MenuBar.Command configCommand = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
-                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW1);
+                getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
             }
         };
 
         MenuBar.Command otherCommand1 = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
-                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW1);
+                getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
             }
         };
 
         MenuBar.Command otherCommand2 = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
-                getUI().getNavigator().navigateTo(NewspaperUI.STATISTICSVIEW3);
+                getUI().getNavigator().navigateTo(NewspaperUI.TITLEVALIDATIONPANEL);
             }
         };
 
         header.addItem("config", configCommand);
-        header.addItem("panel1", otherCommand1);
-        header.addItem("panel2", otherCommand2);
+        header.addItem("Delivery validation", otherCommand1);
+        header.addItem("TitleValidation", otherCommand2);
 
         switch (type) {
-            case NewspaperUI.STATISTICSVIEW1:
+            case NewspaperUI.DELIVERYPANEL:
                 tabelsLayout = new DeliveryInformationPanel(model);
-                mainhlayout = new VerticalLayout();
-                pdf.setWidth("500px");
-                pdf.setHeight("750px");
                 break;
-            case NewspaperUI.STATISTICSVIEW2:
-                tabelsLayout = new DeliveryInformationPanel(model);
-                mainhlayout = new HorizontalLayout();
-                pdf.setWidth("900px");
-                pdf.setHeight("1300px");
-                tabelsLayout.setHeight("1500px");
-                break;
-            case NewspaperUI.STATISTICSVIEW3:
+            case NewspaperUI.TITLEVALIDATIONPANEL:
                 tabelsLayout = new DeliveryInformationPanel2(model);
-                mainhlayout = new VerticalLayout();
-                pdf.setWidth("500px");
-                pdf.setHeight("750px");
-                break;
-            case NewspaperUI.STATISTICSVIEW4:
-                tabelsLayout = new DeliveryInformationPanel2(model);
-                mainhlayout = new HorizontalLayout();
-                pdf.setWidth("900px");
-                pdf.setHeight("1300px");
-                tabelsLayout.setHeight("1500px");
                 break;
             default:
                 tabelsLayout = new DeliveryInformationPanel(model);
-                mainhlayout = new HorizontalLayout();
         }
+
+
+        int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+        if(browserWidth>1800) {
+            //tabelsLayout = new DeliveryInformationPanel(model);
+            mainhlayout = new HorizontalLayout();
+            pdf.setWidth("900px");
+            pdf.setHeight("1300px");
+            tabelsLayout.setHeight("1500px");
+        } else {
+            //tabelsLayout = new DeliveryInformationPanel2(model);
+            mainhlayout = new VerticalLayout();
+            pdf.setWidth("500px");
+            pdf.setHeight("750px");
+        }
+
+
+
         tabelsLayout.setVisible(false);
 
         final VerticalLayout viewLayout = new VerticalLayout();

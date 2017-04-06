@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard;
+package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -12,15 +12,18 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter;
 import javaslang.control.Try;
 
 import java.util.function.Function;
 
 /**
+ * RepositoryConfigurator captures the current (as of 2017-03-06) Dagger configuration into code so a DomsRepository can
+ * be correctly configured from a ConfigurationMap configuration.
+ * (there is currently no
+ * official solution to using Dagger 2 with web servers).
  *
  */
-public class RepositoryProvider implements Function<ConfigurationMap, DomsRepository> {
+public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRepository> {
 
     @Override
     public DomsRepository apply(ConfigurationMap map) {
@@ -51,14 +54,20 @@ public class RepositoryProvider implements Function<ConfigurationMap, DomsReposi
         PremisManipulatorFactory<Item> premisManipulatorFactory = domsModule.providePremisManipulatorFactory(itemFactory);
 
         DomsEventStorage<Item> domsEventStorage = domsModule.provideDomsEventStorage(domsURL, domsPidgeneratorUrl, domsUserName, domsPassword, itemFactory);
-        int pageSize = domsModule.providePageSize(map);
+        int pageSize = 9999;//domsModule.providePageSize(map);
 
         SBOIEventIndex sboiEventIndex = Try.of(
-                () -> new SBOIEventIndex_RecordBaseAsParameter(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, "doms_sboi_dpaCollection")
+                // FIXME: Use provider instead of constructor
+                () -> new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize)
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
-        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
+
+
+        DomsRepository repository = new RepositoryProvider().apply(map);
+
+
+//        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
         return repository;
     }
 }
