@@ -6,7 +6,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliverySta
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.FetchEventStructure;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;

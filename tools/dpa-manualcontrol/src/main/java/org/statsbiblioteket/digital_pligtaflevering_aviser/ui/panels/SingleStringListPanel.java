@@ -5,7 +5,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.FetchEventStructure;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 
 import java.util.Collection;
 import java.util.HashMap;

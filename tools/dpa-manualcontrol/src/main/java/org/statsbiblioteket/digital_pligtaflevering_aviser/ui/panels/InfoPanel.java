@@ -3,7 +3,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Table;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.FetchEventStructure;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 
 import java.util.function.Consumer;
 import java.util.stream.Stream;

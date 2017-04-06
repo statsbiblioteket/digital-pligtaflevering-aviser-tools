@@ -24,7 +24,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.EventPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.FetchEventStructure;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.InfoPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.StatePanel;
