@@ -35,7 +35,7 @@
                 <init-param>
             <description>Application widgetset</description>
             <param-name>widgetset</param-name>
-            <param-value>org.kb.ui.AppWidgetSet</param-value>
+            <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.AppWidgetSet</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

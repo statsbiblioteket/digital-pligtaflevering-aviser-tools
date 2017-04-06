@@ -59,7 +59,7 @@ public class TestClass {
     public void testIng2() throws Exception {
 
 
-        TitleDeliveryHierachy t = new TitleDeliveryHierachy();
+        /*TitleDeliveryHierachy t = new TitleDeliveryHierachy();
 
         DeliveryIdentifier ds = new DeliveryIdentifier("dl_1234567_rt1", 1, 2);
         ds.addArticle(new Article("q"));
@@ -81,14 +81,14 @@ public class TestClass {
 
 
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        File tempFile = new File("/home/mmj/tools/tomcat",  "test.xml");
+        /*File tempFile = new File("/home/mmj/tools/tomcat",  "test.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(t, tempFile);
 
-        System.out.println("TEST_DONE");
+        System.out.println("TEST_DONE");*/
 
     }
 
