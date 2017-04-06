@@ -1,11 +1,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="static dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.SBOIConstants.Q_READY_TO_INGEST" %>
@@ -15,7 +15,7 @@
 <h1>Klar til Ingest</h1>
 <% pageContext.setAttribute("newline", "\n"); %>
 <%
-    ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+    ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
     DomsRepository repository = new RepositoryConfigurator().apply(map);
 
     List<DomsItem> l = repository.query(new SBOIQuerySpecification(Q_READY_TO_INGEST))

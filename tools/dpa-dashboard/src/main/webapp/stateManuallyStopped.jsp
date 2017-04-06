@@ -4,13 +4,14 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="static java.time.temporal.ChronoUnit.DAYS" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
 <html>
 <body>
 
 <h1>Manually stopped</h1>
 <%
     {
-        ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+        ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
         DomsRepository repository = new RepositoryConfigurator().apply(map);
 
@@ -21,7 +22,7 @@
         String oldEvents = "";
         String itemTypes = "doms:ContentModel_DPARoundTrip";
 
-        final EventQuerySpecification eventQuerySpecification = domsModule.providesQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
+        final QuerySpecification eventQuerySpecification = domsModule.providesWorkToDoQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
         List<DomsItem> l = repository.query(eventQuerySpecification).collect(Collectors.toList());
         request.setAttribute("l", l);
     }

@@ -37,6 +37,44 @@ information.
 This mean that all sources are available at once, and that all modules
 have the same version.
 
+Tomcat
+---
+
+As of 2017-04-06 it has been agreed that the configuration (which for
+autonomous components is essentially loaded as a property file) is to
+be provided as context parameters and avoid having a default value present
+as Jens Henrik would like to be notified if a parameter is missing.  
+
+TRA have done some initial work on getting IntelliJ to add this transparently
+when deploying and not found an easy way, so for now use a "For DPA only" copy
+of Tomcat when developing and add this snippet to 
+
+    $CATALINA_BASE/conf/context.xml
+
+just before the final `</Context>` line.  IntelliJ may require recreating the Run/Debug configuration
+for Tomcat.
+
+    <Parameter name="autonomous.sboi.url" value="http://localhost:58608/newspapr/sbsolr/"/>
+    <Parameter name="doms.username" value="fedoraAdmin"/>
+    <Parameter name="doms.password" value="fedoraAdminPass"/>
+    <Parameter name="doms.pidgenerator.url" value="http://localhost:7880/pidgenerator-service"/>
+    <Parameter name="doms.url" value="http://localhost:7880/fedora"/>
+    <Parameter name="pageSize" value="10"/>
+    <Parameter name="jvm.dumpheap" value="false"/>
+    <Parameter name="bitrepository.ingester.baseurl" value="http://localhost:58709/"/>
+    <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived"/>
+    <Parameter name="autonomous.oldEvents" value=""/>
+    <Parameter name="autonomous.itemTypes" value="doms:ContentModel_DPARoundTrip"/>
+    <Parameter name="autonomous.sboi.pageSize" value="100"/>
+    <Parameter name="autonomous.futureEvents" value="XML_validated,Manually_stopped"/>
+    <Parameter name="autonomous.thisEvent" value="XML_validated"/>
+    <Parameter name="autonomous.component.fedoraRetries" value="10"/>
+    <Parameter name="autonomous.component.fedoraDelayBetweenRetries" value="10"/>
+    <Parameter name="doms.collection.pid" value="doms_sboi_dpaCollection"/>
+
+The snippet is also present in dpa-dashboard/dashboard.xml which is packaged with the
+war file in the deployment tarball.
+
 IntelliJ
 --
 
