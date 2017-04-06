@@ -92,7 +92,7 @@
         <module>newspaper/newspaper-prompt-doms-ingester</module>
 
         <!-- dashboard web interface -->
-        <module>tools/dpa-dashboard</module>
+        <module>tools/dpa-manualcontrol</module>
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
         <module>tools/dpa-tools-ide-launchers</module>
