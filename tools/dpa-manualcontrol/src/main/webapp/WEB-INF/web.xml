@@ -4,17 +4,12 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <display-name>Vaadins webapp</display-name>
+    <display-name>DPA control</display-name>
 
     <context-param>
-        <description>Vaadin production mode</description>
+        <description>Deploy status</description>
         <param-name>productionMode</param-name>
         <param-value>false</param-value>
-    </context-param>
-
-    <context-param> <!--All config values should be set with default values here -->
-        <param-name>example.name</param-name>
-        <param-value>example.value</param-value>
     </context-param>
 
     <listener>
@@ -25,7 +20,7 @@
 
 
     <servlet>
-        <servlet-name>Vaadin Application Servlet</servlet-name>
+        <servlet-name>DPA Servlet</servlet-name>
         <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
         <init-param>
             <description>Vaadin UI to display</description>
@@ -33,13 +28,13 @@
             <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI</param-value>
         </init-param>
                 <init-param>
-            <description>Application widgetset</description>
+            <description>DPA control</description>
             <param-name>widgetset</param-name>
             <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.AppWidgetSet</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Vaadin Application Servlet</servlet-name>
-        <url-pattern>/manualcontrol/*</url-pattern>
+        <servlet-name>DPA Servlet</servlet-name>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
 </web-app>
