@@ -47,6 +47,7 @@ public class StatisticsView extends VerticalLayout implements View {
     public StatisticsView(String type) {
 
         MenuBar header = new MenuBar();
+        header.setWidth("100%");
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
 

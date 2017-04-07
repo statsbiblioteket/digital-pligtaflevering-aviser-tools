@@ -128,7 +128,9 @@ public class DeliveryMainPanel extends HorizontalLayout {
         dialog.setListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 UI.getCurrent().removeWindow(dialog);
-                model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
+                if("OKBUTTON".equals(event.getButton().getId())) {
+                    model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
+                }
             }});
 
         dialog.addCloseListener(new Window.CloseListener() {

@@ -8,7 +8,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by mmj on 3/9/17.
@@ -43,6 +42,7 @@ public class GenericListTable extends VerticalLayout {
             table.setVisibleColumns(visibleColumns);
         }
         table.setId(tableId);
+        table.setColumnExpandRatio(checkedColumn, 0.2f);
     }
 
     public void setVisibleColumns(String[] visibleColumns) {
@@ -72,7 +72,6 @@ public class GenericListTable extends VerticalLayout {
         for(Object o : delStat) {
             beans.addBean(o);
         }
-
     }
 
 
@@ -86,11 +85,6 @@ public class GenericListTable extends VerticalLayout {
             c.setHeight("13px");
             return c;
         }
-    }
-
-    public Object getSelection() {
-        Object selectedIds = table.getValue();
-        return selectedIds;
     }
 
 

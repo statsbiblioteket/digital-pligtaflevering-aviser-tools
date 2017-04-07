@@ -40,6 +40,6 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>Vaadin Application Servlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/manualcontrol/*</url-pattern>
     </servlet-mapping>
 </web-app>
