@@ -15,24 +15,21 @@ import java.util.stream.Stream;
  */
 public class FetchEventStructure {
 
-    ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/home/mmj/projects/digital-pligtaflevering-aviser-tools/tools/dpa-manualcontrol/src/test/resources/backend.properties");
-    DomsRepository repository = new RepositoryProvider().apply(map);
-    DomsModule domsModule = new DomsModule();
+    private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/home/mmj/projects/digital-pligtaflevering-aviser-tools/tools/dpa-manualcontrol/src/test/resources/backend.properties");
+    private DomsRepository repository = new RepositoryProvider().apply(map);
+    private DomsModule domsModule = new DomsModule();
 
 
     public FetchEventStructure() {
 
     }
 
-    public Stream<DomsItem> getState(String state) {
-
-        switch(state) {
-            case "Manually_stopped":
-                return getStateManuallyStopped();
-            case "Data_Created":
-                return getStateCreated();
-            case "Data_Archived":
-                return getStateIngested();
+    public Stream<DomsItem> getDeliveryList(EventStatus eventStatus) {
+        switch(eventStatus) {
+            case READYFORMANUALCHECK:
+                return getReadyForMaual();
+            case DONEMANUALCHECK:
+                return getDoneManual();
         }
         return null;
     }
@@ -60,6 +57,18 @@ public class FetchEventStructure {
         );
     }
 
+    public Stream<DomsItem> getReadyForMaual() {
+        return repository.query(domsModule.providesQuerySpecification(
+                "Statistics_generated", "eventName", "", "doms:ContentModel_DPARoundTrip")
+        );
+    }
+
+    public Stream<DomsItem> getDoneManual() {
+        return repository.query(domsModule.providesQuerySpecification(
+                "Statistics_generated,eventName", "", "", "doms:ContentModel_DPARoundTrip")
+        );
+    }
+
     public Stream<DomsItem> getCustomState(String state) {
         return repository.query(domsModule.providesQuerySpecification(
                 state, "", "", "doms:ContentModel_DPARoundTrip")
@@ -79,4 +88,7 @@ public class FetchEventStructure {
     }
 
 
+    public enum EventStatus {
+        READYFORMANUALCHECK, DONEMANUALCHECK;
+    }
 }

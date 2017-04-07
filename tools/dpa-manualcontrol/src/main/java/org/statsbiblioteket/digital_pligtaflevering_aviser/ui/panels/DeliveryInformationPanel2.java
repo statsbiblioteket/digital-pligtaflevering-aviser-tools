@@ -57,4 +57,9 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
+
+
+    public void setDone() {
+        //item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
+    }
 }

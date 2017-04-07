@@ -112,6 +112,12 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     }
 
+
+    public void setDone() {
+        //item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
+    }
+
+
     public void setCheckedState() {
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();

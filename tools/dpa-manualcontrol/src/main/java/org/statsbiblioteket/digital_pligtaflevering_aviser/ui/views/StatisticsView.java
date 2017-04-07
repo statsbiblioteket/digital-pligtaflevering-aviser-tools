@@ -133,24 +133,26 @@ public class StatisticsView extends VerticalLayout implements View {
                             panelPrepare(false);
                             return;
                         }
-                        model.initiateDeliveries("Statistics_generated");
+                        model.initiateDeliveries(searchPanel.useAllreadyValidated());
                         model.initiateTitleHierachyFromFedora();
 
                         panelPrepare(true);
                     } else if ("START".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         if(!model.isMonthInitiated(searchPanel.getSelectedDate())) {
-                            Notification.show("This mont is not prepared");
+                            Notification.show("This month is not prepared");
                             tabelsLayout.insertInitialTableValues();
                             panelPrepare(false);
                             return;
                         }
-                        model.initiateDeliveries("Statistics_generated");
+                        model.initiateDeliveries(searchPanel.useAllreadyValidated());
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
                         panelPrepare(true);
                     } else if ("SAVECHECK".equals(event.getButton().getId())) {
                         tabelsLayout.setCheckedState();
+                    } else if ("SAVEDONE".equals(event.getButton().getId())) {
+                        tabelsLayout.setDone();
                     }
 
                 } catch (Exception e) {

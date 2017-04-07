@@ -23,7 +23,7 @@ public class GenericListTable extends VerticalLayout {
         beans=new BeanItemContainer(c);
 
         // Bind a table to it
-        table = new Table(c.getName(), beans);
+        table = new Table(c.getSimpleName(), beans);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);

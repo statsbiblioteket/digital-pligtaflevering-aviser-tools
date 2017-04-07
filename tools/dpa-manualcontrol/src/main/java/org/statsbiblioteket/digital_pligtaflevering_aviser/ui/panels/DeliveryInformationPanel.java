@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 import java.util.List;
@@ -56,5 +57,10 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
             e.printStackTrace();
         }*/
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
+    }
+
+    public void setDone() {
+        DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
+        item.appendEvent("dashboard", new java.util.Date(), "BUGGER", "eventName", true);
     }
 }

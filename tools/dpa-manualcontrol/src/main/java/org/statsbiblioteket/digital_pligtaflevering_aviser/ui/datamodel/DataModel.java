@@ -6,6 +6,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -104,8 +105,12 @@ public class DataModel {
         return currentlySelectedTitleHiearachy.getOtherStructure(selectedDelivery);
     }
 
-    public void initiateDeliveries(String info) {
-        fedoraSerializer.initiateDeliveries(info);
+    public void initiateDeliveries(boolean allreadyValidated) {
+        FetchEventStructure.EventStatus evtStatus = FetchEventStructure.EventStatus.READYFORMANUALCHECK;
+        if(allreadyValidated) {
+            evtStatus = FetchEventStructure.EventStatus.DONEMANUALCHECK;
+        }
+        fedoraSerializer.initiateDeliveries(evtStatus);
     }
 
     public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment) {

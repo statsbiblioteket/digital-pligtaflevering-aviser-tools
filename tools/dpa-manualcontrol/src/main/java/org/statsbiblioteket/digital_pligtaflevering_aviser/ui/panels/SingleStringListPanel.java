@@ -32,23 +32,6 @@ public class SingleStringListPanel extends VerticalLayout {
         this.addComponent(table);
     }
 
-    public void setInfo(FetchEventStructure fetchStructure, String info) {
-
-        Stream<DomsItem> items = fetchStructure.getState(info);
-        itemList.clear();
-        table.removeAllItems();
-
-        items.forEach(new Consumer<DomsItem>() {
-            @Override
-            public void accept(final DomsItem o) {
-                Object newItemId = table.addItem();
-                com.vaadin.data.Item row1 = table.getItem(newItemId);
-                row1.getItemProperty("Item").setValue(o.getPath());
-                itemList.put(row1, o);
-            }
-        });
-    }
-
 
     public void setTableContent(Collection<String> list) {
 

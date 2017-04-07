@@ -41,9 +41,9 @@ public class DeliveryFedoraSerializer {
     private DomsParser parser = new DomsParser();
 
 
-    public void initiateDeliveries(String info) {
+    public void initiateDeliveries(FetchEventStructure.EventStatus eventStatus) {
         deliveryList.clear();
-        Stream<DomsItem> items = eventFetch.getCustomState(info);
+        Stream<DomsItem> items = eventFetch.getDeliveryList(eventStatus);
         items.forEach(new Consumer<DomsItem>() {
             @Override
             public void accept(final DomsItem o) {
