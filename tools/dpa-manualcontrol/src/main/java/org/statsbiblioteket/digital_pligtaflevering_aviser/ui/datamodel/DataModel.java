@@ -158,8 +158,7 @@ public class DataModel {
     }
 
 
-    public boolean saveCurrentTitleHierachyToFilesystem(Date selectedMonth) throws Exception {
-        currentlySelectedMonth = dateFormat.format(selectedMonth);
+    public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
         return filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
     }
 

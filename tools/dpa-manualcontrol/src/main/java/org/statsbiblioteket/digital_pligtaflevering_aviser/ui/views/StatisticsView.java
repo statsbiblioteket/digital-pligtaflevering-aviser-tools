@@ -128,13 +128,15 @@ public class StatisticsView extends VerticalLayout implements View {
                     if ("PREPAREBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         if(model.isMonthInitiated(searchPanel.getSelectedDate())) {
-                            Notification.show("This mont is allready prepared");
+                            Notification.show("This month is allready prepared");
                             tabelsLayout.insertInitialTableValues();
                             panelPrepare(false);
                             return;
                         }
                         model.initiateDeliveries(searchPanel.useAllreadyValidated());
                         model.initiateTitleHierachyFromFedora();
+
+                        model.saveCurrentTitleHierachyToFilesystem();
 
                         panelPrepare(true);
                     } else if ("START".equals(event.getButton().getId())) {

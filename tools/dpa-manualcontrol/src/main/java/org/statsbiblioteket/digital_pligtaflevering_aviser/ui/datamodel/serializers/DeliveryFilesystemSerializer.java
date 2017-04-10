@@ -15,39 +15,6 @@ import java.util.Iterator;
 public class DeliveryFilesystemSerializer {
 
 
-    public synchronized boolean saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
-
-        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
-        File folderForThis = new File(currentFolder);
-        if (!folderForThis.exists()) {
-            folderForThis.mkdir();
-        }
-        else {
-            return false;
-        }
-
-        Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-
-        while (keyIterator.hasNext()) {
-
-            DeliveryIdentifier deliId = keyIterator.next();
-
-            String deliName = deliId.getDeliveryName();
-            String deliTitle = deliId.getNewspaperTitle();
-            File folderForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
-
-            if (!folderForThisTitleDelivery.exists()) {
-                jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
-            }
-        }
-        return true;
-    }
 
     public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
 
@@ -82,6 +49,53 @@ public class DeliveryFilesystemSerializer {
     }
 
 
+    /**
+     * Write all titles in the delivery to the filesystem
+     * @param currentlySelectedMonth
+     * @param currentlySelectedTitleHiearachy
+     * @return
+     * @throws Exception
+     */
+    public synchronized boolean saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
+
+        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+        File folderForThis = new File(currentFolder);
+        if (!folderForThis.exists()) {
+            folderForThis.mkdir();
+        }
+        else {
+            return false;
+        }
+
+        Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+
+        while (keyIterator.hasNext()) {
+
+            DeliveryIdentifier deliId = keyIterator.next();
+
+            String deliName = deliId.getDeliveryName();
+            String deliTitle = deliId.getNewspaperTitle();
+            File folderForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
+
+            if (!folderForThisTitleDelivery.exists()) {
+                jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Write the specific title in the delivery to the filesystem
+     * @param folderForThisXml
+     * @param currentlySelectedTitleHiearachy
+     * @throws Exception
+     */
     public void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = "/home/mmj/tools/tomcat/" + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";

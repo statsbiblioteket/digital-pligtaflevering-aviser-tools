@@ -19,16 +19,12 @@ public class SearchPanel extends HorizontalLayout {
 
     private Button prepareButton = new Button("Prepare month");
     private Button storeTitlesButton = new Button("Initiate");
-    private Button saveButton = new Button("Save check");
-    private Button doneButton = new Button("Done del");
     private Label info = new Label();
 
     public SearchPanel() {
 
         prepareButton.setId("PREPAREBUTTON");
         storeTitlesButton.setId("START");
-        saveButton.setId("SAVECHECK");
-        doneButton.setId("SAVEDONE");
 
         startDf.setResolution(Resolution.MONTH);
         startDf.setValue(new Date());
@@ -37,8 +33,6 @@ public class SearchPanel extends HorizontalLayout {
         this.addComponent(checked);
         this.addComponent(prepareButton);
         this.addComponent(storeTitlesButton);
-        this.addComponent(saveButton);
-        this.addComponent(doneButton);
         this.addComponent(info);
     }
 
@@ -53,7 +47,5 @@ public class SearchPanel extends HorizontalLayout {
     public void addClickListener(Button.ClickListener listener) {
         prepareButton.addClickListener(listener);
         storeTitlesButton.addClickListener(listener);
-        saveButton.addClickListener(listener);
-        doneButton.addClickListener(listener);
     }
 }
