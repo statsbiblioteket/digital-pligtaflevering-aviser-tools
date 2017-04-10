@@ -2,19 +2,20 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 
 /**
- * Created by mmj on 3/28/17.
+ * Window for confirming that the performed checks should be stored in fedora
  */
 public class StoreResultWindow extends Window {
 
     private final HorizontalLayout contentPanel = new HorizontalLayout();
     private final VerticalLayout vl = new VerticalLayout();
     private final HorizontalLayout hl = new HorizontalLayout();
-    private ResultStorePanel resultPanel;
+    private Layout resultPanel;
 
     private final Button ok = new Button("Ok");
     private final Button cancel = new Button("Cancel");
@@ -37,13 +38,12 @@ public class StoreResultWindow extends Window {
         cancel.addClickListener(listener);
     }
 
-    public void setValues(DeliveryIdentifier item) {
-        ok.setEnabled(!item.isChecked());
-        resultPanel.setValues(item);
+    public void setReady(boolean ready) {
+        ok.setEnabled(ready);
     }
 
 
-    public void setDialogContent(ResultStorePanel content) {
+    public void setDialogContent(Layout content) {
         resultPanel = content;
         contentPanel.addComponent(resultPanel);
     }

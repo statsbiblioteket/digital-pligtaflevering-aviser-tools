@@ -5,15 +5,12 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
- * Created by mmj on 3/2/17.
+ * List containing single String items
  */
 public class SingleStringListPanel extends VerticalLayout {
 
@@ -23,7 +20,7 @@ public class SingleStringListPanel extends VerticalLayout {
     public SingleStringListPanel() {
 
         // Bind a table to it
-        table = new Table("Beans of All Sorts");
+        table = new Table("List");
         table.addContainerProperty("Item", String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");

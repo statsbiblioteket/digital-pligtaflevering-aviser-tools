@@ -10,7 +10,7 @@ import com.vaadin.ui.Label;
 import java.util.Date;
 
 /**
- * Created by mmj on 3/2/17.
+ * Panel for handling searching of values for checkings
  */
 public class SearchPanel extends HorizontalLayout {
 

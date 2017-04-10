@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by mmj on 3/9/17.
+ * Converter utilities between deliveryDTO's and DTO's suitable for the UI
  */
 public class UiDataConverter {
 
@@ -69,10 +69,8 @@ public class UiDataConverter {
      */
     public static HashMap sectionConverter(Iterator<Page> pageIterator, String sectionNumber) {
         HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();
-
         while(pageIterator.hasNext()) {
             Page page = pageIterator.next();
-
             if(sectionNumber == null || sectionNumber.equals(page.getSectionNumber())) {
                 hset.put(page.getSectionNumber(), new TitleComponent(page.getSectionName(), page.getSectionNumber(), 0, 0));
             }

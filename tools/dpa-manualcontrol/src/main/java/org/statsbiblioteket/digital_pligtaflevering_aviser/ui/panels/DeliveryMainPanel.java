@@ -4,6 +4,7 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
@@ -21,13 +22,19 @@ import java.util.List;
 /**
  * Created by mmj on 3/10/17.
  */
-public class DeliveryMainPanel extends HorizontalLayout {
+public class DeliveryMainPanel extends VerticalLayout {
 
     protected DataModel model;//
+
+    protected HorizontalLayout tablesLayout = new HorizontalLayout();
+    protected HorizontalLayout buttonLayout = new HorizontalLayout();
+
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, null, null, "ARTICLE");
+    private Button saveCheckButton = new Button("Save check");
+
 
 
     public DeliveryMainPanel() {
@@ -38,7 +45,7 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     public DeliveryMainPanel(DataModel model) {
         this.model = model;
-
+        tablesLayout.setWidth("100%");
 
 
         sectionSectionTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
@@ -52,15 +59,25 @@ public class DeliveryMainPanel extends HorizontalLayout {
     }
 
     public void initialLayout() {
-        this.addComponent(deliveryPanel);
-        this.addComponent(sectionSectionTable);
-        this.addComponent(fileSelectionPanel);
-        this.addComponent(articleSelectionPanel);
+        tablesLayout.addComponent(deliveryPanel);
+        tablesLayout.addComponent(sectionSectionTable);
+        tablesLayout.addComponent(fileSelectionPanel);
+        tablesLayout.addComponent(articleSelectionPanel);
 
-        this.setExpandRatio(deliveryPanel, 0.2f);
-        this.setExpandRatio(sectionSectionTable, 0.2f);
-        this.setExpandRatio(fileSelectionPanel, 0.4f);
-        this.setExpandRatio(articleSelectionPanel, 0.1f);
+        tablesLayout.setExpandRatio(deliveryPanel, 0.2f);
+        tablesLayout.setExpandRatio(sectionSectionTable, 0.2f);
+        tablesLayout.setExpandRatio(fileSelectionPanel, 0.4f);
+        tablesLayout.setExpandRatio(articleSelectionPanel, 0.1f);
+
+        saveCheckButton.addClickListener(new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+                setCheckedState();
+            }});
+
+        buttonLayout.addComponent(saveCheckButton);
+
+        this.addComponent(buttonLayout);
+        this.addComponent(tablesLayout);
     }
 
 
@@ -112,12 +129,6 @@ public class DeliveryMainPanel extends HorizontalLayout {
 
     }
 
-
-    public void setDone() {
-        //item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
-    }
-
-
     public void setCheckedState() {
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
@@ -127,7 +138,8 @@ public class DeliveryMainPanel extends HorizontalLayout {
         ResultStorePanel storePanel = new ResultStorePanel();
 
         dialog.setDialogContent(storePanel);
-        dialog.setValues(item);
+        storePanel.setValues(item);
+        dialog.setReady(!item.isChecked());
         dialog.setModal(true);
 
         UI.getCurrent().addWindow(dialog);

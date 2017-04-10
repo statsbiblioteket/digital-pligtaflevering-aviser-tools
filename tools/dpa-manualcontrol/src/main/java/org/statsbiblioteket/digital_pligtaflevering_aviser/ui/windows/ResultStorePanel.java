@@ -81,24 +81,4 @@ public class ResultStorePanel extends VerticalLayout {
         return area.getValue();
     }
 
-    public void setInfo(Collection delStat) {
-        beans.removeAllItems();
-        for(Object o : delStat) {
-            beans.addBean(o);
-        }
-    }
-
-
-
-    public List getSelections() {
-        //Object selectedIds = table.getValue();
-
-        return (List)table.getVisibleItemIds();
-
-    }
-
-
-    public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
-        table.addItemClickListener(listener);
-    }
 }

@@ -149,10 +149,6 @@ public class StatisticsView extends VerticalLayout implements View {
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
                         panelPrepare(true);
-                    } else if ("SAVECHECK".equals(event.getButton().getId())) {
-                        tabelsLayout.setCheckedState();
-                    } else if ("SAVEDONE".equals(event.getButton().getId())) {
-                        tabelsLayout.setDone();
                     }
 
                 } catch (Exception e) {

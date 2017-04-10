@@ -44,8 +44,8 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
             }
         });
 
-        this.addComponent(infoPanel);
-        this.setExpandRatio(infoPanel, 0.1f);
+        tablesLayout.addComponent(infoPanel);
+        tablesLayout.setExpandRatio(infoPanel, 0.1f);
         super.initialLayout();
     }
 
@@ -56,10 +56,5 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
 
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
-    }
-
-
-    public void setDone() {
-        //item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
     }
 }

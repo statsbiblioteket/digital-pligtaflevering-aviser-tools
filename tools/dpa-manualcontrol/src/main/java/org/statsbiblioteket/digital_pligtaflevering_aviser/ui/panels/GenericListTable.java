@@ -8,9 +8,10 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
- * Created by mmj on 3/9/17.
+ * Generic table for viewing a table in the table-bean form
  */
 public class GenericListTable extends VerticalLayout {
 
@@ -50,6 +51,18 @@ public class GenericListTable extends VerticalLayout {
         if(visibleColumns!=null) {
             table.setVisibleColumns(visibleColumns);
         }
+    }
+
+    public boolean isAllChecked() {
+
+        Collection i = table.getContainerDataSource().getItemIds();
+        Iterator<?> walker=i.iterator();
+        while(walker.hasNext()) {
+            if(!(Boolean)table.getItem(walker.next()).getItemProperty(checkedColumnName).getValue()) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
