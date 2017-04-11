@@ -31,8 +31,8 @@ public class DeliveryMainPanel extends VerticalLayout {
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, null, null, "ARTICLE");
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, null, new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE");
     private Button saveCheckButton = new Button("Save check");
 
 

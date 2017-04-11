@@ -18,6 +18,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -199,9 +200,26 @@ public class StatisticsView extends VerticalLayout implements View {
             public void buttonClick(Button.ClickEvent event) {
 
                 if(currentSelectedPage!=null) {
+                    currentSelectedPage.setCheckedState(ConfirmationState.CHECKED);
                     model.addCheckedPage(currentSelectedPage);
                 }
                 if(currentSelectedArticle!=null) {
+                    currentSelectedArticle.setCheckedState(ConfirmationState.CHECKED);
+                    model.addCheckedArticle(currentSelectedArticle);
+                }
+            }
+        });
+
+        Button rejectViewButton = new Button("Reject");
+        rejectViewButton.addClickListener(new Button.ClickListener() {
+            public void buttonClick(Button.ClickEvent event) {
+
+                if(currentSelectedPage!=null) {
+                    currentSelectedPage.setCheckedState(ConfirmationState.REJECTED);
+                    model.addCheckedPage(currentSelectedPage);
+                }
+                if(currentSelectedArticle!=null) {
+                    currentSelectedArticle.setCheckedState(ConfirmationState.REJECTED);
                     model.addCheckedArticle(currentSelectedArticle);
                 }
             }
@@ -213,6 +231,7 @@ public class StatisticsView extends VerticalLayout implements View {
         mainhlayout.addComponent(tabelsLayout);
 
         viewControlLayout.addComponent(confirmViewButton);
+        viewControlLayout.addComponent(rejectViewButton);
         viewControlLayout.addComponent(link);
 
         viewLayout.addComponent(viewControlLayout);

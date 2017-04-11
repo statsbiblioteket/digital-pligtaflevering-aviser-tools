@@ -42,7 +42,10 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
     /**
      * construct the title with a titleName and an empty list of pages and articles
-     * @param name
+     * @param deliveryName
+     * @param newspaperTitle
+     * @param noOfArticles
+     * @param noOfPages
      */
     public DeliveryIdentifier(String deliveryName, String newspaperTitle, int noOfArticles, int noOfPages) {
         this.deliveryName = deliveryName;

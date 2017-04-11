@@ -15,6 +15,7 @@ public class Article implements java.io.Serializable {
     private String sectionName;
     private String sectionNumber;
     private String pageNumber;
+    private ConfirmationState checkedState = ConfirmationState.UNCHECKED;
 
     public Article() {
     }
@@ -75,6 +76,15 @@ public class Article implements java.io.Serializable {
     @XmlAttribute
     public void setPageNumber(String pageNumber) {
         this.pageNumber = pageNumber;
+    }
+
+    public ConfirmationState getCheckedState() {
+        return checkedState;
+    }
+
+    @XmlAttribute
+    public void setCheckedState(ConfirmationState checkedState) {
+        this.checkedState = checkedState;
     }
 }
 
