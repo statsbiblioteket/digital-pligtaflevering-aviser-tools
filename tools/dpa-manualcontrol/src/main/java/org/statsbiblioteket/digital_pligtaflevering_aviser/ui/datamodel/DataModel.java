@@ -1,12 +1,16 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,9 +22,12 @@ import java.util.Set;
  */
 public class DataModel {
 
+    private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+    private DomsRepository repository = new RepositoryProvider().apply(map);
+
+    //Formatter for cashing folder
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM");
 
-    private String currentEvent;
     private DeliveryIdentifier selectedDelItem;
     private String selectedDelivery;
     private String selectedTitle;
@@ -28,10 +35,15 @@ public class DataModel {
     private String currentlySelectedMonth;
     private TitleDeliveryHierachy currentlySelectedTitleHiearachy;
 
-    private DeliveryFilesystemSerializer filesystemSerializer = new DeliveryFilesystemSerializer();
+    private DeliveryFilesystemSerializer filesystemSerializer;
 
-    private DeliveryFedoraSerializer fedoraSerializer = new DeliveryFedoraSerializer();
+    private DeliveryFedoraSerializer fedoraSerializer;
 
+    public DataModel() {
+        String cashingPath = map.getDefault("dpa.manualcontrol.cashingfolder", "dummy");
+        filesystemSerializer = new DeliveryFilesystemSerializer(cashingPath);
+        fedoraSerializer = new DeliveryFedoraSerializer(repository);
+    }
 
 
     public String getSelectedDelivery() {
@@ -58,17 +70,6 @@ public class DataModel {
     public void setSelectedTitle(String selectedTitle) {
         this.selectedTitle = selectedTitle;
     }
-
-    public String getCurrentEvent() {
-        return currentEvent;
-    }
-
-    public void setCurrentEvent(String currentEvent) {
-        this.currentEvent = currentEvent;
-    }
-
-
-
 
 
     public List<String> getTitlesFromFileSystem() throws Exception {
@@ -119,9 +120,6 @@ public class DataModel {
 
             filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, deli);
             fedoraSerializer.writeStuff(deli);
-
-
-
 
         } catch (Exception e) {
             e.printStackTrace();

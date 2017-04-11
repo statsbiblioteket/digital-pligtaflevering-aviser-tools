@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
 
@@ -14,11 +15,16 @@ import java.util.Iterator;
  */
 public class DeliveryFilesystemSerializer {
 
+    private ConfigurationMap map;
+    private String cashingPath;
 
+    public DeliveryFilesystemSerializer(String cashingPath) {
+        this.cashingPath = cashingPath;
+    }
 
     public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
 
-        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+        String currentFolder = cashingPath + currentlySelectedMonth;
 
         File folderForThis = new File(currentFolder);
         return folderForThis.exists();
@@ -28,7 +34,7 @@ public class DeliveryFilesystemSerializer {
     public TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
         TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
 
-        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+        String currentFolder = cashingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             return null;
@@ -58,7 +64,7 @@ public class DeliveryFilesystemSerializer {
      */
     public synchronized boolean saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = "/home/mmj/tools/tomcat/" + currentlySelectedMonth;
+        String currentFolder = cashingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             folderForThis.mkdir();
@@ -98,7 +104,7 @@ public class DeliveryFilesystemSerializer {
      */
     public void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = "/home/mmj/tools/tomcat/" + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
+        String currentFolder = cashingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

@@ -2,6 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.seriali
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
@@ -36,9 +37,13 @@ import java.util.stream.Stream;
  */
 public class DeliveryFedoraSerializer {
 
-    private FetchEventStructure eventFetch = new FetchEventStructure();
+    private FetchEventStructure eventFetch;
     private HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
     private DomsParser parser = new DomsParser();
+
+    public DeliveryFedoraSerializer(DomsRepository repository) {
+        eventFetch = new FetchEventStructure(repository);
+    }
 
 
     public void initiateDeliveries(FetchEventStructure.EventStatus eventStatus) {
@@ -63,6 +68,10 @@ public class DeliveryFedoraSerializer {
 
     public Set<String> getInitiatedDeliveries() {
         return deliveryList.keySet();
+    }
+
+    public void setEvent(String id, String eventName, String outcomeParameter, String message) {
+        eventFetch.setEvent(id, eventName, outcomeParameter, message);
     }
 
 
@@ -170,9 +179,12 @@ public class DeliveryFedoraSerializer {
         writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
     }
 
-
-
-
+    /**
+     * Write to current title in delivery
+     * @param deliveryName
+     * @param titleName
+     * @param statisticsStream
+     */
     public void writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
