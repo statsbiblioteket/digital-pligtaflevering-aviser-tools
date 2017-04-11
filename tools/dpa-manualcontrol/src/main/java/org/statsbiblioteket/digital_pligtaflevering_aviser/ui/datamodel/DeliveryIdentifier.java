@@ -18,9 +18,7 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
     private String newspaperTitle;
 
-    @XmlElement(name = "articles")
     private Articles articles = new Articles();
-
 
     private Pages pages = new Pages();
 
@@ -86,6 +84,11 @@ public class DeliveryIdentifier implements java.io.Serializable {
         return this.pages.getPages();
     }
 
+    public List<Article> getArticles() {
+        return this.articles.getArticles();
+    }
+
+    @XmlElement
     public void setArticles(List<Article> articles) {
         this.articles.setArticles(articles);
     }

@@ -15,7 +15,6 @@ import java.util.HashMap;
 public class SingleStringListPanel extends VerticalLayout {
 
     private Table table;
-    private HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
 
     public SingleStringListPanel() {
 
@@ -31,23 +30,13 @@ public class SingleStringListPanel extends VerticalLayout {
 
 
     public void setTableContent(Collection<String> list) {
-
-
-        itemList.clear();
         table.removeAllItems();
-
         for(String item : list) {
             Object newItemId = table.addItem();
             com.vaadin.data.Item row1 = table.getItem(newItemId);
             row1.getItemProperty("Item").setValue(item);
-            //itemList.put(row1, o);
         }
 
-    }
-
-
-    public DomsItem getDomsItem(com.vaadin.data.Item item) {
-        return itemList.get(item);
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
