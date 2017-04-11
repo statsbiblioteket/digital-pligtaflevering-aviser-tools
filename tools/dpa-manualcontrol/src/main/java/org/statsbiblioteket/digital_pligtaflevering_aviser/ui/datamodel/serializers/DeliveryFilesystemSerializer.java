@@ -62,15 +62,12 @@ public class DeliveryFilesystemSerializer {
      * @return
      * @throws Exception
      */
-    public synchronized boolean saveCurrentTitleHierachyToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
+    public synchronized boolean saveDeliveryToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = cashingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             folderForThis.mkdir();
-        }
-        else {
-            return false;
         }
 
         Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
@@ -87,10 +84,10 @@ public class DeliveryFilesystemSerializer {
 
             String deliName = deliId.getDeliveryName();
             String deliTitle = deliId.getNewspaperTitle();
-            File folderForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
+            File fileForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
 
-            if (!folderForThisTitleDelivery.exists()) {
-                jaxbMarshaller.marshal(deliId, folderForThisTitleDelivery);
+            if (!fileForThisTitleDelivery.exists()) {
+                jaxbMarshaller.marshal(deliId, fileForThisTitleDelivery);
             }
         }
         return true;
@@ -102,7 +99,7 @@ public class DeliveryFilesystemSerializer {
      * @param currentlySelectedTitleHiearachy
      * @throws Exception
      */
-    public void saveCurrentTitleHierachyToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
+    public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = cashingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 
@@ -112,6 +109,18 @@ public class DeliveryFilesystemSerializer {
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(currentlySelectedTitleHiearachy, new File(currentFolder));
 
+    }
+
+    /**
+     * Remove a specific cashed title in a delivery
+     * @param folderForThisXml
+     * @param deliveryName
+     * @param titleName
+     * @throws Exception
+     */
+    public void removeDeliveryFromFilesystem(String folderForThisXml, String deliveryName, String titleName) throws Exception {
+        File currentFile = new File(cashingPath + folderForThisXml +"/" + deliveryName + "_" + titleName + ".xml");
+        currentFile.delete();
     }
 
 }

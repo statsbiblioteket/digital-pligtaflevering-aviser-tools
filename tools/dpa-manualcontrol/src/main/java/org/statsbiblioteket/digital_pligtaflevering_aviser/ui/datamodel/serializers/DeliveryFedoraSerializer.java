@@ -121,16 +121,25 @@ public class DeliveryFedoraSerializer {
         return currentlySelectedTitleHiearachy;
     }
 
-
+    /**
+     * Get the object of the title in the delivery fetched from fedora
+     * @param selectedDelivery
+     * @param selectedTitle
+     * @return
+     */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
 
 
         if(selectedDelivery==null || selectedTitle==null) {
             return null;
         }
+        DomsItem domsItem = this.getDeliveryFromName(selectedDelivery);
+        if(domsItem==null) {
+            return null;
+        }
 
 
-        final List<DomsDatastream> datastreams = this.getDeliveryFromName(selectedDelivery).datastreams();
+        final List<DomsDatastream> datastreams = domsItem.datastreams();
         Optional<DomsDatastream> profileOptional = datastreams.stream()
                 .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
                 .findAny();

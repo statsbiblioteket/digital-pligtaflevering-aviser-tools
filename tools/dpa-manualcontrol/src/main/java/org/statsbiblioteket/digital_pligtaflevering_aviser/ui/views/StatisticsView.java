@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
+
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -20,6 +21,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryInformationPanel;
@@ -40,7 +42,7 @@ public class StatisticsView extends VerticalLayout implements View {
     private Embedded pdf = new Embedded(null, null);
     private DeliveryMainPanel tabelsLayout;
     private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
-    private String fedoraPath = "http://localhost:7880/fedora/objects/";
+    private String fedoraPath = "http://172.18.100.153:7880/fedora/objects/";
     private Page currentSelectedPage;
     private Article currentSelectedArticle;
 
@@ -60,7 +62,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         MenuBar.Command configCommand = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
-                getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
+                getUI().getNavigator().navigateTo(NewspaperUI.CONFIGPANEL);
             }
         };
 
@@ -86,6 +88,9 @@ public class StatisticsView extends VerticalLayout implements View {
                 break;
             case NewspaperUI.TITLEVALIDATIONPANEL:
                 tabelsLayout = new DeliveryInformationPanel2(model);
+                break;
+            case NewspaperUI.CONFIGPANEL:
+                tabelsLayout = new ConfigPanel(model);
                 break;
             default:
                 tabelsLayout = new DeliveryInformationPanel(model);
@@ -127,22 +132,14 @@ public class StatisticsView extends VerticalLayout implements View {
 
                     if ("PREPAREBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        if(model.isMonthInitiated(searchPanel.getSelectedDate())) {
-                            Notification.show("This month is allready prepared");
-                            tabelsLayout.insertInitialTableValues();
-                            panelPrepare(false);
-                            return;
-                        }
                         model.initiateDeliveries(searchPanel.useAllreadyValidated());
                         model.initiateTitleHierachyFromFedora();
-
                         model.saveCurrentTitleHierachyToFilesystem();
-
                         panelPrepare(true);
                     } else if ("START".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         if(!model.isMonthInitiated(searchPanel.getSelectedDate())) {
-                            Notification.show("This month is not prepared");
+                            Notification.show("This month is not prepared", Notification.Type.ERROR_MESSAGE);
                             tabelsLayout.insertInitialTableValues();
                             panelPrepare(false);
                             return;

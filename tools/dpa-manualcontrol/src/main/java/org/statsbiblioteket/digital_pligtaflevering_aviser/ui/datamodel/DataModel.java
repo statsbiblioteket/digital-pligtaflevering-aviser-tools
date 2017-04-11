@@ -12,6 +12,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -73,10 +74,7 @@ public class DataModel {
 
 
     public List<String> getTitlesFromFileSystem() throws Exception {
-        if(currentlySelectedTitleHiearachy==null) {
-            initiateTitleHierachyFromFilesystem();
-        }
-
+        initiateTitleHierachyFromFilesystem();
         return currentlySelectedTitleHiearachy.getAllTitles();
     }
 
@@ -118,7 +116,7 @@ public class DataModel {
         try {
             DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment);
 
-            filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, deli);
+            filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             fedoraSerializer.writeStuff(deli);
 
         } catch (Exception e) {
@@ -126,7 +124,13 @@ public class DataModel {
         }
     }
 
-
+    /**
+     * Remove a specific cashed title in a delivery
+     * @throws Exception
+     */
+    public void removeCurrentSelectedTitleInDelivery() throws Exception {
+        filesystemSerializer.removeDeliveryFromFilesystem(currentlySelectedMonth, selectedDelivery, selectedTitle);
+    }
 
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
         return fedoraSerializer.getTitleObj(selectedDelivery, selectedTitle);
@@ -139,9 +143,6 @@ public class DataModel {
 
 
     public void initiateTitleHierachyFromFedora() throws Exception {
-        if(currentlySelectedTitleHiearachy!=null) {
-            return;
-        }
         currentlySelectedTitleHiearachy = fedoraSerializer.getTitleHierachyFromFedora();
     }
 
@@ -157,7 +158,7 @@ public class DataModel {
 
 
     public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
-        return filesystemSerializer.saveCurrentTitleHierachyToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+        return filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
     }
 
     public boolean isMonthInitiated(Date selectedMonth) {
