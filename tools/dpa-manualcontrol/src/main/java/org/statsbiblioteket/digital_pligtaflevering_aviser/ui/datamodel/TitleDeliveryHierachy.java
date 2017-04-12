@@ -33,16 +33,31 @@ public class TitleDeliveryHierachy {
     }
 
 
-
-    public DeliveryIdentifier setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment) {
+    /**
+     * Write information to the defined DeliveryIdentifier
+     * @param title
+     * @param delivery
+     * @param checked
+     * @param initials
+     * @param comment
+     * @param missingItems
+     * @return
+     */
+    public DeliveryIdentifier setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         DeliveryIdentifier delId = getDeliveryTitleCheckStatus(title, delivery);
         delId.setChecked(checked);
         delId.setInitials(initials);
         delId.setComment(comment);
+        delId.setMissingItems(missingItems);
         return delId;
     }
 
-
+    /**
+     * Get the initiated DeliveryIdentifier from title and delivery
+     * @param title
+     * @param delivery
+     * @return
+     */
     public DeliveryIdentifier getDeliveryTitleCheckStatus(String title, String delivery) {
         return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
     }

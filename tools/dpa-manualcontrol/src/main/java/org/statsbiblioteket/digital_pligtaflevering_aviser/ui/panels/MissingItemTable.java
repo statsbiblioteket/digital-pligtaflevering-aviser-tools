@@ -1,18 +1,26 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * List containing single String items
  */
 public class MissingItemTable extends VerticalLayout {
 
+    private BeanItemContainer beans=new BeanItemContainer(MissingItem.class);
     private Table table;
+    private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
     private HorizontalLayout hl = new HorizontalLayout();
 
@@ -22,12 +30,12 @@ public class MissingItemTable extends VerticalLayout {
 
     public MissingItemTable() {
 
+        // Bind a table to it
+        table = new Table(MissingItem.class.getSimpleName(), beans);
+
         this.setSpacing(false);
 
         // Bind a table to it
-        table = new Table("List");
-        table.addContainerProperty("Type", String.class, null);
-        table.addContainerProperty("Name", String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);
@@ -35,10 +43,10 @@ public class MissingItemTable extends VerticalLayout {
 
         add.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-                Object newItemId = table.addItem();
-                Item row1 = table.getItem(newItemId);
-                row1.getItemProperty("Type").setValue(type.getValue());
-                row1.getItemProperty("Name").setValue(name.getValue());
+                MissingItem item = new MissingItem(type.getValue(), name.getValue());
+                beans.addBean(item);
+                missingItems.add(item);
+
             }});
 
         hl.addComponent(add);
@@ -46,5 +54,19 @@ public class MissingItemTable extends VerticalLayout {
         hl.addComponent(name);
         this.addComponent(hl);
         this.addComponent(table);
+    }
+
+    public void setInfo(List<MissingItem> items) {
+        beans.removeAllItems();
+        missingItems.clear();
+        for(MissingItem o : items) {
+            missingItems.add(o);
+            beans.addBean(o);
+        }
+    }
+
+
+    public List<MissingItem> getInfo() {
+        return missingItems;
     }
 }

@@ -9,8 +9,10 @@ import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.MissingItemTable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by mmj on 3/9/17.
@@ -80,6 +82,11 @@ public class ResultStorePanel extends VerticalLayout {
         for(Article o : item.getArticles()) {
             articleBeans.addBean(o);
         }
+        missingItemTable.setInfo(item.getMissingItems());
+    }
+
+    public List<MissingItem> getMissingItems() {
+        return missingItemTable.getInfo();
     }
 
 

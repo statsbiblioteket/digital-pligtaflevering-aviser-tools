@@ -6,15 +6,17 @@ import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
-//import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
-//import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
-//import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,13 +57,29 @@ public class TestClass {
     }
 
 
+
+    @Test
+    public void testIng3() throws Exception {
+
+        MissingItem mis  = new MissingItem("t1", "t2");
+        /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
+        File tempFile = new File("/tmp",  "MissingItem.xml");
+        JAXBContext jaxbContext = JAXBContext.newInstance(MissingItem.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(mis, tempFile);
+
+    }
+
+
     @Test
     public void testIng2() throws Exception {
 
 
-        /*TitleDeliveryHierachy t = new TitleDeliveryHierachy();
+        TitleDeliveryHierachy t = new TitleDeliveryHierachy();
 
-        DeliveryIdentifier ds = new DeliveryIdentifier("dl_1234567_rt1", 1, 2);
+        DeliveryIdentifier ds = new DeliveryIdentifier("JP", "dl_1234567_rt1", 1, 2);
         ds.addArticle(new Article("q"));
         ds.addArticle(new Article("a"));
         ds.addArticle(new Article("x"));
@@ -69,26 +87,37 @@ public class TestClass {
         ds.addPages(new Page("p3","p4"));
         ds.addPages(new Page("p5","p777"));
 
+        MissingItem mis1  = new MissingItem("t11", "t21");
+        MissingItem mis2  = new MissingItem("t12", "t22");
+        MissingItem mis3  = new MissingItem("t13", "t23");
 
-        t.addDeliveryToTitle("JP", ds);
-        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_2234567_rt1", 3, 4));
-        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_3234567_rt1", 0, 0));
-        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_1234567_rt1", 0, 0));
-        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_2234567_rt1", 0, 0));
-        t.addDeliveryToTitle("bt", new DeliveryIdentifier("dl_3234567_rt1", 0, 0));
-        t.addDeliveryToTitle("JP", new DeliveryIdentifier("dl_3234567_rt2", 0, 0));
+        ArrayList<MissingItem> list = new ArrayList<MissingItem>();
+        list.add(mis1);
+        list.add(mis2);
+        list.add(mis3);
+
+        ds.setMissingItems(list);
+
+
+        t.addDeliveryToTitle(ds);
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_2234567_rt1", 3, 4));
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_1234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_2234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt2", 0, 0));
 
 
 
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        /*File tempFile = new File("/home/mmj/tools/tomcat",  "test.xml");
+        File tempFile = new File("/tmp",  "TitleDeliveryHierachy.xml");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(t, tempFile);
 
-        System.out.println("TEST_DONE");*/
+        System.out.println("TEST_DONE");
 
     }
 

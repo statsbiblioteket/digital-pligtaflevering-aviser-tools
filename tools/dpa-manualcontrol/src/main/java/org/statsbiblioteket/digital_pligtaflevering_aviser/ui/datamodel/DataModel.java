@@ -112,9 +112,18 @@ public class DataModel {
         fedoraSerializer.initiateDeliveries(evtStatus);
     }
 
-    public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment) {
+    /**
+     * Write information to the defined DeliveryIdentifier
+     * @param deliveryName
+     * @param titleName
+     * @param checked
+     * @param initials
+     * @param comment
+     * @param missingItems
+     */
+    public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         try {
-            DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment);
+            DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
 
             filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             fedoraSerializer.writeStuff(deli);

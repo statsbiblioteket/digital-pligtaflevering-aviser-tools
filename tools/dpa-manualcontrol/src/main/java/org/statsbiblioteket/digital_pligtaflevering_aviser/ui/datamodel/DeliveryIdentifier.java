@@ -8,31 +8,24 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Pages;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement
 public class DeliveryIdentifier implements java.io.Serializable {
 
-
     private String deliveryName;
-
     private String newspaperTitle;
-
-    private Articles articles = new Articles();
-
-    private Pages pages = new Pages();
-
+    private List<Article> articles = new ArrayList<Article>();
+    private List<Page> pages = new ArrayList<Page>();
     @XmlAttribute(name = "noOfArticle")
     private int noOfArticles;
-
     @XmlAttribute(name = "noOfPage")
     private int noOfPages;
-
     private boolean checked = false;
-
     private String comment;
-
     private String initials;
+    private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
 
     public DeliveryIdentifier() {
@@ -72,29 +65,29 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
 
     public void addArticle(Article fileName) {
-        articles.addArticle(fileName);
+        articles.add(fileName);
     }
 
     @XmlElement
     public void setPages(List<Page> pages) {
-        this.pages.setPages(pages);
+        this.pages = pages;
     }
 
     public List<Page> getPages() {
-        return this.pages.getPages();
+        return this.pages;
     }
 
     public List<Article> getArticles() {
-        return this.articles.getArticles();
+        return this.articles;
     }
 
     @XmlElement
     public void setArticles(List<Article> articles) {
-        this.articles.setArticles(articles);
+        this.articles = articles;
     }
 
     public void addPages(Page fileName) {
-        pages.addPage(fileName);
+        pages.add(fileName);
     }
 
 
@@ -133,5 +126,14 @@ public class DeliveryIdentifier implements java.io.Serializable {
 
     public String getInitials() {
         return this.initials;
+    }
+
+    public List<MissingItem> getMissingItems() {
+        return missingItems;
+    }
+
+    @XmlElement
+    public void setMissingItems(List<MissingItem> missingItems) {
+        this.missingItems =missingItems;
     }
 }

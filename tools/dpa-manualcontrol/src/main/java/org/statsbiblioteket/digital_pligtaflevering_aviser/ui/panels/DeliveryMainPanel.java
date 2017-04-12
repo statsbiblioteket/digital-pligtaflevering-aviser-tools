@@ -147,7 +147,9 @@ public class DeliveryMainPanel extends VerticalLayout {
             public void buttonClick(Button.ClickEvent event) {
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
-                    model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment());
+
+                    //selectedDelivery.
+                    model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
                 }
             }});
 
