@@ -8,7 +8,7 @@ import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryConfirmPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.util.List;
@@ -77,7 +77,7 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
 
         String selectedDelivery = model.getSelectedDelivery();
         final StoreResultWindow dialog = new StoreResultWindow(selectedDelivery);
-        org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel storePanel = new org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel();
+        DeliveryConfirmPanel storePanel = new DeliveryConfirmPanel();
 
         dialog.setDialogContent(storePanel);
         dialog.setModal(true);

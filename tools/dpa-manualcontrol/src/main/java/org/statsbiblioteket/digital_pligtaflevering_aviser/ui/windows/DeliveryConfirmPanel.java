@@ -10,13 +10,13 @@ import java.util.Date;
 /**
  * Created by mmj on 3/9/17.
  */
-public class DeliveryValidationPanel extends VerticalLayout {
+public class DeliveryConfirmPanel extends VerticalLayout {
 
     private TextField initials = new TextField();
     private DateField date = new DateField();
     private TextArea area = new TextArea("Check description");
 
-    public DeliveryValidationPanel() {
+    public DeliveryConfirmPanel() {
         super();
         this.setSpacing(true);
 
