@@ -6,7 +6,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataMode
 /**
  * Created by mmj on 3/10/17.
  */
-public class ConfigPanel extends DeliveryInformationPanel {
+public class ConfigPanel extends DeliveryValidationPanel {
 
     private Button clearDeliveryButton = new Button("Clear");
 
