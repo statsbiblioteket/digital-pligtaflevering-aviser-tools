@@ -25,8 +25,8 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataMode
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
 
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryInformationPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryInformationPanel2;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryValidationPanel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.TitleValidationPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 
 import java.io.InputStream;
@@ -85,28 +85,28 @@ public class StatisticsView extends VerticalLayout implements View {
 
         switch (type) {
             case NewspaperUI.DELIVERYPANEL:
-                tabelsLayout = new DeliveryInformationPanel(model);
+                tabelsLayout = new DeliveryValidationPanel(model);
                 break;
             case NewspaperUI.TITLEVALIDATIONPANEL:
-                tabelsLayout = new DeliveryInformationPanel2(model);
+                tabelsLayout = new TitleValidationPanel(model);
                 break;
             case NewspaperUI.CONFIGPANEL:
                 tabelsLayout = new ConfigPanel(model);
                 break;
             default:
-                tabelsLayout = new DeliveryInformationPanel(model);
+                tabelsLayout = new DeliveryValidationPanel(model);
         }
 
 
         int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
         if(browserWidth>1800) {
-            //tabelsLayout = new DeliveryInformationPanel(model);
+            //tabelsLayout = new DeliveryValidationPanel(model);
             mainhlayout = new HorizontalLayout();
             pdf.setWidth("900px");
             pdf.setHeight("1300px");
             tabelsLayout.setHeight("1500px");
         } else {
-            //tabelsLayout = new DeliveryInformationPanel2(model);
+            //tabelsLayout = new TitleValidationPanel(model);
             mainhlayout = new VerticalLayout();
             pdf.setWidth("500px");
             pdf.setHeight("750px");

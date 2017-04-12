@@ -16,13 +16,13 @@ import java.util.List;
 public class DeliveryIdentifiers
 {
     @XmlElement(name = "delivey")
-    private List<DeliveryIdentifier> deliveries = new ArrayList<DeliveryIdentifier>();
+    private List<DeliveryTitleInfo> deliveries = new ArrayList<DeliveryTitleInfo>();
 
     /**
      * Get all Titles as a list
      * @return
      */
-    public List<DeliveryIdentifier> getDeliveries() {
+    public List<DeliveryTitleInfo> getDeliveries() {
         return deliveries;
     }
 
@@ -30,7 +30,7 @@ public class DeliveryIdentifiers
      * Add a Title
      * @param delivery
      */
-    public void addDeliverie(DeliveryIdentifier delivery) {
+    public void addDeliverie(DeliveryTitleInfo delivery) {
         this.deliveries.add(delivery);
     }
 
@@ -38,7 +38,7 @@ public class DeliveryIdentifiers
      * Set all Titles
      * @param deliveries
      */
-    public void setDeliveries(List<DeliveryIdentifier> deliveries) {
+    public void setDeliveries(List<DeliveryTitleInfo> deliveries) {
         this.deliveries = deliveries;
     }
 }

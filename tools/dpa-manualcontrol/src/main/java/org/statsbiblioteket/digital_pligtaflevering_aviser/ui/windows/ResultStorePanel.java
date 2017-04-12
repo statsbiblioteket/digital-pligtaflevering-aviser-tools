@@ -8,7 +8,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.MissingItemTable;
 import java.util.Date;
@@ -68,7 +68,7 @@ public class ResultStorePanel extends VerticalLayout {
 
     }
 
-    public void setValues(DeliveryIdentifier item) {
+    public void setValues(DeliveryTitleInfo item) {
 
         if(item.getComment()!=null) {
             area.setValue(item.getComment());

@@ -7,24 +7,22 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * Created by mmj on 3/10/17.
  */
-public class DeliveryInformationPanel extends DeliveryMainPanel {
+public class DeliveryValidationPanel extends DeliveryMainPanel {
 
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
     private Button doneDeliveryButton = new Button("Done del");
 
-    public DeliveryInformationPanel(DataModel model) {
+    public DeliveryValidationPanel(DataModel model) {
         super(model);
         fileSelectionPanel.setEnabled(false);
 
@@ -34,7 +32,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
                 com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
                 String selectedDelivery = selectedItem.getItemProperty("Name").getValue().toString();
                 model.setSelectedDelivery(selectedDelivery);
-                List<DeliveryIdentifier> l = model.getOtherFromDelivery();
+                List<DeliveryTitleInfo> l = model.getOtherFromDelivery();
                 deliveryPanel.setInfo(l);
             }
         });
@@ -79,7 +77,7 @@ public class DeliveryInformationPanel extends DeliveryMainPanel {
 
         String selectedDelivery = model.getSelectedDelivery();
         final StoreResultWindow dialog = new StoreResultWindow(selectedDelivery);
-        DeliveryValidationPanel storePanel = new DeliveryValidationPanel();
+        org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel storePanel = new org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryValidationPanel();
 
         dialog.setDialogContent(storePanel);
         dialog.setModal(true);

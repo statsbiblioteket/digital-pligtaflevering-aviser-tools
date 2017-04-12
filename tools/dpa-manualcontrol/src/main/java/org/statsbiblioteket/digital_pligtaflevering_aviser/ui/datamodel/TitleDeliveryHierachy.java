@@ -20,21 +20,21 @@ import java.util.stream.Collectors;
 public class TitleDeliveryHierachy {
 
     @XmlElement(name = "title")
-    private ArrayList<DeliveryIdentifier> otherStructure = new ArrayList<DeliveryIdentifier>();
+    private ArrayList<DeliveryTitleInfo> otherStructure = new ArrayList<DeliveryTitleInfo>();
 
 
-    public void addDeliveryToTitle(DeliveryIdentifier ds) {
+    public void addDeliveryToTitle(DeliveryTitleInfo ds) {
         otherStructure.add(ds);
     }
 
 
-    public ArrayList<DeliveryIdentifier> getTheFullStruct() {
+    public ArrayList<DeliveryTitleInfo> getTheFullStruct() {
         return otherStructure;
     }
 
 
     /**
-     * Write information to the defined DeliveryIdentifier
+     * Write information to the defined DeliveryTitleInfo
      * @param title
      * @param delivery
      * @param checked
@@ -43,8 +43,8 @@ public class TitleDeliveryHierachy {
      * @param missingItems
      * @return
      */
-    public DeliveryIdentifier setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
-        DeliveryIdentifier delId = getDeliveryTitleCheckStatus(title, delivery);
+    public DeliveryTitleInfo setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
+        DeliveryTitleInfo delId = getDeliveryTitleCheckStatus(title, delivery);
         delId.setChecked(checked);
         delId.setInitials(initials);
         delId.setComment(comment);
@@ -53,21 +53,21 @@ public class TitleDeliveryHierachy {
     }
 
     /**
-     * Get the initiated DeliveryIdentifier from title and delivery
+     * Get the initiated DeliveryTitleInfo from title and delivery
      * @param title
      * @param delivery
      * @return
      */
-    public DeliveryIdentifier getDeliveryTitleCheckStatus(String title, String delivery) {
+    public DeliveryTitleInfo getDeliveryTitleCheckStatus(String title, String delivery) {
         return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
     }
 
 
     public List<String> getAllTitles() {
-        List<DeliveryIdentifier> f = otherStructure.stream().filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());
+        List<DeliveryTitleInfo> f = otherStructure.stream().filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());
         List<String> titleList = new ArrayList<String>();
 
-        for(DeliveryIdentifier a : f) {
+        for(DeliveryTitleInfo a : f) {
             titleList.add(a.getNewspaperTitle());
         }
         return titleList;
@@ -79,13 +79,13 @@ public class TitleDeliveryHierachy {
     }
 
 
-    public List<DeliveryIdentifier> getDeliverysFromTitle(String title) {
+    public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
         return otherStructure.stream().filter(bob -> ( bob.getNewspaperTitle().equals(title))).collect(Collectors.toList());
     }
 
 
 
-    public List<DeliveryIdentifier> getOtherStructure(String delivery) {
+    public List<DeliveryTitleInfo> getOtherStructure(String delivery) {
         return otherStructure.stream().filter(bob -> bob.getDeliveryName().equals(delivery)).collect(Collectors.toList());
     }
 }

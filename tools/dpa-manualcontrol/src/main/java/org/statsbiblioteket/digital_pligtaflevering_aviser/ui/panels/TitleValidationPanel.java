@@ -2,7 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import java.util.List;
 /**
  * Created by mmj on 3/10/17.
  */
-public class DeliveryInformationPanel2 extends DeliveryMainPanel {
+public class TitleValidationPanel extends DeliveryMainPanel {
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
 
-    public DeliveryInformationPanel2(DataModel model) {
+    public TitleValidationPanel(DataModel model) {
         super(model);
         deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfArticles", "noOfPages"});
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
@@ -27,7 +27,7 @@ public class DeliveryInformationPanel2 extends DeliveryMainPanel {
                 model.setSelectedTitle(selectedTitle);
                 model.setSelectedSection(null);
                 showTheSelectedTitle();
-                List<DeliveryIdentifier> list = model.getDeliverysFromTitle(selectedTitle);
+                List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(selectedTitle);
 
                 deliveryPanel.setInfo(list);
             }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement
-public class DeliveryIdentifier implements java.io.Serializable {
+public class DeliveryTitleInfo implements java.io.Serializable {
 
     private String deliveryName;
     private String newspaperTitle;
@@ -28,7 +28,7 @@ public class DeliveryIdentifier implements java.io.Serializable {
     private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
 
-    public DeliveryIdentifier() {
+    public DeliveryTitleInfo() {
     }
 
     /**
@@ -38,7 +38,7 @@ public class DeliveryIdentifier implements java.io.Serializable {
      * @param noOfArticles
      * @param noOfPages
      */
-    public DeliveryIdentifier(String deliveryName, String newspaperTitle, int noOfArticles, int noOfPages) {
+    public DeliveryTitleInfo(String deliveryName, String newspaperTitle, int noOfArticles, int noOfPages) {
         this.deliveryName = deliveryName;
         this.newspaperTitle = newspaperTitle;
         this.noOfArticles = noOfArticles;

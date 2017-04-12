@@ -9,7 +9,7 @@ import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleComponent;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
@@ -29,7 +29,7 @@ public class DeliveryMainPanel extends VerticalLayout {
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryIdentifier.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, null, new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE");
@@ -132,7 +132,7 @@ public class DeliveryMainPanel extends VerticalLayout {
     public void setCheckedState() {
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
-        DeliveryIdentifier item = model.getCurrentDelItem();
+        DeliveryTitleInfo item = model.getCurrentDelItem();
 
         final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
         ResultStorePanel storePanel = new ResultStorePanel();

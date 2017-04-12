@@ -6,8 +6,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -114,7 +114,7 @@ public class DeliveryFedoraSerializer {
                     XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/pages/page");
                     NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
 
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryIdentifier(delivery, titleItem, articles.getLength(), pages.getLength()));
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryTitleInfo(delivery, titleItem, articles.getLength(), pages.getLength()));
                 }
             }
         }
@@ -178,9 +178,9 @@ public class DeliveryFedoraSerializer {
     }
 
 
-    public void writeStuff(DeliveryIdentifier deli) throws JAXBException {
+    public void writeStuff(DeliveryTitleInfo deli) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -207,18 +207,15 @@ public class DeliveryFedoraSerializer {
             if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
                 selectedTitleItem = titleItem;
 
-
-                String settingDate = new java.util.Date().toString();
-
                 selectedTitleItem.modifyDatastreamByValue(
-                        "TESTITEM",
+                        "VALIDATIONINFO",
                         null, // no checksum
                         null, // no checksum
                         statisticsStream,
                         null,
                         "text/xml",
                         null,
-                        null);
+                        new java.util.Date().getTime());
             }
         }
     }

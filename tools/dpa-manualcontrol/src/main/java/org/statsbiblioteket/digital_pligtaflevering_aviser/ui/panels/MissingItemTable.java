@@ -1,6 +1,5 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -10,7 +9,6 @@ import com.vaadin.ui.VerticalLayout;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

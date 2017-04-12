@@ -6,10 +6,9 @@ import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
 
 
 import javax.xml.bind.JAXBContext;
@@ -17,7 +16,6 @@ import javax.xml.bind.Marshaller;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,7 +77,7 @@ public class TestClass {
 
         TitleDeliveryHierachy t = new TitleDeliveryHierachy();
 
-        DeliveryIdentifier ds = new DeliveryIdentifier("JP", "dl_1234567_rt1", 1, 2);
+        DeliveryTitleInfo ds = new DeliveryTitleInfo("JP", "dl_1234567_rt1", 1, 2);
         ds.addArticle(new Article("q"));
         ds.addArticle(new Article("a"));
         ds.addArticle(new Article("x"));
@@ -100,12 +98,12 @@ public class TestClass {
 
 
         t.addDeliveryToTitle(ds);
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_2234567_rt1", 3, 4));
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt1", 0, 0));
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_1234567_rt1", 0, 0));
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_2234567_rt1", 0, 0));
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt1", 0, 0));
-        t.addDeliveryToTitle(new DeliveryIdentifier("JP", "dl_3234567_rt2", 0, 0));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_2234567_rt1", 3, 4));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_1234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_2234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_3234567_rt1", 0, 0));
+        t.addDeliveryToTitle(new DeliveryTitleInfo("JP", "dl_3234567_rt2", 0, 0));
 
 
 

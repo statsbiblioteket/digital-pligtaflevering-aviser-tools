@@ -1,7 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryIdentifier;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
 
 import javax.xml.bind.JAXBContext;
@@ -42,12 +42,12 @@ public class DeliveryFilesystemSerializer {
 
         File[] listOfFiles = folderForThis.listFiles();
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
 
         for (File titleFolder : listOfFiles) {
 
-            DeliveryIdentifier deli = (DeliveryIdentifier) jaxbUnMarshaller.unmarshal(titleFolder);
+            DeliveryTitleInfo deli = (DeliveryTitleInfo) jaxbUnMarshaller.unmarshal(titleFolder);
             currentlySelectedTitleHiearachy.addDeliveryToTitle(deli);
 
         }
@@ -70,9 +70,9 @@ public class DeliveryFilesystemSerializer {
             folderForThis.mkdir();
         }
 
-        Iterator<DeliveryIdentifier> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
+        Iterator<DeliveryTitleInfo> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -80,7 +80,7 @@ public class DeliveryFilesystemSerializer {
 
         while (keyIterator.hasNext()) {
 
-            DeliveryIdentifier deliId = keyIterator.next();
+            DeliveryTitleInfo deliId = keyIterator.next();
 
             String deliName = deliId.getDeliveryName();
             String deliTitle = deliId.getNewspaperTitle();
@@ -99,11 +99,11 @@ public class DeliveryFilesystemSerializer {
      * @param currentlySelectedTitleHiearachy
      * @throws Exception
      */
-    public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryIdentifier currentlySelectedTitleHiearachy) throws Exception {
+    public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryTitleInfo currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = cashingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryIdentifier.class);
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);

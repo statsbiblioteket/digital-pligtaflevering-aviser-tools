@@ -12,7 +12,6 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +28,7 @@ public class DataModel {
     //Formatter for cashing folder
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM");
 
-    private DeliveryIdentifier selectedDelItem;
+    private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
     private String selectedTitle;
     private String selectedSection = null;
@@ -92,15 +91,15 @@ public class DataModel {
     }
 
 
-    public DeliveryIdentifier getCurrentDelItem() {
+    public DeliveryTitleInfo getCurrentDelItem() {
         return selectedDelItem;
     }
 
-    public List<DeliveryIdentifier> getDeliverysFromTitle(String title) {
+    public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
         return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
     }
 
-    public List<DeliveryIdentifier> getOtherFromDelivery() {
+    public List<DeliveryTitleInfo> getOtherFromDelivery() {
         return currentlySelectedTitleHiearachy.getOtherStructure(selectedDelivery);
     }
 
@@ -113,7 +112,7 @@ public class DataModel {
     }
 
     /**
-     * Write information to the defined DeliveryIdentifier
+     * Write information to the defined DeliveryTitleInfo
      * @param deliveryName
      * @param titleName
      * @param checked
@@ -123,7 +122,7 @@ public class DataModel {
      */
     public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         try {
-            DeliveryIdentifier deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
+            DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
 
             filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             fedoraSerializer.writeStuff(deli);
