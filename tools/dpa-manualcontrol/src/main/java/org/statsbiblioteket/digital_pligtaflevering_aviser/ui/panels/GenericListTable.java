@@ -7,6 +7,8 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
+
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -16,6 +18,7 @@ import java.util.Iterator;
 public class GenericListTable extends VerticalLayout {
 
     private String checkedColumnName;
+    private Object checkedColumnDefaultValue;
     private String[] columnFilter;
     private BeanItemContainer beans;
     private Table table;
@@ -32,9 +35,10 @@ public class GenericListTable extends VerticalLayout {
         this.addComponent(table);
     }
 
-    public GenericListTable(Class c, String checkedColumn, String[] visibleColumns, String tableId) {
+    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String tableId) {
         this(c);
         checkedColumnName = checkedColumn;
+        checkedColumnDefaultValue = checkedDefaultValue;
         if(checkedColumnName!=null) {
             table.addGeneratedColumn(checkedColumnName, new GenericListTable.CheckBoxColumnGenerator());
         }
@@ -87,13 +91,24 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    public void setValToCheck(Object itemId, Object value) {
+        table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
+    }
+
 
     class CheckBoxColumnGenerator implements Table.ColumnGenerator {
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {
             Property prop = source.getItem(itemId).getItemProperty(checkedColumnName);
-            CheckBox c = new CheckBox(null, prop);
+            CheckBox c;
+            if(checkedColumnDefaultValue!= null) {
+                ConfirmationState oo = (ConfirmationState)prop.getValue();
+                boolean checkValue = !checkedColumnDefaultValue.equals(oo.name());
+                c = new CheckBox(null, checkValue);
+            } else {
+                c = new CheckBox(null, prop);
+            }
             c.setReadOnly(true);
             c.setHeight("13px");
             return c;

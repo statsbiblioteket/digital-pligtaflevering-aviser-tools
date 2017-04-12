@@ -29,10 +29,10 @@ public class DeliveryMainPanel extends VerticalLayout {
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, null, new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, null, new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE");
     private Button saveCheckButton = new Button("Save check");
 
 
