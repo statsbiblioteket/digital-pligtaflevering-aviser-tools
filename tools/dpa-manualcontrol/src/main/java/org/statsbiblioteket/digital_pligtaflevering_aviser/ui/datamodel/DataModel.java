@@ -119,17 +119,19 @@ public class DataModel {
      * @param initials
      * @param comment
      * @param missingItems
+     * @return
      */
-    public void writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
+    public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         try {
             DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
 
             filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
-            fedoraSerializer.writeStuff(deli);
+            return fedoraSerializer.writeDeliveryToFedora(deli);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /**

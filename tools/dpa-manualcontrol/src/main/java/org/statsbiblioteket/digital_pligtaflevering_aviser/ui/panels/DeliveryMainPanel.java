@@ -3,6 +3,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -149,7 +150,13 @@ public class DeliveryMainPanel extends VerticalLayout {
                 if("OKBUTTON".equals(event.getButton().getId())) {
 
                     //selectedDelivery.
-                    model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true, storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
+                    boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
+                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
+
+                    if(!writeResult) {
+                        Notification.show("The result can not get stored", Notification.Type.ERROR_MESSAGE);
+                    }
+
                 }
             }});
 

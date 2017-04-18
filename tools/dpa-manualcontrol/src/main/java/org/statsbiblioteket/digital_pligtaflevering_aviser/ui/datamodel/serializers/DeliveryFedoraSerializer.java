@@ -74,7 +74,11 @@ public class DeliveryFedoraSerializer {
         eventFetch.setEvent(id, eventName, outcomeParameter, message);
     }
 
-
+    /**
+     * Get all Title objects from Fedora
+     * @return
+     * @throws Exception
+     */
     public TitleDeliveryHierachy getTitleHierachyFromFedora() throws Exception {
 
 
@@ -178,14 +182,14 @@ public class DeliveryFedoraSerializer {
     }
 
 
-    public void writeStuff(DeliveryTitleInfo deli) throws JAXBException {
+    public boolean writeDeliveryToFedora(DeliveryTitleInfo deli) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deli, os);
-        writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
+        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
     }
 
     /**
@@ -194,7 +198,7 @@ public class DeliveryFedoraSerializer {
      * @param titleName
      * @param statisticsStream
      */
-    public void writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
+    public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
         DomsItem selectedTitleItem = null;
@@ -206,6 +210,14 @@ public class DeliveryFedoraSerializer {
 
             if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
                 selectedTitleItem = titleItem;
+                final List<DomsDatastream> datastreams = selectedTitleItem.datastreams();
+                Optional<DomsDatastream> profileOptional = datastreams.stream()
+                        .filter(ds -> ds.getId().equals("VALIDATIONINFO"))
+                        .findAny();
+
+                if (profileOptional.isPresent()) {
+                    return false;
+                }
 
                 selectedTitleItem.modifyDatastreamByValue(
                         "VALIDATIONINFO",
@@ -216,8 +228,10 @@ public class DeliveryFedoraSerializer {
                         "text/xml",
                         null,
                         new java.util.Date().getTime());
+                return true;
             }
         }
+        return false;
     }
 
 }
