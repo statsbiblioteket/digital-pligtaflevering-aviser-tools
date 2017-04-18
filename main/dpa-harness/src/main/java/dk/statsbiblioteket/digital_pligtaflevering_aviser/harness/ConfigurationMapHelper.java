@@ -32,10 +32,10 @@ public class ConfigurationMapHelper {
 
         File configurationFile = new File(configurationLocation);
         try {
+            LOGGER.trace("read file {}: {}", configurationFile.getAbsolutePath(), map);
             FileReader fileReader = new FileReader(configurationFile);
             map.addPropertyFile(fileReader);
             fileReader.close();
-            LOGGER.trace("read file {}: {}", configurationFile.getAbsolutePath(), map);
             return map;
         } catch (FileNotFoundException e) {
             // fall through if not present!

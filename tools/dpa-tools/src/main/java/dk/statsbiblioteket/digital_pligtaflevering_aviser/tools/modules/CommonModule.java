@@ -7,6 +7,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import javax.inject.Named;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolMXBean.JMX_OBJECT_NAME;
 
 /**
  * Module containing providers for typical DPA Dagger dependencies.
@@ -14,15 +15,31 @@ import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Autonom
 @Module
 public class CommonModule {
 
-    /** We want to be able to register the version of the software actually running in production.
+
+    /**
+     * We want to be able to register the version of the software actually running in production.
      * The shell script generated to invoke autonomous components from a command line
      * has the git branch and commit id as a system property string assignment.  The
      * string is constructed at assembly time.
-     * @param map
-     * @return
+     *
+     * @param map configuration map
+     * @return String describing the git commit id (if provided) otherwise default to "(non-production)"
      */
     @Provides
-    @Named(DPA_GIT_ID) String provideGitId(ConfigurationMap map) {
+    @Named(DPA_GIT_ID)
+    String provideGitId(ConfigurationMap map) {
         return map.getDefault(DPA_GIT_ID, "(non-production)");
+    }
+
+    /**
+     * Return the ObjectName identifier for the JMX MXBean if required by the Tool.
+     *
+     * @param map configuration map
+     * @return the ObjectName string to use.
+     */
+    @Provides
+    @Named(JMX_OBJECT_NAME)
+    String provideJmxObjectName(ConfigurationMap map) {
+        return map.getRequired(JMX_OBJECT_NAME);
     }
 }

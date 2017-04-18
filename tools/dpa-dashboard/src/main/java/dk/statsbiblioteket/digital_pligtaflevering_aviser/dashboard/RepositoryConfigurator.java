@@ -12,6 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import javaslang.control.Try;
 
 import java.util.function.Function;
@@ -21,7 +22,6 @@ import java.util.function.Function;
  * be correctly configured from a ConfigurationMap configuration.
  * (there is currently no
  * official solution to using Dagger 2 with web servers).
- *
  */
 public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRepository> {
 
@@ -56,13 +56,17 @@ public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRe
         DomsEventStorage<Item> domsEventStorage = domsModule.provideDomsEventStorage(domsURL, domsPidgeneratorUrl, domsUserName, domsPassword, itemFactory);
         int pageSize = domsModule.providePageSize(map);
 
+        final String recordBase = domsModule.provideDomsCollection(map);
+
         SBOIEventIndex sboiEventIndex = Try.of(
                 // FIXME: Use provider instead of constructor
-                () -> new SBOIEventIndex(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize)
+                () -> {
+                    return new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase);
+                }
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
-        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
+        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage, summaLocation, recordBase);
         return repository;
     }
 }

@@ -11,6 +11,13 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.model;
  * @param <V> The result returned.
  */
 public interface RepositoryQuery<Q, V> {
-    // Should query be an attribute on the repository or a stand-alone thing?
+    /**
+     * query for all items corresponding to the given query
+     */
     V query(Q query);
+
+    /**
+     * Ask how many items a given query would return without actually returning the items.
+     */
+    long count(Q query);
 }

@@ -4,38 +4,25 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
-<%@ page import="static java.time.temporal.ChronoUnit.DAYS" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.stream.Collectors" %>
+<%@ page import="static dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.SBOIConstants.Q_READY_TO_INGEST" %>
 <html>
 <body>
 
-<h1>Ingested files</h1>
+<h1>Klar til Ingest</h1>
+<% pageContext.setAttribute("newline", "\n"); %>
 <%
-    {
-        ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
+    ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
+    DomsRepository repository = new RepositoryConfigurator().apply(map);
 
-        DomsRepository repository = new RepositoryConfigurator().apply(map);
-
-        DomsModule domsModule = new DomsModule();
-
-        String pastSuccessfulEvents = "Data_Archived";
-        String futureEvents = "Manually_stopped";
-        String oldEvents = "";
-        String itemTypes = "doms:ContentModel_DPARoundTrip";
-
-        // domsModule.providesWorkToDoQuerySpecification(pastSuccessfulEvents, futureEvents, oldEvents, itemTypes);
-        final QuerySpecification querySpecification = new SBOIQuerySpecification(
-                "+item_model:\"doms:ContentModel_DPARoundTrip\" AND +success_event:Data_Archived"
-        );
-        List<DomsItem> l = repository.query(querySpecification).collect(Collectors.toList());
-        request.setAttribute("l", l);
-    }
+    List<DomsItem> l = repository.query(new SBOIQuerySpecification(Q_READY_TO_INGEST))
+            .collect(Collectors.toList());
+    request.setAttribute("l", l); // so ${l} works
 %>
+
 
 <c:forEach items="${l}" var="item">
     <h2><a href="showItem.jsp?id=${item.domsId.id()}">${item.path}</a></h2>
@@ -56,7 +43,21 @@
             <c:if test="${not empty event.details}">
                 <tr>
                     <td colspan="4">
-                        <Disabledpre>${fn:substring(event.details, 0, 1000)}</Disabledpre>
+                        <c:set var="detailsLines" value="${fn:split(event.details, newline)}"/>
+                        <c:choose>
+                            <c:when test="${fn:length(detailsLines) > 10}">
+                                ${fn:length(detailsLines)} linier
+                                <c:forEach var="i" begin="1" end="10">
+                                    <pre>${detailsLines[i]}</pre>
+                                </c:forEach>
+                                ...
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach var="detailsLine" items="${detailsLines}">
+                                    <pre>${detailsLine}</pre>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
                     </td>
                 </tr>
             </c:if>

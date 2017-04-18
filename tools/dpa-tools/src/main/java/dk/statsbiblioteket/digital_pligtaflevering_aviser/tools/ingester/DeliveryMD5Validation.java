@@ -120,7 +120,7 @@ public class DeliveryMD5Validation {
             } else {
                 //If the file that is claimed to exist in the "checksums.txt" can not be found, raise an error
                 log.trace("key not present: {} for {}", fileName, file.getAbsolutePath());
-                validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() +" claims is existing  : " + file);
+                validationResult.add("There is missing a file " + checksumFile.getAbsolutePath() + " claims is existing  : " + file);
             }
         }
         return validationResult.size()==0;

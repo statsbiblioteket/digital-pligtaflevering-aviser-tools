@@ -282,7 +282,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
                 .map(s -> s.substring("path:".length()))
                 .findAny();
 
-        return relativeFilenameFromDublinCore.get();
+        return relativeFilenameFromDublinCore.orElseGet(() -> "BROKEN VALUE!!");
     }
 
     // BACKPORT - DomsEventStorage.getPremisForItem() is private so adapted from that.

@@ -82,10 +82,10 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification query, DomsRepository domsRepository) {
+        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification workToDoQuery, DomsRepository domsRepository) {
             final String agent = ValidateXMLModule.class.getSimpleName();
 
-            Tool f = () -> Stream.of(query)
+            Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId().apply(domsItem))
