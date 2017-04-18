@@ -78,7 +78,7 @@ import static java.nio.file.Files.walk;
  *
  * @noinspection WeakerAccess
  */
-public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable, FileSystemDeliveryIngesterMBean {
+public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String BITREPOSITORY_INGESTER_COLLECTIONID = "bitrepository.ingester.collectionid";
@@ -604,10 +604,5 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         if (putfileClient != null) {
             putfileClient.close();
         }
-    }
-
-    @Override
-    public String getStatus() {
-        return status;
     }
 }

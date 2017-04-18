@@ -3,6 +3,9 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 import java.util.List;
 
 /**
+ * A QuerySpecification which carries the event lists needed to do an autonomous
+ * component "What work is ready for me?"
+ * (@see {@link dk.statsbiblioteket.medieplatform.autonomous.EventTrigger.Query})
  *
  */
 public class EventQuerySpecification implements QuerySpecification {

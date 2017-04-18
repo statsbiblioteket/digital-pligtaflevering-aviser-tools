@@ -29,7 +29,7 @@ public class SBOIEventIndex_DigitalPligtafleveringAviser<T extends Item> extends
         if (query instanceof PassQThrough_Query) {
             queryWithoutRecordBase =  ((PassQThrough_Query) query).getQ();
         } else {
-            // the recordBase is hardcoded in the super method so remove that and add our own recordBase
+            // the "recordBase:XXX" string is hardcoded in the super method so remove that and add our own recordBase
             String originalQuery = super.toQueryString(query);
             String originalQueryPrefix = spaced(RECORD_BASE); // from examining source
             if (originalQuery.startsWith(originalQueryPrefix)) {
