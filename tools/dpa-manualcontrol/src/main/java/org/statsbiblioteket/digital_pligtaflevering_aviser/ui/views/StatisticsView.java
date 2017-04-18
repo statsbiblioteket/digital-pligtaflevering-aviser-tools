@@ -200,10 +200,12 @@ public class StatisticsView extends VerticalLayout implements View {
                 if(currentSelectedPage!=null) {
                     currentSelectedPage.setCheckedState(ConfirmationState.CHECKED);
                     model.addCheckedPage(currentSelectedPage);
+                    tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.CHECKED);
                 }
                 if(currentSelectedArticle!=null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.CHECKED);
                     model.addCheckedArticle(currentSelectedArticle);
+                    tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.CHECKED);
                 }
             }
         });
@@ -215,10 +217,12 @@ public class StatisticsView extends VerticalLayout implements View {
                 if(currentSelectedPage!=null) {
                     currentSelectedPage.setCheckedState(ConfirmationState.REJECTED);
                     model.addCheckedPage(currentSelectedPage);
+                    tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.REJECTED);
                 }
                 if(currentSelectedArticle!=null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.REJECTED);
                     model.addCheckedArticle(currentSelectedArticle);
+                    tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.REJECTED);
                 }
             }
         });

@@ -57,6 +57,17 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    /**
+     * Check the specified row in the table
+     * @param itemId
+     * @param value
+     */
+    public void checkSpecific(Object itemId, Object value) {
+        table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
+        table.refreshRowCache();
+    }
+
+
     public boolean isAllChecked() {
 
         Collection i = table.getContainerDataSource().getItemIds();

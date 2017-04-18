@@ -8,6 +8,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
@@ -81,7 +82,28 @@ public class DeliveryMainPanel extends VerticalLayout {
         this.addComponent(tablesLayout);
     }
 
+    /**
+     * Set the checkmark in the pageTable
+     * @param itemId
+     * @param checkedState
+     */
+    public void checkThePage(Object itemId, ConfirmationState checkedState) {
+        fileSelectionPanel.checkSpecific(itemId, checkedState);
+    }
 
+    /**
+     * Set the checkmark in the articleTable
+     * @param itemId
+     * @param checkedState
+     */
+    public void checkTheArticle(Object itemId, ConfirmationState checkedState) {
+        articleSelectionPanel.checkSpecific(itemId, checkedState);
+    }
+
+    /**
+     * Show the content of the selection defined by the delivery and title.
+     * The information is fetched from fedora as the statistics stream and is shown in tables with section, article and page
+     */
     protected void showTheSelectedTitle() {
 
         fileSelectionPanel.setEnabled(false);

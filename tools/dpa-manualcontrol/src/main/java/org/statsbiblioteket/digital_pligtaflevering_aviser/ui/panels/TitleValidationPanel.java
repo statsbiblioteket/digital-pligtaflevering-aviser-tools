@@ -9,7 +9,8 @@ import java.util.List;
 
 
 /**
- * Created by mmj on 3/10/17.
+ * Panel for validation of titles, this panel lets the user select a newspaper-title and get a list of all deliveries where this title has been recieved.
+ * The user can validate one delivery at a time until all deliveries of the newspaper has been approved
  */
 public class TitleValidationPanel extends DeliveryMainPanel {
 

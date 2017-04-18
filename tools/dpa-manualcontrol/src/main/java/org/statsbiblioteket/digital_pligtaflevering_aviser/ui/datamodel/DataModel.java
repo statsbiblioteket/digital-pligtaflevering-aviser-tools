@@ -142,6 +142,12 @@ public class DataModel {
         filesystemSerializer.removeDeliveryFromFilesystem(currentlySelectedMonth, selectedDelivery, selectedTitle);
     }
 
+    /**
+     * Get the Title object from fedora, constructed with the STATISTICS stream
+     * @param selectedDelivery
+     * @param selectedTitle
+     * @return
+     */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
         return fedoraSerializer.getTitleObj(selectedDelivery, selectedTitle);
     }
