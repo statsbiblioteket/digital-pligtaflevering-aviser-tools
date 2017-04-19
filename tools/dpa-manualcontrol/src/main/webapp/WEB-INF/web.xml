@@ -18,6 +18,68 @@
         </listener-class>
     </listener>
 
+    <!--Start of CAS filter -->
+    <!--
+    <filter>
+        <filter-name>CAS Authentication Filter</filter-name>
+        <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>CAS Validation Filter</filter-name>
+        <filter-class>org.jasig.cas.client.validation.Saml11TicketValidationFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+        <filter-class>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>AD group provider</filter-name>
+        <filter-class>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.sbstaffapp.GroupProvider</filter-class>
+    </filter>
+    <filter>
+        <filter-name>CAS Assertion Thread Local Filter</filter-name>
+        <filter-class>org.jasig.cas.client.util.AssertionThreadLocalFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>CAS Authentication Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CAS Validation Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AD group provider</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CAS Assertion Thread Local Filter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <context-param>
+        <param-name>casServerUrlPrefix</param-name>
+        <param-value>https://samling.statsbiblioteket.dk/casinternal/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>casServerLoginUrl</param-name>
+        <param-value>https://samling.statsbiblioteket.dk/casinternal/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>service</param-name>
+        <param-value>http://localhost:8080/vaadin-app/VAADIN</param-value>
+    </context-param>
+    <context-param>
+        <param-name>serverName</param-name>
+        <param-value>localhost</param-value>
+    </context-param>
+    -->
+    <!--End of CAS filter -->
 
     <servlet>
         <servlet-name>DPA Servlet</servlet-name>
@@ -36,5 +98,9 @@
     <servlet-mapping>
         <servlet-name>DPA Servlet</servlet-name>
         <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DPA Servlet</servlet-name>
+        <url-pattern>/VAADIN/*</url-pattern>
     </servlet-mapping>
 </web-app>

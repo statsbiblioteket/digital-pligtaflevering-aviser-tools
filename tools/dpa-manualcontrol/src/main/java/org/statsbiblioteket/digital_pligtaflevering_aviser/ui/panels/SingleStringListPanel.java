@@ -36,6 +36,7 @@ public class SingleStringListPanel extends VerticalLayout {
             com.vaadin.data.Item row1 = table.getItem(newItemId);
             row1.getItemProperty("Item").setValue(item);
         }
+        table.setSortContainerPropertyId("Item");
 
     }
 

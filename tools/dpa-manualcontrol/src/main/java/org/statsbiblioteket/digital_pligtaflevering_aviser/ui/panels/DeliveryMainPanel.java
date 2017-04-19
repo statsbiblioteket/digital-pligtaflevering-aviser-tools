@@ -58,6 +58,9 @@ public class DeliveryMainPanel extends VerticalLayout {
                 showTheSelectedTitle();
             }
         });
+        deliveryPanel.setSortParam("newspaperTitle");
+        fileSelectionPanel.setSortParam("sectionName");
+        articleSelectionPanel.setSortParam("sectionName");
     }
 
     public void initialLayout() {

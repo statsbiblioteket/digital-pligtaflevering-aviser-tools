@@ -11,6 +11,8 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.MainView;
 
+import java.util.List;
+
 /**
  * The Application's "main" class
  */
@@ -30,6 +32,7 @@ public class NewspaperUI extends UI {
 
         String productionMode = ConfigCollection.getProperties().getProperty("productionMode");
 
+        List<String> groups = (List<String>) request.getAttribute("sbAdGroups");
         address = request.getRemoteAddr();
         getPage().setTitle("DPA");
 

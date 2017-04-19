@@ -64,6 +64,7 @@ public class DeliveryListPanel extends VerticalLayout {
             }
             row1.getItemProperty("Name").setValue(item);
         }
+        table.setSortContainerPropertyId("Date");
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {

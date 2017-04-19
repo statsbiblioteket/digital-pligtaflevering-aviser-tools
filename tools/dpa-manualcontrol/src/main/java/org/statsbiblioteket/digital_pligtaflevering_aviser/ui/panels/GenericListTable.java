@@ -18,6 +18,7 @@ import java.util.Iterator;
 public class GenericListTable extends VerticalLayout {
 
     private String checkedColumnName;
+    private String sortColumnName = null;
     private Object checkedColumnDefaultValue;
     private String[] columnFilter;
     private BeanItemContainer beans;
@@ -55,6 +56,10 @@ public class GenericListTable extends VerticalLayout {
         if(visibleColumns!=null) {
             table.setVisibleColumns(visibleColumns);
         }
+    }
+
+    public void setSortParam(String param) {
+        sortColumnName = param;
     }
 
     /**
@@ -99,6 +104,10 @@ public class GenericListTable extends VerticalLayout {
         beans.removeAllItems();
         for(Object o : delStat) {
             beans.addBean(o);
+        }
+        if(sortColumnName!= null) {
+            table.setSortContainerPropertyId(sortColumnName);
+            table.refreshRowCache();
         }
     }
 

@@ -6,6 +6,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 
 /**
  * Created by mmj on 3/8/17.
@@ -18,7 +19,7 @@ public class MainView extends VerticalLayout implements View {
                 new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
-                        //navigator.navigateTo(MAINVIEW);
+                        getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
                     }
                 });
         addComponent(button);
