@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mmj on 3/10/17.
+ * The full panel for showing all selection details of deliveries
  */
 public class DeliveryMainPanel extends VerticalLayout {
 
@@ -31,20 +31,16 @@ public class DeliveryMainPanel extends VerticalLayout {
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY");
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber"}, "SECTION");//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE");//
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE");
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY", true);
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber"}, "SECTION", true);//
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE", true);//
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
 
-
-
-    public DeliveryMainPanel() {
-        this.setWidth("100%");
-        this.setHeight("100%");
-    }
-
-
+    /**
+     * Construct the panel with a reference to the datamodel
+     * @param model
+     */
     public DeliveryMainPanel(DataModel model) {
         this.model = model;
         tablesLayout.setWidth("100%");
@@ -63,6 +59,9 @@ public class DeliveryMainPanel extends VerticalLayout {
         articleSelectionPanel.setSortParam("sectionName");
     }
 
+    /**
+     * Initiate columnwith of the graphical components
+     */
     public void initialLayout() {
         tablesLayout.addComponent(deliveryPanel);
         tablesLayout.addComponent(sectionSectionTable);
@@ -76,7 +75,7 @@ public class DeliveryMainPanel extends VerticalLayout {
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
-                setCheckedState();
+                viewDialogForSettingDeliveryToChecked();
             }});
 
         buttonLayout.addComponent(saveCheckButton);
@@ -146,7 +145,10 @@ public class DeliveryMainPanel extends VerticalLayout {
         model.selectTitleDelivery();
     }
 
-
+    /**
+     * Add selectionListener to fileSelectionTable
+     * @param listener
+     */
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
     }
@@ -155,7 +157,10 @@ public class DeliveryMainPanel extends VerticalLayout {
 
     }
 
-    public void setCheckedState() {
+    /**
+     *
+     */
+    public void viewDialogForSettingDeliveryToChecked() {
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
         DeliveryTitleInfo item = model.getCurrentDelItem();

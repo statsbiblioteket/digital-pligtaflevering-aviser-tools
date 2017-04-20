@@ -1,7 +1,9 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import com.vaadin.navigator.Navigator;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -26,9 +28,18 @@ public class NewspaperUI extends UI {
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
 
 
-
+    /**
+     * Initiate the application
+     * @param request
+     */
     @Override
     protected void init(VaadinRequest request) {
+
+        //Enable to navigate to raw path
+        /*if(navigator==null) {
+            String thisIsDomainPath = request.getContextPath();
+            Page.getCurrent().open(thisIsDomainPath + "/", null);
+        }*/
 
         String productionMode = ConfigCollection.getProperties().getProperty("productionMode");
 

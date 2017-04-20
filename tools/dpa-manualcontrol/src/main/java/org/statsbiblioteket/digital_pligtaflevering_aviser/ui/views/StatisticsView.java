@@ -34,7 +34,7 @@ import java.net.URI;
 
 
 /**
- * Created by mmj on 3/8/17.
+ * The full panel for showing deliveries and titles
  */
 public class StatisticsView extends VerticalLayout implements View {
 
@@ -54,12 +54,9 @@ public class StatisticsView extends VerticalLayout implements View {
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
 
-
         pdf.setMimeType("application/pdf");
         pdf.setType(Embedded.TYPE_BROWSER);
         link.setTargetName("_blank");
-
-
 
         MenuBar.Command configCommand = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
@@ -249,7 +246,12 @@ public class StatisticsView extends VerticalLayout implements View {
         tabelsLayout.setVisible(prepare);
     }
 
-
+    /**
+     * Convert the URI to the pdf-file into a StremaRecource for viewing in UI
+     * @param uri
+     * @return
+     * @throws Exception
+     */
     private synchronized StreamResource createStreamResource(final URI uri) throws Exception {
 
         final StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
@@ -263,13 +265,16 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
                 }
             }
-        }, "page.pdf"  );
+        }, "pages.pdf"  );
         resource.setMIMEType("application/pdf");
         resource.setCacheTime(1000);
         return resource;
     }
 
-
+    /**
+     * Show a welcome message when entering pte page
+     * @param event
+     */
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         Notification.show("DPA Delivery validation");

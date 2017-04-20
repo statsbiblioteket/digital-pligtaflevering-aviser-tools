@@ -1,23 +1,23 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
-import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 
 import java.util.Collection;
-import java.util.HashMap;
 
 /**
  * List containing single String items
  */
 public class SingleStringListPanel extends VerticalLayout {
 
+    private CheckBox checkbox = new CheckBox("Visible", true);
     private Table table;
 
     public SingleStringListPanel() {
 
+        checkbox.setEnabled(false);
         // Bind a table to it
         table = new Table("List");
         table.addContainerProperty("Item", String.class, null);
@@ -25,10 +25,14 @@ public class SingleStringListPanel extends VerticalLayout {
         table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
+        this.addComponent(checkbox);
         this.addComponent(table);
     }
 
-
+    /**
+     * Set a collection of Strings into the embedded table
+     * @param list
+     */
     public void setTableContent(Collection<String> list) {
         table.removeAllItems();
         for(String item : list) {
@@ -37,9 +41,12 @@ public class SingleStringListPanel extends VerticalLayout {
             row1.getItemProperty("Item").setValue(item);
         }
         table.setSortContainerPropertyId("Item");
-
     }
 
+    /**
+     * Add clicklistener to the embedded table
+     * @param listener
+     */
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }

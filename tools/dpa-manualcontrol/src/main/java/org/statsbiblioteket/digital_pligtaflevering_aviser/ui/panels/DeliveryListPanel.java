@@ -16,15 +16,17 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
- * Created by mmj on 3/2/17.
+ * Panel for the viewing of newspaper-deliveries
  */
 public class DeliveryListPanel extends VerticalLayout {
 
+    private CheckBox checkbox = new CheckBox("Visible", true);
     private Table table;
     private HashMap<Item, DomsItem> itemList = new HashMap<Item, DomsItem>();
 
     public DeliveryListPanel() {
 
+        checkbox.setEnabled(false);
         // Bind a table to it
         table = new Table("Deliveries");
 
@@ -39,7 +41,7 @@ public class DeliveryListPanel extends VerticalLayout {
 
         table.setColumnExpandRatio("Date", 0.5f);
         table.setColumnExpandRatio("Name", 0.5f);
-
+        this.addComponent(checkbox);
         this.addComponent(table);
     }
 
@@ -67,6 +69,10 @@ public class DeliveryListPanel extends VerticalLayout {
         table.setSortContainerPropertyId("Date");
     }
 
+    /**
+     * Add clickListener to the embedded table
+     * @param listener
+     */
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }

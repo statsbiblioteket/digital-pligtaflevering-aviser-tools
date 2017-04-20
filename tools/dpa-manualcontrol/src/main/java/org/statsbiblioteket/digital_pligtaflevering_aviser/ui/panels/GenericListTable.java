@@ -21,10 +21,21 @@ public class GenericListTable extends VerticalLayout {
     private String sortColumnName = null;
     private Object checkedColumnDefaultValue;
     private String[] columnFilter;
+    private CheckBox checkbox;
     private BeanItemContainer beans;
     private Table table;
 
-    public GenericListTable(Class c) {
+    /**
+     * Construct the TableViewing-component with specific parameters about layout
+     * @param c
+     * @param checkedColumn
+     * @param checkedDefaultValue
+     * @param visibleColumns
+     * @param tableId
+     * @param initialVisible
+     */
+    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String tableId, boolean initialVisible) {
+        checkbox = new CheckBox("Visible", initialVisible);
         beans=new BeanItemContainer(c);
 
         // Bind a table to it
@@ -33,11 +44,11 @@ public class GenericListTable extends VerticalLayout {
         table.setHeight("100%");
         table.setSelectable(true);
         table.setImmediate(true);
+        this.addComponent(checkbox);
+        checkbox.addValueChangeListener(event ->
+                table.setVisible((Boolean)event.getProperty().getValue())
+        );
         this.addComponent(table);
-    }
-
-    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String tableId) {
-        this(c);
         checkedColumnName = checkedColumn;
         checkedColumnDefaultValue = checkedDefaultValue;
         if(checkedColumnName!=null) {
@@ -48,9 +59,14 @@ public class GenericListTable extends VerticalLayout {
             table.setVisibleColumns(visibleColumns);
         }
         table.setId(tableId);
-        table.setColumnExpandRatio(checkedColumn, 0.2f);
+        table.setColumnExpandRatio(checkedColumn, 0.3f);
+        table.setVisible(initialVisible);
     }
 
+    /**
+     * Set a list of which columns in the table to make visible
+     * @param visibleColumns
+     */
     public void setVisibleColumns(String[] visibleColumns) {
         columnFilter = visibleColumns;
         if(visibleColumns!=null) {
@@ -58,6 +74,10 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    /**
+     * Set the name of the column in the table to sort the rows with
+     * @param param
+     */
     public void setSortParam(String param) {
         sortColumnName = param;
     }
@@ -72,7 +92,10 @@ public class GenericListTable extends VerticalLayout {
         table.refreshRowCache();
     }
 
-
+    /**
+     * Iterate through all rows and find out if all checkboxes is selected
+     * @return
+     */
     public boolean isAllChecked() {
 
         Collection i = table.getContainerDataSource().getItemIds();
@@ -85,7 +108,10 @@ public class GenericListTable extends VerticalLayout {
         return true;
     }
 
-
+    /**
+     * Set the component to be vieved as enabled in the UI
+     * @param enabled
+     */
     public void setEnabled(boolean enabled) {
         beans.removeAllItems();
         super.setEnabled(enabled);
@@ -99,7 +125,10 @@ public class GenericListTable extends VerticalLayout {
         table.removeAllItems();
     }
 
-
+    /**
+     * Set data to the embedded table
+     * @param delStat
+     */
     public void setInfo(Collection delStat) {
         beans.removeAllItems();
         for(Object o : delStat) {
