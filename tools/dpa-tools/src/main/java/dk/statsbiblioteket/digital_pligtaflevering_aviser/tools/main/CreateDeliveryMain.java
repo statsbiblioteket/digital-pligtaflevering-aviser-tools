@@ -65,6 +65,16 @@ public class CreateDeliveryMain {
                          Provider<Stream<Path>> deliveriesToCreateProvider,
                          @Named(AUTONOMOUS_DONEDIR) String doneDir) {
 
+            // sanity check
+            File doneDirFile = new File(doneDir);
+            if (doneDirFile.exists() && doneDirFile.canWrite()) {
+                // good, doneDir writable
+            } else {
+                throw new IllegalArgumentException(
+                        "doneDir not writable: " + doneDir + " (" + doneDirFile.getAbsolutePath() + ")"
+                );
+            }
+
             return () -> {
                 //Expected folderFormat
                 Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
