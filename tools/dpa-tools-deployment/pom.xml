@@ -173,7 +173,7 @@
                                 <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
                                     <mainClass>
-                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CreateDeliveryMain
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.localhost.CreateDeliveryMain
                                     </mainClass>
                                     <id>dpa-create-delivery</id>
                                 </program>
@@ -185,7 +185,7 @@
                                 </program>
                                 <!--
                                 <program>
-                                    <mainClass>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFInvokeMain
+                                    <mainCldk.statsbiblioteket.digital_pligtaflevering_aviser.tools.localhost.mainmain.VeraPDFInvokeMain
                                     </mainClass>
                                     <id>dpa-verapdf-apply</id>
                                 </program>

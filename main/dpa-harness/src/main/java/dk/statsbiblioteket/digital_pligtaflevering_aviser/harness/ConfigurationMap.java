@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
- * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. FIXME:  Full technical
+ * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. The toString()
+ * explicitly protects passwords from being printed.  FIXME:  Full technical
  * explanation pending.</p>
  */
 @Module
@@ -44,7 +45,7 @@ public class ConfigurationMap {
                             .filter(e -> everUsed.contains(e) == false)
                             .sorted()
                             .collect(Collectors.toList());
-                    if (unused.size() > 0 ) {
+                    if (unused.size() > 0) {
                         System.err.println("Unused configuration keys: " + unused);
                     }
                 }
@@ -118,7 +119,7 @@ public class ConfigurationMap {
 
     /**
      * Buffers the reader, reads in the entries, and add them to the configuration map.  The reader isn't closed
-     * afterwards.  Values (but not keys) are trimmed.
+     * afterwards.  Keys and values are trimmed.
      */
 
     public void addPropertyFile(Reader reader) throws IOException {
@@ -127,7 +128,7 @@ public class ConfigurationMap {
             p.load(bufferedReader);
         }
         for (Map.Entry<Object, Object> entry : p.entrySet()) {
-            String key = String.valueOf(entry.getKey());
+            String key = String.valueOf(entry.getKey()).trim();
             String value = String.valueOf(entry.getValue()).trim();
             map.put(key, value);
         }

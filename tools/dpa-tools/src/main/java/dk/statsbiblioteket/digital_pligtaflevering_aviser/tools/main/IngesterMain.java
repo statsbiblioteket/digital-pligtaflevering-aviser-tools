@@ -79,7 +79,7 @@ public class IngesterMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
+                m -> dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DaggerIngesterMain_DomsIngesterComponent.builder().configurationMap(m).build().getTool()
         );
     }
 

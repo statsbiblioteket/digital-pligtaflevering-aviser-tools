@@ -65,7 +65,7 @@ public class ValidateXMLMain {
 
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerValidateXMLMain_ValidateXMLComponent.builder().configurationMap(m).build().getTool()
+                m -> dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DaggerValidateXMLMain_ValidateXMLComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
