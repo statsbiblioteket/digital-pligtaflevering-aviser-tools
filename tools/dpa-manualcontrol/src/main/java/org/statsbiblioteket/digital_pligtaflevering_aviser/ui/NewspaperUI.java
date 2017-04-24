@@ -25,6 +25,7 @@ public class NewspaperUI extends UI {
     public static final String MAINVIEW = "";
     public static final String CONFIGPANEL = "CONFIGPANEL";
     public static final String DELIVERYPANEL = "DELIVERYPANEL";
+    public static final String OVERVIEW = "OVERVIEW";
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
 
 
@@ -55,6 +56,7 @@ public class NewspaperUI extends UI {
         navigator.addView(CONFIGPANEL, new StatisticsView(CONFIGPANEL));
         navigator.addView(DELIVERYPANEL, new StatisticsView(DELIVERYPANEL));
         navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(TITLEVALIDATIONPANEL));
+        navigator.addView(OVERVIEW, new StatisticsView(OVERVIEW));
     }
 
 }

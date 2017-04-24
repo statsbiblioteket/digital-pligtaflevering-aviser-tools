@@ -25,7 +25,9 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataMode
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
 
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryValidationPanel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.StatisticsPanels;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.TitleValidationPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 
@@ -41,7 +43,7 @@ public class StatisticsView extends VerticalLayout implements View {
     private DataModel model = new DataModel();
     private Link link = new Link("Metadatlink", null);
     private Embedded pdf = new Embedded(null, null);
-    private DeliveryMainPanel tabelsLayout;
+    private StatisticsPanels tabelsLayout;
     private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
     private String fedoraPath = "http://172.18.100.153:7880/fedora/objects/";
     private Page currentSelectedPage;
@@ -76,9 +78,16 @@ public class StatisticsView extends VerticalLayout implements View {
             }
         };
 
+        MenuBar.Command otherCommand3 = new MenuBar.Command() {
+            public void menuSelected(MenuBar.MenuItem selectedItem) {
+                getUI().getNavigator().navigateTo(NewspaperUI.OVERVIEW);
+            }
+        };
+
         header.addItem("config", configCommand);
         header.addItem("Delivery validation", otherCommand1);
         header.addItem("TitleValidation", otherCommand2);
+        header.addItem("Overview", otherCommand3);
 
         switch (type) {
             case NewspaperUI.DELIVERYPANEL:
@@ -87,9 +96,14 @@ public class StatisticsView extends VerticalLayout implements View {
             case NewspaperUI.TITLEVALIDATIONPANEL:
                 tabelsLayout = new TitleValidationPanel(model);
                 break;
+            case NewspaperUI.OVERVIEW:
+                tabelsLayout = new DeliveryOverviewPanel(model);
+                break;
             case NewspaperUI.CONFIGPANEL:
                 tabelsLayout = new ConfigPanel(model);
                 break;
+
+
             default:
                 tabelsLayout = new DeliveryValidationPanel(model);
         }

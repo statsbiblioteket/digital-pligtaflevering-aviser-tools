@@ -12,6 +12,7 @@ public class ConfigPanel extends DeliveryValidationPanel {
 
     public ConfigPanel(DataModel model) {
         super(model);
+        super.initialLayout();
         clearDeliveryButton.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 try {
