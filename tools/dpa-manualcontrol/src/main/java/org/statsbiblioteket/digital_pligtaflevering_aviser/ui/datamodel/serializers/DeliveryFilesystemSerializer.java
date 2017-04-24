@@ -11,7 +11,8 @@ import java.io.File;
 import java.util.Iterator;
 
 /**
- * Created by mmj on 3/29/17.
+ * Serialize objects into files on the local filesystem.
+ * This functionality can be used to optimize performance on the server by streaming the objects in a format that is used in the dayly use of the server.
  */
 public class DeliveryFilesystemSerializer {
 
@@ -22,15 +23,23 @@ public class DeliveryFilesystemSerializer {
         this.cashingPath = cashingPath;
     }
 
+    /**
+     * Ask in the filesystem if the specified month has been streamed to the filesystem
+     * @param currentlySelectedMonth
+     * @return
+     */
     public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
-
         String currentFolder = cashingPath + currentlySelectedMonth;
-
         File folderForThis = new File(currentFolder);
         return folderForThis.exists();
     }
 
-
+    /**
+     * Construct the object TitleDeliveryHierachy which contains logic about a month of deliveries
+     * @param currentlySelectedMonth
+     * @return
+     * @throws Exception
+     */
     public TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
         TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
 

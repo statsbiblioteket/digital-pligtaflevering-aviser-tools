@@ -113,8 +113,8 @@ public class StatisticsView extends VerticalLayout implements View {
         if(browserWidth>1800) {
             mainhlayout = new HorizontalLayout();
             pdf.setWidth("900px");
-            pdf.setHeight("1300px");
-            tabelsLayout.setHeight("1500px");
+            pdf.setHeight("1200px");
+            tabelsLayout.setHeight("1200px");
         } else {
             mainhlayout = new VerticalLayout();
             pdf.setWidth("500px");

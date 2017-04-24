@@ -99,8 +99,8 @@ public class DataModel {
         return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
     }
 
-    public List<DeliveryTitleInfo> getOtherFromDelivery() {
-        return currentlySelectedTitleHiearachy.getOtherStructure(selectedDelivery);
+    public List<DeliveryTitleInfo> getDeliveryTitleObjects() {
+        return currentlySelectedTitleHiearachy.getDeliveryTitleObjects(selectedDelivery);
     }
 
     public void initiateDeliveries(boolean allreadyValidated) {

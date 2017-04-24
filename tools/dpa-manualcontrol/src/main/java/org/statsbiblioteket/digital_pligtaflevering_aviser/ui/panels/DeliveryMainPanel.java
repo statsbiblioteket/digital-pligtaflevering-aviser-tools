@@ -32,7 +32,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY", true);
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber"}, "SECTION", true);//
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber", "pageCount"}, "SECTION", true);//
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE", true);//
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
@@ -139,7 +139,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
             fileSelectionPanel.setInfo(filteredPages);
         } else {
             sectionSectionTable.cleanTable();
-            sectionSectionTable.setInfo(UiDataConverter.sectionConverter(title.getPage().iterator(), null).values());
+            sectionSectionTable.setInfo(UiDataConverter.sectionConverter(title.getPage()).values());
             fileSelectionPanel.setInfo(pages);
         }
         model.selectTitleDelivery();

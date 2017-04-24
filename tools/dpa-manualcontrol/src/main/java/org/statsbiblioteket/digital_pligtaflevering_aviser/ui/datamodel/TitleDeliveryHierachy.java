@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Created by mmj on 3/23/17.
+ * The full hierachy of metadata from a list of titles and deliveries
  */
 @XmlRootElement(name = "hierachy")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -78,14 +78,25 @@ public class TitleDeliveryHierachy {
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-
+    /**
+     * Get a list of all DeliveryTitleInfo which contains the specified title
+     * @param title
+     * @return
+     */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
-        return otherStructure.stream().filter(bob -> ( bob.getNewspaperTitle().equals(title))).collect(Collectors.toList());
+        return otherStructure.stream()
+                .filter(delivery -> ( delivery.getNewspaperTitle().equals(title)))
+                .collect(Collectors.toList());
     }
 
-
-
-    public List<DeliveryTitleInfo> getOtherStructure(String delivery) {
-        return otherStructure.stream().filter(bob -> bob.getDeliveryName().equals(delivery)).collect(Collectors.toList());
+    /**
+     * Get a list of all DeliveryTitleInfo which contains the specified deliveryname
+     * @param delivery
+     * @return
+     */
+    public List<DeliveryTitleInfo> getDeliveryTitleObjects(String delivery) {
+        return otherStructure.stream()
+                .filter(deliveryObject -> deliveryObject.getDeliveryName().equals(delivery))
+                .collect(Collectors.toList());
     }
 }

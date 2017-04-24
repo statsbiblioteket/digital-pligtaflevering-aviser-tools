@@ -1,6 +1,5 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
-
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
@@ -12,8 +11,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Converter utilities between deliveryDTO's and DTO's suitable for the UI
@@ -63,17 +65,15 @@ public class UiDataConverter {
 
     /**
      * Convert a pageiterator into a hashMap of pages, and use filter if delivered
-     * @param pageIterator
-     * @param sectionNumber
+     * @param pageList
      * @return
      */
-    public static HashMap sectionConverter(Iterator<Page> pageIterator, String sectionNumber) {
+    public static Map sectionConverter(List<Page> pageList) {
+
+        Map<String, List<Page>> grouped = pageList.stream().collect(Collectors.groupingBy(pageItem -> pageItem.getSectionNumber()));
         HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();
-        while(pageIterator.hasNext()) {
-            Page page = pageIterator.next();
-            if(sectionNumber == null || sectionNumber.equals(page.getSectionNumber())) {
-                hset.put(page.getSectionNumber(), new TitleComponent(page.getSectionName(), page.getSectionNumber(), 0, 0));
-            }
+        for(List<Page> groupedPageList : grouped.values()) {
+            hset.put(groupedPageList.get(0).getSectionNumber(), new TitleComponent(groupedPageList.get(0).getSectionName(), groupedPageList.get(0).getSectionNumber(), groupedPageList.size()));
         }
         return hset;
     }

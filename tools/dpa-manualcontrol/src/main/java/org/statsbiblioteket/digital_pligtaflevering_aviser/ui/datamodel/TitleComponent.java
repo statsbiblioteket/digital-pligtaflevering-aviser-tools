@@ -1,19 +1,17 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
 /**
- * Created by mmj on 3/9/17.
+ * A Component containing the metadata of the files that is in a title and a delivery
  */
 public class TitleComponent {
     private String sectionName;
     private String sectionNumber;
     private int pageCount;
-    private int articleCount;
 
-    public TitleComponent(String sectionName, String sectionNumber, int pageCount, int articleCount) {
+    public TitleComponent(String sectionName, String sectionNumber, int pageCount) {
         this.sectionName = sectionName;
         this.sectionNumber = sectionNumber;
         this.pageCount = pageCount;
-        this.articleCount = articleCount;
     }
 
     public String getSectionName() {
@@ -38,14 +36,6 @@ public class TitleComponent {
 
     public void setPageCount(int pageCount) {
         this.pageCount = pageCount;
-    }
-
-    public int getArticleCount() {
-        return articleCount;
-    }
-
-    public void setArticleCount(int articleCount) {
-        this.articleCount = articleCount;
     }
 }
 

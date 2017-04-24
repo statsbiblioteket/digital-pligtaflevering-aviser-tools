@@ -33,7 +33,7 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
                 com.vaadin.data.Item selectedItem = itemClickEvent.getItem();
                 String selectedDelivery = selectedItem.getItemProperty("Name").getValue().toString();
                 model.setSelectedDelivery(selectedDelivery);
-                List<DeliveryTitleInfo> l = model.getOtherFromDelivery();
+                List<DeliveryTitleInfo> l = model.getDeliveryTitleObjects();
                 deliveryPanel.setInfo(l);
             }
         });

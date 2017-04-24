@@ -1,15 +1,9 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import com.vaadin.navigator.Navigator;
-import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper;
 import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryConfigurator;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.MainView;
 
