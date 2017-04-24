@@ -10,6 +10,7 @@
 
     <properties>
         <dpa.slf4j.version>1.7.21</dpa.slf4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
