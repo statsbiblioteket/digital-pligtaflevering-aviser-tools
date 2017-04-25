@@ -7,18 +7,13 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleComponent;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -70,15 +65,6 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
      * Initiate columnwith of the graphical components
      */
     public void initialLayout() {
-        /*tablesLayout.addComponent(deliveryPanel);
-
-
-        tablesLayout.setExpandRatio(deliveryPanel, 0.2f);
-
-
-
-        this.addComponent(buttonLayout);
-        this.addComponent(tablesLayout);*/
     }
 
     @Override
@@ -114,11 +100,6 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
         if(title==null) {
             return;
         }
-
-
-        List<Page> pages = title.getPage();
-        List<Article> articles = title.getArticle();
-
         model.selectTitleDelivery();
     }
 

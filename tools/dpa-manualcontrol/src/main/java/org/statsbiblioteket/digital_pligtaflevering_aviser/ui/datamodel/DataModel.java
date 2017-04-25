@@ -9,7 +9,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.FetchEventStructure;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
 import java.text.SimpleDateFormat;
@@ -104,9 +103,9 @@ public class DataModel {
     }
 
     public void initiateDeliveries(boolean allreadyValidated) {
-        FetchEventStructure.EventStatus evtStatus = FetchEventStructure.EventStatus.READYFORMANUALCHECK;
+        DeliveryFedoraSerializer.EventStatus evtStatus = DeliveryFedoraSerializer.EventStatus.READYFORMANUALCHECK;
         if(allreadyValidated) {
-            evtStatus = FetchEventStructure.EventStatus.DONEMANUALCHECK;
+            evtStatus = DeliveryFedoraSerializer.EventStatus.DONEMANUALCHECK;
         }
         fedoraSerializer.initiateDeliveries(evtStatus);
     }

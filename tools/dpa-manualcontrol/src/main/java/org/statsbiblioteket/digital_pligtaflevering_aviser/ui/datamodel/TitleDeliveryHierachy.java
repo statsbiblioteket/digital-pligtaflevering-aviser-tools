@@ -20,16 +20,16 @@ import java.util.stream.Collectors;
 public class TitleDeliveryHierachy {
 
     @XmlElement(name = "title")
-    private ArrayList<DeliveryTitleInfo> otherStructure = new ArrayList<DeliveryTitleInfo>();
+    private ArrayList<DeliveryTitleInfo> deliveryStructure = new ArrayList<DeliveryTitleInfo>();
 
 
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
-        otherStructure.add(ds);
+        deliveryStructure.add(ds);
     }
 
 
     public ArrayList<DeliveryTitleInfo> getTheFullStruct() {
-        return otherStructure;
+        return deliveryStructure;
     }
 
 
@@ -59,16 +59,19 @@ public class TitleDeliveryHierachy {
      * @return
      */
     public DeliveryTitleInfo getDeliveryTitleCheckStatus(String title, String delivery) {
-        return otherStructure.stream().filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
+        return deliveryStructure.stream()
+                .filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
     }
 
 
     public List<String> getAllTitles() {
-        List<DeliveryTitleInfo> f = otherStructure.stream().filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());
+        List<DeliveryTitleInfo> deliveryTitleList = deliveryStructure.stream()
+                .filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());
+
         List<String> titleList = new ArrayList<String>();
 
-        for(DeliveryTitleInfo a : f) {
-            titleList.add(a.getNewspaperTitle());
+        for(DeliveryTitleInfo deliveryTitle : deliveryTitleList) {
+            titleList.add(deliveryTitle.getNewspaperTitle());
         }
         return titleList;
     }
@@ -84,7 +87,7 @@ public class TitleDeliveryHierachy {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
-        return otherStructure.stream()
+        return deliveryStructure.stream()
                 .filter(delivery -> ( delivery.getNewspaperTitle().equals(title)))
                 .collect(Collectors.toList());
     }
@@ -95,7 +98,7 @@ public class TitleDeliveryHierachy {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliveryTitleObjects(String delivery) {
-        return otherStructure.stream()
+        return deliveryStructure.stream()
                 .filter(deliveryObject -> deliveryObject.getDeliveryName().equals(delivery))
                 .collect(Collectors.toList());
     }

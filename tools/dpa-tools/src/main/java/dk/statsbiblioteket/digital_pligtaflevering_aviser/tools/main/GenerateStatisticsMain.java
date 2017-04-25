@@ -71,7 +71,7 @@ public class GenerateStatisticsMain {
         }
 
         /**
-         * Validate all xml-contents located as child under the delivery
+         * Generate statistics from the content of all child-elements
          *
          * @return
          */

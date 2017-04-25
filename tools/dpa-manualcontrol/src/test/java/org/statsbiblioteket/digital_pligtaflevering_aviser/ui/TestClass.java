@@ -13,12 +13,19 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDel
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -36,10 +43,42 @@ public class TestClass {
 
     }
 
+
     @Test
-    public void testIng() throws ParseException {
+    public void testMarshalUnmarshalDeliveryTitle() throws Exception {
+
+        DeliveryTitleInfo del = new DeliveryTitleInfo("test", "test", 5, 5);
+
+
+        File tempFile = new File("/tmp",  "MarshalUnmarshalDeliveryTitle.xml");
+        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(del, tempFile);
+
+
+        InputStream is = new FileInputStream("/tmp/MarshalUnmarshalDeliveryTitle.xml");
+
+        JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(is);
+
+
+        assertEquals(deserializedObject.getDeliveryName(), "test");
+
+    }
+
+
+
+
+    @Test
+    public void testDateconversion() throws ParseException {
+
 
         String deliveryItemDirectoryName = "dl_20170224_rt1";
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
 
         //Date date = UiDataConverter.getDateFromDeliveryItemDirectoryName(deliveryItemDirectoryName);
 
@@ -49,6 +88,11 @@ public class TestClass {
             String datePart = matcher.group(1);
             String roundtripValue = matcher.group(2);
 
+            Date d = formatter.parse(datePart);
+            String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(d);
+
+
+
 
             System.out.println("TEST_DONE");
         }
@@ -57,7 +101,7 @@ public class TestClass {
 
 
     @Test
-    public void testIng3() throws Exception {
+    public void testMissingItemSerialize() throws Exception {
 
         MissingItem mis  = new MissingItem("t1", "t2");
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
@@ -72,7 +116,7 @@ public class TestClass {
 
 
     @Test
-    public void testIng2() throws Exception {
+    public void testMarshalUnmarshalTitleDeliveryHierachy() throws Exception {
 
 
         TitleDeliveryHierachy t = new TitleDeliveryHierachy();

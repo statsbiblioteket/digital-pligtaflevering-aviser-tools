@@ -1,10 +1,12 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
@@ -37,18 +39,30 @@ import java.util.stream.Stream;
  */
 public class DeliveryFedoraSerializer {
 
-    private FetchEventStructure eventFetch;
     private HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
     private DomsParser parser = new DomsParser();
+    private DomsModule domsModule = new DomsModule();
+    private DomsRepository repository;
 
     public DeliveryFedoraSerializer(DomsRepository repository) {
-        eventFetch = new FetchEventStructure(repository);
+        this.repository = repository;
+        //eventFetch = new FetchFromDoms(repository);
     }
 
 
-    public void initiateDeliveries(FetchEventStructure.EventStatus eventStatus) {
+    public void initiateDeliveries(DeliveryFedoraSerializer.EventStatus eventStatus) {
         deliveryList.clear();
-        Stream<DomsItem> items = eventFetch.getDeliveryList(eventStatus);
+        Stream<DomsItem> items = null;
+
+        switch(eventStatus) {
+            case READYFORMANUALCHECK:
+                items = getReadyForMaual();
+                break;
+            case DONEMANUALCHECK:
+                items = getDoneManual();
+                break;
+        }
+
         items.forEach(new Consumer<DomsItem>() {
             @Override
             public void accept(final DomsItem o) {
@@ -57,8 +71,29 @@ public class DeliveryFedoraSerializer {
         });
     }
 
+
+    public Stream<DomsItem> getReadyForMaual() {
+        return repository.query(domsModule.providesQuerySpecification(
+                "Statistics_generated", "ManualValidationDone", "", "doms:ContentModel_DPARoundTrip")
+        );
+    }
+
+    public Stream<DomsItem> getDoneManual() {
+        return repository.query(domsModule.providesQuerySpecification(
+                "Statistics_generated,ManualValidationDone", "", "", "doms:ContentModel_DPARoundTrip")
+        );
+    }
+
+
+    public enum EventStatus {
+        READYFORMANUALCHECK, DONEMANUALCHECK;
+    }
+
+
+
+
     public DomsItem getItemFromUuid(String id) {
-        return eventFetch.lookup(id);
+        return repository.lookup(new DomsId(id));
     }
 
 
@@ -71,25 +106,48 @@ public class DeliveryFedoraSerializer {
     }
 
     public void setEvent(String id, String eventName, String outcomeParameter, String message) {
-        eventFetch.setEvent(id, eventName, outcomeParameter, message);
+        boolean outcome = outcomeParameter == null ? true : Boolean.parseBoolean(outcomeParameter);
+        DomsItem item = repository.lookup(new DomsId(id));
+        item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
     }
 
     /**
-     * Get all Title objects from Fedora
+     * Get all Title objects from Fedora.
+     *
      * @return
      * @throws Exception
      */
     public TitleDeliveryHierachy getTitleHierachyFromFedora() throws Exception {
 
-
         TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
-        Iterator<String> titles = this.getInitiatedDeliveries().iterator();
+        Iterator<String> deliveries = this.getInitiatedDeliveries().iterator();
 
-        while(titles.hasNext()) {
+        while(deliveries.hasNext()) {
 
-            String delivery = titles.next();
+            String delivery = deliveries.next();
+            DomsItem deliveryItem = this.getDeliveryFromName(delivery);
+            Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(deliveryItem);
 
-            final List<DomsDatastream> datastreams = this.getDeliveryFromName(delivery).datastreams();
+            //FIXME: Make sure objects is replaced instead of added
+            while(titleSubfolder.hasNext()) {
+
+                DomsItem titleItem = titleSubfolder.next();
+                Optional<DomsDatastream> validationStream = titleItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("VALIDATIONINFO")).findAny();
+
+                if (validationStream.isPresent()) {
+
+                    String validationString = validationStream.get().getDatastreamAsString();
+                    StringReader reader = new StringReader(validationString);
+                    InputSource inps = new InputSource(reader);
+                    JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
+                    Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+                    DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(inps);
+
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(deserializedObject);
+                }
+            }
+
+            final List<DomsDatastream> datastreams = deliveryItem.datastreams();
             Optional<DomsDatastream> profileOptional = datastreams.stream()
                     .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
                     .findAny();
