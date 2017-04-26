@@ -22,12 +22,20 @@ public class TitleDeliveryHierachy {
     @XmlElement(name = "title")
     private ArrayList<DeliveryTitleInfo> deliveryStructure = new ArrayList<DeliveryTitleInfo>();
 
-
+    /**
+     * Add DeliveryTitleInfo to list, if it allready exists return without adding
+     * @param ds
+     */
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
-        deliveryStructure.add(ds);
+        if(!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
+            deliveryStructure.add(ds);
+        }
     }
 
-
+    /**
+     * Get the full DeliveryStructure
+     * @return
+     */
     public ArrayList<DeliveryTitleInfo> getTheFullStruct() {
         return deliveryStructure;
     }
@@ -50,6 +58,17 @@ public class TitleDeliveryHierachy {
         delId.setComment(comment);
         delId.setMissingItems(missingItems);
         return delId;
+    }
+
+    /**
+     * Does the dataset contain this DeliveryTitleInfo allready
+     * @param title
+     * @param delivery
+     * @return
+     */
+    public boolean hasDeliveryTitleCheckStatus(String title, String delivery) {
+        return deliveryStructure.stream()
+                .filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).count() > 0;
     }
 
     /**
@@ -76,6 +95,12 @@ public class TitleDeliveryHierachy {
         return titleList;
     }
 
+    /**
+     * Function for filtering on specific equal parameters
+     * @param keyExtractor
+     * @param <T>
+     * @return
+     */
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object,Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;

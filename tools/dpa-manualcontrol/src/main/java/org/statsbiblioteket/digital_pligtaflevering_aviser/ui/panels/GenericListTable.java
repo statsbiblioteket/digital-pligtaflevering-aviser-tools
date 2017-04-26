@@ -127,12 +127,12 @@ public class GenericListTable extends VerticalLayout {
 
     /**
      * Set data to the embedded table
-     * @param delStat
+     * @param dataCollection
      */
-    public void setInfo(Collection delStat) {
+    public void setInfo(Collection dataCollection) {
         beans.removeAllItems();
-        for(Object o : delStat) {
-            beans.addBean(o);
+        for(Object rowItem : dataCollection) {
+            beans.addBean(rowItem);
         }
         if(sortColumnName!= null) {
             table.setSortContainerPropertyId(sortColumnName);

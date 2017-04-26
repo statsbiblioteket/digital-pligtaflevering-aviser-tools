@@ -47,7 +47,7 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
                 Object titleSelect = itemClickEvent.getItem().getItemProperty("newspaperTitle").getValue();
                 model.setSelectedTitle(titleSelect.toString());
 
-                showTheSelectedTitle();
+                showTheSelectedTitle(true);
             }
         });
 

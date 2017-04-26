@@ -20,6 +20,8 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResul
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy.distinctByKey;
 
 /**
  * The full panel for showing all selection details of deliveries
@@ -51,7 +53,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
             public void itemClick(ItemClickEvent itemClickEvent) {
                 Object selection = itemClickEvent.getItem().getItemProperty("sectionNumber").getValue();
                 model.setSelectedSection(selection.toString());
-                showTheSelectedTitle();
+                showTheSelectedTitle(false);
             }
         });
         deliveryPanel.setSortParam("newspaperTitle");
@@ -106,7 +108,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
      * Show the content of the selection defined by the delivery and title.
      * The information is fetched from fedora as the statistics stream and is shown in tables with section, article and page
      */
-    protected void showTheSelectedTitle() {
+    protected void showTheSelectedTitle(boolean redrawSectionTable) {
 
         fileSelectionPanel.setEnabled(false);
         articleSelectionPanel.setEnabled(false);
@@ -127,22 +129,39 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
 
         List<Page> pages = title.getPage();
         List<Article> articles = title.getArticle();
-        articleSelectionPanel.setInfo(articles);
 
-        if(model.getSelectedSection() != null) {
-            List<Page> filteredPages = new ArrayList<Page>();
-            for(Page page : pages) {
-                if(model.getSelectedSection().equals(page.getSectionNumber())) {
-                    filteredPages.add(page);
-                }
-            }
-            fileSelectionPanel.setInfo(filteredPages);
-        } else {
-            sectionSectionTable.cleanTable();
-            sectionSectionTable.setInfo(UiDataConverter.sectionConverter(title.getPage()).values());
-            fileSelectionPanel.setInfo(pages);
-        }
         model.selectTitleDelivery();
+        DeliveryTitleInfo item = model.getCurrentDelItem();
+
+        if(redrawSectionTable) {
+            sectionSectionTable.cleanTable();
+            sectionSectionTable.setInfo(UiDataConverter.sectionConverter(pages).values());
+        }
+
+        List<Page> pageList = new ArrayList<Page>();
+        pageList.addAll(item.getPages());
+        pageList.addAll(pages);
+
+        List<Page> filteredPages = pageList.stream()
+                .filter(p ->
+                        model.getSelectedSection()==null ||
+                                p.getSectionNumber().equals(model.getSelectedSection()))
+                .filter(distinctByKey(page -> page.getId()))
+                .collect(Collectors.toList());
+
+        fileSelectionPanel.setInfo(filteredPages);
+
+        List<Article> articleList = new ArrayList<Article>();
+        articleList.addAll(item.getArticles());
+        articleList.addAll(articles);
+        List<Article> filteredArticles = articleList.stream()
+                .filter(p ->
+                        model.getSelectedSection()==null ||
+                                p.getSectionNumber().equals(model.getSelectedSection()))
+                .filter(distinctByKey(article -> article.getId()))
+                .collect(Collectors.toList());
+
+        articleSelectionPanel.setInfo(filteredArticles);
     }
 
     /**

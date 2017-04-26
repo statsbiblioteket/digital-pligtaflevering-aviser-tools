@@ -28,7 +28,7 @@ public class TitleValidationPanel extends DeliveryMainPanel {
 
                 model.setSelectedTitle(selectedTitle);
                 model.setSelectedSection(null);
-                showTheSelectedTitle();
+                showTheSelectedTitle(true);
                 List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(selectedTitle);
 
                 deliveryPanel.setInfo(list);
@@ -41,7 +41,7 @@ public class TitleValidationPanel extends DeliveryMainPanel {
                 Object page = itemClickEvent.getItem().getItemProperty("deliveryName").getValue();
                 model.setSelectedDelivery(page.toString());
                 model.setSelectedSection(null);
-                showTheSelectedTitle();
+                showTheSelectedTitle(true);
 
             }
         });

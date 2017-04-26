@@ -108,44 +108,8 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     }
 
     /**
-     *
+     * Dummy implementation
      */
     public void viewDialogForSettingDeliveryToChecked() {
-        String selectedDelivery = model.getSelectedDelivery();
-        String selectedTitle = model.getSelectedTitle();
-        DeliveryTitleInfo item = model.getCurrentDelItem();
-
-        final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
-        ResultStorePanel storePanel = new ResultStorePanel();
-
-        dialog.setDialogContent(storePanel);
-        storePanel.setValues(item);
-        dialog.setReady(!item.isChecked());
-        dialog.setModal(true);
-
-        UI.getCurrent().addWindow(dialog);
-        dialog.setListener(new Button.ClickListener() {
-            public void buttonClick(Button.ClickEvent event) {
-                UI.getCurrent().removeWindow(dialog);
-                if("OKBUTTON".equals(event.getButton().getId())) {
-
-                    //selectedDelivery.
-                    boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
-                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
-
-                    if(!writeResult) {
-                        Notification.show("The result can not get stored", Notification.Type.ERROR_MESSAGE);
-                    }
-
-                }
-            }});
-
-        dialog.addCloseListener(new Window.CloseListener() {
-            // inline close-listener
-            public void windowClose(Window.CloseEvent e) {
-
-                UI.getCurrent().removeWindow(dialog);
-            }
-        });
     }
 }
