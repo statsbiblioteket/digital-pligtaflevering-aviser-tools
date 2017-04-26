@@ -128,7 +128,7 @@ public class DeliveryFedoraSerializer {
             DomsItem deliveryItem = this.getDeliveryFromName(delivery);
             Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(deliveryItem);
 
-            //FIXME: Make sure objects is replaced instead of added
+            //First search through tileObjects to find all performed checks
             while(titleSubfolder.hasNext()) {
 
                 DomsItem titleItem = titleSubfolder.next();
@@ -147,6 +147,7 @@ public class DeliveryFedoraSerializer {
                 }
             }
 
+            //Start initializing datamodel of tileObjects that has not yet been performed
             final List<DomsDatastream> datastreams = deliveryItem.datastreams();
             Optional<DomsDatastream> profileOptional = datastreams.stream()
                     .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))

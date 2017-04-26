@@ -102,8 +102,6 @@ public class StatisticsView extends VerticalLayout implements View {
             case NewspaperUI.CONFIGPANEL:
                 tabelsLayout = new ConfigPanel(model);
                 break;
-
-
             default:
                 tabelsLayout = new DeliveryValidationPanel(model);
         }
