@@ -37,8 +37,8 @@ public class AutonomousPreservationToolHelper {
     public static void execute(String[] args, Function<ConfigurationMap, Tool> function) {
         Objects.requireNonNull(args, "args == null");
         // args: ["config.properties",  "a=1", "b=2", "c=3"]
-        if (args.length < 1) {
-            throw new IllegalArgumentException("required argument: configuration file/url");
+        if (args.length < 1 || "-h".equals(args[0]) || "--help".equals(args[0])) {
+            throw new IllegalArgumentException("usage: configuration-file/url [key1=value1 [key2=value2 ..]]");
         }
 
         // "config.properties"
@@ -70,10 +70,10 @@ public class AutonomousPreservationToolHelper {
      * pass it into the given function returning a Tool, which is then executed.  It is not
      * expected to return.
      *
-     * @param map      configuration map to pass into <code>function</code>
-     * @param function function creating a populated Tool from a configuration map.
+     * @param map          configuration map to pass into <code>function</code>
+     * @param toolFunction function creating a populated Tool from a configuration map.
      */
-    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Tool> function) {
+    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Tool> toolFunction) {
         Objects.requireNonNull(map, "map == null");
         final Logger log = LoggerFactory.getLogger(AutonomousPreservationToolHelper.class);
 
@@ -88,8 +88,9 @@ public class AutonomousPreservationToolHelper {
                     log.trace("------------------------------------------------------------------------------");
                     log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
                 }));
+
         try {
-            String result = function.apply(map).call();
+            String result = toolFunction.apply(map).call();
             log.trace("Result: {}", result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);

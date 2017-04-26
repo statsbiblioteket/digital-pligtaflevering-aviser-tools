@@ -5,9 +5,10 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
 <h1>Set event ${param.id}</h1>
 <%
-    ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+    ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
     DomsRepository repository = new RepositoryConfigurator().apply(map);
 %>
@@ -37,7 +38,7 @@
             item.appendEvent("dashboard", new java.util.Date(),
                     "Deleted " + i + " instances of " + eventName +
                     (message == null ? "" : "\n" +
-                            "\nReason " + message), "EVENT_DELETED_MANUALLY", outcome);
+                            "\nReason: " + message), "EVENT_DELETED_MANUALLY", outcome);
 
         %>
         <c:url value="showItem.jsp" var="showItemUrl">

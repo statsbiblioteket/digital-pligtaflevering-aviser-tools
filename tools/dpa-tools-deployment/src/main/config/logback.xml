@@ -1,6 +1,7 @@
 <!-- SB logback.xml configuration file.
 
-    Current copy adapted from Avisprojektet.
+    Current copy adapted from Avisprojektet.  Write log for each invocation to a unique file name.
+    (We expect deletion of old log files to be done externally)
 -->
 <configuration debug="false" packagingData="true">
     <timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss.SSS"/>
@@ -10,6 +11,7 @@
         </encoder>
     </appender>
     <appender name="LOG-FILE" class="ch.qos.logback.core.FileAppender">
+        <!-- app.name set by launching shell script -->
         <file>${app.name:-unknown}-${timestamp}.log</file>
         <encoder>
             <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>

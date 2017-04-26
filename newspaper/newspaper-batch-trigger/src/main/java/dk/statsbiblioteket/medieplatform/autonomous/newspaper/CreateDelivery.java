@@ -116,7 +116,7 @@ public class CreateDelivery {
             //Make sure that roundtrips which does not have the newest roundtrip-id goes into failed state
             if (roundtrip.getRoundTripNumber() > delivery.getRoundTripNumber()) {
                 message += "Roundtrip (" + roundtrip.getRoundTripNumber() + ") is newer than this roundtrip (" + delivery.getRoundTripNumber() + "), so this roundtrip will not be triggered here\n";
-                log.warn("Not adding new batch '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
+                log.warn("Not adding new delivery '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
                 newerRoundTripAlreadyReceived = true;
             }
         }

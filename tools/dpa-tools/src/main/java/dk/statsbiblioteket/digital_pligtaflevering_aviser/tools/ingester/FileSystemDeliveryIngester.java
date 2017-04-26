@@ -1,9 +1,11 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
+import com.google.common.base.Joiner;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -47,7 +49,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,8 @@ import static java.nio.file.Files.walk;
  * occasionally invoking addRelation several times more than necessary.  For instance when called with just one object
  * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
  * See ABR for details. </p>
+ *
+ * @noinspection WeakerAccess
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
 
@@ -101,6 +104,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     protected final OutputHandler output = new DefaultOutputHandler(getClass());
     protected final Function<String, String> encodePublicURLForFileID;
+    protected final Function<Path, Stream<Path>> deliveriesForPath;
+    private final Function<List<ToolResult>, String> eventMessageForToolResults;
+    private final DefaultToolMXBean mxBean;
+    private String status;
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
@@ -114,6 +121,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(DPA_GIT_ID) String gitId,
                                       @Named(DOMS_COLLECTION) String domsCollection,
                                       @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
+                                      Function<Path, Stream<Path>> deliveriesForPath,
+                                      Function<List<ToolResult>, String> eventMessageForToolResults,
+                                      DefaultToolMXBean mxBean,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
@@ -123,6 +133,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.restApi = restApi;
         this.efedora = efedora;
         this.encodePublicURLForFileID = encodePublicURLForFileID;
+        this.deliveriesForPath = deliveriesForPath;
+        this.eventMessageForToolResults = eventMessageForToolResults;
+        this.mxBean = mxBean;
 
         this.bitmagUrl = bitmagUrl;
         this.bitrepositoryIngesterCollectionId = bitrepositoryIngesterCollectionId;
@@ -155,6 +168,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * @param domsItem item as queried in DOMS
      * @param rootPath directory where to locate the delivery
      * @return humanly readable string describing the outcome
+     * @noinspection Convert2MethodRef, PointlessBooleanExpression
      */
     @Override
     public String apply(DomsItem domsItem, Path rootPath) {
@@ -163,25 +177,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // Collect all the indvidual toolResults.
         List<ToolResult> toolResult = ingestDirectoryForDomsItem(domsItem, rootPath);
 
-        // Sort according to result
-        final Map<Boolean, List<ToolResult>> toolResultMap = toolResult.stream()
-                .collect(Collectors.groupingBy(tr -> tr.getResult()));
+        // Construct message to be stored on event for human consumption.
+        String deliveryEventMessage = eventMessageForToolResults.apply(toolResult);
 
-        List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
-
-        // Message saved on event are the failed results.
-        String deliveryEventMessage = failingToolResults.stream()
-                .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
-                .filter(s -> s.trim().length() > 0) // skip blank lines
-                .collect(Collectors.joining("\n"));
-
-        // outcome was successful only if no toolResults has a FALSE result.
-        boolean outcome = failingToolResults.size() == 0;
+        // total outcome is successful only if all toolResults are.
+        boolean outcome = toolResult.stream().allMatch(tr -> tr.getResult() == true);
 
         final String keyword = getClass().getSimpleName();
 
         domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
-        log.info("{} {} Took: {} ms", keyword, domsItem, (System.currentTimeMillis() - startTime));
+        log.info("{} {} Took: {} ms", keyword, domsItem, System.currentTimeMillis() - startTime);
         log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage, outcome);
         return "item " + domsItem + " ingested. outcome = " + outcome;
     }
@@ -243,8 +248,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         log.trace("Delivery directory: {}", deliveryPath);
 
+        status = deliveryPath.toString();
+
         // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
+
+        mxBean.details = "Checking checksums for " + deliveryPath;
 
         DeliveryMD5Validation md5validations;
         try {
@@ -252,12 +261,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if (validationResults.size() > 0) {
-                String collectiveValidationString = new String();
-                for (String singleValidation : validationResults) {
-                    //FIXME: When the webclient is done this might need to be refactored to write this where the webclient fetches it
-                    collectiveValidationString = collectiveValidationString.concat(singleValidation).concat(" ");
-                }
-                return Arrays.asList(ToolResult.fail(domsItem, "Checksum validation failed:  " + collectiveValidationString));
+                String collectiveValidationString = Joiner.on("\n").join(validationResults);
+                return Arrays.asList(ToolResult.fail(domsItem, "Checksum validation failed:\n\n" + collectiveValidationString));
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not process checksums.txt", e);
@@ -338,15 +343,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
          * <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
          */
 
-        final Stream<Path> pathsInThisDirectory;
-        try {
-            pathsInThisDirectory = Files.walk(absoluteFileSystemPath, 1);
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot walk " + absoluteFileSystemPath, e);
-        }
+        Stream<Path> pathStream = deliveriesForPath.apply(absoluteFileSystemPath);
 
-        Map<String, List<Path>> pathsForPage = pathsInThisDirectory
-                .filter(Files::isRegularFile)
+        Map<String, List<Path>> pathsForPage = pathStream
                 .sorted()
                 .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
                 .peek(path -> log.trace("discovered regular file {}", path.getFileName()))
@@ -371,10 +370,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                     final String id = entry.getKey();
                     String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
                     final List<Path> filesForPage = entry.getValue();
+                    mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
                     return filesForPage.stream()
                             .sorted()
                             .map(path -> {
                                 log.trace("Page file {} for {}", path, id);
+                                mxBean.idsProcessed++;
                                 try {
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);

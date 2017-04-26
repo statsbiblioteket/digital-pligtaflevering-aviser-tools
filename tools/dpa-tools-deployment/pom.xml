@@ -16,14 +16,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <output>${project.build.outputDirectory}/META-INF/maven/dependency-tree.txt</output>
+        <output>target/appassembler/META-INF/maven/dependency-tree.txt</output>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
             <artifactId>dpa-tools</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
 
@@ -48,7 +48,7 @@
                 </configuration>
             </plugin>
 
-            <!-- get git information from file system - https://github.com/ktoso/maven-git-commit-id-plugin#using-the-plugin -->
+            <!-- get git information from file system -->
             <!--
                  [INFO] [GitCommitIdMojo] git.commit.id.abbrev = f422323
                  [INFO] [GitCommitIdMojo] git.commit.user.email = tra@statsbiblioteket.dk
@@ -63,49 +63,47 @@
                  [INFO] [GitCommitIdMojo] git.build.time = 20.02.2017 @ 09:59:00 CET
             -->
             <plugin>
+                <!-- https://github.com/ktoso/maven-git-commit-id-plugin#using-the-plugin -->
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
                 <!-- 2.0.4 is the newest that does not require Maven 3.3 -->
                 <version>2.0.4</version>
                 <executions>
                     <execution>
-                        <id>get-the-git-infos</id>
+                        <id>set-properties-in-maven-build-for-expansion-when-creating-shell-scripts</id>
                         <goals>
                             <goal>revision</goal>
                         </goals>
+                        <configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>save-properties-to-tarball</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <configuration>
+                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <generateGitPropertiesFilename>target/appassembler/META-INF/git.properties</generateGitPropertiesFilename>
+                        </configuration>
                     </execution>
                 </executions>
-
             </plugin>
 
 
-            <!-- http://stackoverflow.com/a/7957042/53897 - create classes/META-INF/maven/dependencies.properties-->
+            <!-- http://stackoverflow.com/a/7957042/53897 - create classes/META-INF/dependencies.properties-->
             <plugin>
                 <groupId>org.apache.servicemix.tooling</groupId>
                 <artifactId>depends-maven-plugin</artifactId>
+                <version>1.4.0</version>
                 <executions>
                     <execution>
                         <id>generate-depends-file</id>
                         <goals>
                             <goal>generate-depends-file</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- http://stackoverflow.com/a/11729432/53897 - create classes/META-INF/maven/dependency-tree.txt -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
-                <executions>
-                    <execution>
-                        <id>dependency-tree</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>tree</goal>
-                        </goals>
                         <configuration>
+                            <outputFile>target/appassembler/META-INF/dependencies.properties</outputFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -126,7 +124,7 @@
                     http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html
                     -->
                     <platforms>
-                        <platform>all</platform>
+                        <platform>unix</platform>
                     </platforms>
                     <configurationDirectory>conf</configurationDirectory>
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
@@ -148,6 +146,8 @@
 
                     FIXME: Consider if we need a full thread dump when task fails: http://stackoverflow.com/a/2788423/53897
                     For OOM VisualVM can extract it from the hprof file.
+
+                    FIXME:  We would like to add ${app.name} to the gc log file, but tra cannot figure out how yet.
                     -->
                     <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
@@ -202,16 +202,69 @@
                 </executions>
             </plugin>
 
+            <!-- it may be possible to get maven-assembly-plugin to copy these but I could not make it work, so
+            just do it in the simplest possible way -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <!-- http://stackoverflow.com/a/11729432/53897 - create classes/META-INF/maven/dependency-tree.txt -->
+                    <execution>
+                        <id>dependency-tree</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>tree</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>target/appassembler/META-INF/dependency-tree.txt</outputFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+                            <artifactId>dpa-dashboard</artifactId>
+                            <version>${project.version}</version>
+                            <type>war</type>
+                            <overWrite>true</overWrite>
+                            <destFileName>dpa-dashboard.war</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+                            <artifactId>dpa-dashboard</artifactId>
+                            <version>${project.version}</version>
+                            <!-- our own custom type for this -->
+                            <type>tomcat-xml</type>
+                            <overWrite>true</overWrite>
+                            <destFileName>dpa-dashboard.xml</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                    <outputDirectory>${project.build.directory}/appassembler/tomcat-apps</outputDirectory>
+                    <overWriteReleases>false</overWriteReleases>
+                    <overWriteSnapshots>true</overWriteSnapshots>
+                </configuration>
+            </plugin>
+
             <!-- create deployment tarball -->
             <plugin>
                 <!-- https://maven.apache.org/plugins/maven-assembly-plugin/usage.html -->
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0.0</version>
                 <configuration>
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
-                    <archiveBaseDirectory>target/appassembler</archiveBaseDirectory>
+                    <archiveBaseDirectory>${project.build.directory}/appassembler</archiveBaseDirectory>
                     <attach>true</attach>
                 </configuration>
                 <executions>
