@@ -183,7 +183,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     /**
      * return all direct children nodes for the current node.  For now the interface is a stream, but
-     * internally the whole response is built.
+     * internally the whole response is built up front.
      */
     public Stream<DomsItem> allChildren() {
         List<DomsItem> allChildrenSoFar = new ArrayList<>();
