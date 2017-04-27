@@ -12,7 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_RecordBaseAsParameter;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import javaslang.control.Try;
 
 import java.util.function.Function;
@@ -53,12 +53,14 @@ public class RepositoryProvider implements Function<ConfigurationMap, DomsReposi
         DomsEventStorage<Item> domsEventStorage = domsModule.provideDomsEventStorage(domsURL, domsPidgeneratorUrl, domsUserName, domsPassword, itemFactory);
         int pageSize = domsModule.providePageSize(map);
 
+        final String recordBase = domsModule.provideDomsCollection(map);
+
         SBOIEventIndex sboiEventIndex = Try.of(
-                () -> new SBOIEventIndex_RecordBaseAsParameter(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, "doms_sboi_dpaCollection")
+                () -> new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, "doms_sboi_dpaCollection")
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 
-        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage);
+        DomsRepository repository = new DomsRepository(sboiEventIndex, webResource, efedora, domsEventStorage, summaLocation, recordBase);
         return repository;
     }
 }

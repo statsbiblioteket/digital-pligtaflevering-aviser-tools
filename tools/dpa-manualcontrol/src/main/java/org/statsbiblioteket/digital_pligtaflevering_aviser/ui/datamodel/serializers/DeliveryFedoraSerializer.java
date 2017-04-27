@@ -4,6 +4,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -50,16 +51,16 @@ public class DeliveryFedoraSerializer {
     }
 
 
-    public void initiateDeliveries(DeliveryFedoraSerializer.EventStatus eventStatus) {
+    public void initiateDeliveries(DeliveryFedoraSerializer.EventStatus eventStatus, String deliveryFilter) {
         deliveryList.clear();
         Stream<DomsItem> items = null;
 
         switch(eventStatus) {
             case READYFORMANUALCHECK:
-                items = getReadyForMaual();
+                items = getReadyForMaual(deliveryFilter);
                 break;
             case DONEMANUALCHECK:
-                items = getDoneManual();
+                items = getDoneManual(deliveryFilter);
                 break;
         }
 
@@ -72,16 +73,16 @@ public class DeliveryFedoraSerializer {
     }
 
 
-    public Stream<DomsItem> getReadyForMaual() {
-        return repository.query(domsModule.providesQuerySpecification(
-                "Statistics_generated", "ManualValidationDone", "", "doms:ContentModel_DPARoundTrip")
-        );
+    public Stream<DomsItem> getReadyForMaual(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                "Statistics_generated", "ManualValidationDone", "", "doms:ContentModel_DPARoundTrip"))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
-    public Stream<DomsItem> getDoneManual() {
-        return repository.query(domsModule.providesQuerySpecification(
-                "Statistics_generated,ManualValidationDone", "", "", "doms:ContentModel_DPARoundTrip")
-        );
+    public Stream<DomsItem> getDoneManual(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                "Statistics_generated,ManualValidationDone", "", "", "doms:ContentModel_DPARoundTrip"))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
 
@@ -103,12 +104,6 @@ public class DeliveryFedoraSerializer {
 
     public Set<String> getInitiatedDeliveries() {
         return deliveryList.keySet();
-    }
-
-    public void setEvent(String id, String eventName, String outcomeParameter, String message) {
-        boolean outcome = outcomeParameter == null ? true : Boolean.parseBoolean(outcomeParameter);
-        DomsItem item = repository.lookup(new DomsId(id));
-        item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
     }
 
     /**

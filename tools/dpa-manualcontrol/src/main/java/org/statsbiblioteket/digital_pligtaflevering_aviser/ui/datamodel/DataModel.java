@@ -25,7 +25,7 @@ public class DataModel {
     private DomsRepository repository = new RepositoryProvider().apply(map);
 
     //Formatter for cashing folder
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM");
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
 
     private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
@@ -107,7 +107,7 @@ public class DataModel {
         if(allreadyValidated) {
             evtStatus = DeliveryFedoraSerializer.EventStatus.DONEMANUALCHECK;
         }
-        fedoraSerializer.initiateDeliveries(evtStatus);
+        fedoraSerializer.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
     }
 
     /**
