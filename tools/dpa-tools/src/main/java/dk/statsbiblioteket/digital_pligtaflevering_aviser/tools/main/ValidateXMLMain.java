@@ -47,7 +47,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DaggerValidateXMLMain_ValidateXMLComponent.builder;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
@@ -65,7 +64,7 @@ public class ValidateXMLMain {
 
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> builder().configurationMap(m).build().getTool()
+                m -> DaggerValidateXMLMain_ValidateXMLComponent.builder().configurationMap(m).build().getTool()
         );
     }
 

@@ -13,6 +13,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXB
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.medieplatform.autonomous.Item;
+import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import javaslang.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DaggerValidateXMLMain_ValidateXMLComponent.builder;
 
 /**
  * Main class for starting autonomous component
@@ -49,7 +50,7 @@ public class ValidateMetadataMain {
 
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> builder().configurationMap(m).build().getTool()
+                m -> DaggerValidateXMLMain_ValidateXMLComponent.builder().configurationMap(m).build().getTool()
         );
     }
 
@@ -83,14 +84,19 @@ public class ValidateMetadataMain {
         @Provides
         Function<DomsItem, ToolResult> provideDeliveryProcessor(
                 Function<DomsItem, Stream<Try<ToolResult>>> processDeliveryChild,
-                Collector<Try<ToolResult>, Object, ToolResult> toolResultCollector) {
+                Collector<Try<ToolResult>, OkFailThrown, ToolResult> toolResultCollector) {
             return domsItem -> domsItem.allChildren()
                     .flatMap(processDeliveryChild)
                     .collect(toolResultCollector);
         }
 
-        class C {
-            public C(List<ToolResult> ok, List<ToolResult> fail, List<Try<ToolResult>> thrown) {
+        @Provides
+        Function<DomsItem, Stream<Try<ToolResult>>> provideDeliveryChildProcessor() {
+            throw new UnsupportedOperationException();
+        }
+
+        class OkFailThrown {
+            public OkFailThrown(List<ToolResult> ok, List<ToolResult> fail, List<Try<ToolResult>> thrown) {
                 this.ok = Objects.requireNonNull(ok, "ok");
                 this.fail = Objects.requireNonNull(fail, "fail");
                 this.thrown = Objects.requireNonNull(thrown, "thrown");
@@ -101,10 +107,10 @@ public class ValidateMetadataMain {
         }
 
         @Provides
-        Collector<Try<ToolResult>, C, ToolResult> provideToolResultCollector(Supplier<DomsItem> domsItemSupplier) {
+        Collector<Try<ToolResult>, OkFailThrown, ToolResult> provideToolResultCollector(Supplier<DomsItem> domsItemSupplier) {
 
-            Supplier<C> supplier = () -> new C(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-            BiConsumer<C, Try<ToolResult>> accumulator = (c, t) -> {
+            Supplier<OkFailThrown> supplier = () -> new OkFailThrown(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            BiConsumer<OkFailThrown, Try<ToolResult>> accumulator = (c, t) -> {
                 if (t.isFailure()) {
                     c.thrown.add(t);
                 } else if (t.get().getResult()) {
@@ -113,8 +119,8 @@ public class ValidateMetadataMain {
                     c.fail.add(t.get());
                 }
             };
-            BinaryOperator<C> combiner = (c1, c2) -> new C(concat(c1.ok, c2.ok), concat(c1.fail, c2.fail), concat(c1.thrown, c2.thrown));
-            Function<C, ToolResult> finisher = (c) -> {
+            BinaryOperator<OkFailThrown> combiner = (c1, c2) -> new OkFailThrown(concat(c1.ok, c2.ok), concat(c1.fail, c2.fail), concat(c1.thrown, c2.thrown));
+            Function<OkFailThrown, ToolResult> finisher = (c) -> {
                 if (c.fail.size() == 0 && c.thrown.size() == 0) { // all well.
                     return ToolResult.ok(domsItemSupplier.get(), c.ok.size() + " processed.");
                 } else {
@@ -161,6 +167,11 @@ public class ValidateMetadataMain {
         @Named(AUTONOMOUS_THIS_EVENT)
         String thisEventName(ConfigurationMap map) {
             return map.getRequired(AUTONOMOUS_THIS_EVENT);
+        }
+
+        @Provides
+        ItemFactory<Item> provideItemFactory() {
+            return id -> new Item();
         }
 
     }
