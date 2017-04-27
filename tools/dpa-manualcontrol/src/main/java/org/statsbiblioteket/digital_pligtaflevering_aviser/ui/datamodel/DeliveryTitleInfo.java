@@ -1,9 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Articles;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Pages;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -11,6 +9,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DeliveryTitleInfo contains the validation-content in a delivery and a title
+ */
 @XmlRootElement
 public class DeliveryTitleInfo implements java.io.Serializable {
 

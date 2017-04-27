@@ -1,16 +1,12 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 
 import javax.swing.text.DateFormatter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -24,20 +20,6 @@ public class UiDataConverter {
 
     private static String dateFormat = "yyyyMMdd";
     private static DateFormatter df = new DateFormatter();
-
-    public static ArrayList<FileComponent> getComponent(DeliveryStatistics delivery) {
-
-        ArrayList<FileComponent> list = new ArrayList<FileComponent>();
-        for(Title title : delivery.getTitles().getTitles()) {
-            Iterator<Page> pageIterator = title.getPage().iterator();
-            while(pageIterator.hasNext()) {
-                Page page = pageIterator.next();
-                FileComponent c = new FileComponent(page.getPageName(), title.getTitle(), "Undefined");
-                list.add(c);
-            }
-        }
-        return list;
-    }
 
 
     /**
