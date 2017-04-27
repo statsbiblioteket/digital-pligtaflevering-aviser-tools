@@ -20,10 +20,11 @@ import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryMainPanel;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryValidationPanel;
@@ -39,6 +40,8 @@ import java.net.URI;
  * The full panel for showing deliveries and titles
  */
 public class StatisticsView extends VerticalLayout implements View {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private DataModel model = new DataModel();
     private Link link = new Link("Metadatlink", null);
@@ -146,7 +149,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         panelPrepare(true);
                     } else if ("START".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        if(!model.isMonthInitiated(searchPanel.getSelectedDate())) {
+                        if(!model.isMonthInitiated()) {
                             Notification.show("This month is not prepared", Notification.Type.ERROR_MESSAGE);
                             tabelsLayout.insertInitialTableValues();
                             panelPrepare(false);
@@ -159,7 +162,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     }
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
 
             }
@@ -196,7 +199,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
         });
@@ -273,7 +276,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     InputStream inps = uri.toURL().openStream();
                     return inps;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                     return null;
                 }
             }

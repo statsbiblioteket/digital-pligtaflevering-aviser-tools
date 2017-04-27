@@ -18,16 +18,15 @@ import javaslang.control.Try;
 import java.util.function.Function;
 
 /**
- *
+ * RepositoryProvider captures the Dagger configuration into code so a DomsRepository can
+ * be correctly configured from a ConfigurationMap configuration.
  */
 public class RepositoryProvider implements Function<ConfigurationMap, DomsRepository> {
 
     @Override
     public DomsRepository apply(ConfigurationMap map) {
 
-        CommonModule commonModule = new CommonModule();
         DomsModule domsModule = new DomsModule();
-        BitRepositoryModule bitRepositoryModule = new BitRepositoryModule();
 
         String domsUserName = domsModule.provideDomsUserName(map);
         String domsPassword = domsModule.provideDomsPassword(map);
@@ -56,7 +55,7 @@ public class RepositoryProvider implements Function<ConfigurationMap, DomsReposi
         final String recordBase = domsModule.provideDomsCollection(map);
 
         SBOIEventIndex sboiEventIndex = Try.of(
-                () -> new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, "doms_sboi_dpaCollection")
+                () -> new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase)
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);
 

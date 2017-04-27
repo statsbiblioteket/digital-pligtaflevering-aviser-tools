@@ -131,5 +131,4 @@ public class DeliveryFilesystemSerializer {
         File currentFile = new File(cashingPath + folderForThisXml +"/" + deliveryName + "_" + titleName + ".xml");
         currentFile.delete();
     }
-
 }

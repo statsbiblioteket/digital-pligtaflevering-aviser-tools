@@ -4,11 +4,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
 import org.w3c.dom.Document;
@@ -36,21 +37,25 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Created by mmj on 3/29/17.
+ * Helper-class for serializing objects between datamodel and fedora
  */
 public class DeliveryFedoraSerializer {
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private HashMap<String, DomsItem> deliveryList = new HashMap<String, DomsItem>();
+    private HashMap<String, DomsItem> deliveryList = new HashMap<>();
     private DomsParser parser = new DomsParser();
     private DomsModule domsModule = new DomsModule();
     private DomsRepository repository;
 
     public DeliveryFedoraSerializer(DomsRepository repository) {
         this.repository = repository;
-        //eventFetch = new FetchFromDoms(repository);
     }
 
-
+    /**
+     * Initiate the list of deliveries
+     * @param eventStatus
+     * @param deliveryFilter
+     */
     public void initiateDeliveries(DeliveryFedoraSerializer.EventStatus eventStatus, String deliveryFilter) {
         deliveryList.clear();
         Stream<DomsItem> items = null;
@@ -72,36 +77,50 @@ public class DeliveryFedoraSerializer {
         });
     }
 
-
+    /**
+     * Get a list of deliveries, which is ready for manual inspections
+     * @param deliveryFilter
+     * @return
+     */
     public Stream<DomsItem> getReadyForMaual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 "Statistics_generated", "ManualValidationDone", "", "doms:ContentModel_DPARoundTrip"))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
+    /**
+     * Get a list of deliveries, which is has allready added an event that manual inspections has been done
+     * @param deliveryFilter
+     * @return
+     */
     public Stream<DomsItem> getDoneManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 "Statistics_generated,ManualValidationDone", "", "", "doms:ContentModel_DPARoundTrip"))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
-
-    public enum EventStatus {
-        READYFORMANUALCHECK, DONEMANUALCHECK;
-    }
-
-
-
-
+    /**
+     * Get the domsItem from the uuid. The Item is fetched directly from fedora
+     * @param id
+     * @return
+     */
     public DomsItem getItemFromUuid(String id) {
         return repository.lookup(new DomsId(id));
     }
 
-
+    /**
+     * Get the DomsItem from the list of items, which has been cashed
+     * @param name
+     * @return
+     */
     public DomsItem getDeliveryFromName(String name) {
         return deliveryList.get(name);
     }
 
+    /**
+     * Get the list of deliveryNames which is cashed
+     * @return
+     */
     public Set<String> getInitiatedDeliveries() {
         return deliveryList.keySet();
     }
@@ -186,8 +205,6 @@ public class DeliveryFedoraSerializer {
      * @return
      */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
-
-
         if(selectedDelivery==null || selectedTitle==null) {
             return null;
         }
@@ -229,13 +246,18 @@ public class DeliveryFedoraSerializer {
                 return selectedTitleObj;
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         return null;
     }
 
-
+    /**
+     * Write the delivery to the title-object in fedora
+     * @param deli
+     * @return
+     * @throws JAXBException
+     */
     public boolean writeDeliveryToFedora(DeliveryTitleInfo deli) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
@@ -288,4 +310,7 @@ public class DeliveryFedoraSerializer {
         return false;
     }
 
+    public enum EventStatus {
+        READYFORMANUALCHECK, DONEMANUALCHECK;
+    }
 }

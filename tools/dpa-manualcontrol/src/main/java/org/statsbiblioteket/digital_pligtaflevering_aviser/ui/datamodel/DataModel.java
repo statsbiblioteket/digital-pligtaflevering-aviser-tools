@@ -7,6 +7,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
@@ -17,14 +19,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DataModel has one initiated instance per browsersession
+ * DataModel has one initiated instance per browsersession.
+ * The datamodel contains cashed information about the deliveries, which is currently beeing checked
  */
 public class DataModel {
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
     private DomsRepository repository = new RepositoryProvider().apply(map);
 
-    //Formatter for cashing folder
+    //Formatter for naming the cashing folder by the date
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
 
     private DeliveryTitleInfo selectedDelItem;
@@ -39,7 +43,7 @@ public class DataModel {
     private DeliveryFedoraSerializer fedoraSerializer;
 
     public DataModel() {
-        String cashingPath = map.getDefault("dpa.manualcontrol.cashingfolder", "dummy");
+        String cashingPath = map.getDefault("dpa.manualcontrol.cashingfolder", "/tmp");
         filesystemSerializer = new DeliveryFilesystemSerializer(cashingPath);
         fedoraSerializer = new DeliveryFedoraSerializer(repository);
     }
@@ -123,12 +127,10 @@ public class DataModel {
     public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         try {
             DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
-
             filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             return fedoraSerializer.writeDeliveryToFedora(deli);
-
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
         return false;
     }
@@ -151,22 +153,35 @@ public class DataModel {
         return fedoraSerializer.getTitleObj(selectedDelivery, selectedTitle);
     }
 
+    /**
+     * Get the domsItem from the uuid. The Item is fetched directly from fedora
+     * @param id
+     * @return
+     */
     public DomsItem getItemFromUuid(String id) {
         return fedoraSerializer.getItemFromUuid(id);
     }
 
-
-
+    /**
+     * Initiate TitleDeliveryHierachy from fedora, and cash it in the model
+     * @throws Exception
+     */
     public void initiateTitleHierachyFromFedora() throws Exception {
         currentlySelectedTitleHiearachy = fedoraSerializer.getTitleHierachyFromFedora();
     }
 
-
+    /**
+     * Initiate TitleDeliveryHierachy from filesystem, and cash it in the model
+     * @throws Exception
+     */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
         currentlySelectedTitleHiearachy = filesystemSerializer.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
-
+    /**
+     * Set the month to the model, the month is used as basis of which deliveries that can currently get validated
+     * @param selectedMonth
+     */
     public void setSelectedMonth(Date selectedMonth) {
         currentlySelectedMonth = dateFormat.format(selectedMonth);
     }
@@ -176,8 +191,11 @@ public class DataModel {
         return filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
     }
 
-    public boolean isMonthInitiated(Date selectedMonth) {
-        currentlySelectedMonth = dateFormat.format(selectedMonth);
+    /**
+     * Is the month been cashed ti the filesystem
+     * @return
+     */
+    public boolean isMonthInitiated() {
         return filesystemSerializer.isMonthInitiated(currentlySelectedMonth);
     }
 
