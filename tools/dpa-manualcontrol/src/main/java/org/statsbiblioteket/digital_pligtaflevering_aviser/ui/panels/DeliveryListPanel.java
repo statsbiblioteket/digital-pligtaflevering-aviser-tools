@@ -1,13 +1,13 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
 import java.text.ParseException;
@@ -16,9 +16,12 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
- * Panel for the viewing of newspaper-deliveries
+ * Panel for the viewing of newspaper-deliveries on the delivery format.
+ * This is the format it is stored on fedora:
+ * Delivery -> Title -> Section -> Pages&articles
  */
 public class DeliveryListPanel extends VerticalLayout {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private CheckBox checkbox = new CheckBox("Visible", true);
     private Table table;
@@ -51,18 +54,16 @@ public class DeliveryListPanel extends VerticalLayout {
      * @param list
      */
     public void setValues(Collection<String> list) {
-
         itemList.clear();
         table.removeAllItems();
 
         for(String item : list) {
             Object newItemId = table.addItem();
             Item row1 = table.getItem(newItemId);
-
             try {
                 row1.getItemProperty("Date").setValue(UiDataConverter.getDateFromDeliveryItemDirectoryName(item));
             } catch (ParseException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
             row1.getItemProperty("Name").setValue(item);
         }

@@ -4,8 +4,13 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
@@ -14,17 +19,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Created by mmj on 4/20/17.
+ * DatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
  */
 public class DatePanel extends VerticalLayout {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private String[] columns;
     private CheckBox checkbox;
     private BeanItemContainer beans;
     private Table table;
+    private TextArea unmappable = new TextArea("");
 
 
     public DatePanel() {
@@ -44,6 +50,7 @@ public class DatePanel extends VerticalLayout {
             table.addContainerProperty(columns[i], String.class, null);
             i++;
         }
+        unmappable.setEnabled(false);
 
         table.setWidth("100%");
         table.setHeight("100%");
@@ -51,21 +58,23 @@ public class DatePanel extends VerticalLayout {
         table.setImmediate(true);
         this.addComponent(checkbox);
         this.addComponent(table);
+        this.addComponent(unmappable);
     }
 
-
+    /**
+     * Set a list of DeliveryTitleInfo and deploy values into the relevant days in the currently viewed month
+     * @param delStat
+     */
     public void setInfo(List<DeliveryTitleInfo> delStat) {
         table.removeAllItems();
         Item newItemId = null;
+        String unmappableValues = "";
         for(DeliveryTitleInfo item : delStat) {
             try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-                Pattern pattern = Pattern.compile("dl_(.*)_rt([0-9]+)$");
-                Matcher matcher = pattern.matcher(item.getDeliveryName());
+                Matcher matcher = UiDataConverter.getPatternMatcher(item.getDeliveryName());
                 if (matcher.matches()) {
-                    String datePart = matcher.group(1);
                     String roundtripValue = matcher.group(2);
-                    Date date = formatter.parse(datePart);
+                    Date date = UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName());
                     String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(date);
                     String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(date);
 
@@ -74,13 +83,17 @@ public class DatePanel extends VerticalLayout {
                         newItemId.getItemProperty("Weekno").setValue(weekday_no);
                     }
                     newItemId.getItemProperty(weekday_name).setValue(roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles());
+                } else {
+                    unmappableValues = unmappableValues.concat(item.getDeliveryName());
                 }
+
             } catch (ParseException e) {
-                e.printStackTrace();
+                unmappableValues = unmappableValues.concat(item.getDeliveryName());
+                log.error(e.getMessage(), e);
             }
+            unmappable.setValue(unmappableValues);
         }
     }
-
 
     /**
      * Set the component to be vieved as enabled in the UI
@@ -91,6 +104,10 @@ public class DatePanel extends VerticalLayout {
         super.setEnabled(enabled);
     }
 
+    /**
+     * Set a caption of the embedded Table
+     * @param caption
+     */
     public void setCaption(String caption) {
         table.setCaption(caption);
     }

@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy.distinctByKey;
 
 /**
- * The full panel for showing all selection details of deliveries
+ * The full panel for showing all selection details of newspaper-deliveries on the delivery format.
+ * This is the format it is stored on fedora:
+ * Delivery -> Title -> Section -> Pages&articles
  */
 public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanels {
 
@@ -35,8 +37,8 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY", true);
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber", "pageCount"}, "SECTION", true);//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE", true);//
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", "UNCHECKED", new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE", false);
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE", true);//
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
 
     /**

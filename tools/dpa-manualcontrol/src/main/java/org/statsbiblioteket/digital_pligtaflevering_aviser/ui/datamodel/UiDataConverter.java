@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class UiDataConverter {
 
     private static String dateFormat = "yyyyMMdd";
+    private static Pattern deliveryPattern = Pattern.compile("dl_(.*)_rt([0-9]+)$");
     private static DateFormatter df = new DateFormatter();
 
 
@@ -28,10 +29,9 @@ public class UiDataConverter {
      * @return
      * @throws ParseException
      */
-    public static Date getDateFromDeliveryItemDirectoryName(String deliveryItemDirectoryName) throws ParseException {
+    public static synchronized Date getDateFromDeliveryItemDirectoryName(String deliveryItemDirectoryName) throws ParseException {
 
-        Pattern pattern = Pattern.compile("dl_(.*)_rt([0-9]+)$");
-        Matcher matcher = pattern.matcher(deliveryItemDirectoryName);
+        Matcher matcher = deliveryPattern.matcher(deliveryItemDirectoryName);
         if (matcher.matches()) {
             String datePart = matcher.group(1);
             df.setFormat(new SimpleDateFormat(dateFormat));
@@ -44,13 +44,18 @@ public class UiDataConverter {
         }
     }
 
+    public static synchronized Matcher getPatternMatcher(String deliveryItemDirectoryName) throws ParseException {
+        Matcher matcher = deliveryPattern.matcher(deliveryItemDirectoryName);
+        return matcher;
+    }
+
 
     /**
      * Convert a pageiterator into a hashMap of pages, and use filter if delivered
      * @param pageList
      * @return
      */
-    public static Map sectionConverter(List<Page> pageList) {
+    public static synchronized Map sectionConverter(List<Page> pageList) {
 
         Map<String, List<Page>> grouped = pageList.stream().collect(Collectors.groupingBy(pageItem -> pageItem.getSectionNumber()));
         HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();

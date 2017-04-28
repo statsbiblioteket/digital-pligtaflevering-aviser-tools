@@ -153,7 +153,7 @@ public class GenericListTable extends VerticalLayout {
             CheckBox c;
             if(checkedColumnDefaultValue!= null) {
                 ConfirmationState oo = (ConfirmationState)prop.getValue();
-                boolean checkValue = !checkedColumnDefaultValue.equals(oo.name());
+                boolean checkValue = !checkedColumnDefaultValue.equals(oo);
                 c = new CheckBox(null, checkValue);
             } else {
                 c = new CheckBox(null, prop);
