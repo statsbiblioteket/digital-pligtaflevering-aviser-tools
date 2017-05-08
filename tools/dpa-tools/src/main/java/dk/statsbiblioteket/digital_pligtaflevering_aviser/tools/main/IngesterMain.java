@@ -338,9 +338,9 @@ public class IngesterMain {
 
         @Provides
         Function<List<ToolResult>, String> provideEventMessageForToolResults() {
-            return toolResult -> {
+            return toolResults -> {
                 // naive initial solution.
-                final Map<Boolean, List<ToolResult>> toolResultMap = toolResult.stream()
+                final Map<Boolean, List<ToolResult>> toolResultMap = toolResults.stream()
                         .collect(Collectors.groupingBy(tr -> tr.getResult()));
 
                 List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());

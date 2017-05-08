@@ -3,9 +3,16 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.Before;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +53,20 @@ public class ValidateXMLMainTest {
                     Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
                     URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
                     BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
-                    assertEquals("Failed Files : " + filePath.toString(), true, xmlValidatorModule.validate(in, xsdUrl));
+                    boolean result;
+                    try {
+                        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                        Schema schema = schemaFactory.newSchema(xsdUrl);
+                        Validator validator = schema.newValidator();
+                        validator.validate(new StreamSource(in));
+                        xmlValidatorModule.log.trace("Validation of the xml-content is accepted");
+                        result = true;
+                    } catch (IOException | SAXException e) {
+                        //This exception is not kept since this exception should just result in registrating that the xml is not validate
+                        xmlValidatorModule.log.info("Validation of the xml-content is rejected");
+                        result = false;
+                    }
+                    assertEquals("Failed Files : " + filePath.toString(), true, result);
                 } catch (Exception e) {
                     assertEquals(e.getMessage(), true, false);
                 }
@@ -88,7 +108,18 @@ public class ValidateXMLMainTest {
         Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
         URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(xmlurl.getFile()), "UTF8"));
-        return xmlValidatorModule.validate(in, xsdUrl);
+        try {
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = schemaFactory.newSchema(xsdUrl);
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(in));
+            xmlValidatorModule.log.trace("Validation of the xml-content is accepted");
+            return true;
+        } catch (IOException | SAXException e) {
+            //This exception is not kept since this exception should just result in registrating that the xml is not validate
+            xmlValidatorModule.log.info("Validation of the xml-content is rejected");
+            return false;
+        }
     }
 
 

@@ -36,8 +36,7 @@
     <dependency>
       <groupId>org.bitrepository.reference</groupId>
       <artifactId>bitrepository-client</artifactId>
-      <!--FIXME: This is not needed any more when this version of bitrepository has been released-->
-      <version>1.9-SNAPSHOT</version>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>dk.statsbiblioteket.newspaper</groupId>
