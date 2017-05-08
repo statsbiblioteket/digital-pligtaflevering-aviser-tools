@@ -179,7 +179,8 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
     }
 
     /**
-     *
+     * Show a dialog with the currently selected delivery and title.
+     * The delivery can then be saved as a valideted delivery
      */
     public void viewDialogForSettingDeliveryToChecked() {
         String selectedDelivery = model.getSelectedDelivery();
@@ -188,7 +189,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
 
         final StoreResultWindow dialog = new StoreResultWindow(selectedTitle + " - " + selectedDelivery);
         ResultStorePanel storePanel = new ResultStorePanel();
-
+        storePanel.setInitials(model.getInitials());
         dialog.setDialogContent(storePanel);
         storePanel.setValues(item);
         dialog.setReady(!item.isChecked());

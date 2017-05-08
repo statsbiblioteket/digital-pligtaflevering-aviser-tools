@@ -37,13 +37,15 @@ import java.net.URI;
 
 
 /**
- * The full panel for showing deliveries and titles
+ * The full panel for showing deliveries and titles.
+ * The panel contains a searchpanel at the top, a information panel in the middle, and a detailview at the buttom.
+ * The informationpalel can be changed with different panel depending on what is in focus in the view
  */
 public class StatisticsView extends VerticalLayout implements View {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private DataModel model = new DataModel();
+    private DataModel model;
     private Link link = new Link("Metadatlink", null);
     private Embedded pdf = new Embedded(null, null);
     private StatisticsPanels tabelsLayout;
@@ -52,8 +54,9 @@ public class StatisticsView extends VerticalLayout implements View {
     private Page currentSelectedPage;
     private Article currentSelectedArticle;
 
-    public StatisticsView(String type) {
+    public StatisticsView(DataModel model, String type) {
 
+        this.model = model;
         MenuBar header = new MenuBar();
         header.setWidth("100%");
         Layout mainhlayout;

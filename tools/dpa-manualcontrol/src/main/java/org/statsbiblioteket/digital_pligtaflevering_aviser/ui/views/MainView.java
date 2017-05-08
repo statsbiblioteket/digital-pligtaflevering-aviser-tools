@@ -9,13 +9,13 @@ import com.vaadin.ui.VerticalLayout;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 
 /**
- * Created by mmj on 3/8/17.
+ * The mainpanel is just the a defaultPanel
  */
 public class MainView extends VerticalLayout implements View {
     public MainView() {
         setSizeFull();
 
-        Button button = new Button("Main",
+        Button button = new Button("Jump to deliverypanel",
                 new Button.ClickListener() {
                     @Override
                     public void buttonClick(Button.ClickEvent event) {

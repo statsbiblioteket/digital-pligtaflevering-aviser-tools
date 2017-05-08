@@ -31,6 +31,7 @@ public class DataModel {
     //Formatter for naming the cashing folder by the date
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
 
+    private String initials;
     private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
     private String selectedTitle;
@@ -48,28 +49,66 @@ public class DataModel {
         fedoraSerializer = new DeliveryFedoraSerializer(repository);
     }
 
+    /**
+     * Set initials of the person currently using the application in this browserinstance
+     * @param initials
+     */
+    public void setInitials(String initials) {
+        this.initials = initials;
+    }
 
+    /**
+     * Get initials of the person currently using the application in this browserinstance
+     * @return
+     */
+    public String getInitials() {
+        return initials;
+    }
+
+    /**
+     * Get the name of the delivery which is currently in operation
+     * @return
+     */
     public String getSelectedDelivery() {
         return selectedDelivery;
     }
 
+    /**
+     * Set the name of the delivery which is currently in operation
+     * @param selectedDelivery
+     */
     public void setSelectedDelivery(String selectedDelivery) {
         this.selectedDelivery = selectedDelivery;
     }
 
-
+    /**
+     * Get the name of the newspapertitle which is currently in operation
+     * @return
+     */
     public String getSelectedTitle() {
         return selectedTitle;
     }
 
+    /**
+     * Get the name of the newspapersection which is currently in operation
+     * @return
+     */
     public String getSelectedSection() {
         return selectedSection;
     }
 
+    /**
+     * Set the name of the newspapersection which is currently in operation
+     * @param selectedSection
+     */
     public void setSelectedSection(String selectedSection) {
         this.selectedSection = selectedSection;
     }
 
+    /**
+     * Set the name of the delivery which is currently in operation
+     * @param selectedTitle
+     */
     public void setSelectedTitle(String selectedTitle) {
         this.selectedTitle = selectedTitle;
     }
@@ -80,32 +119,58 @@ public class DataModel {
         return currentlySelectedTitleHiearachy.getAllTitles();
     }
 
+    /**
+     * Select the TitleDeliveryItem for operation, selection is done with the local parameters of title and deliveryname
+     */
     public void selectTitleDelivery() {
-
         selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
     }
 
+    /**
+     * Add information about a newspaperpage, which has been checked
+     * @param page
+     */
     public void addCheckedPage(Page page) {
         selectedDelItem.addPages(page);
     }
 
+    /**
+     * Add information about a newspaperarticle, which has been checked
+     * @param article
+     */
     public void addCheckedArticle(Article article) {
         selectedDelItem.addArticle(article);
     }
 
-
+    /**
+     * Get the deliveryTitle which is currently selected for operation
+     * @return
+     */
     public DeliveryTitleInfo getCurrentDelItem() {
         return selectedDelItem;
     }
 
+    /**
+     * Get all deliverysTitles which contain the title-name in the parameter
+     * @param title
+     * @return
+     */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
         return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
     }
 
+    /**
+     * Get all deliverysTitles, that is delivered in the currently selected delivery
+     * @return
+     */
     public List<DeliveryTitleInfo> getDeliveryTitleObjects() {
         return currentlySelectedTitleHiearachy.getDeliveryTitleObjects(selectedDelivery);
     }
 
+    /**
+     * Initiate the list of deliveries which is currently beeing in operation
+     * @param allreadyValidated
+     */
     public void initiateDeliveries(boolean allreadyValidated) {
         DeliveryFedoraSerializer.EventStatus evtStatus = DeliveryFedoraSerializer.EventStatus.READYFORMANUALCHECK;
         if(allreadyValidated) {
@@ -199,11 +264,19 @@ public class DataModel {
         return filesystemSerializer.isMonthInitiated(currentlySelectedMonth);
     }
 
-
+    /**
+     * Get the DomsItem from the name of the delivery, the domsItem can be used for reading and writing to doms
+     * @param name
+     * @return
+     */
     public DomsItem getDeliveryFromName(String name) {
         return fedoraSerializer.getDeliveryFromName(name);
     }
 
+    /**
+     * Get a list of alle deliveries, which is currently beeing operated
+     * @return
+     */
     public Set<String> getInitiatedDeliveries() {
         return fedoraSerializer.getInitiatedDeliveries();
     }

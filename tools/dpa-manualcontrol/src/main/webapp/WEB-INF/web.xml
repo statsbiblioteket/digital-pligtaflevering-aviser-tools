@@ -19,7 +19,6 @@
     </listener>
 
     <!--Start of CAS filter -->
-    <!--
     <filter>
         <filter-name>CAS Authentication Filter</filter-name>
         <filter-class>org.jasig.cas.client.authentication.AuthenticationFilter</filter-class>
@@ -78,7 +77,6 @@
         <param-name>serverName</param-name>
         <param-value>localhost</param-value>
     </context-param>
-    -->
     <!--End of CAS filter -->
 
     <servlet>

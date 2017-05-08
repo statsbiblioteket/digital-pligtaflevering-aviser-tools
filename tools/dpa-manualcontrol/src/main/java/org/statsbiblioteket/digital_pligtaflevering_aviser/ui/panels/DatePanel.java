@@ -1,8 +1,10 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
@@ -48,6 +50,7 @@ public class DatePanel extends VerticalLayout {
         for(DayOfWeek d : ds) {
             columns[i] = d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
             table.addContainerProperty(columns[i], String.class, null);
+            table.addGeneratedColumn(columns[i], new DatePanel.FieldGenerator());
             i++;
         }
         unmappable.setEnabled(false);
@@ -82,7 +85,14 @@ public class DatePanel extends VerticalLayout {
                         newItemId = table.addItem(weekday_no);
                         newItemId.getItemProperty("Weekno").setValue(weekday_no);
                     }
-                    newItemId.getItemProperty(weekday_name).setValue(roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles());
+                    Object oldCellValue = newItemId.getItemProperty(weekday_name).getValue();
+                    Object newCellValue = roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles();
+                    if(oldCellValue!=null) {
+                        newItemId.getItemProperty(weekday_name).setValue(oldCellValue + "\n" + newCellValue);
+                    } else {
+                        newItemId.getItemProperty(weekday_name).setValue(newCellValue);
+                    }
+
                 } else {
                     unmappableValues = unmappableValues.concat(item.getDeliveryName());
                 }
@@ -110,5 +120,22 @@ public class DatePanel extends VerticalLayout {
      */
     public void setCaption(String caption) {
         table.setCaption(caption);
+    }
+
+    /**
+     * Generate textareas as cells in the table
+     */
+    class FieldGenerator implements Table.ColumnGenerator {
+
+        @Override
+        public Component generateCell(Table source, Object itemId, Object columnId) {
+            Property prop = source.getItem(itemId).getItemProperty(columnId);
+            TextArea area = new TextArea(null, prop);
+            if(prop.getValue() == null) {
+                area.setValue("");
+            }
+            area.setReadOnly(true);
+            return area;
+        }
     }
 }

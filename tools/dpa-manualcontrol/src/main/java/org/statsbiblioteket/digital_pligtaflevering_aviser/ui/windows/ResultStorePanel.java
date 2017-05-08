@@ -15,20 +15,18 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by mmj on 3/9/17.
+ * This panel contains results of validations in a titleDelivery, it gives the possiblity of viewing what has been validated
+ * and store it if it is approved.
  */
 public class ResultStorePanel extends VerticalLayout {
 
     private TextField initials = new TextField("Initials");
     private DateField date = new DateField();
     private TextArea area = new TextArea("Check description");
-
     private BeanItemContainer pageBeans;
     private BeanItemContainer articleBeans;
-
     private Table pageTable;
     private Table articleTable;
-
     private MissingItemTable missingItemTable = new MissingItemTable();
 
     public ResultStorePanel() {
@@ -68,6 +66,18 @@ public class ResultStorePanel extends VerticalLayout {
 
     }
 
+    /**
+     * Set the initials of the person currently performing the approvement
+     * @param defaultInitials
+     */
+    public void setInitials(String defaultInitials) {
+        initials.setValue(defaultInitials);
+    }
+
+    /**
+     * Set values to be viewed in the panel
+     * @param item
+     */
     public void setValues(DeliveryTitleInfo item) {
 
         if(item.getComment()!=null) {
@@ -85,6 +95,10 @@ public class ResultStorePanel extends VerticalLayout {
         missingItemTable.setInfo(item.getMissingItems());
     }
 
+    /**
+     * Get a list of items, that has been marekd as missin items
+     * @return
+     */
     public List<MissingItem> getMissingItems() {
         return missingItemTable.getInfo();
     }
@@ -96,15 +110,26 @@ public class ResultStorePanel extends VerticalLayout {
         super.setEnabled(enabled);
     }
 
+    /**
+     * Set a caption to the panel
+     * @param caption
+     */
     public void setCaption(String caption) {
         pageTable.setCaption(caption);
     }
 
-
+    /**
+     * Get the initials from the edit-field, the initial value can have been replaced by the user
+     * @return
+     */
     public String getInitials() {
         return initials.getValue();
     }
 
+    /**
+     * Get the text from the commentField
+     * @return
+     */
     public String getComment() {
         return area.getValue();
     }

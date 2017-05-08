@@ -1,18 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.util.List;
 
@@ -21,13 +14,11 @@ import java.util.List;
  */
 public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsPanels {
 
-    protected DataModel model;//
-
-    protected HorizontalLayout tablesLayout = new HorizontalLayout();
-    protected HorizontalLayout buttonLayout = new HorizontalLayout();
-
-    protected SingleStringListPanel infoPanel = new SingleStringListPanel();
-    protected DatePanel datePanel = new DatePanel();
+    private DataModel model;
+    private HorizontalLayout tablesLayout = new HorizontalLayout();
+    private HorizontalLayout buttonLayout = new HorizontalLayout();
+    private SingleStringListPanel infoPanel = new SingleStringListPanel();
+    private DatePanel datePanel = new DatePanel();
 
     /**
      * Construct the panel with a reference to the datamodel
@@ -44,7 +35,6 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
 
                 model.setSelectedTitle(selectedTitle);
                 model.setSelectedSection(null);
-                showTheSelectedTitle();
                 List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(selectedTitle);
 
                 datePanel.setInfo(list);
@@ -53,12 +43,12 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
 
 
         tablesLayout.addComponent(infoPanel);
-        tablesLayout.setExpandRatio(infoPanel, 0.1f);
+        tablesLayout.setExpandRatio(infoPanel, 0.2f);
         tablesLayout.addComponent(datePanel);
+        tablesLayout.setExpandRatio(datePanel, 0.8f);
 
         this.addComponent(buttonLayout);
         this.addComponent(tablesLayout);
-
     }
 
     /**
@@ -67,41 +57,35 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     public void initialLayout() {
     }
 
+    /**
+     * Dummy implementation
+     * @param itemId
+     * @param checkedState
+     */
     @Override
     public void checkThePage(Object itemId, ConfirmationState checkedState) {
 
     }
 
+    /**
+     * Dummy implementation
+     * @param itemId
+     * @param checkedState
+     */
     @Override
     public void checkTheArticle(Object itemId, ConfirmationState checkedState) {
 
     }
 
+    /**
+     * Dummy implementation
+     * @param listener
+     */
     @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
 
     }
 
-
-    /**
-     * Show the content of the selection defined by the delivery and title.
-     * The information is fetched from fedora as the statistics stream and is shown in tables with section, article and page
-     */
-    protected void showTheSelectedTitle() {
-
-
-        String selectedDelivery = model.getSelectedDelivery();
-        String selectedTitle = model.getSelectedTitle();
-        if(selectedDelivery==null || selectedTitle==null) {
-            return;
-        }
-
-        Title title = model.getTitleObj(selectedDelivery, selectedTitle);
-        if(title==null) {
-            return;
-        }
-        model.selectTitleDelivery();
-    }
 
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
@@ -110,6 +94,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     /**
      * Dummy implementation
      */
+    @Override
     public void viewDialogForSettingDeliveryToChecked() {
     }
 }
