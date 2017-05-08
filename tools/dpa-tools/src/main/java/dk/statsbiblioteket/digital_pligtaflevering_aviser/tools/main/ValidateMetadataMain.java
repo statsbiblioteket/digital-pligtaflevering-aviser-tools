@@ -34,7 +34,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 /**
  * Main class for starting autonomous component
  * This component is used for validation of metadata from newspaper deliveries.
@@ -84,10 +83,10 @@ public class ValidateMetadataMain {
         @Provides
         Function<DomsItem, ToolResult> provideDeliveryProcessor(
                 Function<DomsItem, Stream<Try<ToolResult>>> processDeliveryChild,
-                Collector<Try<ToolResult>, OkFailThrown, ToolResult> toolResultCollector) {
+                Function<DomsItem, Collector<Try<ToolResult>, OkFailThrown, ToolResult>> toolResultCollectorFunction) {
             return domsItem -> domsItem.allChildren()
                     .flatMap(processDeliveryChild)
-                    .collect(toolResultCollector);
+                    .collect(toolResultCollectorFunction.apply(domsItem));
         }
 
         @Provides
@@ -107,40 +106,41 @@ public class ValidateMetadataMain {
         }
 
         @Provides
-        Collector<Try<ToolResult>, OkFailThrown, ToolResult> provideToolResultCollector(Supplier<DomsItem> domsItemSupplier) {
+        Function<DomsItem, Collector<Try<ToolResult>, OkFailThrown, ToolResult>> provideToolResultCollector() {
+            return domsItem -> {
+                Supplier<OkFailThrown> supplier = () -> new OkFailThrown(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+                BiConsumer<OkFailThrown, Try<ToolResult>> accumulator = (c, t) -> {
+                    if (t.isFailure()) {
+                        c.thrown.add(t);
+                    } else if (t.get().getResult()) {
+                        c.ok.add(t.get());
+                    } else {
+                        c.fail.add(t.get());
+                    }
+                };
+                BinaryOperator<OkFailThrown> combiner = (c1, c2) -> new OkFailThrown(concat(c1.ok, c2.ok), concat(c1.fail, c2.fail), concat(c1.thrown, c2.thrown));
+                Function<OkFailThrown, ToolResult> finisher = (c) -> {
+                    if (c.fail.size() == 0 && c.thrown.size() == 0) { // all well.
+                        return ToolResult.ok(domsItem, c.ok.size() + " processed.");
+                    } else {
 
-            Supplier<OkFailThrown> supplier = () -> new OkFailThrown(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-            BiConsumer<OkFailThrown, Try<ToolResult>> accumulator = (c, t) -> {
-                if (t.isFailure()) {
-                    c.thrown.add(t);
-                } else if (t.get().getResult()) {
-                    c.ok.add(t.get());
-                } else {
-                    c.fail.add(t.get());
-                }
+                        String message1 = c.thrown.size() > 0
+                                ? c.thrown.stream()
+                                .flatMap(t -> stacktraceFor(t.getCause())).collect(Collectors.joining("\n\n"))
+                                : "";
+
+                        String message2 = c.fail.size() > 0
+                                ? c.fail.stream()
+                                .flatMap(tr -> Stream.of("---", tr.getItem() + ": " + tr.getHumanlyReadableMessage(), ""))
+                                .filter(s -> s.trim().length() > 0) // skip blank lines
+                                .collect(Collectors.joining("\n"))
+                                : "";
+
+                        return ToolResult.fail(domsItem, message1 + "\n" + message2);
+                    }
+                };
+                return Collector.of(supplier, accumulator, combiner, finisher);
             };
-            BinaryOperator<OkFailThrown> combiner = (c1, c2) -> new OkFailThrown(concat(c1.ok, c2.ok), concat(c1.fail, c2.fail), concat(c1.thrown, c2.thrown));
-            Function<OkFailThrown, ToolResult> finisher = (c) -> {
-                if (c.fail.size() == 0 && c.thrown.size() == 0) { // all well.
-                    return ToolResult.ok(domsItemSupplier.get(), c.ok.size() + " processed.");
-                } else {
-
-                    String message1 = c.thrown.size() > 0
-                            ? c.thrown.stream()
-                            .flatMap(t -> stacktraceFor(t.getCause())).collect(Collectors.joining("\n\n"))
-                            : "";
-
-                    String message2 = c.fail.size() > 0
-                            ? c.fail.stream()
-                            .flatMap(tr -> Stream.of("---", tr.getItem() + ": " + tr.getHumanlyReadableMessage(), ""))
-                            .filter(s -> s.trim().length() > 0) // skip blank lines
-                            .collect(Collectors.joining("\n"))
-                            : "";
-
-                    return ToolResult.fail(domsItemSupplier.get(), message1 + "\n" + message2);
-                }
-            };
-            return Collector.of(supplier, accumulator, combiner, finisher);
         }
 
         private Stream<String> stacktraceFor(Throwable cause) {
