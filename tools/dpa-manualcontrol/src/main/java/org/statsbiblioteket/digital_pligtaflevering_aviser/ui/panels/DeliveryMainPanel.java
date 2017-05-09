@@ -11,6 +11,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleComponent;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -30,7 +32,8 @@ import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.T
  */
 public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanels {
 
-    protected DataModel model;//
+    protected Logger log = LoggerFactory.getLogger(getClass());
+    protected DataModel model;
 
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -219,5 +222,16 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
                 UI.getCurrent().removeWindow(dialog);
             }
         });
+    }
+
+    public void viewIsEntered() {
+        if(model.getSelectedDelivery()!=null && model.getSelectedTitle()!=null) {
+            try {
+                insertInitialTableValues();
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            showTheSelectedTitle(true);
+        }
     }
 }

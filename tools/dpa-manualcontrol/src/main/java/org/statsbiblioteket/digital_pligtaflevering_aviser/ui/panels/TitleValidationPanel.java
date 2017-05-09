@@ -61,4 +61,12 @@ public class TitleValidationPanel extends DeliveryMainPanel {
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
+
+    public void viewIsEntered() {
+        if(model.getSelectedTitle() != null) {
+            List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(model.getSelectedTitle());
+            deliveryPanel.setInfo(list);
+        }
+        super.viewIsEntered();
+    }
 }

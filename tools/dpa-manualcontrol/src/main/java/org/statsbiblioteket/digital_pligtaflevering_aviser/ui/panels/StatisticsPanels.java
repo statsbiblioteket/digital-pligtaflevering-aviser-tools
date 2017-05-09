@@ -57,5 +57,6 @@ public interface StatisticsPanels extends Component {
     public void viewDialogForSettingDeliveryToChecked();
 
 
+    public void viewIsEntered();
 
 }

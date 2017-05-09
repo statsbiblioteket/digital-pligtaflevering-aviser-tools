@@ -97,4 +97,11 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     @Override
     public void viewDialogForSettingDeliveryToChecked() {
     }
+
+    /**
+     * Dummy implementation
+     */
+    public void viewIsEntered() {
+
+    }
 }

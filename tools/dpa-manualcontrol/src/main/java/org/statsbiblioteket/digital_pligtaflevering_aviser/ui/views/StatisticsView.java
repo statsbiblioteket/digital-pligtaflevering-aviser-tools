@@ -303,7 +303,19 @@ public class StatisticsView extends VerticalLayout implements View {
      */
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        searchPanel.setSelectedMonth(model.getSelectedMonth());
+        try {
+            searchPanel.setSelectedMonth(model.getSelectedMonth());
+            if(model.getSelectedDelivery()!=null && model.getSelectedTitle()!=null) {
+                model.initiateDeliveries(searchPanel.useAllreadyValidated());
+                model.initiateTitleHierachyFromFilesystem();
+                tabelsLayout.insertInitialTableValues();
+                panelPrepare(true);
+            }
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        tabelsLayout.viewIsEntered();
         Notification.show("DPA Delivery validation");
     }
 

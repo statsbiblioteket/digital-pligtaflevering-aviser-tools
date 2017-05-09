@@ -107,4 +107,12 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
             }
         });
     }
+
+    public void viewIsEntered() {
+        if(model.getSelectedDelivery() != null) {
+            List<DeliveryTitleInfo> l = model.getDeliveryTitleObjects();
+            deliveryPanel.setInfo(l);
+        }
+        super.viewIsEntered();
+    }
 }
