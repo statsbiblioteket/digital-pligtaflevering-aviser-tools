@@ -3,20 +3,17 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
-import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
 import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.MainView;
 
-import javax.inject.Named;
 import java.util.List;
-
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
  * The Application's "main" class
@@ -35,7 +32,6 @@ public class NewspaperUI extends UI {
     private DomsModule domsModule = new DomsModule();
     private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
 
-
     private DataModel model = new DataModel();
     /**
      * Initiate the application
@@ -52,7 +48,13 @@ public class NewspaperUI extends UI {
         model.setInitials(initials);
         String productionMode = ConfigCollection.getProperties().getProperty("productionMode");
 
-        List<String> groups = (List<String>) request.getAttribute("sbAdGroups");
+        String month = request.getParameter("month");
+        String del = request.getParameter("del");
+        String title = request.getParameter("title");
+        model.setSelectedMonth(month);
+        model.setSelectedDelivery(del);
+        model.setSelectedTitle(title);
+
         address = request.getRemoteAddr();
         getPage().setTitle("DPA");
 

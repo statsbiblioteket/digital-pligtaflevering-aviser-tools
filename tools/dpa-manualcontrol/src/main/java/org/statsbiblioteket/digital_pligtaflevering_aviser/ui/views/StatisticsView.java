@@ -45,6 +45,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    private SearchPanel searchPanel = new SearchPanel();
     private DataModel model;
     private Link link = new Link("Metadatalink", null);
     private Embedded pdf = new Embedded(null, null);
@@ -140,7 +141,8 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.setMargin(true);
         addComponent(layout);
 
-        SearchPanel searchPanel = new SearchPanel();
+
+        searchPanel.setSelectedMonth(model.getSelectedMonth());
         searchPanel.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 try {
@@ -257,8 +259,13 @@ public class StatisticsView extends VerticalLayout implements View {
 
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
+        panelPrepare(false);
     }
 
+    /**
+     * Set panes to being prepared for viewing details
+     * @param prepare
+     */
     private void panelPrepare(boolean prepare) {
         pdf.setVisible(prepare);
         link.setVisible(prepare);
@@ -296,6 +303,7 @@ public class StatisticsView extends VerticalLayout implements View {
      */
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
+        searchPanel.setSelectedMonth(model.getSelectedMonth());
         Notification.show("DPA Delivery validation");
     }
 

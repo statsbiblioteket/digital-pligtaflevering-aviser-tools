@@ -13,6 +13,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -252,6 +253,23 @@ public class DataModel {
      */
     public void setSelectedMonth(Date selectedMonth) {
         currentlySelectedMonth = dateFormat.format(selectedMonth);
+    }
+
+    public void setSelectedMonth(String selectedMonth) {
+        currentlySelectedMonth = selectedMonth;
+    }
+
+    public Date getSelectedMonth() {
+        try {
+            if(currentlySelectedMonth == null) {
+                return new Date();
+            } else {
+                return dateFormat.parse(currentlySelectedMonth);
+            }
+        } catch (ParseException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 
 

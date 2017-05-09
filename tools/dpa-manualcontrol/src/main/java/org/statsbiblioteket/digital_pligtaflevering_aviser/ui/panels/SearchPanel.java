@@ -36,6 +36,10 @@ public class SearchPanel extends HorizontalLayout {
         this.addComponent(info);
     }
 
+    /**
+     * Get the dete that is currently shown in the datecomponent
+     * @return
+     */
     public Date getSelectedDate() {
         return startDf.getValue();
     }
@@ -44,6 +48,15 @@ public class SearchPanel extends HorizontalLayout {
         return checked.getValue();
     }
 
+    public void setSelectedMonth(Date month) {
+        startDf.setValue(month);
+    }
+
+
+    /**
+     * Add listeners to buttons in panel
+     * @param listener
+     */
     public void addClickListener(Button.ClickListener listener) {
         prepareButton.addClickListener(listener);
         storeTitlesButton.addClickListener(listener);
