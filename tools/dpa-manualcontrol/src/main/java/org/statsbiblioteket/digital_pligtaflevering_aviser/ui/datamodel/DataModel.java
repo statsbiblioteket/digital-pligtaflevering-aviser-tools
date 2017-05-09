@@ -31,7 +31,7 @@ public class DataModel {
 
     //Formatter for naming the cashing folder by the date
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
-
+    private boolean includeValidatedDeliveries = false;
     private String initials;
     private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
@@ -60,6 +60,11 @@ public class DataModel {
     public void setInitials(String initials) {
         this.initials = initials;
     }
+
+    public void setIncludeValidatedDeliveries(boolean includeValidatedDeliveries) {
+        this.includeValidatedDeliveries = includeValidatedDeliveries;
+    }
+
 
     /**
      * Get initials of the person currently using the application in this browserinstance
@@ -173,11 +178,10 @@ public class DataModel {
 
     /**
      * Initiate the list of deliveries which is currently beeing in operation
-     * @param allreadyValidated
      */
-    public void initiateDeliveries(boolean allreadyValidated) {
+    public void initiateDeliveries() {
         DeliveryFedoraSerializer.EventStatus evtStatus = DeliveryFedoraSerializer.EventStatus.READYFORMANUALCHECK;
-        if(allreadyValidated) {
+        if(this.includeValidatedDeliveries) {
             evtStatus = DeliveryFedoraSerializer.EventStatus.DONEMANUALCHECK;
         }
         fedoraSerializer.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
@@ -270,6 +274,10 @@ public class DataModel {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    public String getSelectedMonthString() {
+        return currentlySelectedMonth;
     }
 
 

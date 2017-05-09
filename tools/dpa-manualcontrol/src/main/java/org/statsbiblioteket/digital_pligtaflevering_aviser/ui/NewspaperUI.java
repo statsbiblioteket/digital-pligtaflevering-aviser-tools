@@ -51,9 +51,12 @@ public class NewspaperUI extends UI {
         String month = request.getParameter("month");
         String del = request.getParameter("del");
         String title = request.getParameter("title");
+        boolean validated = "true".equals(request.getParameter("validated"));
+
         model.setSelectedMonth(month);
         model.setSelectedDelivery(del);
         model.setSelectedTitle(title);
+        model.setIncludeValidatedDeliveries(validated);
 
         address = request.getRemoteAddr();
         getPage().setTitle("DPA");
@@ -61,10 +64,12 @@ public class NewspaperUI extends UI {
         // Create a navigator to control the views
         navigator = new Navigator(this, this);
 
+        StatisticsView deliveryPanel = new StatisticsView(model, DELIVERYPANEL);
+
         // Create and register the views
-        navigator.addView(MAINVIEW, new MainView());
+        navigator.addView(MAINVIEW, deliveryPanel);
         navigator.addView(CONFIGPANEL, new StatisticsView(model, CONFIGPANEL));
-        navigator.addView(DELIVERYPANEL, new StatisticsView(model, DELIVERYPANEL));
+        navigator.addView(DELIVERYPANEL, deliveryPanel);
         navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(model, TITLEVALIDATIONPANEL));
         navigator.addView(OVERVIEW, new StatisticsView(model, OVERVIEW));
     }

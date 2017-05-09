@@ -102,7 +102,7 @@ public class DeliveryFedoraSerializer {
      */
     public Stream<DomsItem> getDoneManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                pastEvents + "," + thisEvent, "", "", itemType))
+                pastEvents, "", "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 

@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
+import com.sun.jndi.toolkit.url.Uri;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -38,8 +39,8 @@ import java.net.URI;
 
 /**
  * The full panel for showing deliveries and titles.
- * The panel contains a searchpanel at the top, a information panel in the middle, and a detailview at the buttom.
- * The informationpalel can be changed with different panel depending on what is in focus in the view
+ * The panel contains a search panel at the top, a information panel in the middle, and a detail view at the buttom.
+ * The information panel can be changed with different panel depending on what is in focus in the view
  */
 public class StatisticsView extends VerticalLayout implements View {
 
@@ -147,9 +148,10 @@ public class StatisticsView extends VerticalLayout implements View {
             public void buttonClick(Button.ClickEvent event) {
                 try {
 
+
                     if ("PREPAREBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        model.initiateDeliveries(searchPanel.useAllreadyValidated());
+                        model.initiateDeliveries();
                         model.initiateTitleHierachyFromFedora();
                         model.saveCurrentTitleHierachyToFilesystem();
                         panelPrepare(true);
@@ -161,10 +163,20 @@ public class StatisticsView extends VerticalLayout implements View {
                             panelPrepare(false);
                             return;
                         }
-                        model.initiateDeliveries(searchPanel.useAllreadyValidated());
+                        model.initiateDeliveries();
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
                         panelPrepare(true);
+                    } else if("LINK".equals(event.getButton().getId())) {
+
+                        URI oldUri = UI.getCurrent().getPage().getLocation();
+
+                        String newQuery = "month=" + model.getSelectedMonthString() + "&" +
+                                "del=" + model.getSelectedDelivery() + "&" +
+                                "title=" + model.getSelectedTitle();
+
+                        URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery, oldUri.getFragment());
+                        searchPanel.setLabel(newUri.toString());
                     }
 
                 } catch (Exception e) {
@@ -298,7 +310,8 @@ public class StatisticsView extends VerticalLayout implements View {
     }
 
     /**
-     * Show a welcome message when entering pte page
+     * Show a welcome message when entering the page
+     * If the model has been initiated with search-selections these wil be shown
      * @param event
      */
     @Override
@@ -306,7 +319,7 @@ public class StatisticsView extends VerticalLayout implements View {
         try {
             searchPanel.setSelectedMonth(model.getSelectedMonth());
             if(model.getSelectedDelivery()!=null && model.getSelectedTitle()!=null) {
-                model.initiateDeliveries(searchPanel.useAllreadyValidated());
+                model.initiateDeliveries();
                 model.initiateTitleHierachyFromFilesystem();
                 tabelsLayout.insertInitialTableValues();
                 panelPrepare(true);

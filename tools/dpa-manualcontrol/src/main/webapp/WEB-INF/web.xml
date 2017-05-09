@@ -9,7 +9,7 @@
     <context-param>
         <description>Deploy status</description>
         <param-name>productionMode</param-name>
-        <param-value>false</param-value>
+        <param-value>true</param-value>
     </context-param>
 
     <listener>
@@ -71,7 +71,7 @@
     </context-param>
     <context-param>
         <param-name>service</param-name>
-        <param-value>http://localhost:8080/vaadin-app/VAADIN</param-value>
+        <param-value>http://localhost:8080/dpa_manual/VAADIN;mode=manualvalidate</param-value>
     </context-param>
     <context-param>
         <param-name>serverName</param-name>

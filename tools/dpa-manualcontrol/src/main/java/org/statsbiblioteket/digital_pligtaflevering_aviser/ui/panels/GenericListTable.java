@@ -13,14 +13,15 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Generic table for viewing a table in the table-bean form
+ * Generic table for viewing a table in the table-bean form.
+ * This component contains a table and a checkbox which makes it possible to make the table visible/invisible
  */
 public class GenericListTable extends VerticalLayout {
 
     private String checkedColumnName;
     private String sortColumnName = null;
     private Object checkedColumnDefaultValue;
-    private String[] columnFilter;
+
     private CheckBox checkbox;
     private BeanItemContainer beans;
     private Table table;
@@ -54,7 +55,7 @@ public class GenericListTable extends VerticalLayout {
         if(checkedColumnName!=null) {
             table.addGeneratedColumn(checkedColumnName, new GenericListTable.CheckBoxColumnGenerator());
         }
-        columnFilter = visibleColumns;
+
         if(visibleColumns!=null) {
             table.setVisibleColumns(visibleColumns);
         }
@@ -68,7 +69,6 @@ public class GenericListTable extends VerticalLayout {
      * @param visibleColumns
      */
     public void setVisibleColumns(String[] visibleColumns) {
-        columnFilter = visibleColumns;
         if(visibleColumns!=null) {
             table.setVisibleColumns(visibleColumns);
         }
