@@ -42,12 +42,19 @@ import java.util.stream.Stream;
 public class DeliveryFedoraSerializer {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
+    private static String itemType;
+    private static String pastEvents;
+    private static String thisEvent;
+
     private HashMap<String, DomsItem> deliveryList = new HashMap<>();
     private DomsParser parser = new DomsParser();
     private DomsModule domsModule = new DomsModule();
     private DomsRepository repository;
 
-    public DeliveryFedoraSerializer(DomsRepository repository) {
+    public DeliveryFedoraSerializer(String itemType, String pastEvents, String thisEvent, DomsRepository repository) {
+        this.itemType = itemType;
+        this.pastEvents = pastEvents;
+        this.thisEvent = thisEvent;
         this.repository = repository;
     }
 
@@ -84,7 +91,7 @@ public class DeliveryFedoraSerializer {
      */
     public Stream<DomsItem> getReadyForMaual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                "Statistics_generated", "ManualValidationDone", "", "doms:ContentModel_DPARoundTrip"))
+                pastEvents, thisEvent, "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
@@ -95,7 +102,7 @@ public class DeliveryFedoraSerializer {
      */
     public Stream<DomsItem> getDoneManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                "Statistics_generated,ManualValidationDone", "", "", "doms:ContentModel_DPARoundTrip"))
+                pastEvents + "," + thisEvent, "", "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 

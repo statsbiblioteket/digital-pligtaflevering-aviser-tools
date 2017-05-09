@@ -46,11 +46,12 @@ public class StatisticsView extends VerticalLayout implements View {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private DataModel model;
-    private Link link = new Link("Metadatlink", null);
+    private Link link = new Link("Metadatalink", null);
     private Embedded pdf = new Embedded(null, null);
     private StatisticsPanels tabelsLayout;
-    private String bitRepoPath = "http://172.18.100.153:58709/var/file1pillar/files/dpaviser/folderDir/";
-    private String fedoraPath = "http://172.18.100.153:7880/fedora/objects/";
+    public static String bitRepoPath;
+    public static String fedoraPath;
+    public static String manualCheckEventname;
     private Page currentSelectedPage;
     private Article currentSelectedArticle;
 

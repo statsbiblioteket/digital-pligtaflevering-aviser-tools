@@ -8,7 +8,7 @@ import com.vaadin.ui.VerticalLayout;
 import java.util.Date;
 
 /**
- * Created by mmj on 3/9/17.
+ * This panel gives the possibility of setting information ato get written when a delivery is marked as confirmed.
  */
 public class DeliveryConfirmPanel extends VerticalLayout {
 

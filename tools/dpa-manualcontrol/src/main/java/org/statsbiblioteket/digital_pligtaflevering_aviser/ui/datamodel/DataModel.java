@@ -44,9 +44,12 @@ public class DataModel {
     private DeliveryFedoraSerializer fedoraSerializer;
 
     public DataModel() {
-        String cashingPath = map.getDefault("dpa.manualcontrol.cashingfolder", "/tmp");
+        String cashingPath = map.getRequired("dpa.manualcontrol.cashingfolder");
         filesystemSerializer = new DeliveryFilesystemSerializer(cashingPath);
-        fedoraSerializer = new DeliveryFedoraSerializer(repository);
+        fedoraSerializer = new DeliveryFedoraSerializer(map.getRequired("autonomous.itemTypes"),
+                map.getRequired("autonomous.pastSuccessfulEvents"),
+                map.getRequired("autonomous.thisEvent"),
+                repository);
     }
 
     /**

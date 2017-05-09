@@ -3,12 +3,20 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
+import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
 import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.MainView;
 
+import javax.inject.Named;
 import java.util.List;
+
+import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
  * The Application's "main" class
@@ -22,6 +30,11 @@ public class NewspaperUI extends UI {
     public static final String DELIVERYPANEL = "DELIVERYPANEL";
     public static final String OVERVIEW = "OVERVIEW";
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
+    public static final String AUTONOMOUS_THIS_EVENT = "autonomous.thisEvent";
+
+    private DomsModule domsModule = new DomsModule();
+    private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+
 
     private DataModel model = new DataModel();
     /**
@@ -31,11 +44,9 @@ public class NewspaperUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
 
-        //Enable to navigate to raw path
-        /*if(navigator==null) {
-            String thisIsDomainPath = request.getContextPath();
-            Page.getCurrent().open(thisIsDomainPath + "/", null);
-        }*/
+        StatisticsView.fedoraPath = domsModule.provideDomsURL(map) + "/objects/";
+        StatisticsView.bitRepoPath = map.getRequired(IngesterConfiguration.BITMAG_BASEURL_PROPERTY) + "var/file1pillar/files/dpaviser/folderDir/";
+        StatisticsView.manualCheckEventname = map.getRequired(AUTONOMOUS_THIS_EVENT);
 
         String initials = request.getUserPrincipal().getName();
         model.setInitials(initials);

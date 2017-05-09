@@ -43,9 +43,9 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
 
 
         tablesLayout.addComponent(infoPanel);
-        tablesLayout.setExpandRatio(infoPanel, 0.2f);
+        infoPanel.setWidth("200px");
         tablesLayout.addComponent(datePanel);
-        tablesLayout.setExpandRatio(datePanel, 0.8f);
+        tablesLayout.setExpandRatio(datePanel, 1f);
 
         this.addComponent(buttonLayout);
         this.addComponent(tablesLayout);

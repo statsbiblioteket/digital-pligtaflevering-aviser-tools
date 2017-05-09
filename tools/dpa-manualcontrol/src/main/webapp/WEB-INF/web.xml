@@ -87,11 +87,6 @@
             <param-name>UI</param-name>
             <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI</param-value>
         </init-param>
-                <init-param>
-            <description>DPA control</description>
-            <param-name>widgetset</param-name>
-            <param-value>org.statsbiblioteket.digital_pligtaflevering_aviser.ui.AppWidgetSet</param-value>
-        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>DPA Servlet</servlet-name>

@@ -8,13 +8,17 @@ import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryConfirmPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.util.List;
 
 /**
- * Created by mmj on 3/10/17.
+ * Panel for validation of titles, this panel lets the user select a newspaper-title and get a list of all deliveries where this title has been recieved.
+ * The user can validate one delivery at a time until all deliveries of the newspaper has been approved
+ * The information is viewed on this format
+ * Delivery -> Title -> Section -> Pages&articles
  */
 public class DeliveryValidationPanel extends DeliveryMainPanel {
 
@@ -69,6 +73,9 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
 
+    /**
+     * Show the dialog for adding the event "manualDeliveryValidation" to a delivery
+     */
     public void setDone() {
 
         if(!deliveryPanel.isAllChecked()) {
@@ -89,7 +96,7 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
                     DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
-                    item.appendEvent("manualDeliveryValidation", new java.util.Date(), "Validation of manual delivery", "ManualValidationDone", true);
+                    item.appendEvent(StatisticsView.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", StatisticsView.manualCheckEventname, true);
                 }
             }});
 
