@@ -7,10 +7,15 @@
     <metadata>
         <source>verapdf</source>
         <publishdate>20160811</publishdate>
-        <sectionname>kultur</sectionname>
-        <sectionnumber>2</sectionnumber>
-        <pagename>kultur</pagename>
-        <pagenumber>2</pagenumber>
+	<pages>
+	    <page>
+	        <pagefile>1</pagefile>
+                <sectionname>kultur</sectionname>
+                <sectionnumber>2</sectionnumber>
+                <pagename>kultur</pagename>
+                <pagenumber>2</pagenumber>
+             </page>
+	</pages>
         <type>Print</type>
         <links>
             <link>http://www.example.com/test3</link>

@@ -7,10 +7,15 @@
     <metadata>
         <source>testavis</source>
         <publishdate>20160908</publishdate>
+	<pages>
+	    <page>
+	        <pagefile>1</pagefile>
         <sectionname>NYHEDER</sectionname>
         <sectionnumber>1</sectionnumber>
         <pagename>NYHEDER</pagename>
         <pagenumber>2</pagenumber>
+	    </page>
+	</pages>
         <type>Print</type>
         <links>
             <link>http://www.example.com/test5</link>

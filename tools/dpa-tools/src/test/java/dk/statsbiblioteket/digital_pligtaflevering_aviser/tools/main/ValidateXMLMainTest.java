@@ -20,6 +20,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -39,46 +41,41 @@ public class ValidateXMLMainTest {
         xmlValidatorModule = new ValidateXMLMain.ValidateXMLModule();
     }
 
-
     @org.junit.Test
     public void analyzeDeliveriesFolderTest() throws Exception {
 
         String folder = getBatchFolder();
+        boolean[] allOk = new boolean[]{true};
+        List<String> failedFilePaths = new ArrayList<>();
         Files.walk(Paths.get(folder))
                 .filter(p -> p.toString().endsWith(".xml"))
                 .forEach(filePath -> {
-            if (Files.isRegularFile(filePath)) {
-                try {
-                    String xsdName = xmlValidatorModule.getRootTagName(new InputSource(Files.newInputStream(filePath)));
-                    Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
-                    URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
-                    BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
-                    boolean result;
-                    try {
-                        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                        Schema schema = schemaFactory.newSchema(xsdUrl);
-                        Validator validator = schema.newValidator();
-                        validator.validate(new StreamSource(in));
-                        xmlValidatorModule.log.trace("Validation of the xml-content is accepted");
-                        result = true;
-                    } catch (IOException | SAXException e) {
-                        //This exception is not kept since this exception should just result in registrating that the xml is not validate
-                        xmlValidatorModule.log.info("Validation of the xml-content is rejected");
-                        result = false;
+                    if (Files.isRegularFile(filePath)) {
+                        try {
+                            String xsdName = xmlValidatorModule.getRootTagName(new InputSource(Files.newInputStream(filePath)));
+                            Map<String, String> xsdMap = xmlValidatorModule.provideXsdRootMap();
+                            URL xsdUrl = getClass().getClassLoader().getResource(xsdMap.get(xsdName));
+                            BufferedReader in = new BufferedReader(new InputStreamReader(Files.newInputStream(filePath), "UTF8"));
+                            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                            Schema schema = schemaFactory.newSchema(xsdUrl);
+                            Validator validator = schema.newValidator();
+                            validator.validate(new StreamSource(in));
+                            // xmlValidatorModule.log.trace("Validation of the xml-content is accepted");
+                        } catch (Exception e) {
+                            // This exception is not kept since this exception should just result in registrating that the xml is not validate
+                            xmlValidatorModule.log.info("not valid: " + filePath, e);
+                            allOk[0] = false;
+                            failedFilePaths.add(filePath.toString());
+                        }
                     }
-                    assertEquals("Failed Files : " + filePath.toString(), true, result);
-                } catch (Exception e) {
-                    assertEquals(e.getMessage(), true, false);
-                }
-            }
-        });
+                });
+        assertEquals("Failed Files : " + failedFilePaths, true, allOk[0]);
     }
 
     @org.junit.Test
     public void analyzeAcceptedXMLArticleTest() throws Exception {
         assertEquals("Test of approved article", true, validatePath("xmlValidation/articleCorrectTest.xml"));
     }
-
 
     @org.junit.Test
     public void analyzeAcceptedXMLPageTest() throws Exception {
@@ -90,7 +87,6 @@ public class ValidateXMLMainTest {
         assertEquals("Test of failing article", false, validatePath("xmlValidation/articleFailTest.xml"));
     }
 
-
     @org.junit.Test
     public void analyzeFailingXMLPageTest() throws Exception {
         assertEquals("Test of failing page", false, validatePath("xmlValidation/pageFailTest.xml"));
@@ -98,6 +94,7 @@ public class ValidateXMLMainTest {
 
     /**
      * Check wether a path to an xml-file can be validated aganst xsd-files
+     *
      * @param path
      * @return
      * @throws Exception
@@ -121,7 +118,6 @@ public class ValidateXMLMainTest {
             return false;
         }
     }
-
 
     /**
      * Get the folder where the testbatches is located during test in dev-environment
