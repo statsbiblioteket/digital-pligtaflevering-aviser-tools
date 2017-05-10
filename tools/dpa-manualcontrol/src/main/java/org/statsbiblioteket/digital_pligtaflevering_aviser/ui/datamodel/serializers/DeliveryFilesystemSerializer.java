@@ -1,6 +1,5 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
 
@@ -16,7 +15,6 @@ import java.util.Iterator;
  */
 public class DeliveryFilesystemSerializer {
 
-    private ConfigurationMap map;
     private String cashingPath;
 
     public DeliveryFilesystemSerializer(String cashingPath) {

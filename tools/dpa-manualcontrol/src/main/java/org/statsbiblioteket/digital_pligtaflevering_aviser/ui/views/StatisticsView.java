@@ -1,7 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
-import com.sun.jndi.toolkit.url.Uri;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -23,6 +22,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Confirmatio
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
@@ -51,9 +51,6 @@ public class StatisticsView extends VerticalLayout implements View {
     private Link link = new Link("Metadatalink", null);
     private Embedded pdf = new Embedded(null, null);
     private StatisticsPanels tabelsLayout;
-    public static String bitRepoPath;
-    public static String fedoraPath;
-    public static String manualCheckEventname;
     private Page currentSelectedPage;
     private Article currentSelectedArticle;
 
@@ -198,7 +195,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                         pdf.setVisible(false);
 
-                        Resource resource = new ExternalResource(fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
+                        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
                         link.setResource(resource);
                         link.setDescription("Link to Second Page");
                     } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
@@ -207,10 +204,10 @@ public class StatisticsView extends VerticalLayout implements View {
 
                         pdf.setVisible(true);
                         String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
-                        final URI uri = new URI(null, null, bitRepoPath + path + ".pdf", null);
+                        final URI uri = new URI(null, null, NewspaperContextListener.bitRepoPath + path + ".pdf", null);
                         StreamResource streamRecource = createStreamResource(uri);
                         pdf.setSource(streamRecource);
-                        Resource resource = new ExternalResource(fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
+                        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
                         link.setResource(resource);
                         link.setDescription("Link to Second Page");
                     }

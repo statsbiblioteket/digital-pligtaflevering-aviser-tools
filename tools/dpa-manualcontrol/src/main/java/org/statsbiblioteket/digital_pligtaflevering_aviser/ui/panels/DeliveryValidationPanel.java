@@ -6,6 +6,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
@@ -96,7 +97,7 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
                     DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
-                    item.appendEvent(StatisticsView.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", StatisticsView.manualCheckEventname, true);
+                    item.appendEvent(NewspaperContextListener.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", NewspaperContextListener.manualCheckEventname, true);
                 }
             }});
 

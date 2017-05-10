@@ -9,6 +9,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
@@ -26,7 +27,7 @@ import java.util.Set;
 public class DataModel {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private ConfigurationMap map = ConfigurationMapHelper.configurationMapFromProperties("/backend.properties");
+    private ConfigurationMap map = NewspaperContextListener.configurationmap;
     private DomsRepository repository = new RepositoryProvider().apply(map);
 
     //Formatter for naming the cashing folder by the date

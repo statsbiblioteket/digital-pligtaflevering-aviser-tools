@@ -14,7 +14,7 @@
 
     <listener>
         <listener-class>
-            dk.statsbiblioteket.sbutil.webservices.configuration.ConfigContextListener
+            org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener
         </listener-class>
     </listener>
 
@@ -60,23 +60,6 @@
         <filter-name>CAS Assertion Thread Local Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-    <context-param>
-        <param-name>casServerUrlPrefix</param-name>
-        <param-value>https://samling.statsbiblioteket.dk/casinternal/</param-value>
-    </context-param>
-    <context-param>
-        <param-name>casServerLoginUrl</param-name>
-        <param-value>https://samling.statsbiblioteket.dk/casinternal/</param-value>
-    </context-param>
-    <context-param>
-        <param-name>service</param-name>
-        <param-value>http://localhost:8080/dpa_manual/VAADIN;mode=manualvalidate</param-value>
-    </context-param>
-    <context-param>
-        <param-name>serverName</param-name>
-        <param-value>localhost</param-value>
-    </context-param>
     <!--End of CAS filter -->
 
     <servlet>
