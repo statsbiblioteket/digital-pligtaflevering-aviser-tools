@@ -7,10 +7,15 @@
     <metadata>
         <source>testavis</source>
         <publishdate>20160913</publishdate>
-        <sectionname>kultur</sectionname>
-        <sectionnumber>2</sectionnumber>
-        <pagename>kultur</pagename>
-        <pagenumber>2</pagenumber>
+        <pages>
+            <page>
+                <pagefile>1</pagefile>
+                <sectionname>kultur</sectionname>
+                <sectionnumber>2</sectionnumber>
+                <pagename>kultur</pagename>
+                <pagenumber>2</pagenumber>
+            </page>
+        </pages>
         <type>Print</type>
         <links>
             <link>http://www.example.com/test2</link>
@@ -34,6 +39,7 @@
             mauris. Quisque id porttitor turpis. Proin malesuada hendrerit sollicitudin.
             Proin ac est ac arcu blandit cursus in ut urna. Sed eget turpis id nunc blandit
             condimentum. Etiam at libero quis tortor iaculis maximus eget non mi. Integer
-            in auctor ipsum.</bodytext>
+            in auctor ipsum.
+        </bodytext>
     </content>
 </article>
