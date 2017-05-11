@@ -14,7 +14,7 @@ import java.util.List;
  * The information is viewed on this format
  * Title -> Delivery -> Section -> Pages&articles
  */
-public class TitleValidationPanel extends DeliveryMainPanel {
+public class TitleValidationPanel extends DeliveryPanel {
 
     protected SingleStringListPanel infoPanel = new SingleStringListPanel();
 
@@ -53,11 +53,10 @@ public class TitleValidationPanel extends DeliveryMainPanel {
         super.initialLayout();
     }
 
-    public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-        fileSelectionPanel.addItemClickListener(listener);
-        articleSelectionPanel.addItemClickListener(listener);
-    }
-
+    /**
+     * Insert titles into first table
+     * @throws Exception
+     */
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }

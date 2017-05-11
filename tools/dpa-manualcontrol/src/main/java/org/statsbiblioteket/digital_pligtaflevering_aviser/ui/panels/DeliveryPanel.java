@@ -30,25 +30,31 @@ import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.T
  * This is the format it is stored on fedora:
  * Delivery -> Title -> Section -> Pages&articles
  */
-public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanels {
+public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
+
+    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"};
+    private static String[] sectionColumns = new String[]{"sectionName", "sectionNumber", "pageCount"};
+    private static String[] fileColumns = new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"};
+    private static String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
+
     protected DataModel model;
 
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"}, "DELIVERY", true);
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, new String[]{"sectionName", "sectionNumber", "pageCount"}, "SECTION", true);//
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"}, "PAGE", true);//
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"}, "ARTICLE", false);
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true);//
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true);//
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
 
     /**
      * Construct the panel with a reference to the datamodel
      * @param model
      */
-    public DeliveryMainPanel(DataModel model) {
+    public DeliveryPanel(DataModel model) {
         this.model = model;
         tablesLayout.setWidth("100%");
 
@@ -175,7 +181,9 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
      */
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
+        articleSelectionPanel.addItemClickListener(listener);
     }
+
 
     public void insertInitialTableValues() throws Exception {
 
@@ -204,21 +212,19 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
 
-                    //selectedDelivery.
                     boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
                             storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
 
                     if(!writeResult) {
-                        Notification.show("The result can not get stored", Notification.Type.ERROR_MESSAGE);
+                        Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
                     }
 
                 }
             }});
 
         dialog.addCloseListener(new Window.CloseListener() {
-            // inline close-listener
+            //This event gets called when the dialog is closed
             public void windowClose(Window.CloseEvent e) {
-
                 UI.getCurrent().removeWindow(dialog);
             }
         });
@@ -229,6 +235,7 @@ public class DeliveryMainPanel extends VerticalLayout implements StatisticsPanel
             try {
                 insertInitialTableValues();
             } catch (Exception e) {
+                Notification.show("The tables contains invalid data, please contact support", Notification.Type.ERROR_MESSAGE);
                 log.error(e.getMessage(), e);
             }
             showTheSelectedTitle(true);

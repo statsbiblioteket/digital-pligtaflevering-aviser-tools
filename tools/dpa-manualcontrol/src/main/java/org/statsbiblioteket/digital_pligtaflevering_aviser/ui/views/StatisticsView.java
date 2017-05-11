@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
+import com.google.gwt.http.client.URL;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -48,8 +49,8 @@ public class StatisticsView extends VerticalLayout implements View {
 
     private SearchPanel searchPanel = new SearchPanel();
     private DataModel model;
-    private Link link = new Link("Metadatalink", null);
-    private Embedded pdf = new Embedded(null, null);
+    private Link metadatalink = new Link("Metadatalink", null);
+    private Embedded pdfComponent = new Embedded(null, null);
     private StatisticsPanels tabelsLayout;
     private Page currentSelectedPage;
     private Article currentSelectedArticle;
@@ -62,9 +63,9 @@ public class StatisticsView extends VerticalLayout implements View {
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
 
-        pdf.setMimeType("application/pdf");
-        pdf.setType(Embedded.TYPE_BROWSER);
-        link.setTargetName("_blank");
+        pdfComponent.setMimeType("application/pdf");
+        pdfComponent.setType(Embedded.TYPE_BROWSER);
+        metadatalink.setTargetName("_blank");
 
         MenuBar.Command configCommand = new MenuBar.Command() {
             public void menuSelected(MenuBar.MenuItem selectedItem) {
@@ -114,15 +115,16 @@ public class StatisticsView extends VerticalLayout implements View {
 
 
         int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+        //The UI is optimized to run on iither a small or large screen,
         if(browserWidth>1800) {
             mainhlayout = new HorizontalLayout();
-            pdf.setWidth("900px");
-            pdf.setHeight("1200px");
+            pdfComponent.setWidth("900px");
+            pdfComponent.setHeight("1200px");
             tabelsLayout.setHeight("1200px");
         } else {
             mainhlayout = new VerticalLayout();
-            pdf.setWidth("500px");
-            pdf.setHeight("750px");
+            pdfComponent.setWidth("500px");
+            pdfComponent.setHeight("750px");
         }
 
 
@@ -173,10 +175,11 @@ public class StatisticsView extends VerticalLayout implements View {
                                 "title=" + model.getSelectedTitle();
 
                         URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery, oldUri.getFragment());
-                        searchPanel.setLabel(newUri.toString());
+                        searchPanel.setLabel(URL.encode(newUri.toURL().toString()));
                     }
 
                 } catch (Exception e) {
+                    Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                     log.error(e.getMessage(), e);
                 }
 
@@ -193,27 +196,28 @@ public class StatisticsView extends VerticalLayout implements View {
                         currentSelectedArticle = (Article) itemClickEvent.getItemId();
                         currentSelectedPage = null;
 
-                        pdf.setVisible(false);
+                        pdfComponent.setVisible(false);
 
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
-                        link.setResource(resource);
-                        link.setDescription("Link to Second Page");
+                        metadatalink.setResource(resource);
+                        metadatalink.setDescription("Link to Second Page");
                     } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
                         currentSelectedPage = (Page) itemClickEvent.getItemId();
                         currentSelectedArticle = null;
 
-                        pdf.setVisible(true);
+                        pdfComponent.setVisible(true);
                         String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
                         final URI uri = new URI(null, null, NewspaperContextListener.bitRepoPath + path + ".pdf", null);
                         StreamResource streamRecource = createStreamResource(uri);
-                        pdf.setSource(streamRecource);
+                        pdfComponent.setSource(streamRecource);
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
-                        link.setResource(resource);
-                        link.setDescription("Link to Second Page");
+                        metadatalink.setResource(resource);
+                        metadatalink.setDescription("Link to Second Page");
                     }
 
 
                 } catch (Exception e) {
+                    Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                     log.error(e.getMessage(), e);
                 }
             }
@@ -261,10 +265,10 @@ public class StatisticsView extends VerticalLayout implements View {
 
         viewControlLayout.addComponent(confirmViewButton);
         viewControlLayout.addComponent(rejectViewButton);
-        viewControlLayout.addComponent(link);
+        viewControlLayout.addComponent(metadatalink);
 
         viewLayout.addComponent(viewControlLayout);
-        viewLayout.addComponent(pdf);
+        viewLayout.addComponent(pdfComponent);
 
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
@@ -276,13 +280,13 @@ public class StatisticsView extends VerticalLayout implements View {
      * @param prepare
      */
     private void panelPrepare(boolean prepare) {
-        pdf.setVisible(prepare);
-        link.setVisible(prepare);
+        pdfComponent.setVisible(prepare);
+        metadatalink.setVisible(prepare);
         tabelsLayout.setVisible(prepare);
     }
 
     /**
-     * Convert the URI to the pdf-file into a StremaRecource for viewing in UI
+     * Convert the URI to the pdfComponent-file into a StremaRecource for viewing in UI
      * @param uri
      * @return
      * @throws Exception
@@ -300,7 +304,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
                 }
             }
-        }, "pages.pdf"  );
+        }, "pages.pdf"  );//Pagename is needed in order for the stream to know it is a pdf
         resource.setMIMEType("application/pdf");
         resource.setCacheTime(1000);
         return resource;

@@ -9,7 +9,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryConfirmPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
@@ -21,7 +20,7 @@ import java.util.List;
  * The information is viewed on this format
  * Delivery -> Title -> Section -> Pages&articles
  */
-public class DeliveryValidationPanel extends DeliveryMainPanel {
+public class DeliveryValidationPanel extends DeliveryPanel {
 
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
@@ -69,7 +68,10 @@ public class DeliveryValidationPanel extends DeliveryMainPanel {
     }
 
 
-
+    /**
+     * Insert deliveries into first table
+     * @throws Exception
+     */
     public void insertInitialTableValues()  {
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
