@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 /**
  * Helper-class for serializing objects between datamodel and fedora
  */
-public class DeliveryFedoraSerializer {
+public class DeliveryFedoraCommunication {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private static String itemType;
@@ -51,7 +51,7 @@ public class DeliveryFedoraSerializer {
     private DomsModule domsModule = new DomsModule();
     private DomsRepository repository;
 
-    public DeliveryFedoraSerializer(String itemType, String pastEvents, String thisEvent, DomsRepository repository) {
+    public DeliveryFedoraCommunication(String itemType, String pastEvents, String thisEvent, DomsRepository repository) {
         this.itemType = itemType;
         this.pastEvents = pastEvents;
         this.thisEvent = thisEvent;
@@ -63,13 +63,13 @@ public class DeliveryFedoraSerializer {
      * @param eventStatus
      * @param deliveryFilter
      */
-    public void initiateDeliveries(DeliveryFedoraSerializer.EventStatus eventStatus, String deliveryFilter) {
+    public void initiateDeliveries(DeliveryFedoraCommunication.EventStatus eventStatus, String deliveryFilter) {
         deliveryList.clear();
         Stream<DomsItem> items = null;
 
         switch(eventStatus) {
             case READYFORMANUALCHECK:
-                items = getReadyForMaual(deliveryFilter);
+                items = getReadyForManual(deliveryFilter);
                 break;
             case DONEMANUALCHECK:
                 items = getDoneManual(deliveryFilter);
@@ -89,14 +89,14 @@ public class DeliveryFedoraSerializer {
      * @param deliveryFilter
      * @return
      */
-    public Stream<DomsItem> getReadyForMaual(String deliveryFilter) {
+    public Stream<DomsItem> getReadyForManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 pastEvents, thisEvent, "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
     /**
-     * Get a list of deliveries, which is has allready added an event that manual inspections has been done
+     * Get a list of deliveries, which is has already added an event that manual inspections has been done
      * @param deliveryFilter
      * @return
      */
@@ -174,11 +174,11 @@ public class DeliveryFedoraSerializer {
                     .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
                     .findAny();
 
-
+            //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
             if (profileOptional.isPresent()) {
 
                 DomsDatastream ds = profileOptional.get();
-                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                //We are reading this textstring as a String and are aware that this might lead to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
 
@@ -291,6 +291,8 @@ public class DeliveryFedoraSerializer {
             DomsItem titleItem = titleSubfolder.next();
             String itemPath = titleItem.getPath();
 
+            //path:dl_20160811_rt1/verapdf
+            //Find the title part of the path
             if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
                 selectedTitleItem = titleItem;
                 final List<DomsDatastream> datastreams = selectedTitleItem.datastreams();
@@ -317,7 +319,11 @@ public class DeliveryFedoraSerializer {
         return false;
     }
 
+    /**
+     * Enums for different types of fetch to fedora
+     */
     public enum EventStatus {
-        READYFORMANUALCHECK, DONEMANUALCHECK;
+        READYFORMANUALCHECK, // Get deliveries that is ready for manual check
+        DONEMANUALCHECK; // Get deliveries including deliveries where the manual check is done
     }
 }

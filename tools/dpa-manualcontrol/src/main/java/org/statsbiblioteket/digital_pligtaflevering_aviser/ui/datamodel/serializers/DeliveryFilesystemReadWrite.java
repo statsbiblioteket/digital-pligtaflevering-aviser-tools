@@ -12,13 +12,14 @@ import java.util.Iterator;
 /**
  * Serialize objects into files on the local filesystem.
  * This functionality can be used to optimize performance on the server by streaming the objects in a format that is used in the dayly use of the server.
+ * The streaming to the filesystem is done to improve performance especially when quickly finding a title in a delivery
  */
-public class DeliveryFilesystemSerializer {
+public class DeliveryFilesystemReadWrite {
 
-    private String cashingPath;
+    private String cachingPath;
 
-    public DeliveryFilesystemSerializer(String cashingPath) {
-        this.cashingPath = cashingPath;
+    public DeliveryFilesystemReadWrite(String cashingPath) {
+        this.cachingPath = cashingPath;
     }
 
     /**
@@ -27,7 +28,7 @@ public class DeliveryFilesystemSerializer {
      * @return
      */
     public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
-        String currentFolder = cashingPath + currentlySelectedMonth;
+        String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         return folderForThis.exists();
     }
@@ -41,7 +42,7 @@ public class DeliveryFilesystemSerializer {
     public TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
         TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
 
-        String currentFolder = cashingPath + currentlySelectedMonth;
+        String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             return null;
@@ -71,7 +72,7 @@ public class DeliveryFilesystemSerializer {
      */
     public synchronized boolean saveDeliveryToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = cashingPath + currentlySelectedMonth;
+        String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         if (!folderForThis.exists()) {
             folderForThis.mkdir();
@@ -108,7 +109,7 @@ public class DeliveryFilesystemSerializer {
      */
     public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryTitleInfo currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = cashingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
+        String currentFolder = cachingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -126,7 +127,7 @@ public class DeliveryFilesystemSerializer {
      * @throws Exception
      */
     public void removeDeliveryFromFilesystem(String folderForThisXml, String deliveryName, String titleName) throws Exception {
-        File currentFile = new File(cashingPath + folderForThisXml +"/" + deliveryName + "_" + titleName + ".xml");
+        File currentFile = new File(cachingPath + folderForThisXml +"/" + deliveryName + "_" + titleName + ".xml");
         currentFile.delete();
     }
 }

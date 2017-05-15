@@ -3,15 +3,14 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraSerializer;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemSerializer;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraCommunication;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemReadWrite;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
 import java.text.ParseException;
@@ -41,14 +40,14 @@ public class DataModel {
     private String currentlySelectedMonth;
     private TitleDeliveryHierachy currentlySelectedTitleHiearachy;
 
-    private DeliveryFilesystemSerializer filesystemSerializer;
+    private DeliveryFilesystemReadWrite filesystemReadWrite;
 
-    private DeliveryFedoraSerializer fedoraSerializer;
+    private DeliveryFedoraCommunication fedoraCommunication;
 
     public DataModel() {
         String cashingPath = map.getRequired("dpa.manualcontrol.cashingfolder");
-        filesystemSerializer = new DeliveryFilesystemSerializer(cashingPath);
-        fedoraSerializer = new DeliveryFedoraSerializer(map.getRequired("autonomous.itemTypes"),
+        filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingPath);
+        fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
                 map.getRequired("autonomous.pastSuccessfulEvents"),
                 map.getRequired("autonomous.thisEvent"),
                 repository);
@@ -181,11 +180,11 @@ public class DataModel {
      * Initiate the list of deliveries which is currently beeing in operation
      */
     public void initiateDeliveries() {
-        DeliveryFedoraSerializer.EventStatus evtStatus = DeliveryFedoraSerializer.EventStatus.READYFORMANUALCHECK;
+        DeliveryFedoraCommunication.EventStatus evtStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
         if(this.includeValidatedDeliveries) {
-            evtStatus = DeliveryFedoraSerializer.EventStatus.DONEMANUALCHECK;
+            evtStatus = DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK;
         }
-        fedoraSerializer.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
+        fedoraCommunication.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
     }
 
     /**
@@ -201,8 +200,8 @@ public class DataModel {
     public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         try {
             DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
-            filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
-            return fedoraSerializer.writeDeliveryToFedora(deli);
+            filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
+            return fedoraCommunication.writeDeliveryToFedora(deli);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -214,7 +213,7 @@ public class DataModel {
      * @throws Exception
      */
     public void removeCurrentSelectedTitleInDelivery() throws Exception {
-        filesystemSerializer.removeDeliveryFromFilesystem(currentlySelectedMonth, selectedDelivery, selectedTitle);
+        filesystemReadWrite.removeDeliveryFromFilesystem(currentlySelectedMonth, selectedDelivery, selectedTitle);
     }
 
     /**
@@ -224,7 +223,7 @@ public class DataModel {
      * @return
      */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
-        return fedoraSerializer.getTitleObj(selectedDelivery, selectedTitle);
+        return fedoraCommunication.getTitleObj(selectedDelivery, selectedTitle);
     }
 
     /**
@@ -233,7 +232,7 @@ public class DataModel {
      * @return
      */
     public DomsItem getItemFromUuid(String id) {
-        return fedoraSerializer.getItemFromUuid(id);
+        return fedoraCommunication.getItemFromUuid(id);
     }
 
     /**
@@ -241,7 +240,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFedora() throws Exception {
-        currentlySelectedTitleHiearachy = fedoraSerializer.getTitleHierachyFromFedora();
+        currentlySelectedTitleHiearachy = fedoraCommunication.getTitleHierachyFromFedora();
     }
 
     /**
@@ -249,7 +248,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
-        currentlySelectedTitleHiearachy = filesystemSerializer.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
+        currentlySelectedTitleHiearachy = filesystemReadWrite.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
     /**
@@ -277,13 +276,21 @@ public class DataModel {
         }
     }
 
+    /**
+     * Get the currently selected month as a string
+     * @return
+     */
     public String getSelectedMonthString() {
         return currentlySelectedMonth;
     }
 
-
+    /**
+     * Save the hierachy of titles and deliveries to the filesystem
+     * @return
+     * @throws Exception
+     */
     public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
-        return filesystemSerializer.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+        return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
     }
 
     /**
@@ -291,7 +298,7 @@ public class DataModel {
      * @return
      */
     public boolean isMonthInitiated() {
-        return filesystemSerializer.isMonthInitiated(currentlySelectedMonth);
+        return filesystemReadWrite.isMonthInitiated(currentlySelectedMonth);
     }
 
     /**
@@ -300,7 +307,7 @@ public class DataModel {
      * @return
      */
     public DomsItem getDeliveryFromName(String name) {
-        return fedoraSerializer.getDeliveryFromName(name);
+        return fedoraCommunication.getDeliveryFromName(name);
     }
 
     /**
@@ -308,7 +315,7 @@ public class DataModel {
      * @return
      */
     public Set<String> getInitiatedDeliveries() {
-        return fedoraSerializer.getInitiatedDeliveries();
+        return fedoraCommunication.getInitiatedDeliveries();
     }
 
 }
