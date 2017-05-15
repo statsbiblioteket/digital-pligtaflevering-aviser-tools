@@ -196,6 +196,12 @@
                                     </mainClass>
                                     <id>dpa-validate-xml</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.GenerateStatisticsMain
+                                    </mainClass>
+                                    <id>dpa-generate-statistics</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
