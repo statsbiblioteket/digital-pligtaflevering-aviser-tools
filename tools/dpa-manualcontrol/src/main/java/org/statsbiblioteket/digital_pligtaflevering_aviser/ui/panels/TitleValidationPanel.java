@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class TitleValidationPanel extends DeliveryPanel {
 
-    protected SingleStringListPanel infoPanel = new SingleStringListPanel();
+    protected SingleStringListPanel infoPanel = new SingleStringListPanel("Title");
 
     public TitleValidationPanel(DataModel model) {
         super(model);
@@ -25,7 +25,7 @@ public class TitleValidationPanel extends DeliveryPanel {
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("Item").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("Title").getValue();
                 String selectedTitle = page.toString();
 
                 model.setSelectedTitle(selectedTitle);

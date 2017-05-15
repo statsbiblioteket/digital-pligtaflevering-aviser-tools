@@ -23,7 +23,7 @@ public class MissingItemTable extends VerticalLayout {
 
     private HorizontalLayout hl = new HorizontalLayout();
 
-    private Button add = new Button("Add to table");
+    private Button add = new Button("Add to missing table");
     private TextField type = new TextField();
     private TextField name = new TextField();
 
@@ -51,8 +51,8 @@ public class MissingItemTable extends VerticalLayout {
         hl.addComponent(add);
         hl.addComponent(type);
         hl.addComponent(name);
-        this.addComponent(hl);
         this.addComponent(table);
+        this.addComponent(hl);
     }
 
     public void setInfo(List<MissingItem> items) {

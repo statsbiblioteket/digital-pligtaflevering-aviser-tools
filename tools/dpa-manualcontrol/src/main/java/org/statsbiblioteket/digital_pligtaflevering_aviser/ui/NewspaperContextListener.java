@@ -22,7 +22,6 @@ public class NewspaperContextListener implements ServletContextListener {
     public static final String AUTONOMOUS_THIS_EVENT = "autonomous.thisEvent";
 
     public static ConfigurationMap configurationmap = new ConfigurationMap(new HashMap<>());
-    public static String bitRepoPath;
     public static String fedoraPath;
     public static String manualCheckEventname;
 
@@ -37,7 +36,6 @@ public class NewspaperContextListener implements ServletContextListener {
         }
         configurationmap = new ConfigurationMap(attributeMap);
         fedoraPath = configurationmap.getRequired(DOMS_URL) + "/objects/";
-        bitRepoPath = configurationmap.getRequired(IngesterConfiguration.BITMAG_BASEURL_PROPERTY) + "var/file1pillar/files/dpaviser/folderDir/";
         manualCheckEventname = configurationmap.getRequired(AUTONOMOUS_THIS_EVENT);
     }
 

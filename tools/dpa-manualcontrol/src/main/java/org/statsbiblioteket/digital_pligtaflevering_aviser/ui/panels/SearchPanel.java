@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -11,13 +12,14 @@ import java.util.Date;
  * Panel for handling searching of values for checkings
  */
 public class SearchPanel extends HorizontalLayout {
+    private HorizontalLayout controlLayout = new HorizontalLayout();
 
     private DateField startDf = new DateField();
 
     private Button prepareButton = new Button("Prepare month");
-    private Button storeTitlesButton = new Button("Initiate");
+    private Button storeTitlesButton = new Button("Start");
     private Button getLink = new Button("Get link");
-    private Label info = new Label();
+    private Label info = new Label("");
 
     public SearchPanel() {
 
@@ -28,11 +30,16 @@ public class SearchPanel extends HorizontalLayout {
         startDf.setResolution(Resolution.MONTH);
         startDf.setValue(new Date());
 
-        this.addComponent(startDf);
-        this.addComponent(prepareButton);
-        this.addComponent(storeTitlesButton);
-        this.addComponent(getLink);
+        controlLayout.addComponent(startDf);
+        controlLayout.addComponent(prepareButton);
+        controlLayout.addComponent(storeTitlesButton);
+
+        this.addComponent(controlLayout);
+        this.setComponentAlignment(controlLayout, Alignment.MIDDLE_LEFT);
         this.addComponent(info);
+        this.addComponent(getLink);
+        this.setComponentAlignment(getLink, Alignment.MIDDLE_RIGHT);
+        this.setWidth("100%");
     }
 
     /**

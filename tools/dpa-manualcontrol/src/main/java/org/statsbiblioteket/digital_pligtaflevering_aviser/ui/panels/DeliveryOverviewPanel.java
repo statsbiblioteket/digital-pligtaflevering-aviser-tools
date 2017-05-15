@@ -18,7 +18,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     private DataModel model;
     private HorizontalLayout tablesLayout = new HorizontalLayout();
     private HorizontalLayout buttonLayout = new HorizontalLayout();
-    private SingleStringListPanel infoPanel = new SingleStringListPanel();
+    private SingleStringListPanel infoPanel = new SingleStringListPanel("Title");
     private DatePanel datePanel = new DatePanel();
 
     /**
@@ -31,7 +31,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("Item").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("Title").getValue();
                 String selectedTitle = page.toString();
 
                 model.setSelectedTitle(selectedTitle);

@@ -18,6 +18,8 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
@@ -60,6 +62,7 @@ public class StatisticsView extends VerticalLayout implements View {
         this.model = model;
         MenuBar header = new MenuBar();
         header.setWidth("100%");
+        searchPanel.setWidth("100%");
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
 
@@ -175,7 +178,7 @@ public class StatisticsView extends VerticalLayout implements View {
                                 "title=" + model.getSelectedTitle();
 
                         URI newUri = new URI(oldUri.getScheme(), oldUri.getAuthority(), oldUri.getPath(), newQuery, oldUri.getFragment());
-                        searchPanel.setLabel(URL.encode(newUri.toURL().toString()));
+                        searchPanel.setLabel(newUri.toURL().toString());
                     }
 
                 } catch (Exception e) {
@@ -206,9 +209,10 @@ public class StatisticsView extends VerticalLayout implements View {
                         currentSelectedArticle = null;
 
                         pdfComponent.setVisible(true);
-                        String path = model.getItemFromUuid(currentSelectedPage.getId()).getPath();
-                        final URI uri = new URI(null, null, NewspaperContextListener.bitRepoPath + path + ".pdf", null);
-                        StreamResource streamRecource = createStreamResource(uri);
+                        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.getId()).children().findFirst().get();
+                        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+                        java.net.URL url = new java.net.URL(pdfStream.getUrl());
+                        StreamResource streamRecource = createStreamResource(url);
                         pdfComponent.setSource(streamRecource);
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
                         metadatalink.setResource(resource);
@@ -287,17 +291,17 @@ public class StatisticsView extends VerticalLayout implements View {
 
     /**
      * Convert the URI to the pdfComponent-file into a StremaRecource for viewing in UI
-     * @param uri
+     * @param url
      * @return
      * @throws Exception
      */
-    private synchronized StreamResource createStreamResource(final URI uri) throws Exception {
+    private synchronized StreamResource createStreamResource(final java.net.URL url) throws Exception {
 
         final StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 try {
-                    InputStream inps = uri.toURL().openStream();
+                    InputStream inps = url.openStream();
                     return inps;
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);

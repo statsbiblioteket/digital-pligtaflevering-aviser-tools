@@ -12,15 +12,16 @@ import java.util.Collection;
  */
 public class SingleStringListPanel extends VerticalLayout {
 
+    private String columnName;
     private CheckBox checkbox = new CheckBox("Visible", true);
     private Table table;
 
-    public SingleStringListPanel() {
-
+    public SingleStringListPanel(String columnName) {
+        this.columnName = columnName;
         checkbox.setEnabled(false);
         // Bind a table to it
         table = new Table("List");
-        table.addContainerProperty("Item", String.class, null);
+        table.addContainerProperty(this.columnName, String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");
         table.setSelectable(true);
@@ -38,9 +39,9 @@ public class SingleStringListPanel extends VerticalLayout {
         for(String item : list) {
             Object newItemId = table.addItem();
             com.vaadin.data.Item row1 = table.getItem(newItemId);
-            row1.getItemProperty("Item").setValue(item);
+            row1.getItemProperty(this.columnName).setValue(item);
         }
-        table.setSortContainerPropertyId("Item");
+        table.setSortContainerPropertyId(this.columnName);
         table.sort();
     }
 

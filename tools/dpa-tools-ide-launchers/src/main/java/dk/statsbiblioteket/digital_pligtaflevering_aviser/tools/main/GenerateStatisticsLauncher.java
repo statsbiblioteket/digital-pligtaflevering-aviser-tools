@@ -1,8 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 /**
- * Developer class for stating the class ValidateXMLMain
- * This is used for initiating the process of validating all xml that has been ingested into fedora.
+ * Developer class for starting the class GenerateStatisticsMain
+ * This is used for initiating the process of generating statistics of the content in a delivery.
  */
 public class GenerateStatisticsLauncher {
 

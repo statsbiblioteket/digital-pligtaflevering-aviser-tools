@@ -34,7 +34,7 @@ public class ResultStorePanel extends VerticalLayout {
         this.setSpacing(true);
         pageBeans=new BeanItemContainer(Page.class);
         // Bind a table to it
-        pageTable = new Table("Approved", pageBeans);
+        pageTable = new Table("checked pages", pageBeans);
         pageTable.setWidth("100%");
         pageTable.setHeight("150px");
         pageTable.setSelectable(true);
@@ -43,7 +43,7 @@ public class ResultStorePanel extends VerticalLayout {
 
         articleBeans=new BeanItemContainer(Article.class);
         // Bind a table to it
-        articleTable = new Table("Approved", articleBeans);
+        articleTable = new Table("checked articles", articleBeans);
         articleTable.setWidth("100%");
         articleTable.setHeight("150px");
         articleTable.setSelectable(true);
