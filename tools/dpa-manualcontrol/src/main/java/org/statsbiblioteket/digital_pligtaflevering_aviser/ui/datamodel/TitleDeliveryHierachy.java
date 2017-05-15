@@ -82,7 +82,10 @@ public class TitleDeliveryHierachy {
                 .filter(bob -> (bob.getDeliveryName().equals(delivery) && bob.getNewspaperTitle().equals(title))).findFirst().get();
     }
 
-
+    /**
+     * Get all titles available in the deliveries
+     * @return
+     */
     public List<String> getAllTitles() {
         List<DeliveryTitleInfo> deliveryTitleList = deliveryStructure.stream()
                 .filter(distinctByKey(p -> p.getNewspaperTitle())).collect(Collectors.toList());

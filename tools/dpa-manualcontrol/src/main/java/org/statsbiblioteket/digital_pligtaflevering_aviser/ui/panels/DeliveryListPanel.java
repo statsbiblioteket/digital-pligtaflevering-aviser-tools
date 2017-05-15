@@ -3,6 +3,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -63,6 +64,7 @@ public class DeliveryListPanel extends VerticalLayout {
             try {
                 row1.getItemProperty("Date").setValue(UiDataConverter.getDateFromDeliveryItemDirectoryName(item));
             } catch (ParseException e) {
+                Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                 log.error(e.getMessage(), e);
             }
             row1.getItemProperty("Name").setValue(item);

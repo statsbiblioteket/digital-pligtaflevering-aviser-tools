@@ -1,7 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
-import com.google.gwt.http.client.URL;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -304,6 +303,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     InputStream inps = url.openStream();
                     return inps;
                 } catch (Exception e) {
+                    Notification.show("The application can not read the pdf-file", Notification.Type.WARNING_MESSAGE);
                     log.error(e.getMessage(), e);
                     return null;
                 }

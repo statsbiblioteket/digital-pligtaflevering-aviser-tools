@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -21,6 +22,7 @@ public class ConfigPanel extends DeliveryValidationPanel {
                 try {
                     model.removeCurrentSelectedTitleInDelivery();
                 } catch (Exception e) {
+                    Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                     log.error(e.getMessage(), e);
                 }
             }});

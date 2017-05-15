@@ -100,6 +100,7 @@ public class DatePanel extends VerticalLayout {
                 }
 
             } catch (ParseException e) {
+                //Handling of perserexception is done by storing unparsable info to the panel for unmappable values.
                 unmappableValues = unmappableValues.concat(item.getDeliveryName());
                 log.error(e.getMessage(), e);
             }
