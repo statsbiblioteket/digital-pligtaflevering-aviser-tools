@@ -44,6 +44,12 @@ public class UiDataConverter {
         }
     }
 
+    /**
+     * Return a datematcher from the pattern defined by deliveries from Infomedia
+     * @param deliveryItemDirectoryName
+     * @return
+     * @throws ParseException
+     */
     public static synchronized Matcher getPatternMatcher(String deliveryItemDirectoryName) throws ParseException {
         Matcher matcher = deliveryPattern.matcher(deliveryItemDirectoryName);
         return matcher;
@@ -58,10 +64,10 @@ public class UiDataConverter {
     public static synchronized Map sectionConverter(List<Page> pageList) {
 
         Map<String, List<Page>> grouped = pageList.stream().collect(Collectors.groupingBy(pageItem -> pageItem.getSectionNumber()));
-        HashMap<String, TitleComponent> hset = new HashMap<String, TitleComponent>();
+        Map<String, TitleComponent> titleComponentList = new HashMap<String, TitleComponent>();
         for(List<Page> groupedPageList : grouped.values()) {
-            hset.put(groupedPageList.get(0).getSectionNumber(), new TitleComponent(groupedPageList.get(0).getSectionName(), groupedPageList.get(0).getSectionNumber(), groupedPageList.size()));
+            titleComponentList.put(groupedPageList.get(0).getSectionNumber(), new TitleComponent(groupedPageList.get(0).getSectionName(), groupedPageList.get(0).getSectionNumber(), groupedPageList.size()));
         }
-        return hset;
+        return titleComponentList;
     }
 }
