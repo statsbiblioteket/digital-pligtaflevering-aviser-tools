@@ -31,7 +31,7 @@ public class DeliveryListPanel extends VerticalLayout {
 
         checkbox.setEnabled(false);
         // Bind a table to it
-        table = new Table("Deliveries");
+        table = new Table("Unconfirmed deliveries");
 
         table.addContainerProperty("Date", Date.class, null);
         table.addContainerProperty("Name", String.class, null);

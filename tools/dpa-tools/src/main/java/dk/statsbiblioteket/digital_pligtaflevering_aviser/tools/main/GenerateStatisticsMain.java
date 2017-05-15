@@ -79,9 +79,12 @@ public class GenerateStatisticsMain {
             return domsItem -> {
                 DomsParser parser = new DomsParser();
                 String deliveryName = domsItem.getPath();
-                long startDeliveryIngestTime = System.currentTimeMillis();
-                log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
+                long startDeliveryStatTime = System.currentTimeMillis();
+                log.info(KibanaLoggingStrings.START_GENERATE_STATISTICS, deliveryName);
                 DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(domsItem);
+                if(deliveryStatistics == null) {
+                    return ToolResult.fail(domsItem, "The statistics which should be generated from the delivery could not get generated");
+                }
                 byte[] statisticsStream = parser.processDeliveryStatisticsToBytestream().apply(deliveryStatistics);
                 String settingDate = new java.util.Date().toString();
 
@@ -95,6 +98,9 @@ public class GenerateStatisticsMain {
                         "text/xml",
                         null,
                         null);
+
+                long finishedDeliveryStatTime = System.currentTimeMillis();
+                log.info(KibanaLoggingStrings.FINISHED_GENERATE_STATISTICS, deliveryName, finishedDeliveryStatTime - startDeliveryStatTime);
 
                 if (statisticsStream != null) {
                     return ToolResult.ok(domsItem, settingDate);

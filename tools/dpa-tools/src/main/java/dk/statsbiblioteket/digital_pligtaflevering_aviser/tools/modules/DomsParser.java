@@ -132,6 +132,15 @@ public class DomsParser {
         return sectionName;
     }
 
+    /**
+     * Find the sectionNumber inside a document
+     * @param xmlDocument
+     * @return
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     * @throws XPathExpressionException
+     */
     public String getSectionNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
@@ -140,6 +149,15 @@ public class DomsParser {
         return sectionName;
     }
 
+    /**
+     * Find the pagename inside a document
+     * @param xmlDocument
+     * @return
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     * @throws XPathExpressionException
+     */
     public String getPageNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
