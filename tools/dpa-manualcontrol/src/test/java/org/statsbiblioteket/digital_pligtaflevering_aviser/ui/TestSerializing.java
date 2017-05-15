@@ -16,6 +16,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,7 +53,7 @@ public class TestSerializing {
 
         DeliveryTitleInfo deliveryTitleInfo = new DeliveryTitleInfo("dl_11111111", "test", 5, 7);
 
-        File tempFile = new File("/tmp",  "MarshalUnmarshalDeliveryTitle.xml");
+        File tempFile = createTestFile("MarshalUnmarshalDeliveryTitle");
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
@@ -64,7 +65,7 @@ public class TestSerializing {
         assertEquals(deliveryTitleInfo.getNoOfArticles(), 5);
         assertEquals(deliveryTitleInfo.getNoOfPages(), 7);
 
-        InputStream is = new FileInputStream("/tmp/MarshalUnmarshalDeliveryTitle.xml");
+        InputStream is = new FileInputStream(tempFile);
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
@@ -85,7 +86,7 @@ public class TestSerializing {
 
         MissingItem missingItem  = new MissingItem("t1", "t2");
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        File tempFile = new File("/tmp",  "MissingItem.xml");
+        File tempFile = createTestFile("MissingItem");
         JAXBContext jaxbContext = JAXBContext.newInstance(MissingItem.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
@@ -94,7 +95,7 @@ public class TestSerializing {
         assertEquals(missingItem.getType(), "t1");
         assertEquals(missingItem.getValue(), "t2");
 
-        InputStream is = new FileInputStream("/tmp/MissingItem.xml");
+        InputStream is = new FileInputStream(tempFile);
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(MissingItem.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
@@ -149,14 +150,14 @@ public class TestSerializing {
         assertEquals(1, titleDeliveryHierachy.getDeliveryTitleObjects("dl_2234567_rt1").size());
 
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        File tempFile = new File("/tmp",  "TitleDeliveryHierachy.xml");
+        File tempFile = createTestFile("TitleDeliveryHierachy");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(titleDeliveryHierachy, tempFile);
 
-        InputStream is = new FileInputStream("/tmp/TitleDeliveryHierachy.xml");
+        InputStream is = new FileInputStream(tempFile);
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(TitleDeliveryHierachy.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
@@ -170,5 +171,15 @@ public class TestSerializing {
 
     }
 
+    /**
+     * Create a temporary testFile
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    private File createTestFile(String filename) throws IOException {
+        File tempFile = File.createTempFile(filename, ".xml");
+        return tempFile;
+    }
 
 }

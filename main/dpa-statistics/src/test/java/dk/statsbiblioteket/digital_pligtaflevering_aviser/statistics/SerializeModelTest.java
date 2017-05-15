@@ -11,10 +11,12 @@ import javax.xml.bind.Unmarshaller;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -51,7 +53,7 @@ public class SerializeModelTest {
     @Test
     public void testArticleSerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testArticleSerialize.xml");
+        File tempFile = createTestFile("/tmp/testArticleSerialize");
         JAXBContext jaxbContext = JAXBContext.newInstance(Article.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -68,7 +70,7 @@ public class SerializeModelTest {
     @Test
     public void testPageSerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testPageSerialize.xml");
+        File tempFile = createTestFile("/tmp/testPageSerialize");
         JAXBContext jaxbContext = JAXBContext.newInstance(Page.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -86,7 +88,7 @@ public class SerializeModelTest {
     @Test
     public void testTitleSerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testTitleSerialize.xml");
+        File tempFile = createTestFile("/tmp/testTitleSerialize");
 
         JAXBContext jaxbContext = JAXBContext.newInstance(Title.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -124,7 +126,7 @@ public class SerializeModelTest {
     @Test
     public void testDeliverySerialize() throws Exception {
 
-        File tempFile = createTestFile("/tmp/testDeliverySerialize.xml");
+        File tempFile = createTestFile("/tmp/testDeliverySerialize");
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -175,32 +177,14 @@ public class SerializeModelTest {
 
 
     /**
-     * Test of serializing of an entire DeliveryStatistics
-     * The DeliveryStatistics is serialized into a xml-file and the content of the file is validated
-     * @throws Exception
-     */
-    @Test
-    public void testDeliveryUnserialize() throws Exception {
-
-        File tempFile = new File("/tmp/testDeliverySerialize.xml");
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(tempFile);
-        assertEquals(deserializedObject.getDeliveryName(), "dl_213232");
-
-        assertEquals(deserializedObject.getTitles().getTitles().size(), 2);
-    }
-
-    /**
      * Create a temporary testFile
      * @param filename
      * @return
      * @throws IOException
      */
     private File createTestFile(String filename) throws IOException {
-        File f = Paths.get(filename).toFile();
-        f.deleteOnExit();
-        return f;
+        File tempFile = File.createTempFile(filename, ".xml");
+        return tempFile;
     }
 
     /**
