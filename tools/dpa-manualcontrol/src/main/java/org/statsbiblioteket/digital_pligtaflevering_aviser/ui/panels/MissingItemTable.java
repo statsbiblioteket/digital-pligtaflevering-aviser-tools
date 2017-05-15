@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * List containing single String items
+ * Table for viewing items which is missing.
+ * This table it used in a dialog that gives the user the possibility of committing the validation-status of a title in a delivery
  */
 public class MissingItemTable extends VerticalLayout {
 

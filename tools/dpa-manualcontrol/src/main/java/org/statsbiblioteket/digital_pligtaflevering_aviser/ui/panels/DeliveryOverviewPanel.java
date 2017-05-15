@@ -10,6 +10,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Delivery
 import java.util.List;
 
 /**
+ * The Calenderview
  * The full panel for showing all selection details of deliveries
  */
 public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsPanels {

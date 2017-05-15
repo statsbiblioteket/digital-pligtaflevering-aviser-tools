@@ -136,7 +136,7 @@ public class GenericListTable extends VerticalLayout {
         }
         if(sortColumnName!= null) {
             table.setSortContainerPropertyId(sortColumnName);
-            table.refreshRowCache();
+            table.sort();
         }
     }
 

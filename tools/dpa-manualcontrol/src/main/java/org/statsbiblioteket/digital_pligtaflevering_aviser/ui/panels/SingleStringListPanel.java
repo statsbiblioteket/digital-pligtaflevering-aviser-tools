@@ -41,6 +41,7 @@ public class SingleStringListPanel extends VerticalLayout {
             row1.getItemProperty("Item").setValue(item);
         }
         table.setSortContainerPropertyId("Item");
+        table.sort();
     }
 
     /**

@@ -68,6 +68,7 @@ public class DeliveryListPanel extends VerticalLayout {
             row1.getItemProperty("Name").setValue(item);
         }
         table.setSortContainerPropertyId("Date");
+        table.sort();
     }
 
     /**

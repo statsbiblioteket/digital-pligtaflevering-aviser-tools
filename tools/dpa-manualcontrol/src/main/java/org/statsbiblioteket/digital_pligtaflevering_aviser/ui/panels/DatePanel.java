@@ -53,6 +53,8 @@ public class DatePanel extends VerticalLayout {
             table.addGeneratedColumn(columns[i], new DatePanel.FieldGenerator());
             i++;
         }
+        table.setSortContainerPropertyId("Weekno");
+
         unmappable.setEnabled(false);
 
         table.setWidth("100%");
@@ -102,6 +104,7 @@ public class DatePanel extends VerticalLayout {
                 log.error(e.getMessage(), e);
             }
             unmappable.setValue(unmappableValues);
+            table.sort();
         }
     }
 

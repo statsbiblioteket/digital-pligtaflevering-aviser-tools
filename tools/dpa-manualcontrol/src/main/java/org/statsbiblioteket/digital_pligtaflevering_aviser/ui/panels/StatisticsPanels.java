@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mmj on 4/21/17.
+ * This interface is used to specify the interface that all the different statisticsPanels must comply to
  */
 public interface StatisticsPanels extends Component {
 
+    /**
+     * Initially perform layout of components inb the panel
+     */
     public void initialLayout();
 
     /**
@@ -49,14 +52,20 @@ public interface StatisticsPanels extends Component {
      */
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener);
 
+    /**
+     * Insert values which is initiated into the model to the UI-component in the respective panel
+     * @throws Exception
+     */
     public void insertInitialTableValues() throws Exception;
 
     /**
-     *
+     * Show the Dialog for committing currently  validation status
      */
     public void viewDialogForSettingDeliveryToChecked();
 
-
+    /**
+     * Called when the view is entered to inform the panel that initiation can start
+     */
     public void viewIsEntered();
 
 }
