@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 /**
  * The full hierachy of metadata from a list of titles and deliveries
  */
-@XmlRootElement(name = "hierachy")
+@XmlRootElement(name = "hierarchy")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TitleDeliveryHierachy {
+public class TitleDeliveryHierarchy {
 
     @XmlElement(name = "title")
     private ArrayList<DeliveryTitleInfo> deliveryStructure = new ArrayList<DeliveryTitleInfo>();

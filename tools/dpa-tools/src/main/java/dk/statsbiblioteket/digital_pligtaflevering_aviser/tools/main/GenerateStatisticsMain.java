@@ -105,7 +105,7 @@ public class GenerateStatisticsMain {
                 if (statisticsStream != null) {
                     return ToolResult.ok(domsItem, settingDate);
                 } else {
-                    return ToolResult.fail(domsItem, settingDate);
+                    return ToolResult.fail(domsItem, "Statistics could not get generated on " + deliveryName + " at the time " + settingDate);
                 }
             };
         }

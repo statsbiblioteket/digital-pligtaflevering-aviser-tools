@@ -23,7 +23,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResul
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy.distinctByKey;
+import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy.distinctByKey;
 
 /**
  * The full panel for showing all selection details of newspaper-deliveries on the delivery format.
@@ -132,6 +132,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
         Title title = model.getTitleObj(selectedDelivery, selectedTitle);
         if(title==null) {
+            Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
             return;
         }
 

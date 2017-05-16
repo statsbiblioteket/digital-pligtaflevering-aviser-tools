@@ -38,7 +38,7 @@ public class DataModel {
     private String selectedTitle;
     private String selectedSection = null;
     private String currentlySelectedMonth;
-    private TitleDeliveryHierachy currentlySelectedTitleHiearachy;
+    private TitleDeliveryHierarchy currentlySelectedTitleHiearachy;
 
     private DeliveryFilesystemReadWrite filesystemReadWrite;
 
@@ -236,7 +236,7 @@ public class DataModel {
     }
 
     /**
-     * Initiate TitleDeliveryHierachy from fedora, and cash it in the model
+     * Initiate TitleDeliveryHierarchy from fedora, and cash it in the model
      * @throws Exception
      */
     public void initiateTitleHierachyFromFedora() throws Exception {
@@ -244,7 +244,7 @@ public class DataModel {
     }
 
     /**
-     * Initiate TitleDeliveryHierachy from filesystem, and cash it in the model
+     * Initiate TitleDeliveryHierarchy from filesystem, and cash it in the model
      * @throws Exception
      */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
@@ -263,16 +263,16 @@ public class DataModel {
         currentlySelectedMonth = selectedMonth;
     }
 
-    public Date getSelectedMonth() {
-        try {
-            if(currentlySelectedMonth == null) {
-                return new Date();
-            } else {
-                return dateFormat.parse(currentlySelectedMonth);
-            }
-        } catch (ParseException e) {
-            log.error(e.getMessage(), e);
-            return null;
+    /**
+     * Get the currently selected month from the month as a String
+     * @return
+     * @throws ParseException
+     */
+    public Date getSelectedMonth() throws ParseException {
+        if(currentlySelectedMonth == null) {
+            return new Date();
+        } else {
+            return dateFormat.parse(currentlySelectedMonth);
         }
     }
 

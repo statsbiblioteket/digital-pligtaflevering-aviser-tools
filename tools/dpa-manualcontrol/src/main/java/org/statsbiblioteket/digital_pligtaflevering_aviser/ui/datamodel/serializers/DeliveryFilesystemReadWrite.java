@@ -1,7 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -34,13 +34,13 @@ public class DeliveryFilesystemReadWrite {
     }
 
     /**
-     * Construct the object TitleDeliveryHierachy which contains logic about a month of deliveries
+     * Construct the object TitleDeliveryHierarchy which contains logic about a month of deliveries
      * @param currentlySelectedMonth
      * @return
      * @throws Exception
      */
-    public TitleDeliveryHierachy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
-        TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
+    public TitleDeliveryHierarchy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
+        TitleDeliveryHierarchy currentlySelectedTitleHiearachy = new TitleDeliveryHierarchy();
 
         String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
@@ -70,7 +70,7 @@ public class DeliveryFilesystemReadWrite {
      * @return
      * @throws Exception
      */
-    public synchronized boolean saveDeliveryToFilesystem(String currentlySelectedMonth, TitleDeliveryHierachy currentlySelectedTitleHiearachy) throws Exception {
+    public synchronized boolean saveDeliveryToFilesystem(String currentlySelectedMonth, TitleDeliveryHierarchy currentlySelectedTitleHiearachy) throws Exception {
 
         String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);

@@ -11,7 +11,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsPars
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -41,6 +41,10 @@ import java.util.stream.Stream;
  */
 public class DeliveryFedoraCommunication {
     protected Logger log = LoggerFactory.getLogger(getClass());
+
+    private final static String VALIDATION_INFO_STREAMNAME = "VALIDATIONINFO";
+    private final static String STATISTICS_STREAM_NAME = "DELIVERYSTATISTICS";
+
 
     private static String itemType;
     private static String pastEvents;
@@ -138,9 +142,9 @@ public class DeliveryFedoraCommunication {
      * @return
      * @throws Exception
      */
-    public TitleDeliveryHierachy getTitleHierachyFromFedora() throws Exception {
+    public TitleDeliveryHierarchy getTitleHierachyFromFedora() throws Exception {
 
-        TitleDeliveryHierachy currentlySelectedTitleHiearachy = new TitleDeliveryHierachy();
+        TitleDeliveryHierarchy currentlySelectedTitleHiearachy = new TitleDeliveryHierarchy();
         Iterator<String> deliveries = this.getInitiatedDeliveries().iterator();
 
         while(deliveries.hasNext()) {
@@ -153,7 +157,7 @@ public class DeliveryFedoraCommunication {
             while(titleSubfolder.hasNext()) {
 
                 DomsItem titleItem = titleSubfolder.next();
-                Optional<DomsDatastream> validationStream = titleItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("VALIDATIONINFO")).findAny();
+                Optional<DomsDatastream> validationStream = titleItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(VALIDATION_INFO_STREAMNAME)).findAny();
 
                 if (validationStream.isPresent()) {
 
@@ -171,7 +175,7 @@ public class DeliveryFedoraCommunication {
             //Start initializing datamodel of tileObjects that has not yet been performed
             final List<DomsDatastream> datastreams = deliveryItem.datastreams();
             Optional<DomsDatastream> profileOptional = datastreams.stream()
-                    .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                    .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
                     .findAny();
 
             //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
@@ -209,7 +213,7 @@ public class DeliveryFedoraCommunication {
      * Get the object of the title in the delivery fetched from fedora
      * @param selectedDelivery
      * @param selectedTitle
-     * @return
+     * @return null if nothing can be found
      */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
         if(selectedDelivery==null || selectedTitle==null) {
@@ -223,7 +227,7 @@ public class DeliveryFedoraCommunication {
 
         final List<DomsDatastream> datastreams = domsItem.datastreams();
         Optional<DomsDatastream> profileOptional = datastreams.stream()
-                .filter(ds -> ds.getId().equals("DELIVERYSTATISTICS"))
+                .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
                 .findAny();
 
 
@@ -254,6 +258,7 @@ public class DeliveryFedoraCommunication {
 
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
+                return null;
             }
         }
         return null;
@@ -297,7 +302,7 @@ public class DeliveryFedoraCommunication {
                 selectedTitleItem = titleItem;
                 final List<DomsDatastream> datastreams = selectedTitleItem.datastreams();
                 Optional<DomsDatastream> profileOptional = datastreams.stream()
-                        .filter(ds -> ds.getId().equals("VALIDATIONINFO"))
+                        .filter(ds -> ds.getId().equals(VALIDATION_INFO_STREAMNAME))
                         .findAny();
 
                 if (profileOptional.isPresent()) {
@@ -305,7 +310,7 @@ public class DeliveryFedoraCommunication {
                 }
 
                 selectedTitleItem.modifyDatastreamByValue(
-                        "VALIDATIONINFO",
+                        VALIDATION_INFO_STREAMNAME,
                         null, // no checksum
                         null, // no checksum
                         statisticsStream,

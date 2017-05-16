@@ -37,6 +37,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel
 
 import java.io.InputStream;
 import java.net.URI;
+import java.text.ParseException;
 
 
 /**
@@ -143,13 +144,16 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.setMargin(true);
         addComponent(layout);
 
+        try {
+            searchPanel.setSelectedMonth(model.getSelectedMonth());
+        } catch(ParseException e) {
+            Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
+            log.error(e.getMessage(), e);
+        }
 
-        searchPanel.setSelectedMonth(model.getSelectedMonth());
         searchPanel.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 try {
-
-
                     if ("PREPAREBUTTON".equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         model.initiateDeliveries();
@@ -331,6 +335,7 @@ public class StatisticsView extends VerticalLayout implements View {
             }
 
         } catch (Exception e) {
+            Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
             log.error(e.getMessage(), e);
         }
         tabelsLayout.viewIsEntered();

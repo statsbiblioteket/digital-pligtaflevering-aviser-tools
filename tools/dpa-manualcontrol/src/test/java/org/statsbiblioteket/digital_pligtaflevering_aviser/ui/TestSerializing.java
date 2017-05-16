@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierachy;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
 
 import javax.xml.bind.JAXBContext;
@@ -18,13 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 
@@ -107,13 +101,13 @@ public class TestSerializing {
     }
 
     /**
-     * Validate that TitleDeliveryHierachy handles deliverylists correctly, and that it can be streamed to and from xml
+     * Validate that TitleDeliveryHierarchy handles deliverylists correctly, and that it can be streamed to and from xml
      * @throws Exception
      */
     @Test
     public void testMarshalUnmarshalTitleDeliveryHierachy() throws Exception {
 
-        TitleDeliveryHierachy titleDeliveryHierachy = new TitleDeliveryHierachy();
+        TitleDeliveryHierarchy titleDeliveryHierarchy = new TitleDeliveryHierarchy();
 
         DeliveryTitleInfo ds = new DeliveryTitleInfo("dl_1234567_rt1", "JP", 1, 2);
         ds.addArticle(new Article("q"));
@@ -135,39 +129,39 @@ public class TestSerializing {
         ds.setMissingItems(list);
 
 
-        titleDeliveryHierachy.addDeliveryToTitle(ds);
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_2234567_rt1", "JP", 3, 4));
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt1", "JP", 0, 0));
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_1234567_rt1", "JP", 0, 0));
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_2234567_rt1", "JP", 0, 0));
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt1", "BT", 0, 0));
-        titleDeliveryHierachy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt2", "JP", 0, 0));
+        titleDeliveryHierarchy.addDeliveryToTitle(ds);
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_2234567_rt1", "JP", 3, 4));
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt1", "JP", 0, 0));
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_1234567_rt1", "JP", 0, 0));
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_2234567_rt1", "JP", 0, 0));
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt1", "BT", 0, 0));
+        titleDeliveryHierarchy.addDeliveryToTitle(new DeliveryTitleInfo("dl_3234567_rt2", "JP", 0, 0));
 
-        assertEquals(2, titleDeliveryHierachy.getAllTitles().size());
-        assertEquals(4, titleDeliveryHierachy.getDeliverysFromTitle("JP").size());
-        assertEquals(1, titleDeliveryHierachy.getDeliverysFromTitle("BT").size());
-        assertEquals(2, titleDeliveryHierachy.getDeliveryTitleObjects("dl_3234567_rt1").size());
-        assertEquals(1, titleDeliveryHierachy.getDeliveryTitleObjects("dl_2234567_rt1").size());
+        assertEquals(2, titleDeliveryHierarchy.getAllTitles().size());
+        assertEquals(4, titleDeliveryHierarchy.getDeliverysFromTitle("JP").size());
+        assertEquals(1, titleDeliveryHierarchy.getDeliverysFromTitle("BT").size());
+        assertEquals(2, titleDeliveryHierarchy.getDeliveryTitleObjects("dl_3234567_rt1").size());
+        assertEquals(1, titleDeliveryHierarchy.getDeliveryTitleObjects("dl_2234567_rt1").size());
 
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        File tempFile = createTestFile("TitleDeliveryHierachy");
-        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierachy.class);
+        File tempFile = createTestFile("TitleDeliveryHierarchy");
+        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        jaxbMarshaller.marshal(titleDeliveryHierachy, tempFile);
+        jaxbMarshaller.marshal(titleDeliveryHierarchy, tempFile);
 
         InputStream is = new FileInputStream(tempFile);
 
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(TitleDeliveryHierachy.class);
+        JAXBContext jaxbContext1 = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        TitleDeliveryHierachy deserializedObject = (TitleDeliveryHierachy)jaxbUnmarshaller.unmarshal(is);
+        TitleDeliveryHierarchy deserializedObject = (TitleDeliveryHierarchy)jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(2, deserializedObject.getAllTitles().size());
         assertEquals(4, deserializedObject.getDeliverysFromTitle("JP").size());
         assertEquals(1, deserializedObject.getDeliverysFromTitle("BT").size());
         assertEquals(2, deserializedObject.getDeliveryTitleObjects("dl_3234567_rt1").size());
-        assertEquals(1, titleDeliveryHierachy.getDeliveryTitleObjects("dl_2234567_rt1").size());
+        assertEquals(1, titleDeliveryHierarchy.getDeliveryTitleObjects("dl_2234567_rt1").size());
 
     }
 
