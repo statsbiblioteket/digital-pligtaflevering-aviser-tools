@@ -53,6 +53,15 @@ public class DataModel {
                 repository);
     }
 
+    public void cleanModel() {
+        selectedDelItem = null;
+        selectedDelivery = null;
+        selectedTitle = null;
+        selectedSection = null;
+        currentlySelectedMonth = null;
+        currentlySelectedTitleHiearachy = null;
+    }
+
     /**
      * Set initials of the person currently using the application in this browserinstance
      * @param initials
@@ -256,10 +265,12 @@ public class DataModel {
      * @param selectedMonth
      */
     public void setSelectedMonth(Date selectedMonth) {
+        cleanModel();
         currentlySelectedMonth = dateFormat.format(selectedMonth);
     }
 
     public void setSelectedMonth(String selectedMonth) {
+        cleanModel();
         currentlySelectedMonth = selectedMonth;
     }
 

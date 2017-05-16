@@ -132,7 +132,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
         Title title = model.getTitleObj(selectedDelivery, selectedTitle);
         if(title==null) {
-            Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
+            Notification.show("The title does not exist in the delivery", Notification.Type.ERROR_MESSAGE);
             return;
         }
 
