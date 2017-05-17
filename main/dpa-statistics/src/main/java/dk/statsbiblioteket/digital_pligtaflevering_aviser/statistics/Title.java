@@ -11,7 +11,6 @@ import java.util.List;
 @XmlRootElement
 public class Title implements java.io.Serializable {
 
-    @XmlAttribute(name = "titleName")
     private String titleName;
 
     @XmlElement(name = "articles")
@@ -31,12 +30,12 @@ public class Title implements java.io.Serializable {
         this.titleName = titleName;
     }
 
-
+    @XmlAttribute
     public void setTitleName(String titleName) {
         this.titleName = titleName;
     }
 
-    public String getTitle() {
+    public String getTitleName() {
         return this.titleName;
     }
 

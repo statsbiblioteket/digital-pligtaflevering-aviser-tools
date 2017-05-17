@@ -9,12 +9,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Article implements java.io.Serializable {
 
+    //The id of the article is the uuid which is used in fedora
     private String id;
+
     //The name of the article is really just the name of tne metadata file
     private String articleName;
+
+    //Sectionname is the readable name of the section, it is the same as the one delivered in metada delivered by Infomadia
     private String sectionName;
+
+    //The sectionNumber is the number of the section, it is the same as the one delivered in metada delivered by Infomadia
     private String sectionNumber;
+
+    //The pageNumber is the number of the page, it is the same as the one delivered in metada delivered by Infomadia
     private String pageNumber;
+
+    //checkedState indicates if a manual check of the delivered information has been performed
     private ConfirmationState checkedState = ConfirmationState.UNCHECKED;
 
     public Article() {
@@ -50,27 +60,24 @@ public class Article implements java.io.Serializable {
         return articleName;
     }
 
-    public String getSectionName() {
-        return sectionName;
-    }
-
     @XmlAttribute
     public void setSectionName(String sectionName) {
         this.sectionName = sectionName;
     }
 
 
-    public String getSectionNumber() {
-        return sectionNumber;
+    public String getSectionName() {
+        return sectionName;
     }
+
 
     @XmlAttribute
     public void setSectionNumber(String sectionNumber) {
         this.sectionNumber = sectionNumber;
     }
 
-    public String getPageNumber() {
-        return pageNumber;
+    public String getSectionNumber() {
+        return sectionNumber;
     }
 
     @XmlAttribute
@@ -78,13 +85,17 @@ public class Article implements java.io.Serializable {
         this.pageNumber = pageNumber;
     }
 
-    public ConfirmationState getCheckedState() {
-        return checkedState;
+    public String getPageNumber() {
+        return pageNumber;
     }
 
     @XmlAttribute
     public void setCheckedState(ConfirmationState checkedState) {
         this.checkedState = checkedState;
+    }
+
+    public ConfirmationState getCheckedState() {
+        return checkedState;
     }
 }
 
