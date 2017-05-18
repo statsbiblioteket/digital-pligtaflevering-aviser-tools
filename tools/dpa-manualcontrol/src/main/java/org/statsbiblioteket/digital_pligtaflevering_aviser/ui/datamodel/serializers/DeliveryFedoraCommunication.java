@@ -38,7 +38,9 @@ import java.util.stream.Stream;
 
 /**
  * Helper-class for serializing objects between datamodel and fedora
- * This is used for writing xml-streams to fedora and reading xml-streams into objectmodels
+ * This is used for writing xml-streams to fedora and reading xml-streams into objectmodels.
+ * Each roundtrip contains a datastream with metadata of the filestructure under each delivery.
+ * The result af a check is stored in the Title under a delivery
  */
 public class DeliveryFedoraCommunication {
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -140,7 +142,6 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get all Title objects from Fedora.
-     *
      * @return
      * @throws Exception
      */
@@ -228,7 +229,7 @@ public class DeliveryFedoraCommunication {
         if (profileOptional.isPresent()) {
             try {
                 DomsDatastream ds = profileOptional.get();
-                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
+                //We are reading this textstring as a String and are aware that this might leed to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
                 InputSource inps = new InputSource(reader);
 
