@@ -84,7 +84,7 @@ public class DeliveryFilesystemReadWrite {
             File fileForThisTitleDelivery = createCashingFile(currentlySelectedMonth, deliName, deliTitle);
 
             if (!fileForThisTitleDelivery.exists()) {
-                MarshallerFunctions.streamToDeliveryTitleInfo(deliId, fileForThisTitleDelivery);
+                MarshallerFunctions.streamDeliveryTitleInfoToFile(deliId, fileForThisTitleDelivery);
             }
         }
         return true;
