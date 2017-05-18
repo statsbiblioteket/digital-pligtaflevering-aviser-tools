@@ -212,7 +212,7 @@ public class DataModel {
             filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             return fedoraCommunication.writeDeliveryToFedora(deli);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Exception occoured during writing DeliveryTitleInfo", e);
         }
         return false;
     }

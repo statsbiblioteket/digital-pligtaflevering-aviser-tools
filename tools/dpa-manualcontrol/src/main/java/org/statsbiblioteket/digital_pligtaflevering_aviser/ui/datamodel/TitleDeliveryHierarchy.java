@@ -87,15 +87,11 @@ public class TitleDeliveryHierarchy {
      * @return
      */
     public List<String> getAllTitles() {
-        List<DeliveryTitleInfo> deliveryTitleList = deliveryStructure.stream()
-                .filter(distinctByKey(deliveryTitleInfo -> deliveryTitleInfo.getNewspaperTitle())).collect(Collectors.toList());
-
-        List<String> titleList = new ArrayList<String>();
-
-        for(DeliveryTitleInfo deliveryTitle : deliveryTitleList) {
-            titleList.add(deliveryTitle.getNewspaperTitle());
-        }
-        return titleList;
+        List<String> deliveryTitleList = deliveryStructure.stream()
+                .map(deliveryTitleInfo -> deliveryTitleInfo.getNewspaperTitle())
+                .distinct()
+                .collect(Collectors.toList());
+        return deliveryTitleList;
     }
 
     /**

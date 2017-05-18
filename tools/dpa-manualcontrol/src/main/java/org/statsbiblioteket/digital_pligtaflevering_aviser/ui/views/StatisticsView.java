@@ -35,7 +35,9 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.StatisticsP
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.TitleValidationPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
@@ -225,9 +227,9 @@ public class StatisticsView extends VerticalLayout implements View {
                     }
 
 
-                } catch (Exception e) {
-                    Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-                    log.error(e.getMessage(), e);
+                } catch (MalformedURLException e) {
+                    Notification.show("The application can not create a link to the url, please contact support", Notification.Type.ERROR_MESSAGE);
+                    log.error("The link could net parsed into a url", e);
                 }
             }
         });
@@ -300,7 +302,7 @@ public class StatisticsView extends VerticalLayout implements View {
      * @return
      * @throws Exception
      */
-    private synchronized StreamResource createStreamResource(final java.net.URL url) throws Exception {
+    private synchronized StreamResource createStreamResource(final java.net.URL url) {
 
         final StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
             @Override
@@ -308,9 +310,9 @@ public class StatisticsView extends VerticalLayout implements View {
                 try {
                     InputStream inps = url.openStream();
                     return inps;
-                } catch (Exception e) {
+                } catch (IOException e) {
                     Notification.show("The application can not read the pdf-file", Notification.Type.WARNING_MESSAGE);
-                    log.error(e.getMessage(), e);
+                    log.error("The stream could not get opened", e);
                     return null;
                 }
             }
@@ -338,7 +340,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         } catch (Exception e) {
             Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-            log.error(e.getMessage(), e);
+            log.error("Initialization of model during entering StatisticsView has failed", e);
         }
         tabelsLayout.viewIsEntered();
         Notification.show("DPA Delivery validation");

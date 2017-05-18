@@ -23,7 +23,7 @@ public class ConfigPanel extends DeliveryValidationPanel {
                     model.removeCurrentSelectedTitleInDelivery();
                 } catch (Exception e) {
                     Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-                    log.error(e.getMessage(), e);
+                    log.error("Initialization of model during entering clearing of cashed data", e);
                 }
             }});
         buttonLayout.addComponent(clearDeliveryButton);

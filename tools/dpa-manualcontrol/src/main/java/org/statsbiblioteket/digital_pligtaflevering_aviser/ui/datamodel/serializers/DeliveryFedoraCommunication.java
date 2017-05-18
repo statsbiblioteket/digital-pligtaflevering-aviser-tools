@@ -250,8 +250,8 @@ public class DeliveryFedoraCommunication {
 
                 return selectedTitleObj;
 
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
+            } catch (JAXBException e) {
+                log.error("Parsing of XML-streams has failed", e);
                 return null;
             }
         }

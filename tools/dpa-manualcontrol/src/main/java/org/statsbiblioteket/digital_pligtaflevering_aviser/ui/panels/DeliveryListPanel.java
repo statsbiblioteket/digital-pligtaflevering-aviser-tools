@@ -64,8 +64,8 @@ public class DeliveryListPanel extends VerticalLayout {
             try {
                 row1.getItemProperty("Date").setValue(UiDataConverter.getDateFromDeliveryItemDirectoryName(item));
             } catch (ParseException e) {
-                Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-                log.error(e.getMessage(), e);
+                Notification.show("The application could not parse the datestring, please contact support", Notification.Type.ERROR_MESSAGE);
+                log.error("The date could not be parsed in the DatePanel", e);
             }
             row1.getItemProperty("Name").setValue(item);
         }

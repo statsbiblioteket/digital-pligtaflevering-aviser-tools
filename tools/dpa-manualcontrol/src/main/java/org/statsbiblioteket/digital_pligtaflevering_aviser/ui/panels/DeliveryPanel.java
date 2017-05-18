@@ -237,7 +237,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 insertInitialTableValues();
             } catch (Exception e) {
                 Notification.show("The tables contains invalid data, please contact support", Notification.Type.ERROR_MESSAGE);
-                log.error(e.getMessage(), e);
+                log.error("Initialization of model during entering DeliveryPanel has failed", e);
             }
             showTheSelectedTitle(true);
         }
