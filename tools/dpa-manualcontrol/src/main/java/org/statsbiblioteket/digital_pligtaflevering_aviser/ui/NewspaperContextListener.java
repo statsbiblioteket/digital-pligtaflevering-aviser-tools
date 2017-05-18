@@ -1,7 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration;
+import dk.statsbiblioteket.sbutil.webservices.configuration.ConfigCollection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -29,6 +29,17 @@ public class NewspaperContextListener implements ServletContextListener {
     @Override
     public void contextInitialized ( ServletContextEvent contextEvent ) {
         ServletContext servletContext = contextEvent.getServletContext();
+
+        String productionMode = servletContext.getInitParameter("productionMode");
+        if("false".equals(productionMode)) {
+
+            //configurationmap = new ConfigurationMap(attributeMap);
+
+
+
+        }
+
+
         //ServletContext servletContext = contextEvent.getServletContext();
         Map<String, String> attributeMap = new HashMap<>();
         for(Object name : Collections.list(servletContext.getInitParameterNames())) {

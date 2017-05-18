@@ -27,6 +27,17 @@ Overwrite til filebeat.yml from the unpacked filebeat-tarball [filebeat-5.0.0-li
 
 5) Add startupscript to start filebeat with [./filebeat start] and make it start on serverstartup
 
+
+Configuration of tomcat:
+---
+1) Add file setenv.sh to /tomcat/bin
+
+2) Configure link to certificate: export JAVA_OPTS="$JAVA_OPTS -Djavax.net.ssl.trustStore=/home/dpaviser/tomcat/conf/cacerts/cacert"
+
+3) Configure configuration-files in /tomcat/conf/Catalina/localhost
+  - Including dpa-manualcontrol
+     - where service needs to be the jumpback url to the server
+     - /tomcat/conf/Catalina/localhost need to be allocated cashing folder "/var/dpa-manualcontrol"
 ...
 
 

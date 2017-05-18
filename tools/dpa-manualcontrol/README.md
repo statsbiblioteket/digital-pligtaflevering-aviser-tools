@@ -1,7 +1,19 @@
 
+
+    <context-param>
+        <description>Deploy status</description>
+        <param-name>productionMode</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    
+    
+    mvn idea:idea -DdeploymentDescriptorFile=src/webapp/WEB-INF/web.xml
+
+
+
 Run this command to start the server
 
-tools/dpa-dashboard$ mvn package jetty:run
+tools/dpa-dmanualcontrol$ mvn package jetty:run
 
 
 run config

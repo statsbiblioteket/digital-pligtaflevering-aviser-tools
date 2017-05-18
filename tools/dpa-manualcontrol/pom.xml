@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>dpa-root</artifactId>
+        <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+        <version>master-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.statsbiblioteket.digital_pligtaflevering_aviser.ui</groupId>
     <artifactId>dpa-manualcontrol</artifactId>
     <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
     <name>Vaadin Web Application</name>
 
     <properties>
@@ -111,6 +115,7 @@
     </dependencies>
 
     <build>
+        <finalName>dpa-manualcontrol</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -120,6 +125,37 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+
+            <!-- attach the Tomcat context xml file so we can package it next to the war in the deployment tar ball -->
+            <plugin>
+                <!-- http://www.mojohaus.org/build-helper-maven-plugin/attach-artifact-mojo.html -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>dpa-manualcontrol.xml</file>
+                                    <type>tomcat-xml</type>
+                                </artifact>
+                                <artifact>
+                                    <file>cacerts</file>
+                                    <type>certificate</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- As we are doing "inplace" GWT compilation, ensure the widgetset -->
             <!-- directory is cleaned properly -->
             <plugin>
@@ -138,6 +174,11 @@
                 <artifactId>vaadin-maven-plugin</artifactId>
                 <version>${vaadin.plugin.version}</version>
                 <configuration>
+
+
+
+
+
                     <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
                     <!-- <runTarget>mobilemail</runTarget> -->
                     <!-- We are doing "inplace" but into subdir VAADIN/widgetsets. This
@@ -196,7 +237,7 @@
                                             vaadin-maven-plugin
                                         </artifactId>
                                         <versionRange>
-                                            [7.0.0,)
+                                            [7.0.0]
                                         </versionRange>
                                         <goals>
                                             <goal>resources</goal>
