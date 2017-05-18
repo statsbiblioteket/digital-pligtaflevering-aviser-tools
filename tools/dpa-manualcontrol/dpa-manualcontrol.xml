@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<Context docBase="$HOME/tools/tomcat/apache-tomcat-7.0.73/webapps/dpa-manualcontrol.war">
+<Context docBase="${user.home}/services/tomcat-apps/dpa-manualcontrol.war">
   <Parameter name="autonomous.sboi.url" value="http://localhost:58608/newspapr/sbsolr/"/>
   <Parameter name="doms.username" value="fedoraAdmin"/>
   <Parameter name="doms.password" value="fedoraAdminPass"/>

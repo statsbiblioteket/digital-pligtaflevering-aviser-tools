@@ -45,8 +45,8 @@ public class DataModel {
     private DeliveryFedoraCommunication fedoraCommunication;
 
     public DataModel() {
-        String cashingPath = map.getRequired("dpa.manualcontrol.cashingfolder");
-        filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingPath);
+        String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
+        filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
                 map.getRequired("autonomous.pastSuccessfulEvents"),
                 map.getRequired("autonomous.thisEvent"),
@@ -265,11 +265,13 @@ public class DataModel {
      * @param selectedMonth
      */
     public void setSelectedMonth(Date selectedMonth) {
+        //When the selected month is changed the model is cleaned, since the model is allways initiated with data for an entire month
         cleanModel();
         currentlySelectedMonth = dateFormat.format(selectedMonth);
     }
 
     public void setSelectedMonth(String selectedMonth) {
+        //When the selected month is changed the model is cleaned, since the model is allways initiated with data for an entire month
         cleanModel();
         currentlySelectedMonth = selectedMonth;
     }

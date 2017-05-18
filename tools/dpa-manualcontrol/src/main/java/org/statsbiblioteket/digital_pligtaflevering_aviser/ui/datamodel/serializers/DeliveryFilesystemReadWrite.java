@@ -18,8 +18,8 @@ public class DeliveryFilesystemReadWrite {
 
     private String cachingPath;
 
-    public DeliveryFilesystemReadWrite(String cashingPath) {
-        this.cachingPath = cashingPath;
+    public DeliveryFilesystemReadWrite(String cachingPath) {
+        this.cachingPath = cachingPath;
     }
 
     /**
@@ -27,7 +27,7 @@ public class DeliveryFilesystemReadWrite {
      * @param currentlySelectedMonth
      * @return
      */
-    public synchronized boolean isMonthInitiated(String currentlySelectedMonth) {
+    public boolean isMonthInitiated(String currentlySelectedMonth) {
         String currentFolder = cachingPath + currentlySelectedMonth;
         File folderForThis = new File(currentFolder);
         return folderForThis.exists();
@@ -36,7 +36,8 @@ public class DeliveryFilesystemReadWrite {
     /**
      * Construct the object TitleDeliveryHierarchy which contains logic about a month of deliveries
      * @param currentlySelectedMonth
-     * @return
+     * @return the titlehierachy of all deliveries in a full month.
+     * {@code null} if a delivery with this name has not been initialized from Fedora
      * @throws Exception
      */
     public TitleDeliveryHierarchy initiateTitleHierachyFromFilesystem(String currentlySelectedMonth) throws Exception {
@@ -50,14 +51,8 @@ public class DeliveryFilesystemReadWrite {
 
         File[] listOfFiles = folderForThis.listFiles();
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
-        Unmarshaller jaxbUnMarshaller = jaxbContext.createUnmarshaller();
-
         for (File titleFolder : listOfFiles) {
-
-            DeliveryTitleInfo deli = (DeliveryTitleInfo) jaxbUnMarshaller.unmarshal(titleFolder);
-            currentlySelectedTitleHiearachy.addDeliveryToTitle(deli);
-
+            currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
         }
         return currentlySelectedTitleHiearachy;
     }
@@ -80,22 +75,16 @@ public class DeliveryFilesystemReadWrite {
 
         Iterator<DeliveryTitleInfo> keyIterator = currentlySelectedTitleHiearachy.getTheFullStruct().iterator();
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-
         while (keyIterator.hasNext()) {
 
             DeliveryTitleInfo deliId = keyIterator.next();
 
             String deliName = deliId.getDeliveryName();
             String deliTitle = deliId.getNewspaperTitle();
-            File fileForThisTitleDelivery = new File(currentFolder + "/" + deliName + "_" + deliTitle + ".xml");
+            File fileForThisTitleDelivery = createCashingFile(currentlySelectedMonth, deliName, deliTitle);
 
             if (!fileForThisTitleDelivery.exists()) {
-                jaxbMarshaller.marshal(deliId, fileForThisTitleDelivery);
+                MarshallerFunctions.streamToDeliveryTitleInfo(deliId, fileForThisTitleDelivery);
             }
         }
         return true;
@@ -109,25 +98,37 @@ public class DeliveryFilesystemReadWrite {
      */
     public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryTitleInfo currentlySelectedTitleHiearachy) throws Exception {
 
-        String currentFolder = cachingPath + folderForThisXml +"/" + currentlySelectedTitleHiearachy.getDeliveryName() + "_" + currentlySelectedTitleHiearachy.getNewspaperTitle() + ".xml";
+        File fileForThisTitleDelivery = createCashingFile(folderForThisXml, currentlySelectedTitleHiearachy.getDeliveryName(), currentlySelectedTitleHiearachy.getNewspaperTitle());
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        jaxbMarshaller.marshal(currentlySelectedTitleHiearachy, new File(currentFolder));
+        jaxbMarshaller.marshal(currentlySelectedTitleHiearachy, fileForThisTitleDelivery);
 
     }
 
     /**
      * Remove a specific cashed title in a delivery
-     * @param folderForThisXml
+     * @param selectedMonth
      * @param deliveryName
      * @param titleName
      * @throws Exception
      */
-    public void removeDeliveryFromFilesystem(String folderForThisXml, String deliveryName, String titleName) throws Exception {
-        File currentFile = new File(cachingPath + folderForThisXml +"/" + deliveryName + "_" + titleName + ".xml");
+    public void removeDeliveryFromFilesystem(String selectedMonth, String deliveryName, String titleName) throws Exception {
+        File currentFile = createCashingFile(selectedMonth, deliveryName, titleName);
         currentFile.delete();
+    }
+
+    /**
+     * create cashing file on the correct location
+     * @param selectedMonth
+     * @param deliveryName
+     * @param titleName
+     * @return
+     */
+    public File createCashingFile(String selectedMonth, String deliveryName, String titleName) {
+        File file = new File(cachingPath + selectedMonth +"/" + deliveryName + "_" + titleName + ".xml");
+        return file;
     }
 }

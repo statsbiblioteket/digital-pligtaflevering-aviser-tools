@@ -37,6 +37,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.text.ParseException;
 
 
@@ -118,7 +119,10 @@ public class StatisticsView extends VerticalLayout implements View {
 
 
         int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-        //The UI is optimized to run on iither a small or large screen,
+        // The UI is optimized to run on either a small or large screen.
+        // A limit of browserscreenwidth 1800 pixels is used.
+        // If the browserscreenwidth is large pdfComponent is shown at the right side of the tables, otherwise below.
+        // If the browserscreenwidth is large pdfComponent is 900px" X "1200px" otherwise 500px" X "7500px"
         if(browserWidth>1800) {
             mainhlayout = new HorizontalLayout();
             pdfComponent.setWidth("900px");
@@ -129,8 +133,6 @@ public class StatisticsView extends VerticalLayout implements View {
             pdfComponent.setWidth("500px");
             pdfComponent.setHeight("750px");
         }
-
-
 
         tabelsLayout.setVisible(false);
 
@@ -148,19 +150,19 @@ public class StatisticsView extends VerticalLayout implements View {
             searchPanel.setSelectedMonth(model.getSelectedMonth());
         } catch(ParseException e) {
             Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-            log.error(e.getMessage(), e);
+            log.error("MONTH PARSER ERROR", e);
         }
 
         searchPanel.addClickListener(new Button.ClickListener() {
             public void buttonClick(Button.ClickEvent event) {
                 try {
-                    if ("PREPAREBUTTON".equals(event.getButton().getId())) {
+                    if (SearchPanel.prepareButtonId.equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         model.initiateDeliveries();
                         model.initiateTitleHierachyFromFedora();
                         model.saveCurrentTitleHierachyToFilesystem();
                         panelPrepare(true);
-                    } else if ("START".equals(event.getButton().getId())) {
+                    } else if (SearchPanel.startButtonId.equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
                         if(!model.isMonthInitiated()) {
                             Notification.show("This month is not prepared", Notification.Type.ERROR_MESSAGE);
@@ -172,7 +174,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
                         panelPrepare(true);
-                    } else if("LINK".equals(event.getButton().getId())) {
+                    } else if(SearchPanel.linkButtonId.equals(event.getButton().getId())) {
 
                         URI oldUri = UI.getCurrent().getPage().getLocation();
 
@@ -186,7 +188,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 } catch (Exception e) {
                     Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
-                    log.error(e.getMessage(), e);
+                    log.error("Exception has accoured during initialization of datamodel", e);
                 }
 
             }
@@ -214,7 +216,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         pdfComponent.setVisible(true);
                         DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.getId()).children().findFirst().get();
                         DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
-                        java.net.URL url = new java.net.URL(pdfStream.getUrl());
+                        URL url = new URL(pdfStream.getUrl());
                         StreamResource streamRecource = createStreamResource(url);
                         pdfComponent.setSource(streamRecource);
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
@@ -293,7 +295,7 @@ public class StatisticsView extends VerticalLayout implements View {
     }
 
     /**
-     * Convert the URI to the pdfComponent-file into a StremaRecource for viewing in UI
+     * Convert the URI to the pdfComponent-file into a StreamResource for viewing in UI
      * @param url
      * @return
      * @throws Exception
@@ -312,7 +314,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
                 }
             }
-        }, "pages.pdf"  );//Pagename is needed in order for the stream to know it is a pdf
+        }, "pages.pdf"  );// Short pagename is needed
         resource.setMIMEType("application/pdf");
         resource.setCacheTime(1000);
         return resource;

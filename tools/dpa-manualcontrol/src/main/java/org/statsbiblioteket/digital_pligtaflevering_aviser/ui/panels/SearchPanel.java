@@ -12,6 +12,11 @@ import java.util.Date;
  * Panel for handling searching of values for checkings
  */
 public class SearchPanel extends HorizontalLayout {
+
+    public final static String prepareButtonId ="PREPAREBUTTON";
+    public final static String startButtonId ="START";
+    public final static String linkButtonId ="LINK";
+
     private HorizontalLayout controlLayout = new HorizontalLayout();
 
     private DateField startDf = new DateField();
@@ -23,9 +28,9 @@ public class SearchPanel extends HorizontalLayout {
 
     public SearchPanel() {
 
-        prepareButton.setId("PREPAREBUTTON");
-        storeTitlesButton.setId("START");
-        getLink.setId("LINK");
+        prepareButton.setId(prepareButtonId);
+        storeTitlesButton.setId(startButtonId);
+        getLink.setId(linkButtonId);
 
         startDf.setResolution(Resolution.MONTH);
         startDf.setValue(new Date());

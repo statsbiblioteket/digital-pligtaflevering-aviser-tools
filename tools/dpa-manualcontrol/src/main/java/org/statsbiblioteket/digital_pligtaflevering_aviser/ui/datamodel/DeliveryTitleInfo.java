@@ -15,19 +15,35 @@ import java.util.List;
 @XmlRootElement
 public class DeliveryTitleInfo implements java.io.Serializable {
 
+    // The name of the delivery "dl_######_rt#"
     private String deliveryName;
-    private String newspaperTitle;
-    private List<Article> articles = new ArrayList<Article>();
-    private List<Page> pages = new ArrayList<Page>();
-    @XmlAttribute(name = "noOfArticle")
-    private int noOfArticles;
-    @XmlAttribute(name = "noOfPage")
-    private int noOfPages;
-    private boolean checked = false;
-    private String comment;
-    private String initials;
-    private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
+    // The newspapertitle Berligske, Information etc.
+    private String newspaperTitle;
+
+    // A list of articles contained in the delivery and title
+    private List<Article> articles = new ArrayList<Article>();
+
+    // A list of pages contained in the delivery and title
+    private List<Page> pages = new ArrayList<Page>();
+
+    // The number of articles in the delivery and title (As a performance optimization the lists is not allways initialized)
+    private int noOfArticles;
+
+    // The number of pages in the delivery and title (As a performance optimization the lists is not allways initialized)
+    private int noOfPages;
+
+    // Has manual check been performed
+    private boolean checked = false;
+
+    // Comment by the user if extra textual description about the check is relevant
+    private String comment;
+
+    // The initials of the person performing the check
+    private String initials;
+
+    // List of generic information about things missing in the delivery
+    private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
     public DeliveryTitleInfo() {
     }
@@ -64,9 +80,8 @@ public class DeliveryTitleInfo implements java.io.Serializable {
         return this.newspaperTitle;
     }
 
-
-    public void addArticle(Article fileName) {
-        articles.add(fileName);
+    public void addPages(Page fileName) {
+        pages.add(fileName);
     }
 
     @XmlElement
@@ -78,8 +93,8 @@ public class DeliveryTitleInfo implements java.io.Serializable {
         return this.pages;
     }
 
-    public List<Article> getArticles() {
-        return this.articles;
+    public void addArticle(Article fileName) {
+        articles.add(fileName);
     }
 
     @XmlElement
@@ -87,28 +102,35 @@ public class DeliveryTitleInfo implements java.io.Serializable {
         this.articles = articles;
     }
 
-    public void addPages(Page fileName) {
-        pages.add(fileName);
+    public List<Article> getArticles() {
+        return this.articles;
     }
 
+    @XmlAttribute
+    public void setNoOfArticles(int noOfArticles) {
+        this.noOfArticles = noOfArticles;
+    }
 
     public int getNoOfArticles() {
         return noOfArticles;
     }
 
+    @XmlAttribute
+    public void setNoOfPages(int noOfPages) {
+        this.noOfPages = noOfPages;
+    }
 
     public int getNoOfPages() {
         return noOfPages;
     }
 
-
-    public boolean isChecked() {
-        return checked;
-    }
-
     @XmlAttribute
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public boolean isChecked() {
+        return checked;
     }
 
     @XmlAttribute
@@ -129,12 +151,12 @@ public class DeliveryTitleInfo implements java.io.Serializable {
         return this.initials;
     }
 
-    public List<MissingItem> getMissingItems() {
-        return missingItems;
-    }
-
     @XmlElement
     public void setMissingItems(List<MissingItem> missingItems) {
         this.missingItems =missingItems;
+    }
+
+    public List<MissingItem> getMissingItems() {
+        return missingItems;
     }
 }

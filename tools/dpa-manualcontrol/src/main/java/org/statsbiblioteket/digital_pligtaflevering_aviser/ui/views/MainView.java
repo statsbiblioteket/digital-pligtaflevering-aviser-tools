@@ -16,12 +16,7 @@ public class MainView extends VerticalLayout implements View {
         setSizeFull();
 
         Button button = new Button("Jump to deliverypanel",
-                new Button.ClickListener() {
-                    @Override
-                    public void buttonClick(Button.ClickEvent event) {
-                        getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
-                    }
-                });
+                (Button.ClickListener) event -> getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL));
         addComponent(button);
         setComponentAlignment(button, Alignment.MIDDLE_CENTER);
     }

@@ -19,7 +19,7 @@ public class StoreResultWindow extends Window {
 
     private final Button ok = new Button("Ok");
     private final Button cancel = new Button("Cancel");
-    private final Label chackStateInfo = new Label("Validation can not be performed, since it is already performed");
+    private final Label checkStateInfo = new Label("Validation can not be performed, since it is already performed");
 
     public StoreResultWindow(String caption) {
         super(caption);
@@ -28,10 +28,10 @@ public class StoreResultWindow extends Window {
 
         hl.addComponent(ok);
         hl.addComponent(cancel);
-        hl.addComponent(chackStateInfo);
+        hl.addComponent(checkStateInfo);
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
-        chackStateInfo.setVisible(false);
+        checkStateInfo.setVisible(false);
         super.setContent(vl);
     }
 
@@ -45,16 +45,16 @@ public class StoreResultWindow extends Window {
     }
 
     /**
-     * Set the dialog to be ready or not ready to performe a press on ok
-     * @param ready
+     * Set the dialog to be ready or not ready to perform a press on ok.
+     * @param ready if the parameter is false the "ok" button is disabled and a comment about why it is disabled is shown
      */
     public void setReady(boolean ready) {
         ok.setEnabled(ready);
-        chackStateInfo.setVisible(!ready);
+        checkStateInfo.setVisible(!ready);
     }
 
     /**
-     * Insert UI panels into the dialog
+     * Insert the content to view in the dialog
      * @param content
      */
     public void setDialogContent(Layout content) {

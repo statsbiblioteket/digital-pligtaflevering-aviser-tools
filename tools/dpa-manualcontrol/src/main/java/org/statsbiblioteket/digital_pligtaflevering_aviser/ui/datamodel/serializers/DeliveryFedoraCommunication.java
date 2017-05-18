@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 /**
  * Helper-class for serializing objects between datamodel and fedora
+ * This is used for writing xml-streams to fedora and reading xml-streams into objectmodels
  */
 public class DeliveryFedoraCommunication {
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -89,7 +90,7 @@ public class DeliveryFedoraCommunication {
     }
 
     /**
-     * Get a list of deliveries, which is ready for manual inspections
+     * Get a list of deliveries, which are ready for manual inspections
      * @param deliveryFilter
      * @return
      */
@@ -121,15 +122,16 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get the DomsItem from the list of items, which has been cashed
-     * @param name
-     * @return
+     * @param name deliveryname as used in fedora "dl_######_rt#"
+     * @return the DomsItem which is used for iterating through the tree-structure below the item,
+     * {@code null} if a delivery with this name has not been initialized from Fedora
      */
     public DomsItem getDeliveryFromName(String name) {
         return deliveryList.get(name);
     }
 
     /**
-     * Get the list of deliveryNames which is cashed
+     * Get the list of deliveryNames which are cashed
      * @return
      */
     public Set<String> getInitiatedDeliveries() {
@@ -145,12 +147,10 @@ public class DeliveryFedoraCommunication {
     public TitleDeliveryHierarchy getTitleHierachyFromFedora() throws Exception {
 
         TitleDeliveryHierarchy currentlySelectedTitleHiearachy = new TitleDeliveryHierarchy();
-        Iterator<String> deliveries = this.getInitiatedDeliveries().iterator();
 
-        while(deliveries.hasNext()) {
+        for(String delivery: deliveryList.keySet()) {
 
-            String delivery = deliveries.next();
-            DomsItem deliveryItem = this.getDeliveryFromName(delivery);
+            DomsItem deliveryItem = deliveryList.get(delivery);
             Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(deliveryItem);
 
             //First search through tileObjects to find all performed checks
@@ -160,15 +160,8 @@ public class DeliveryFedoraCommunication {
                 Optional<DomsDatastream> validationStream = titleItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(VALIDATION_INFO_STREAMNAME)).findAny();
 
                 if (validationStream.isPresent()) {
-
                     String validationString = validationStream.get().getDatastreamAsString();
-                    StringReader reader = new StringReader(validationString);
-                    InputSource inps = new InputSource(reader);
-                    JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
-                    Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-                    DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(inps);
-
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(deserializedObject);
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(validationString));
                 }
             }
 
@@ -213,7 +206,8 @@ public class DeliveryFedoraCommunication {
      * Get the object of the title in the delivery fetched from fedora
      * @param selectedDelivery
      * @param selectedTitle
-     * @return null if nothing can be found
+     * @return the Title which contains metadate of a newspapertitle in a delivery
+     * {@code null} if a delivery with this name has not been initialized from Fedora
      */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
         if(selectedDelivery==null || selectedTitle==null) {
@@ -246,7 +240,7 @@ public class DeliveryFedoraCommunication {
                 Title selectedTitleObj = null;
                 List<Title> titleList = deserializedObject.getTitles().getTitles();
                 for(Title title : titleList) {
-                    if(selectedTitle.equals(title.getTitle())) {
+                    if(selectedTitle.equals(title.getTitleName())) {
                         selectedTitleObj = title;
                     }
                 }
@@ -285,11 +279,15 @@ public class DeliveryFedoraCommunication {
      * @param deliveryName
      * @param titleName
      * @param statisticsStream
+     * @return return true if the writing performed successfully
      */
     public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
-        DomsItem selectedTitleItem = null;
+        if(domsItem == null) {
+            return false;
+        }
+        DomsItem selectedTitleItem;
 
         Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(domsItem);
         while(titleSubfolder.hasNext()) {
@@ -297,7 +295,7 @@ public class DeliveryFedoraCommunication {
             String itemPath = titleItem.getPath();
 
             //path:dl_20160811_rt1/verapdf
-            //Find the title part of the path
+            //Find the title part of the path, the title part is the title of the newspaper (bt/politikken/jyllandsposten etc.)
             if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
                 selectedTitleItem = titleItem;
                 final List<DomsDatastream> datastreams = selectedTitleItem.datastreams();
@@ -328,7 +326,14 @@ public class DeliveryFedoraCommunication {
      * Enums for different types of fetch to fedora
      */
     public enum EventStatus {
-        READYFORMANUALCHECK, // Get deliveries that is ready for manual check
-        DONEMANUALCHECK; // Get deliveries including deliveries where the manual check is done
+        /**
+         * Get deliveries that is ready for manual check
+         */
+        READYFORMANUALCHECK,
+
+        /**
+         * Get deliveries including deliveries where the manual check is done
+         */
+        DONEMANUALCHECK;
     }
 }

@@ -57,7 +57,7 @@ public class UiDataConverter {
 
 
     /**
-     * Convert a pageiterator into a hashMap of pages, and use filter if delivered
+     * Convert a list of pages into a map of TitleComponent, a new TitleComponent is added for every different page found in the list
      * @param pageList
      * @return
      */
@@ -66,7 +66,8 @@ public class UiDataConverter {
         Map<String, List<Page>> grouped = pageList.stream().collect(Collectors.groupingBy(pageItem -> pageItem.getSectionNumber()));
         Map<String, TitleComponent> titleComponentList = new HashMap<String, TitleComponent>();
         for(List<Page> groupedPageList : grouped.values()) {
-            titleComponentList.put(groupedPageList.get(0).getSectionNumber(), new TitleComponent(groupedPageList.get(0).getSectionName(), groupedPageList.get(0).getSectionNumber(), groupedPageList.size()));
+            Page firstPage = groupedPageList.get(0);
+            titleComponentList.put(firstPage.getSectionNumber(), new TitleComponent(firstPage.getSectionName(), firstPage.getSectionNumber(), groupedPageList.size()));
         }
         return titleComponentList;
     }
