@@ -20,6 +20,7 @@ import java.util.function.Function;
 /**
  * RepositoryProvider captures the Dagger configuration into code so a DomsRepository can
  * be correctly configured from a ConfigurationMap configuration.
+ * This piece of code is copied directly from tools/dpa-dashboards/src/main/java/RepositoryConfigurator
  */
 public class RepositoryProvider implements Function<ConfigurationMap, DomsRepository> {
 
