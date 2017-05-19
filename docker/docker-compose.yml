@@ -1,0 +1,164 @@
+# https://docs.docker.com/compose/compose-file/compose-file-v2/
+
+version: '2'
+
+
+
+services:
+
+
+#Prerequisites
+  activemq:
+    # https://hub.docker.com/r/webcenter/activemq/
+    image: rmohr/activemq:5.14.3-alpine # 2017-05-19
+    volumes:
+      - dpa_activemq_store:/opt/activemq/data
+    environment:
+      - ACTIVEMQ_MIN_MEMORY=512
+      - ACTIVEMQ_MAX_MEMORY=2048
+    expose:
+      - "61616"
+    entrypoint: /opt/activemq/bin/activemq
+    command: console
+    volumes:
+      - /dpa_activemq_store
+
+#  webdav:
+#    image: blekinge/apache_webdav
+#    volumes:
+#      - ./state/webdav:/site/dav
+#    expose:
+#      - "80"
+#
+
+
+# Pillars
+  filepillar1:
+    image: openjdk:8-alpine
+    volumes:
+      - target/for-docker/bitrepository-reference-pillar-1.9/:/pillar
+      -
+
+    environment:
+      - state_dir=/state/file1pillar
+      - conf_dir=/conf/file1pillar
+    links:
+      - activemq
+
+
+#  filepillar2:
+#    build:
+#      context: ./pillar
+#    volumes:
+#      - ./conf:/conf
+#      - ./state:/state
+#    environment:
+#      - state_dir=/state/file2pillar
+#      - conf_dir=/conf/file2pillar
+#    links:
+#      - webdav
+#      - activemq
+#
+#  checksumpillar:
+#    build:
+#      context: ./pillar
+#    volumes:
+#      - ./conf:/conf
+#      - ./state:/state
+#    environment:
+#      - state_dir=/state/checksumpillar
+#      - conf_dir=/conf/checksumpillar
+#    links:
+#      - webdav
+#      - activemq
+#
+#
+# Enable this service and disable all the other services if you want to run just one tomcat with all the services
+# Remember to change conf/webclientservice/services.properties
+#  allservices:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-alarm-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-alarm-service.xml
+#      - ./tomcat-services/bitrepository-audit-trail-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-audit-trail-service.xml
+#      - ./tomcat-services/bitrepository-integrity-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-integrity-service.xml
+#      - ./tomcat-services/bitrepository-monitoring-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-monitoring-service.xml
+#      - ./tomcat-services/bitrepository-webclient.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-webclient.xml
+#    links:
+#      - activemq
+#      - webdav
+#    ports:
+#      - "8080:8080"
+
+
+
+#
+#  webclientservice:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-webclient.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-webclient.xml
+#    links:
+#      - activemq
+#      - alarmservice
+#      - audittrailservice
+#      - integrityservice
+#      - monitoringservice
+#      - webdav
+#    ports:
+#      - "8080:8080"
+#
+### All the services below expose a port, as the webclient service use client side AJAX to communicate with them
+#  alarmservice:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-alarm-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-alarm-service.xml
+#    links:
+#      - activemq
+#    ports:
+#      - "8081:8080"
+#
+#
+#  audittrailservice:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-audit-trail-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-audit-trail-service.xml
+#    links:
+#      - activemq
+#    ports:
+#      - "8082:8080"
+#
+#
+#  integrityservice:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-integrity-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-integrity-service.xml
+#    links:
+#      - activemq
+#    ports:
+#      - "8083:8080"
+#
+#  monitoringservice:
+#    build:
+#      context: ./service
+#    volumes:
+#      - ./state:/state
+#      - ./conf/:/conf/
+#      - ./tomcat-services/bitrepository-monitoring-service.xml:/usr/local/tomcat/conf/Catalina/localhost/bitrepository-monitoring-service.xml
+#    links:
+#      - activemq
+#    ports:
+#      - "8084:8080"

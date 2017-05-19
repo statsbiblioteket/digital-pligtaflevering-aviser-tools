@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.bitrepository.reference</groupId>
             <artifactId>bitrepository-core</artifactId>
-            <version>1.9</version>
+            <version>${dpa.bitrepository.version}</version>
         </dependency>
 
         <dependency>
