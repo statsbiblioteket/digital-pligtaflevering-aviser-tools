@@ -384,7 +384,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
                                     Path filePath = deliveryPath.relativize(path);
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
-                                    String checksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
+                                    String expectedChecksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                                     if (path.toString().endsWith(".pdf")) {
                                         //Save *.pdf files to bitrepository
                                         long startFileIngestTime = System.currentTimeMillis();
@@ -410,7 +410,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
                                         //noinspection UnnecessaryLocalVariable
-                                        ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, checksum);
+                                        ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, expectedChecksum);
                                         return toolResult;
 
                                     } else if (path.toString().endsWith(".xml")) {
@@ -418,15 +418,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
                                         //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
                                         FileInputStream fis = new FileInputStream(path.toFile());
-                                        String md5s = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+                                        String calculatedChecksum = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
                                         fis.close();
-                                        if (md5s.equals(checksum)) {//If checksum is validated start ingesting otherwise return fail
+                                        if (calculatedChecksum.equals(expectedChecksum)) {//If checksum is validated start ingesting otherwise return fail
                                             final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
-                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, checksum, allBytes, null, mimeType, "From " + path, null);
+                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, expectedChecksum, allBytes, null, mimeType, "From " + path, null);
                                             return ToolResult.ok(rootDomsItem, "XML datastream added for " + path);
                                         } else {
-                                            return ToolResult.fail(rootDomsItem, "The checksum failed on : " + path);
+                                            return ToolResult.fail(rootDomsItem, "checksum fail.  Expected " + expectedChecksum
+                                                    + ", found: " + calculatedChecksum + " for " + path);
                                         }
                                     } else if (path.toString().endsWith(".verapdf")) {
                                         // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.

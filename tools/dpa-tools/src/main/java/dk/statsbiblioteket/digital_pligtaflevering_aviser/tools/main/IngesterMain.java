@@ -16,6 +16,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSys
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.reports.ToolResultReport;
 import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
@@ -52,9 +53,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -338,25 +337,7 @@ public class IngesterMain {
 
         @Provides
         Function<List<ToolResult>, String> provideEventMessageForToolResults() {
-            return toolResults -> {
-                // naive initial solution.
-                final Map<Boolean, List<ToolResult>> toolResultMap = toolResults.stream()
-                        .collect(Collectors.groupingBy(tr -> tr.getResult()));
-
-                List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
-
-                if (failingToolResults.size() == 0) {
-                    return toolResultMap.getOrDefault(Boolean.TRUE, Collections.emptyList()).size() + " successful";
-                } else {
-                    String result = failingToolResults.stream()
-                            .map(tr -> "---\n" + tr.getHumanlyReadableMessage() + "\n")
-                            .filter(s -> s.trim().length() > 0) // skip blank lines
-                            .collect(Collectors.joining("\n"));
-                    return result;
-                }
-            };
+            return toolResults -> new ToolResultReport().apply(toolResults.stream());
         }
-
-
     }
-};
+}
