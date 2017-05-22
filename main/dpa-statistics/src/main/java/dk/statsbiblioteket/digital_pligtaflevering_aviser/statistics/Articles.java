@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType (XmlAccessType.FIELD)
 public class Articles
 {
-    @XmlElement(name = "article")
+    @XmlElement(name = "article", required = false, namespace = "www.sb.dk/dpa/delivery")
     private List<Article> articles = new ArrayList<Article>();
 
     /**

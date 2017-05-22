@@ -87,15 +87,14 @@ public class SerializeModelTest {
         jaxbMarshaller.marshal(title, tempFile);
         String xmlResult = convertStreamToString(tempFile);
         XMLAssert.assertXpathEvaluatesTo("TitleName1", "//title/@titleName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("title01", "//title/articles/article/@articleName", xmlResult);
 
-        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title01']", xmlResult);
-        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title02']", xmlResult);
-        XMLAssert.assertXpathExists("//title/articles/article[@articleName = 'title03']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='articles']/*[local-name()='article'][@articleName = 'title01']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='articles']/*[local-name()='article'][@articleName = 'title02']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='articles']/*[local-name()='article'][@articleName = 'title03']", xmlResult);
 
-        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title11']", xmlResult);
-        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title12']", xmlResult);
-        XMLAssert.assertXpathExists("//title/pages/page[@pageName = 'title13']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='pages']/*[local-name()='page'][@pageName = 'title11']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='pages']/*[local-name()='page'][@pageName = 'title12']", xmlResult);
+        XMLAssert.assertXpathExists("//title/*[local-name()='pages']/*[local-name()='page'][@pageName = 'title13']", xmlResult);
 
     }
 
@@ -142,19 +141,19 @@ public class SerializeModelTest {
         String xmlResult = convertStreamToString(tempFile);
 
         XMLAssert.assertXpathEvaluatesTo("dl_213232", "//deliveryStatistics/@deliveryName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("test1", "//deliveryStatistics/titles/title/@titleName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("article1", "//deliveryStatistics/titles/title/articles/article/@articleName", xmlResult);
-        XMLAssert.assertXpathEvaluatesTo("page1", "//deliveryStatistics/titles/title/pages/page/@pageName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("test1", "//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("article1", "//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='articles']/*[local-name()='article']/@articleName", xmlResult);
+        XMLAssert.assertXpathEvaluatesTo("page1", "//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='pages']/*[local-name()='page']/@pageName", xmlResult);
 
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title[@titleName = 'test1']", xmlResult);
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title[@titleName = 'test2']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName = 'test1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName = 'test2']", xmlResult);
 
 
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/pages/page[@pageName = 'page1']", xmlResult);
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/pages/page[@pageName = 'page2']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='pages']/*[local-name()='page'][@pageName = 'page1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='pages']/*[local-name()='page'][@pageName = 'page2']", xmlResult);
 
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/articles/article[@articleName = 'article1']", xmlResult);
-        XMLAssert.assertXpathExists("//deliveryStatistics/titles/title/articles/article[@articleName = 'article2']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='articles']/*[local-name()='article'][@articleName = 'article1']", xmlResult);
+        XMLAssert.assertXpathExists("//deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/*[local-name()='articles']/*[local-name()='article'][@articleName = 'article2']", xmlResult);
     }
 
 

@@ -13,10 +13,10 @@ public class Title implements java.io.Serializable {
 
     private String titleName;
 
-    @XmlElement(name = "articles")
+    @XmlElement(name = "articles", required = false, namespace = "www.sb.dk/dpa/delivery")
     private Articles articles = new Articles();
 
-    @XmlElement(name = "pages")
+    @XmlElement(name = "pages", required = false, namespace = "www.sb.dk/dpa/delivery")
     private Pages pages = new Pages();
 
     public Title() {

@@ -15,7 +15,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Titles
 {
-    @XmlElement(name = "title")
+    @XmlElement(name = "title", required = false, namespace = "www.sb.dk/dpa/delivery")
     private List<Title> titles = new ArrayList<Title>();
 
     /**

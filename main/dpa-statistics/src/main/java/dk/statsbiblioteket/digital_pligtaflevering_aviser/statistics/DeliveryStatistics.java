@@ -15,7 +15,7 @@ public class DeliveryStatistics implements java.io.Serializable {
     /**
      * List of all titles in the delivery meaning al newspapertitles
      */
-    @XmlElement(name = "titles")
+    @XmlElement(name = "titles", required = false, namespace = "www.sb.dk/dpa/delivery")
     private Titles titles = new Titles();
 
     /**

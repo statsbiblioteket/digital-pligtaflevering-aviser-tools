@@ -14,7 +14,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Pages
 {
-    @XmlElement(name = "page")
+    @XmlElement(name = "page", required = false, namespace = "www.sb.dk/dpa/delivery")
     private List<Page> pages = new ArrayList<Page>();
 
     /**

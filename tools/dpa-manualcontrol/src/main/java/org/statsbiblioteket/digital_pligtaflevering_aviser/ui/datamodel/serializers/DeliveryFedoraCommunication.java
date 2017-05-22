@@ -185,15 +185,15 @@ public class DeliveryFedoraCommunication {
                 Document doc = builder.parse(inps);
                 XPathFactory xPathfactory = XPathFactory.newInstance();
                 XPath xpath = xPathfactory.newXPath();
-                XPathExpression expr = xpath.compile("/deliveryStatistics/titles/title/@titleName");
+                XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
                 NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
                 for(int i = 0; i< nl.getLength(); i++) {
                     String titleItem = nl.item(i).getNodeValue();
 
-                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/articles/article");
+                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='"+titleItem+"']/*[local-name()='articles']/*[local-name()='article']");
                     NodeList articles = (NodeList) articleExpression.evaluate(doc, XPathConstants.NODESET);
-                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/titles/title[@titleName='"+titleItem+"']/pages/page");
+                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='"+titleItem+"']/*[local-name()='pages']/*[local-name()='page']");
                     NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
 
                     currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryTitleInfo(delivery, titleItem, articles.getLength(), pages.getLength()));
