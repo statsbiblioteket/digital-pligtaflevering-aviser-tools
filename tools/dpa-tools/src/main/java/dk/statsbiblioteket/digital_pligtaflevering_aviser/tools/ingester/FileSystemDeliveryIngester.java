@@ -76,7 +76,7 @@ import static java.nio.file.Files.walk;
  * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
  * See ABR for details. </p>
  *
- * @noinspection WeakerAccess
+ * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
 
@@ -99,7 +99,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private final String gitId;
     private String domsCollection;
     private Settings settings;
-    private String bitmagUrl = null;
+    //private String bitmagUrl = null;
     private String bitrepositoryIngesterCollectionId = null;
 
     protected final OutputHandler output = new DefaultOutputHandler(getClass());
@@ -137,7 +137,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.eventMessageForToolResults = eventMessageForToolResults;
         this.mxBean = mxBean;
 
-        this.bitmagUrl = bitmagUrl;
+        //this.bitmagUrl = bitmagUrl;
         this.bitrepositoryIngesterCollectionId = bitrepositoryIngesterCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
@@ -232,6 +232,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         // "B20160811-RT1"
 
+        //noinspection PointlessBooleanExpression
         if (relativeFilenameFromDublinCore.isPresent() == false) {
             throw new RuntimeException("Could not get 'path:...' identifier");
         }
@@ -299,8 +300,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     /**
      * Create a checksum-object based on a checksom-string
      *
-     * @param checksum
-     * @return
+     * @param checksum as a string to be base16 encoded.
+     * @return ChecksumDataForFileTYPE wrapper containing MD5 as the type,
+     * base 16 encoded version of passed in
+     * checksum, and "now" as the timestamp.
      */
     private ChecksumDataForFileTYPE getChecksum(String checksum) {
         ChecksumDataForFileTYPE checksumData = new ChecksumDataForFileTYPE();
@@ -322,8 +325,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * DOMS id using its relative Path and create a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on
      * "DIRECTORYOBJECT". This will work because the subdirectories are processed first. </li> </ul>
      *
-     * @param dcIdentifier
-     * @param md5map
+     * @param dcIdentifier DC identifier to look up object in DOMS with.
+     * @param md5map MD5 validation map.
      */
 
     protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(DomsItem rootDomsItem, String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
@@ -334,17 +337,18 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         final String currentDirectoryPid = lookupObjectFromDCIdentifierAndCreateItIfNeeded(dcIdentifier);
 
-        /**
-         * After careful consideration we need the Delivery Ingester to create a DOMS object pr page, which is not
-         * easily derived from the directory structure in the deliveries from
-         * infomedia as directories.  We therefore need to introduce an additional group by filenames.
-         *
-         * Figure out which pages we have (for "foo/a.pdf" and "foo/a.xml" construct
-         * <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
+        /*
+          After careful consideration we need the Delivery Ingester to create a DOMS object pr page, which is not
+          easily derived from the directory structure in the deliveries from
+          infomedia as directories.  We therefore need to introduce an additional group by filenames.
+
+          Figure out which pages we have (for "foo/a.pdf" and "foo/a.xml" construct
+          <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
          */
 
         Stream<Path> pathStream = deliveriesForPath.apply(absoluteFileSystemPath);
 
+        //noinspection PointlessBooleanExpression
         Map<String, List<Path>> pathsForPage = pathStream
                 .sorted()
                 .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
@@ -405,6 +409,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         OperationEvent finalEvent = eventHandler.getFinish();
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
+                                        //noinspection UnnecessaryLocalVariable
                                         ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, checksum);
                                         return toolResult;
 
@@ -452,7 +457,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
 
-        if (toolResultsForThisDirectory.stream().filter(tr -> tr.getResult() == Boolean.FALSE).findAny().isPresent()) {
+        if (toolResultsForThisDirectory.stream().anyMatch(tr -> tr.getResult() == Boolean.FALSE)) {
             // a failure has happened up til now, return now for cleanest error messages
             return toolResultsForThisDirectory.stream();
         }
@@ -579,8 +584,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * Return the basename of the given path, by converting to a string, locating the last "." and returning the string
      * up to that point.  For "foo/bar.txt", return "foo/bar".
      *
-     * @param path
-     * @return
+     * @param path path to find basename for
+     * @return basename for path
      */
     protected String basenameOfPath(Path path) {
         String s = path.toString();
