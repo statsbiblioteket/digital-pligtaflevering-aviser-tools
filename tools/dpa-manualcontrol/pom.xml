@@ -47,6 +47,14 @@
     </pluginRepositories>
     <dependencies>
 
+        <!--The selenium tests use a jetty webserver-->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>8.2.0.v20160908</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
             <artifactId>cas-client-core</artifactId>
