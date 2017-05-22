@@ -1,14 +1,5 @@
 
 
-    <context-param>
-        <description>Deploy status</description>
-        <param-name>productionMode</param-name>
-        <param-value>false</param-value>
-    </context-param>
-    
-    
-    mvn idea:idea -DdeploymentDescriptorFile=src/webapp/WEB-INF/web.xml
-
 How to run in dev environment
 ---
 If you want to disable the singlesignon part, disable it in the web.xml
