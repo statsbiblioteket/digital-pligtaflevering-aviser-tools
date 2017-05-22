@@ -9,11 +9,17 @@
     
     mvn idea:idea -DdeploymentDescriptorFile=src/webapp/WEB-INF/web.xml
 
+How to run in dev environment
+---
+If you want to disable the singlesignon part, disable it in the web.xml
+Disable CAS filter from:
+<!--Start of CAS filter -->
+
+to:
+<!--End of CAS filter -->
 
 
-Run this command to start the server
-
-tools/dpa-dmanualcontrol$ mvn package jetty:run
+Run this server starting "JettyRunner" in the testpackage
 
 
 run config
