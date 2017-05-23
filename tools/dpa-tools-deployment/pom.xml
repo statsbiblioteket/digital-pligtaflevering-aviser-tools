@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <output>target/appassembler/META-INF/maven/dependency-tree.txt</output>
+        <output>target/appassembler/services/META-INF/maven/dependency-tree.txt</output>
     </properties>
 
     <dependencies>
@@ -84,7 +84,7 @@
                         </goals>
                         <configuration>
                             <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                            <generateGitPropertiesFilename>target/appassembler/META-INF/git.properties</generateGitPropertiesFilename>
+                            <generateGitPropertiesFilename>target/appassembler/services/META-INF/git.properties</generateGitPropertiesFilename>
                         </configuration>
                     </execution>
                 </executions>
@@ -103,7 +103,7 @@
                             <goal>generate-depends-file</goal>
                         </goals>
                         <configuration>
-                            <outputFile>target/appassembler/META-INF/dependencies.properties</outputFile>
+                            <outputFile>target/appassembler/services/META-INF/dependencies.properties</outputFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -126,17 +126,16 @@
                     <platforms>
                         <platform>unix</platform>
                     </platforms>
-                    <configurationDirectory>conf</configurationDirectory>
+                    <binFolder>services/java-wrappers</binFolder>
+                    <configurationDirectory>services/conf</configurationDirectory>
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
 
                     <!-- flat/default/legacy - consider what works best.  -->
                     <repositoryLayout>flat</repositoryLayout>
-                    <repositoryName>libs</repositoryName>
-                    <!-- for logback -->
+                    <repositoryName>services/libs</repositoryName>
+                    <!-- for logback.  It also allows for emergency hotpatching by adding classes here -->
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
-                    <!-- no logs directory, logs should go relative to current working directory set before launch -->
-                    <logsDirectory></logsDirectory>
                     <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
                     <preAssembleDirectory>for-deployment</preAssembleDirectory>
 
@@ -224,7 +223,7 @@
                             <goal>tree</goal>
                         </goals>
                         <configuration>
-                            <outputFile>target/appassembler/META-INF/dependency-tree.txt</outputFile>
+                            <outputFile>target/appassembler/services/META-INF/dependency-tree.txt</outputFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -281,7 +280,7 @@
                             <destFileName>cacert</destFileName>
                         </artifactItem>
                     </artifactItems>
-                    <outputDirectory>${project.build.directory}/appassembler/tomcat-apps</outputDirectory>
+                    <outputDirectory>${project.build.directory}/appassembler/services/tomcat-apps</outputDirectory>
                     <overWriteReleases>false</overWriteReleases>
                     <overWriteSnapshots>true</overWriteSnapshots>
                 </configuration>
