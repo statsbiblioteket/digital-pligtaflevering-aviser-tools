@@ -37,7 +37,7 @@ Configuration of tomcat:
 3) Configure configuration-files in /tomcat/conf/Catalina/localhost
   - Including dpa-manualcontrol
      - where service needs to be the jumpback url to the server
-     - /tomcat/conf/Catalina/localhost need to be allocated cashing folder "/var/dpa-manualcontrol"
+     - /tomcat/conf/Catalina/localhost need to be allocated caching folder "/var/dpa-manualcontrol"
 ...
 
 

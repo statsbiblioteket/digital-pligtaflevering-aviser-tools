@@ -1,7 +1,21 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
 
 
 /**
@@ -15,30 +29,30 @@ public class JettyRunner {
         // Create Jetty Server
         Server server = new Server(8080);
 
+        Path warPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.war");
+        Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.xml");
+
+        InputStream in = new FileInputStream(xmlPath.toFile());
+        InputSource inputSource = new InputSource(new InputStreamReader(in));
+
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/dpa-manualcontrol");
-        webapp.setInitParameter("autonomous.sboi.url", "http://localhost:58608/newspapr/sbsolr/");
-        webapp.setInitParameter("doms.username", "fedoraAdmin");
-        webapp.setInitParameter("doms.password", "fedoraAdminPass");
-        webapp.setInitParameter("doms.pidgenerator.url", "http://localhost:7880/pidgenerator-service");
-        webapp.setInitParameter("doms.url", "http://localhost:7880/fedora");
-        webapp.setInitParameter("pageSize", "10");
-        webapp.setInitParameter("bitrepository.ingester.baseurl", "http://localhost:58709/");
-        webapp.setInitParameter("autonomous.pastSuccessfulEvents", "Data_Archived,Statistics_generated");
-        webapp.setInitParameter("autonomous.itemTypes", "doms:ContentModel_DPARoundTrip");
-        webapp.setInitParameter("autonomous.sboi.pageSize", "100");
-        webapp.setInitParameter("autonomous.futureEvents", "ManualValidationDone");
-        webapp.setInitParameter("autonomous.thisEvent", "ManualValidationDone");
-        webapp.setInitParameter("autonomous.component.fedoraRetries", "10");
-        webapp.setInitParameter("autonomous.component.fedoraDelayBetweenRetries", "10");
-        webapp.setInitParameter("dpa.manualcontrol.cashingfolder", "/tmp/");
-        webapp.setInitParameter("doms.collection.pid", "doms_sboi_dpaCollection");
-        webapp.setInitParameter("casServerUrlPrefix", "https://samling.statsbiblioteket.dk/casinternal/");
-        webapp.setInitParameter("casServerLoginUrl", "https://samling.statsbiblioteket.dk/casinternal/");
-        webapp.setInitParameter("serverName", "localhost");
-        webapp.setInitParameter("service", "http://localhost:8080/dpa-manualcontrol/VAADIN;mode=manualvalidate");
 
-        webapp.setWar("/home/mmj/projects/digital-pligtaflevering-aviser-tools/tools/dpa-manualcontrol/target/dpa-manualcontrol.war");
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        org.w3c.dom.Document doc = builder.parse(inputSource);
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression expr = xpath.compile("//Parameter");
+        NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+        for(int i = 0; i< nl.getLength(); i++) {
+            String paramName = nl.item(i).getAttributes().getNamedItem("name").getTextContent();
+            String paramValue = nl.item(i).getAttributes().getNamedItem("value").getTextContent();
+            webapp.setInitParameter(paramName, paramValue);
+        }
+
+        webapp.setWar(warPath.toString());
         server.setHandler(webapp);
 
         server.start();
