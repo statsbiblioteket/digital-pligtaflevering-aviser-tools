@@ -54,10 +54,15 @@ services/wars
 ---
 The contents of `wars/` from the binary tarball.
 
+tomcat/conf/cacerts
+---
+The certificate from the tarball - services/wars/cacert
+
 var/
 ---
 Area for persisting information between runs.  Those autonomous components needing this must explicitly be told where it 
-is through the appropriate configuration parameter.  As of 2017-04-03 the only component needing this is the create delivery.
+is through the appropriate configuration parameter.  
+As of 2017-04-03 the only component needing this is the create delivery and dpa-manualcontrol.
 
 
 /tra 2017-04-03

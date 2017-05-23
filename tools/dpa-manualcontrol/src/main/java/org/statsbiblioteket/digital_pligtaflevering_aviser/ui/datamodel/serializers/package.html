@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+
+</head>
+
+<body bgcolor="white">
+
+<!-- Package summary here -->
+
+<p>Provides interfaces for getting objectmodel of deliveries and writing to disk or fedora</p>
+
+<h2>Package Specification</h2>
+
+
+<p>This package contains two keyclasses DeliveryFedoraCommunication and DeliveryFilesystemReadWrite.</p>
+
+<p>DeliveryFedoraCommunication is used to read or write information to fedora.
+    The system initially reads the filestructure from Fedora, when writing from the application information is written to both Fedora and the filesystem.
+    Since some lookup in Fedora is very slow some lookups is only performed in the filesystem, and cashed from fedora, if the files is missing.
+</p>
+
+</body>
+</html>

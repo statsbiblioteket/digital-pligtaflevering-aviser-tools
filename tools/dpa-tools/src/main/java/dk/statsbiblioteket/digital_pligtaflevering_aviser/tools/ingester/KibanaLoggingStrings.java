@@ -20,4 +20,7 @@ public class KibanaLoggingStrings {
     public static final String FINISHED_DELIVERY_PDFANALYZE = "FinishedDeliveryPDFAnalyze {} Took: {} ms ";
     public static final String FINISHED_FILE_PDFANALYZE = "FinishedFilePDFAnalyze {} Took: {} ms ";
 
+    public static final String START_GENERATE_STATISTICS = "EnteredGenerateStatistics {} ";
+    public static final String FINISHED_GENERATE_STATISTICS = "FinishedGenerateStatistics {} Took: {} ms ";
+
 }

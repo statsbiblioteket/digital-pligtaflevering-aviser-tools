@@ -196,6 +196,12 @@
                                     </mainClass>
                                     <id>dpa-validate-xml</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.GenerateStatisticsMain
+                                    </mainClass>
+                                    <id>dpa-generate-statistics</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
@@ -247,6 +253,32 @@
                             <type>tomcat-xml</type>
                             <overWrite>true</overWrite>
                             <destFileName>dpa-dashboard.xml</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+                            <artifactId>dpa-manualcontrol</artifactId>
+                            <version>${project.version}</version>
+                            <type>war</type>
+                            <overWrite>true</overWrite>
+                            <destFileName>dpa-manualcontrol.war</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+                            <artifactId>dpa-manualcontrol</artifactId>
+                            <version>${project.version}</version>
+                            <!-- our own custom type for this -->
+                            <type>tomcat-xml</type>
+                            <overWrite>true</overWrite>
+                            <destFileName>dpa-manualcontrol.xml</destFileName>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
+                            <artifactId>dpa-manualcontrol</artifactId>
+                            <version>${project.version}</version>
+                            <!-- our own custom type for this -->
+                            <type>certificate</type>
+                            <overWrite>true</overWrite>
+                            <destFileName>cacert</destFileName>
                         </artifactItem>
                     </artifactItems>
                     <outputDirectory>${project.build.directory}/appassembler/tomcat-apps</outputDirectory>
