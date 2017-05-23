@@ -123,17 +123,19 @@
                     <!--
                     http://www.mojohaus.org/appassembler/appassembler-maven-plugin/assemble-mojo.html
                     -->
+                    <assembleDirectory>${project.build.directory}/appassembler/services</assembleDirectory>
                     <platforms>
                         <platform>unix</platform>
                     </platforms>
-                    <binFolder>services/java-wrappers</binFolder>
-                    <configurationDirectory>services/conf</configurationDirectory>
+                    <binFolder>java-wrappers</binFolder>
+                    <configurationDirectory>conf</configurationDirectory>
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
 
                     <!-- flat/default/legacy - consider what works best.  -->
                     <repositoryLayout>flat</repositoryLayout>
-                    <repositoryName>services/libs</repositoryName>
+                    <repositoryName>libs</repositoryName>
+
                     <!-- for logback.  It also allows for emergency hotpatching by adding classes here -->
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
                     <projectArtifactFirstInClassPath>true</projectArtifactFirstInClassPath>
