@@ -7,7 +7,7 @@
   <Parameter name="doms.url" value="http://localhost:7880/fedora"/>
   <Parameter name="pageSize" value="10"/>
   <Parameter name="jvm.dumpheap" value="false"/>
-  <Parameter name="bitrepository.ingester.baseurl" value="http://bitfinder.statsbiblioteket.dk/dpaviser-achernar/"/>
+  <Parameter name="bitrepository.ingester.baseurl" value="http://localhost:58709/"/>
   <Parameter name="bitrepository.sbpillar.mountpoint" value="/avisbits/dpaviser/"/>
   <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived,Statistics_generated"/>
   <Parameter name="autonomous.oldEvents" value=""/>
@@ -17,7 +17,7 @@
   <Parameter name="autonomous.thisEvent" value="ManualValidationDone"/>
   <Parameter name="autonomous.component.fedoraRetries" value="10"/>
   <Parameter name="autonomous.component.fedoraDelayBetweenRetries" value="10"/>
-  <Parameter name="dpa.manualcontrol.cashingfolder" value="/tmp/"/>
+  <Parameter name="dpa.manualcontrol.cashingfolder" value="/home/dpaviser/var/dpa-manualcontrol/"/>
   <Parameter name="doms.collection.pid" value="doms_sboi_dpaCollection"/>
 
   <Parameter name="casServerUrlPrefix" value="https://samling.statsbiblioteket.dk/casinternal/"/>
