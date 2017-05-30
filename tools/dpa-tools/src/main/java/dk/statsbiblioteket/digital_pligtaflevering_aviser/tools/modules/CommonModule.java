@@ -8,6 +8,7 @@ import javax.inject.Named;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolMXBean.JMX_OBJECT_NAME;
+import javax.enterprise.inject.Produces;
 
 /**
  * Module containing providers for typical DPA Dagger dependencies.
@@ -25,6 +26,7 @@ public class CommonModule {
      * @param map configuration map
      * @return String describing the git commit id (if provided) otherwise default to "(non-production)"
      */
+    @Produces
     @Provides
     @Named(DPA_GIT_ID)
     String provideGitId(ConfigurationMap map) {
@@ -37,6 +39,7 @@ public class CommonModule {
      * @param map configuration map
      * @return the ObjectName string to use.
      */
+    @Produces
     @Provides
     @Named(JMX_OBJECT_NAME)
     String provideJmxObjectName(ConfigurationMap map) {

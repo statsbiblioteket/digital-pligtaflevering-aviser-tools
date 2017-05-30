@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.EventQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -39,18 +40,22 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDOR
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.SBOI_PAGESIZE;
 import static java.util.Arrays.asList;
+import javax.enterprise.inject.Produces;
 
 /**
  * DOMS configuration string lookup providers.
  */
 @Module
 public class DomsModule {
+
+    
     /**
-     * URL for accessing the DOMS repository.  No default value.
+     * URL for accessing the DOMS repository. No default value.
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(DOMS_URL)
     public String provideDomsURL(ConfigurationMap map) {
@@ -58,11 +63,12 @@ public class DomsModule {
     }
 
     /**
-     * Username for accessing DOMS.  No default.
+     * Username for accessing DOMS. No default.
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(DOMS_USERNAME)
     public String provideDomsUserName(ConfigurationMap map) {
@@ -70,11 +76,12 @@ public class DomsModule {
     }
 
     /**
-     * URL for DOMS pid generator.  No default
+     * URL for DOMS pid generator. No default
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(DOMS_PIDGENERATOR_URL)
     public String provideDomsPidGeneratorURL(ConfigurationMap map) {
@@ -87,6 +94,7 @@ public class DomsModule {
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER)
     public String provideBatcFolderPath(ConfigurationMap map) {
@@ -94,11 +102,12 @@ public class DomsModule {
     }
 
     /**
-     * Password for accessing DOMS.  No default.
+     * Password for accessing DOMS. No default.
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(DOMS_PASSWORD)
     public String provideDomsPassword(ConfigurationMap map) {
@@ -106,12 +115,12 @@ public class DomsModule {
     }
 
     /**
-     * URL for accessing SBOI.  No default
+     * URL for accessing SBOI. No default
      *
      * @param map configuration map containing the value.
      * @return
      */
-
+    @Produces
     @Provides
     @Named(AUTONOMOUS_SBOI_URL)
     public String provideSummaLocation(ConfigurationMap map) {
@@ -121,7 +130,7 @@ public class DomsModule {
     /**
      * Number of retries for retrieving data from DOMS Fedora before giving up.
      */
-
+    @Produces
     @Provides
     @Named(FEDORA_RETRIES)
     public int getFedoraRetries(ConfigurationMap map) {
@@ -129,9 +138,10 @@ public class DomsModule {
     }
 
     /**
-     * Delay between retries for retrieving data from DOMS Fedora before giving up.
+     * Delay between retries for retrieving data from DOMS Fedora before giving
+     * up.
      */
-
+    @Produces
     @Provides
     @Named(FEDORA_DELAY_BETWEEN_RETRIES)
     public int getFedoraDelayBetweenRetries(ConfigurationMap map) {
@@ -139,11 +149,13 @@ public class DomsModule {
     }
 
     /**
-     * Create Modified_SBOIEventIndex from dependencies provided by Dagger so we can search in the right collection.
+     * Create Modified_SBOIEventIndex from dependencies provided by Dagger so we
+     * can search in the right collection.
      */
+    @Produces
     @Provides
     public SBOIEventIndex<Item> provideSBOIEventIndex(
-                    @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
+            @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
             PremisManipulatorFactory<Item> premisManipulatorFactory,
             DomsEventStorage<Item> domsEventStorage,
             @Named(SBOI_PAGESIZE) int pageSize,
@@ -157,11 +169,13 @@ public class DomsModule {
     }
 
     /**
-     * Provider to give PremisManipulatorFactory as we cannot modify the actual constructor with the Dagger annotations.
+     * Provider to give PremisManipulatorFactory as we cannot modify the actual
+     * constructor with the Dagger annotations.
      *
      * @param itemFactory factory to create new, empty items.
      * @return factory
      */
+    @Produces
     @Provides
     public PremisManipulatorFactory<Item> providePremisManipulatorFactory(ItemFactory<Item> itemFactory) {
         try {
@@ -176,13 +190,14 @@ public class DomsModule {
     /**
      * Create DomsEventStorage factory using appropriate
      *
-     * @param domsURL             URL to contact DOMS
+     * @param domsURL URL to contact DOMS
      * @param domsPidGeneratorURL URL to contact PID generator web service.
-     * @param domsUserName        DOMS user name
-     * @param domsPassword        DOMS password
-     * @param itemFactory         factory for new fresh items for JAXB to populate.
+     * @param domsUserName DOMS user name
+     * @param domsPassword DOMS password
+     * @param itemFactory factory for new fresh items for JAXB to populate.
      * @return
      */
+    @Produces
     @Provides
     public DomsEventStorage<Item> provideDomsEventStorage(
             @Named(DOMS_URL) String domsURL,
@@ -204,6 +219,7 @@ public class DomsModule {
         }
     }
 
+    @Produces
     @Provides
     public EnhancedFedora provideEnhancedFedora(
             @Named(DOMS_USERNAME) String domsUserName,
@@ -223,29 +239,33 @@ public class DomsModule {
                     null, // FIXME:  What is this?  Goes in the description?
                     fedoraRetries,
                     fedoraDelayBetweenRetries);
-        } catch (JAXBException | PIDGeneratorException |
-                MalformedURLException e) {
+        } catch (JAXBException | PIDGeneratorException
+                | MalformedURLException e) {
             throw new RuntimeException("EnhancedFedoraImpl constructor failed");
         }
         return eFedora;
     }
 
     /**
-     * Extracts a EventQuerySpecification from configuration parameters.  The semantics are the same as
-     * for the Newspaper Autonomous components.
+     * Extracts a EventQuerySpecification from configuration parameters. The
+     * semantics are the same as for the Newspaper Autonomous components.
      *
-     * @param pastSuccessfulEvents Comma separated list of event names which must have been completed successfully
-     *                             previously for item to be considered.  An empty string will include template objects
-     *                             which is seldomly wanted.
-     * @param futureEvents         Comma separated list of events which must not have happened yet regardless of their
-     *                             outcome.
-     * @param oldEvents            Comma separated list of events which 1) must never have happened, or 2) have happened
-     *                             but a datastream (any datastream other than EVENTS which holds the events) have been
-     *                             written to since that event occured (the time stamp of the datastream is newer than
-     *                             the time stamp of the event).
-     * @param itemTypes            Comma separated list of types which item MUST have to be considered.
+     * @param pastSuccessfulEvents Comma separated list of event names which
+     * must have been completed successfully previously for item to be
+     * considered. An empty string will include template objects which is
+     * seldomly wanted.
+     * @param futureEvents Comma separated list of events which must not have
+     * happened yet regardless of their outcome.
+     * @param oldEvents Comma separated list of events which 1) must never have
+     * happened, or 2) have happened but a datastream (any datastream other than
+     * EVENTS which holds the events) have been written to since that event
+     * occured (the time stamp of the datastream is newer than the time stamp of
+     * the event).
+     * @param itemTypes Comma separated list of types which item MUST have to be
+     * considered.
      * @return
      */
+    @Produces
     @Provides
     public QuerySpecification providesWorkToDoQuerySpecification(
             @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS) String pastSuccessfulEvents,
@@ -261,11 +281,13 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of events which must have been completed successfully previously for item to be considered.
+     * Comma separated list of events which must have been completed
+     * successfully previously for item to be considered.
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(AUTONOMOUS_PAST_SUCCESSFUL_EVENTS)
     public String providePastSuccesfulEvents(ConfigurationMap map) {
@@ -273,12 +295,13 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of events which may not yet have happened (FIXME:  Successfully?) for item to be
-     * considered.
+     * Comma separated list of events which may not yet have happened (FIXME:
+     * Successfully?) for item to be considered.
      *
      * @param map configuration map containing the value.
      * @return
      */
+    @Produces
     @Provides
     @Named(AUTONOMOUS_FUTURE_EVENTS)
     public String provideFutureEvents(ConfigurationMap map) {
@@ -286,12 +309,14 @@ public class DomsModule {
     }
 
     /**
-     * Comma separated list of events which (FIXME:  what exactly?) for item to be considered.
+     * Comma separated list of events which (FIXME: what exactly?) for item to
+     * be considered.
      *
      * @param map configuration map containing the value.
      * @return
      */
     @Provides
+    @Produces
     @Named(AUTONOMOUS_OLD_EVENTS)
     public String provideOldEvents(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_OLD_EVENTS);
@@ -304,24 +329,27 @@ public class DomsModule {
      * @return configuration value (mandatory)
      */
     @Provides
+    @Produces
     @Named(AUTONOMOUS_ITEM_TYPES)
     public String provideItemTypes(ConfigurationMap map) {
         return map.getRequired(AUTONOMOUS_ITEM_TYPES);
     }
 
     /**
-     * This creates a configured WebResource which can talk to Fedora based on the
-     * credentials given in the configuration map.  For historical reasons
-     * (meaning to be compatible with the existing configuration files) we do the same silent adding
-     * on "/objects/" as was done in IteratorForFedora3 constructor in item-event-framework-common.
+     * This creates a configured WebResource which can talk to Fedora based on
+     * the credentials given in the configuration map. For historical reasons
+     * (meaning to be compatible with the existing configuration files) we do
+     * the same silent adding on "/objects/" as was done in IteratorForFedora3
+     * constructor in item-event-framework-common.
      *
-     * @param domsUrl      url to Fedora Commons instance
+     * @param domsUrl url to Fedora Commons instance
      * @param domsUsername username for Fedora Commons instance
      * @param domsPassword password for Fedora Commons instance
      * @return ready-to-use WebResource for Fedora Commons interaction.
      */
     @Provides
-    public WebResource provideConfiguredFedoraWebResource(
+    @Produces
+    @Named(DomsId.DPA_WEBRESOURCE) public WebResource provideConfiguredFedoraWebResource(
             @Named(DOMS_URL) String domsUrl,
             @Named(DOMS_USERNAME) String domsUsername,
             @Named(DOMS_PASSWORD) String domsPassword) {
@@ -335,14 +363,16 @@ public class DomsModule {
      * Return the number of responses in a single sboi query
      */
     @Provides
+    @Produces
     @Named(SBOI_PAGESIZE)
     public Integer providePageSize(ConfigurationMap map) {
         return Integer.valueOf(map.getRequired(SBOI_PAGESIZE));
     }
 
     @Provides
+    @Produces
     @Named(DOMS_COLLECTION)
-    public String provideDomsCollection(ConfigurationMap map){
+    public String provideDomsCollection(ConfigurationMap map) {
         return map.getRequired(DOMS_COLLECTION);
     }
 
