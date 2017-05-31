@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 
 /** TODO:  TEMPORAY DUMMY CLASS FOR TESTING.
  *
@@ -28,14 +29,15 @@ public class NewClass {
 //    public String produceDomsUsername() {
 //        return "DOMSUSERNAME!";
 //    }
-    @javax.enterprise.inject.Produces
-    public ConfigurationMap produceConfigurationMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("doms.password", "PASSWORD");
-
-        ConfigurationMap map2 = new ConfigurationMap(map);
-        return map2;
-    }
+//    @javax.enterprise.inject.Produces
+//    public ConfigurationMap produceConfigurationMap(ServletContext servletContext) {
+//        Map<String, String> map = new HashMap<>();
+//        map.put("doms.username", servletContext.getInitParameter("doms.username"));
+//        map.put("doms.password", "PASSWORD");
+//
+//        ConfigurationMap map2 = new ConfigurationMap(map);
+//        return map2;
+//    }
 
 //    @javax.enterprise.inject.Produces
 //    @javax.inject.Named("doms.password")
@@ -47,10 +49,10 @@ public class NewClass {
  //       throw new IllegalStateException();
  //   }
 
-    @Produces
-    public DomsRepository produceDomsRepository() {
-        throw new IllegalStateException();
-    }
+//    @Produces
+//    public DomsRepository produceDomsRepository() {
+//        throw new IllegalStateException();
+//    }
 
     @Produces
     public DefaultToolMXBean produceDefaultToolMXBean() {
