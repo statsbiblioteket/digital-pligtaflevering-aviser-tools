@@ -23,6 +23,7 @@ import java.util.function.Function;
  * (there is currently no
  * official solution to using Dagger 2 with web servers).
  */
+@Deprecated
 public class RepositoryConfigurator implements Function<ConfigurationMap, DomsRepository> {
 
     @Override
