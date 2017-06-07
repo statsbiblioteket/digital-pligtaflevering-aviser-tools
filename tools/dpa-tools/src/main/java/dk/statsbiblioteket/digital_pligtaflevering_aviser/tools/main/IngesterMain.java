@@ -46,6 +46,7 @@ import org.bitrepository.protocol.security.PermissionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -84,19 +85,22 @@ public class IngesterMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, IngesterModule.class, BitRepositoryModule.class})
     protected interface DomsIngesterComponent {
+
         Tool getTool();
     }
 
     @Module
-    protected static class IngesterModule {
+    public static class IngesterModule {
+
         Logger log = LoggerFactory.getLogger(this.getClass());
 
+        @Produces
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                         QuerySpecification workToDoQuery,
-                         DomsRepository repository,
-                         FileSystemDeliveryIngester ingester,
-                         DefaultToolMXBean mxBean
+                QuerySpecification workToDoQuery,
+                DomsRepository repository,
+                FileSystemDeliveryIngester ingester,
+                DefaultToolMXBean mxBean
         ) {
 
             return () -> {
@@ -115,25 +119,28 @@ public class IngesterMain {
         }
 
         /**
-         * This is the folder have been put so we can locate the files corresponding to the trigger.
+         * This is the folder have been put so we can locate the files
+         * corresponding to the trigger.
          *
          * @param map configuration map
          * @return
          */
         @Provides
+        @Produces
         @Named(DPA_DELIVERIES_FOLDER)
         String provideDeliveriesFolder(ConfigurationMap map) {
             return map.getRequired(DPA_DELIVERIES_FOLDER);
         }
 
         /**
-         * The path where PutfileClientStub places files
-         * This path is only used by the stub and not the real bitrepositoryIngester
+         * The path where PutfileClientStub places files This path is only used
+         * by the stub and not the real bitrepositoryIngester
          *
          * @param map
          * @return
          */
         @Provides
+        @Produces
         @Named(DPA_PUTFILE_DESTINATION)
         String provideDestinationPath(ConfigurationMap map) {
             return map.getRequired(DPA_PUTFILE_DESTINATION);
@@ -146,30 +153,35 @@ public class IngesterMain {
          * @return
          */
         @Provides
+        @Produces
         @Named(DPA_TEST_MODE)
         String provideTestMode(ConfigurationMap map) {
             return map.getRequired(DPA_TEST_MODE);
         }
 
         /**
-         * The ID of this collection, the ID has to match the id of the collection created in fedora
+         * The ID of this collection, the ID has to match the id of the
+         * collection created in fedora
          *
          * @param map
          * @return
          */
         @Provides
+        @Produces
         @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID)
         String provideIngesterId(ConfigurationMap map) {
             return map.getRequired(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID);
         }
 
         /**
-         * 'base' path to where batch/deliverable can be found by bitrepositoryClient
+         * 'base' path to where batch/deliverable can be found by
+         * bitrepositoryClient
          *
          * @param map
          * @return
          */
         @Provides
+        @Produces
         @Named(URL_TO_BATCH_DIR_PROPERTY)
         String provideUrlToBetrepositorysBatchPath(ConfigurationMap map) {
             return map.getRequired(URL_TO_BATCH_DIR_PROPERTY);
@@ -182,6 +194,7 @@ public class IngesterMain {
          * @return
          */
         @Provides
+        @Produces
         @Named(IngesterConfiguration.SETTINGS_DIR_PROPERTY)
         String provideSettingsProperty(ConfigurationMap map) {
             return map.getRequired(IngesterConfiguration.SETTINGS_DIR_PROPERTY);
@@ -193,34 +206,39 @@ public class IngesterMain {
          * @param map
          * @return
          */
+        @Produces
         @Provides
         @Named(IngesterConfiguration.CERTIFICATE_PROPERTY)
         String provideCertificateProperty(ConfigurationMap map) {
             return map.getRequired(IngesterConfiguration.CERTIFICATE_PROPERTY);
         }
 
+        @Produces
         @Provides
         ItemFactory<Item> provideItemFactory() {
             return id -> new Item();
         }
 
         /**
-         * returns a comma-separated set of filenames (without path) to ignore when traversing the file tree.
-         * Naming is kept the same as in Avisprojektet to keep configuration files similar
+         * returns a comma-separated set of filenames (without path) to ignore
+         * when traversing the file tree. Naming is kept the same as in
+         * Avisprojektet to keep configuration files similar
          *
          * @param map configuration map
          * @return string with comma separated file names.
          */
+        @Produces
         @Provides
         @Named(ITERATOR_FILESYSTEM_IGNOREDFILES)
         String provideFilesystemIgnoredFiles(ConfigurationMap map) {
             return map.getRequired(ITERATOR_FILESYSTEM_IGNOREDFILES);
         }
 
+        @Produces
         @Provides
         DBSearchRest provideDBSearchRest(@Named(DOMS_URL) String domsUrl,
-                                         @Named(DOMS_USERNAME) String domsUsername,
-                                         @Named(DOMS_PASSWORD) String domsPassword) {
+                @Named(DOMS_USERNAME) String domsUsername,
+                @Named(DOMS_PASSWORD) String domsPassword) {
             try {
                 return new DBSearchRest(new Credentials(domsUsername, domsPassword), domsUrl);
             } catch (MalformedURLException e) {
@@ -231,21 +249,24 @@ public class IngesterMain {
         /**
          * Provides PutClient for interfacing to bitrepository
          *
-         * @param testMode            If true a testclient is returned
-         * @param dpaIngesterId       The ID of the collection, the ID has to match the id of the collection created in
-         *                            fedora
-         * @param destination         The destination where the client places the files
-         * @param settingDir          The folder where settings for bitrepositoryClient is placed
-         * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
+         * @param testMode If true a testclient is returned
+         * @param dpaIngesterId The ID of the collection, the ID has to match
+         * the id of the collection created in fedora
+         * @param destination The destination where the client places the files
+         * @param settingDir The folder where settings for bitrepositoryClient
+         * is placed
+         * @param certificateProperty The name of the certificate-file bor
+         * bitrepositoryClient
          * @return PutFileClient
          */
+        @Produces
         @Provides
         AutoCloseablePutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
-                                                        @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
-                                                        @Named(DPA_PUTFILE_DESTINATION) String destination,
-                                                        @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                                                        @Named(CERTIFICATE_PROPERTY) String certificateProperty,
-                                                        Settings settings) {
+                @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
+                @Named(DPA_PUTFILE_DESTINATION) String destination,
+                @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                @Named(CERTIFICATE_PROPERTY) String certificateProperty,
+                Settings settings) {
 
             final AutoCloseablePutFileClient putClient;
             if (Boolean.parseBoolean(testMode)) {
@@ -287,25 +308,30 @@ public class IngesterMain {
         }
 
         /**
-         * Provide settings for PutfileClient and for EventHandler listening for the events from ingesting
+         * Provide settings for PutfileClient and for EventHandler listening for
+         * the events from ingesting
          *
          * @param dpaIngesterId The ID of the collection
-         * @param settingDir    The directory where the collection is located seen from the putFileClient
+         * @param settingDir The directory where the collection is located seen
+         * from the putFileClient
          * @return Settings for putfile PutfileClient and EventHandler
          */
+        @Produces
         @Provides
         Settings provideSettings(@Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
-                                 @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
+                @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
             SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
             final Settings settings = settingsLoader.getSettings();
             return settings;
         }
 
         /**
-         * Provide Function for converting filePath into an ID which is suitable for bitRepository
+         * Provide Function for converting filePath into an ID which is suitable
+         * for bitRepository
          *
          * @return and ID for the fileContent
          */
+        @Produces
         @Provides
         FileNameToFileIDConverter provideFileNameToFileIDConverter() {
             //For creating flat filestructure for ingested files
@@ -316,25 +342,29 @@ public class IngesterMain {
         }
 
         /**
-         * Provide Function for converting filePath to the path relative to where the delivery is located
+         * Provide Function for converting filePath to the path relative to
+         * where the delivery is located
          *
          * @return and ID for the fileContent
          */
+        @Produces
         @Provides
         public FilePathToChecksumPathConverter provideFilePathConverter() {
             //This should be used for the checksums in the specifications
             return (path1, deliveryFolderName) -> Paths.get(deliveryFolderName).relativize(path1).toString();
         }
 
+        @Produces
         @Provides
         public Function<Path, Stream<Path>> provideDeliveriesForAbsolutePath() {
-            return absolutePath -> Try.of(() ->
-                    Files.walk(absolutePath, 1)
+            return absolutePath -> Try.of(()
+                    -> Files.walk(absolutePath, 1)
                             .filter(Files::isRegularFile)
                             .sorted()
             ).get();
         }
 
+        @Produces
         @Provides
         Function<List<ToolResult>, String> provideEventMessageForToolResults() {
             return toolResults -> new ToolResultReport().apply(toolResults.stream());

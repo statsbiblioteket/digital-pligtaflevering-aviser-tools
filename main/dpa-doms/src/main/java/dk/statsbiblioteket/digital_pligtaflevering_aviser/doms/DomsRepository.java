@@ -59,7 +59,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource,
+    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
                           EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                           @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
                           @Named(DOMS_COLLECTION) String recordBase) {

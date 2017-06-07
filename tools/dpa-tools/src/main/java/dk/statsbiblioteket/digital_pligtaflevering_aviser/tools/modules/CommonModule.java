@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 
+import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
@@ -25,6 +26,7 @@ public class CommonModule {
      * @param map configuration map
      * @return String describing the git commit id (if provided) otherwise default to "(non-production)"
      */
+    @Produces
     @Provides
     @Named(DPA_GIT_ID)
     String provideGitId(ConfigurationMap map) {
@@ -37,6 +39,7 @@ public class CommonModule {
      * @param map configuration map
      * @return the ObjectName string to use.
      */
+    @Produces
     @Provides
     @Named(JMX_OBJECT_NAME)
     String provideJmxObjectName(ConfigurationMap map) {
