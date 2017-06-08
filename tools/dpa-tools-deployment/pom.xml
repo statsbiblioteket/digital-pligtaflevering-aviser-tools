@@ -174,7 +174,7 @@
                                 <!-- consider getting this automatically - http://stackoverflow.com/q/4107498/53897 -->
                                 <program>
                                     <mainClass>
-                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.localhost.CreateDeliveryMain
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CreateDeliveryMain
                                     </mainClass>
                                     <id>dpa-create-delivery</id>
                                 </program>
