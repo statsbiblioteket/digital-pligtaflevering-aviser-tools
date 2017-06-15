@@ -1,20 +1,11 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
-import javaslang.control.Try;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 
-import javax.inject.Named;
-import javax.inject.Provider;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,16 +18,30 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import javax.inject.Named;
+import javax.inject.Provider;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
+import javaslang.control.Try;
 
 /**
  * Unfinished create batch trigger main.
  */
 public class CreateDeliveryMain {
+
+    public static final String TRANSFER_COMPLETE = "transfer_complete";
+
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
@@ -81,8 +86,9 @@ public class CreateDeliveryMain {
                 // Iterate through the deliveries on disk
                 final Stream<Path> paths = deliveriesToCreateProvider.get();
                 String joinedString = paths.map(deliveryItemDirectoryPath -> {
+                    // Files.exists(p.resolve(TRANSFER_COMPLETE))?
                     File deliveryItemDirectory = deliveryItemDirectoryPath.toFile();
-                    final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, "transfer_complete");
+                    final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, TRANSFER_COMPLETE);
                     if (doneDeliveryIndicatorFile.exists()) {
                         //Split into a part with deliveryname and one with mutation
                         // Std. Delivery: dl_########_rt#
@@ -128,17 +134,27 @@ public class CreateDeliveryMain {
         }
 
         /**
-         * Identify all folders in deliveryFolderName and <i>reverse them</i>.  Reversing them mean that "A_rt2" will be
-         * processed before "A_rt1" so when "A_rt1" is considered there is already "A_rt2" present for delivery "A".
-         * (This only works properly up to 9 roundtrips, but that should hopefully be rare).
+         * <p>
+         * Locate deliveries in the current folder and below in reverse order
+         * (by looking for the transfer completed file).
+         * </p>
          *
-         * @param deliveryFolderName Path name for delivery folder (containing deliveries).
+         * <p>
+         * Reversing them mean that "A_rt2" will be processed before "A_rt1" so
+         * when "A_rt1" is considered there is already "A_rt2" present for
+         * delivery "A". (This only works properly up to 9 roundtrips, but that
+         * should hopefully be rare).
+         * </p>
+         *
+         * @param deliveryFolderName
+         *            Path name for delivery folder (containing deliveries).
          * @return Reverse sorted stream of paths of deliveries.
          */
         @Provides
         Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName) {
-            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName), 1)
+            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName),1 )
                     .filter(Files::isDirectory)
+                    .filter(p -> Files.exists(p.resolve(TRANSFER_COMPLETE)))
                     .sorted(Comparator.reverseOrder())
             ).get();
         }

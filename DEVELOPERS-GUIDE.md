@@ -75,6 +75,88 @@ for Tomcat.
 The snippet is also present in dpa-dashboard/dashboard.xml which is packaged with the
 war file in the deployment tarball.
 
+(Note that the manual control web app written by MMJ has a embedded Jetty launcher running
+as a normal Java application invoking `main(...)`).
+
+Glassfish 4:
+---
+
+As of 2017-05-29 TRA found that for Glassfish 4 the simplest way to get the container configured, insert
+the following in $GLASSFISH/domains/domain1/config/default-web.xml right after the `<web-app ...>` root tag.
+
+
+    <context-param>
+        <param-name>autonomous.sboi.url</param-name>
+        <param-value>http://localhost:58608/newspapr/sbsolr/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>doms.username</param-name>
+        <param-value>fedoraAdmin</param-value>
+    </context-param>
+    <context-param>
+        <param-name>doms.password</param-name>
+        <param-value>fedoraAdminPass</param-value>
+    </context-param>
+    <context-param>
+        <param-name>doms.pidgenerator.url</param-name>
+        <param-value>http://localhost:7880/pidgenerator-service</param-value>
+    </context-param>
+    <context-param>
+        <param-name>doms.url</param-name>
+        <param-value>http://localhost:7880/fedora</param-value>
+    </context-param>
+    <context-param>
+        <param-name>pageSize</param-name>
+        <param-value>10</param-value>
+    </context-param>
+    <context-param>
+        <param-name>jvm.dumpheap</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
+        <param-name>bitrepository.ingester.baseurl</param-name>
+        <param-value>http://localhost:58709/</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.pastSuccessfulEvents</param-name>
+        <param-value>Data_Archived</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.oldEvents</param-name>
+        <param-value></param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.itemTypes</param-name>
+        <param-value>doms:ContentModel_DPARoundTrip</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.sboi.pageSize</param-name>
+        <param-value>100</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.futureEvents</param-name>
+        <param-value>XML_validated,Manually_stopped</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.thisEvent</param-name>
+        <param-value>XML_validated</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.component.fedoraRetries</param-name>
+        <param-value>10</param-value>
+    </context-param>
+    <context-param>
+        <param-name>autonomous.component.fedoraDelayBetweenRetries</param-name>
+        <param-value>10</param-value>
+    </context-param>
+    <context-param>
+        <param-name>doms.collection.pid</param-name>
+        <param-value>doms_sboi_dpaCollection</param-value>
+    </context-param>
+    
+
+
+
 IntelliJ
 --
 

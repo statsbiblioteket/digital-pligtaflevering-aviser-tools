@@ -2,7 +2,31 @@
 
 set -e
 
+# First add the extra disk and extend the root volume.
+#
+# Adapted from https://www.rootusers.com/how-to-increase-the-size-of-a-linux-lvm-by-adding-a-new-disk/
+
+fdisk /dev/sdb << EOF
+n
+p
+1
+
+
+t
+8e
+w
+EOF
+
+pvcreate /dev/sdb1
+vgextend vagrant-vg /dev/sdb1
+lvextend -r /dev/vagrant-vg/root /dev/sdb1
+
+# ---
+# Now continue installing stuff
+
 ln -s /vagrant/nohup.out /home/vagrant/nohup.out
+
+
 
 apt-get update > /dev/null
 apt-get install -y zip unzip openjdk-7-jdk zookeeperd git xmlstarlet

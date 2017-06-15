@@ -11,7 +11,8 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Note:  This is not the officially recommended box!  See https://www.vagrantup.com/docs/boxes.html
-  config.vm.box = "ubuntu/trusty64"
+  #config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "bento/ubuntu-14.04"
   # Initial experiments with xenial64 showed that the image is not completely ready yet.
   # config.vm.box = "ubuntu/xenial64"
 
@@ -47,6 +48,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "virtualbox" do |v|
     v.memory = 8192
     v.cpus = 2 # or more for heavy load
+    # https://stackoverflow.com/a/27878224/53897
+    v.customize ["createhd",  "--filename", "m4_disk0", "--size", "1048576"] # 1 TB
+    v.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd", "--medium", "m4_disk0.vdi"]
   end
 
   # for jvisualvm

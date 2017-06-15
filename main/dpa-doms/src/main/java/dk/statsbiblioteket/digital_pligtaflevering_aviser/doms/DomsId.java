@@ -5,9 +5,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 import java.util.Objects;
 
 /**
- * A DomsId is a typed string uniquely identifying an object in DOMS.  It does not know of anything else.
+ * A DomsId is a typed string uniquely identifying an object in DOMS. It does
+ * not know of anything else.
  */
 public class DomsId implements Id {
+
+    public final static String DPA_WEBRESOURCE = "dpa.webresource";
 
     private String id;
 
@@ -22,15 +25,19 @@ public class DomsId implements Id {
 
     @Override
     public String toString() {
-        return "DomsId{" +
-                "id='" + id + '\'' +
-                '}';
+        return "DomsId{"
+                + "id='" + id + '\''
+                + '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         DomsId domsId = (DomsId) o;
 

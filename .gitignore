@@ -13,3 +13,5 @@ buildNumber.properties
 *.hprof
 /.vagrant/
 /vagrant/scripts/nohup.out
+/m4_disk0.vdi
+/tools/dpa-dashboard/nb-configuration.xml

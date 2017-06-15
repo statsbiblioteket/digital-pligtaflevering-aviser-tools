@@ -13,8 +13,9 @@
 <html>
 <body>
 
-<h1>Ingested files</h1>
+<h1>Queried entries</h1>
 <%
+    /*
     {
         ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
@@ -31,7 +32,12 @@
         List<DomsItem> l = repository.query(querySpecification).collect(Collectors.toList());
         request.setAttribute("l", l);
     }
+*/
 %>
+<form action="ExecuteQ">
+    <textarea name="q" id="" cols="50" rows="2">${param.q}</textarea>
+    <input type="submit" value="Go" />
+</form>
 
 <c:forEach items="${l}" var="item">
     <h2><a href="showItem.jsp?id=${item.domsId.id()}">${item.path}</a></h2>
@@ -56,12 +62,7 @@
             </c:if>
         </c:forEach>
     </table>
-    <form action='setEventOnItem.jsp' method="get">
-        <input type="hidden" name="id" value="${item.domsId.id()}"/>
-        <input type="hidden" name="e" value="Manually_stopped"/>
-        <input type='submit' value='Set Manually_stopped'/>
-    </form>
-</c:forEach>
+ </c:forEach>
 
 <hr/>
 <%= new java.util.Date() %>

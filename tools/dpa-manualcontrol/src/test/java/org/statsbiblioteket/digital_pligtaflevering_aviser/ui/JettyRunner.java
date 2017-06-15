@@ -30,7 +30,7 @@ public class JettyRunner {
         Server server = new Server(8080);
 
         Path warPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.war");
-        Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.xml");
+        Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
         InputStream in = new FileInputStream(xmlPath.toFile());
         InputSource inputSource = new InputSource(new InputStreamReader(in));
