@@ -152,7 +152,7 @@ public class CreateDeliveryMain {
          */
         @Provides
         Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName) {
-            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName))
+            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName),1 )
                     .filter(Files::isDirectory)
                     .filter(p -> Files.exists(p.resolve(TRANSFER_COMPLETE)))
                     .sorted(Comparator.reverseOrder())
