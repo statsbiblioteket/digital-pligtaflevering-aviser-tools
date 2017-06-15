@@ -27,6 +27,8 @@
         </dependency>
         
         <!-- https://mvnrepository.com/artifact/javax.enterprise/cdi-api -->
+        <!-- to give @Produces -->
+
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>

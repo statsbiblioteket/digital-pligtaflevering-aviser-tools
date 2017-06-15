@@ -11,7 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
+ *  A TryFinisher converts a list of <tt>Try&lt;A></tt></pre> into a String.  The successful
+ *  ones are rendered by the renderResultFunction, and the failed (which threw an exception) ones
+ *  have their stack traces added.   This is useful for creating event descriptions from
+ *  multiple tasks.
  */
 public class TryFinisher<A> implements Function<List<Try<A>>, String> {
     private final Function<Stream<A>, String> renderResultFunction;

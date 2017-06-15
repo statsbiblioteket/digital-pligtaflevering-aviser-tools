@@ -293,8 +293,14 @@
             <plugin>
                 <!-- https://maven.apache.org/plugins/maven-assembly-plugin/usage.html -->
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <!-- 2.6 is latest supporting finalName as is - https://issues.apache.org/jira/browse/MJAR-233 -->
+                <version>2.6</version>
                 <configuration>
+                    <!-- get git info in name - https://stackoverflow.com/a/3269902/53897 -->
+                    <!--suppress MavenModelInspection -->
+                    <finalName>dpa_${git.branch}_${git.commit.id.abbrev}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
