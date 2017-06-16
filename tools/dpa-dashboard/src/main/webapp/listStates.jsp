@@ -27,11 +27,11 @@
     <th>Antal</th>
     <tr>
         <td>
-            <a href="stateFailed.jsp">Mislykkedes</a>
+            <a href="stateFailed.jsp">Ingest fejlet</a>
         </td>
         <td align="right">
             <%=
-            repository.count(new SBOIQuerySpecification(""))
+            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_FAILED))
             %>
         </td>
     </tr>
@@ -41,7 +41,7 @@
         </td>
         <td align="right">
             <%=
-            repository.count(new SBOIQuerySpecification(""))
+            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_MANUAL_CONTROL))
             %>
         </td>
     </tr>
