@@ -24,20 +24,7 @@
 Id: ${item.domsId.id()}
 
 <p/>
-<table border="1" style="border-collapse:collapse;">
-    <c:forEach var="event" items="${item.originalEvents}">
-        <tr>
-            <td><c:out value="${event.success}"/></td>
-            <td><c:out value="${event.eventID}"/></td>
-            <td><c:out value="${event.date}"/></td>
-        </tr>
-        <c:if test="${not empty event.details}">
-            <tr>
-                <td colspan="3"><i>${event.details}</i></td>
-            </tr>
-        </c:if>
-    </c:forEach>
-</table>
+<%@include file="WEB-INF/listItemEvents.jsp"%>
 <p/>
 Data streams:
 

@@ -27,7 +27,7 @@
     <th>Antal</th>
     <tr>
         <td>
-            <a href="stateFailed.jsp">Ingest fejlet</a>
+            <a href="StateIngestFailed">Ingest fejlet</a>
         </td>
         <td align="right">
             <%=
@@ -37,7 +37,7 @@
     </tr>
     <tr>
         <td>
-            <a href="stateManuallyStopped.jsp">Stoppet manuelt</a>
+            <a href="StateManuallyStopped">Stoppet manuelt</a>
         </td>
         <td align="right">
             <%=
@@ -47,7 +47,7 @@
     </tr>
     <tr>
         <td>
-            <a href="stateCreated.jsp">Klar til ingest</a>
+            <a href="StateCreated">Klar til ingest</a>
         </td>
         <td align="right">
             <%=
@@ -57,7 +57,7 @@
     </tr>
     <tr>
         <td>
-            <a href="stateIngested.jsp">Ingestet</a>
+            <a href="StateIngested">Ingestet</a>
         </td>
         <td align="right">
             <%=

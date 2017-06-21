@@ -21,9 +21,12 @@ public class SBOIConstants {
      *
      */
     public static final String Q_INGEST_FAILED = " and +event:\"Data_Archived\" and -success_event:\"Data_Archived\" and -event:\"Manually_stopped\"";
+    
+    public static final String Q_INGEST_SUCCESSFUL = "+item_model:\"doms:ContentModel_DPARoundTrip\" AND +success_event:Data_Archived";
     /**
      * query for those which has been put under manual_control.  This effectively stops every downstream processing.
      * 
      */
     public static final String Q_MANUAL_CONTROL = " and +event:\"Manually_stopped\"";
+    
 }
