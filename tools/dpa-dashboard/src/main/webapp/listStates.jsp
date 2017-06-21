@@ -37,7 +37,7 @@
     </tr>
     <tr>
         <td>
-            <a href="StateManuallyStopped">Stoppet manuelt</a>
+            <a href="StateManualControl">Manuelt styret</a>
         </td>
         <td align="right">
             <%=
