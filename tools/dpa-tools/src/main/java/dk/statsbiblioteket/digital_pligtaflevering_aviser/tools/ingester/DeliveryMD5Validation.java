@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,7 +84,7 @@ public class DeliveryMD5Validation {
 
         //Walk through the filesystem in that delivery and confirm that all files inside the delivery is also mentioned in the checksum-file
         //It is possible to indicate some specific files whish should be ignored, they is not part of the validation
-        Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()))
+        Files.walk(Paths.get(Paths.get(deliveryFolder, deliveryName).toFile().getAbsolutePath()), FileVisitOption.FOLLOW_LINKS)
                 .forEach(filePath -> {
                     if(Files.isRegularFile(filePath)) {
                         String fileIdMatchingChecksumfile = md5Convert.apply(filePath, deliveryFolder + "/" + deliveryName);

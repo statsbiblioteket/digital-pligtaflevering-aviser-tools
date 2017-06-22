@@ -27,26 +27,6 @@
     <th>Antal</th>
     <tr>
         <td>
-            <a href="StateIngestFailed">Ingest fejlet</a>
-        </td>
-        <td align="right">
-            <%=
-            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_FAILED))
-            %>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <a href="StateManualControl">Manuelt styret</a>
-        </td>
-        <td align="right">
-            <%=
-            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_MANUAL_CONTROL))
-            %>
-        </td>
-    </tr>
-    <tr>
-        <td>
             <a href="StateCreated">Klar til ingest</a>
         </td>
         <td align="right">
@@ -62,6 +42,26 @@
         <td align="right">
             <%=
             repository.count(new SBOIQuerySpecification("recordBase:doms_sboi_dpaCollection"))
+            %>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="StateIngestFailed">Ingest fejlet</a>
+        </td>
+        <td align="right">
+            <%=
+            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_FAILED))
+            %>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="StateManualControl">Manuelt styret</a>
+        </td>
+        <td align="right">
+            <%=
+            repository.count(new SBOIQuerySpecification(SBOIConstants.Q_MANUAL_CONTROL))
             %>
         </td>
     </tr>

@@ -68,15 +68,19 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModu
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
+import java.nio.file.FileVisitOption;
 import static java.nio.file.Files.walk;
 
 /**
- * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects.  One object for each
- * directory and one object for each file (some are ignored).  A <code>hasPart</code> relation is created between a
- * given object and the object for the parent directory it belongs to. </p><p>NOTE: FedoraRest.addRelations has a bug
- * occasionally invoking addRelation several times more than necessary.  For instance when called with just one object
- * id.  This leads to duplications of relations.  Therefore we treat a single relation as a special case.
- * See ABR for details. </p>
+ * <p>
+ * FileSystemIngester takes a given directory and creates a corresponding set of
+ * DOMS objects. One object for each directory and one object for each file
+ * (some are ignored). A <code>hasPart</code> relation is created between a
+ * given object and the object for the parent directory it belongs to. </p><p>
+ * NOTE: FedoraRest.addRelations has a bug occasionally invoking addRelation
+ * several times more than necessary. For instance when called with just one
+ * object id. This leads to duplications of relations. Therefore we treat a
+ * single relation as a special case. See ABR for details. </p>
  *
  * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument
  */
@@ -113,21 +117,21 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
-                                      @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
-                                      AutoCloseablePutFileClient putfileClient,
-                                      FileNameToFileIDConverter fileNameToFileIDConverter,
-                                      FilePathToChecksumPathConverter md5Convert,
-                                      @Named(BITREPOSITORY_INGESTER_COLLECTIONID) String bitrepositoryIngesterCollectionId,
-                                      @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
-                                      @Named(DomsId.DPA_WEBRESOURCE) WebResource restApi, 
-                                      EnhancedFedora efedora,
-                                      @Named(DPA_GIT_ID) String gitId,
-                                      @Named(DOMS_COLLECTION) String domsCollection,
-                                      @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
-                                      Function<Path, Stream<Path>> deliveriesForPath,
-                                      Function<List<ToolResult>, String> eventMessageForToolResults,
-                                      DefaultToolMXBean mxBean,
-                                      Settings settings) {
+            @Named(ITERATOR_FILESYSTEM_IGNOREDFILES) String ignoredFiles,
+            AutoCloseablePutFileClient putfileClient,
+            FileNameToFileIDConverter fileNameToFileIDConverter,
+            FilePathToChecksumPathConverter md5Convert,
+            @Named(BITREPOSITORY_INGESTER_COLLECTIONID) String bitrepositoryIngesterCollectionId,
+            @Named(URL_TO_BATCH_DIR_PROPERTY) String urlToBitmagBatchPath,
+            @Named(DomsId.DPA_WEBRESOURCE) WebResource restApi,
+            EnhancedFedora efedora,
+            @Named(DPA_GIT_ID) String gitId,
+            @Named(DOMS_COLLECTION) String domsCollection,
+            @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
+            Function<Path, Stream<Path>> deliveriesForPath,
+            Function<List<ToolResult>, String> eventMessageForToolResults,
+            DefaultToolMXBean mxBean,
+            Settings settings) {
         this.ignoredFiles = ignoredFiles;
         this.putfileClient = putfileClient;
         this.fileNameToFileIDConverter = fileNameToFileIDConverter;
@@ -152,21 +156,30 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     }
 
     /**
-     * For a given domsId we first have to locate the physical location of the delivery. <p>The convention is to get the
-     * Dublin Core identifiers and the one that starts with "path:" contains the path of the delivery directory relative
+     * For a given domsId we first have to locate the physical location of the
+     * delivery.
+     * <p>
+     * The convention is to get the Dublin Core identifiers and the one that
+     * starts with "path:" contains the path of the delivery directory relative
      * to the passed in rootDir.
      * <p>
-     * Then we can create the objects in DOMS corresponding to the files in the delivery directory as follows:
+     * Then we can create the objects in DOMS corresponding to the files in the
+     * delivery directory as follows:
      * <p>
-     * <ul> <li>Each directory becomes a DOMS object.</li> <li>A file group exist for all files with the same basename.
-     * For "a.pdf" and "a.xml" the file group is named "a" and the corresponding DOMS object will be named "A".</li>
-     * <li>Each directory DOMS object will have a "hasPart" RDF relation to the DOMS objects for the file groups and
-     * directories it contains.</li> <li>For binary files in a file group, the file will be ingested in the
-     * Bitrepository and a child DOMS object created with a CONTENTS datastream type "R" redirecting to the public URL
-     * for the file in the Bitrepository (which for the Statsbiblioteket pillar can be transformed to be resolved as a
-     * local file).  A "hasFile" relation is created from the file group object to the child object.</li> <li>For
-     * non-binary metadatafiles they are stored as a managed Fedora datastream type "M" named with the extension for the
-     * file.  ("a.xml" will be stored in the o.</li> </ul>
+     * <ul> <li>Each directory becomes a DOMS object.</li> <li>A file group
+     * exist for all files with the same basename. For "a.pdf" and "a.xml" the
+     * file group is named "a" and the corresponding DOMS object will be named
+     * "A".</li>
+     * <li>Each directory DOMS object will have a "hasPart" RDF relation to the
+     * DOMS objects for the file groups and directories it contains.</li>
+     * <li>For binary files in a file group, the file will be ingested in the
+     * Bitrepository and a child DOMS object created with a CONTENTS datastream
+     * type "R" redirecting to the public URL for the file in the Bitrepository
+     * (which for the Statsbiblioteket pillar can be transformed to be resolved
+     * as a local file). A "hasFile" relation is created from the file group
+     * object to the child object.</li> <li>For non-binary metadatafiles they
+     * are stored as a managed Fedora datastream type "M" named with the
+     * extension for the file. ("a.xml" will be stored in the o.</li> </ul>
      *
      * @param domsItem item as queried in DOMS
      * @param rootPath directory where to locate the delivery
@@ -203,7 +216,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         //  <dc:identifier>uuid:5a06c0ed-6324-4777-86b0-075fc972dcb4</dc:identifier>
         //  <dc:identifier>path:B20160811-RT1</dc:identifier>
         //</oai_dc:dc>
-
         XPath xPath = XPathFactory.newInstance().newXPath();
         NamespaceContextImpl context = new NamespaceContextImpl();
         context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
@@ -225,16 +237,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         // The one starting with "path:" is the one we need.  The rest of that string is the
         // filename in the local file system.
-
         // ["uuid:5a06c0ed-6324-4777-86b0-075fc972dcb4", "path:B20160811-RT1"]
-
         Optional<String> relativeFilenameFromDublinCore = textContent.stream()
                 .filter(s -> s.startsWith("path:"))
                 .map(s -> s.substring("path:".length()))
                 .findAny();
 
         // "B20160811-RT1"
-
         //noinspection PointlessBooleanExpression
         if (relativeFilenameFromDublinCore.isPresent() == false) {
             throw new RuntimeException("Could not get 'path:...' identifier");
@@ -256,7 +265,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
-
         mxBean.details = "Checking checksums for " + deliveryPath;
 
         DeliveryMD5Validation md5validations;
@@ -272,18 +280,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             throw new RuntimeException("Could not process checksums.txt", e);
         }
 
-            /* walk() guarantees that we have always seen the parent of a directory before we
+        /* walk() guarantees that we have always seen the parent of a directory before we
              see the directory itself.  This mean that we can rely of the parent being in DOMS */
-
         // Process folders in "longest string" order:
         // dl_20160811_rt1/verapdf/articles
         // dl_20160811_rt1/verapdf/pages
         // dl_20160811_rt1/verapdf
         // dl_20160811_rt1/
-
         final Stream<Path> pathStream;
         try {
-            pathStream = walk(deliveryPath);
+            pathStream = walk(deliveryPath, FileVisitOption.FOLLOW_LINKS);
         } catch (IOException e) {
             return Arrays.asList(ToolResult.fail(domsItem, "Could not walk " + deliveryPath));
         }
@@ -304,9 +310,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * Create a checksum-object based on a checksom-string
      *
      * @param checksum as a string to be base16 encoded.
-     * @return ChecksumDataForFileTYPE wrapper containing MD5 as the type,
-     * base 16 encoded version of passed in
-     * checksum, and "now" as the timestamp.
+     * @return ChecksumDataForFileTYPE wrapper containing MD5 as the type, base
+     * 16 encoded version of passed in checksum, and "now" as the timestamp.
      */
     private ChecksumDataForFileTYPE getChecksum(String checksum) {
         ChecksumDataForFileTYPE checksumData = new ChecksumDataForFileTYPE();
@@ -319,25 +324,28 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     }
 
     /**
-     * For the given directory: <ul> <li>Look up DOMS object for current "path:...".  If not found, create an empty DOMS
-     * object here called "DIRECTORYOBJECT" for the given directory itself.</li> <li>Create a DOMS object for each file
-     * (here called "FILEOBJECT").</li> <ul> <li>Create METADATA datastream for each metadata file.</li> <li>For each
-     * binary file, ingest the file in BitRepository and create CONTENTS datastream for the corresponding public
-     * BitRepository URL </li> </ul> <li>For each "FILEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart"
-     * "FILEOBJECT")-relation on "DIRECTORYOBJECT" </li> <li>For each subdirectory in this directory, lookup the child
-     * DOMS id using its relative Path and create a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on
-     * "DIRECTORYOBJECT". This will work because the subdirectories are processed first. </li> </ul>
+     * For the given directory: <ul> <li>Look up DOMS object for current
+     * "path:...". If not found, create an empty DOMS object here called
+     * "DIRECTORYOBJECT" for the given directory itself.</li> <li>Create a DOMS
+     * object for each file (here called "FILEOBJECT").</li> <ul> <li>Create
+     * METADATA datastream for each metadata file.</li> <li>For each binary
+     * file, ingest the file in BitRepository and create CONTENTS datastream for
+     * the corresponding public BitRepository URL </li> </ul> <li>For each
+     * "FILEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart"
+     * "FILEOBJECT")-relation on "DIRECTORYOBJECT" </li> <li>For each
+     * subdirectory in this directory, lookup the child DOMS id using its
+     * relative Path and create a RDF ("DIRECTORYOBJECT" "HasPart"
+     * "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the
+     * subdirectories are processed first. </li> </ul>
      *
      * @param dcIdentifier DC identifier to look up object in DOMS with.
      * @param md5map MD5 validation map.
      */
-
     protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(DomsItem rootDomsItem, String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
         log.trace("DC id: {}", dcIdentifier);
 
         // see if DOMS object exist for this directory
-
         final String currentDirectoryPid = lookupObjectFromDCIdentifierAndCreateItIfNeeded(dcIdentifier);
 
         /*
@@ -348,7 +356,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
           Figure out which pages we have (for "foo/a.pdf" and "foo/a.xml" construct
           <code> {"a" => ["foo/a.pdf", "foo/a.xml"] }</code>)
          */
-
         Stream<Path> pathStream = deliveriesForPath.apply(absoluteFileSystemPath);
 
         //noinspection PointlessBooleanExpression
@@ -369,7 +376,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // create a DOMS object for the file, store the public URL for the bitrepository file in "CONTENTS" on the file object,
         // and create a "hasFile" relation from the file group object to the page object.
         // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
-
         List<ToolResult> toolResultsForThisDirectory = new ArrayList<>();
 
         List<ToolResult> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
@@ -404,7 +410,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                                         // Checksum is not validated since the bitrepository return an error if the checksum is not validated
-
                                         putfileClient.putFile(bitrepositoryIngesterCollectionId,
                                                 urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
@@ -458,7 +463,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                 }).collect(Collectors.toList());
 
         // All files now processed and created in DOMS.  If any failures so far, stop here.
-
         toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
 
         if (toolResultsForThisDirectory.stream().anyMatch(tr -> tr.getResult() == Boolean.FALSE)) {
@@ -467,7 +471,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         }
 
         // Add "hasPart" relations to all domsIds on this page directory object.
-
         List<String> domsIdsInThisDirectory = sortedPathsForPage.keySet().stream().map(id -> lookupObjectFromDCIdentifier(id).get(0)).collect(Collectors.toList());
         try {
             if (domsIdsInThisDirectory.size() != 1) { // avoid triggering bug in FedoraRest.addRelations
@@ -513,9 +516,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      * Write the result of activate putfileClient to envoke bitmagasin
      *
      * @param relativePath The [relative to deliveryfolder] path to the file
-     * @param finalEvent   The event that is fetched from the putFileClient
+     * @param finalEvent The event that is fetched from the putFileClient
      * @param pageObjectId pageObjectId to write to fedora
-     * @param checkSum     The checksum of the file
+     * @param checkSum The checksum of the file
      * @return A result of the specifik job
      */
     private ToolResult writeResultFromBitmagIngest(DomsItem rootDomsItem, Path relativePath, OperationEvent finalEvent, String pageObjectId, String checkSum) {
@@ -526,41 +529,43 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // create DOMS object for the file
         String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded("path:" + relativePath.toString());
 
-        if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.COMPLETE)) {
-            try {
-                // The URLEncoding needs to be done twice to get it stored correctly inside Fedora, this is not the best solution but it is the only possible solution when running with this fedora client
-                String linkFromFedoraToBitrepository = encodePublicURLForFileID.apply(finalEvent.getFileID());
+        switch (finalEvent.getEventType()) {
+            case COMPLETE:
+                try {
+                    // The URLEncoding needs to be done twice to get it stored correctly inside Fedora, this is not the best solution but it is the only possible solution when running with this fedora client
+                    String linkFromFedoraToBitrepository = encodePublicURLForFileID.apply(finalEvent.getFileID());
 
-                // save external datastream in file object.
-                efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + gitId);
+                    // save external datastream in file object.
+                    efedora.addExternalDatastream(fileObjectId, "CONTENTS", finalEvent.getFileID(), linkFromFedoraToBitrepository, "application/octet-stream", mimetype, null, "Adding file after bitrepository ingest " + gitId);
 
-                // Add "hasPart" relation from the page object to the file object.
-                efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + gitId);
+                    // Add "hasPart" relation from the page object to the file object.
+                    efedora.addRelation(pageObjectId, pageObjectId, "info:fedora/fedora-system:def/relations-external#hasPart", fileObjectId, false, "linking file to page " + gitId);
 
-                // Add the checksum relation to Fedora
-                efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
+                    // Add the checksum relation to Fedora
+                    efedora.addRelation(pageObjectId, "info:fedora/" + fileObjectId + "/" + CONTENTS, RELATION_PREDICATE, checkSum, true, "Adding checksum after bitrepository ingest");
 
-                toolResult = ToolResult.ok(rootDomsItem, "CONTENT node added for PDF for " + pageObjectId);
-                log.info("Completed ingest of file " + finalEvent.getFileID());
+                    toolResult = ToolResult.ok(rootDomsItem, "CONTENT node added for PDF for " + pageObjectId);
+                    log.info("Completed ingest of file " + finalEvent.getFileID());
 
-            } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
-                log.error("ObjectId: " + fileObjectId + " relativePath: " + relativePath.toString(), e);
-                throw new RuntimeException("Could not process " + finalEvent.getFileID(), e);
-            }
-
-        } else if (finalEvent.getEventType().equals(OperationEvent.OperationEventType.FAILED)) {
-            log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", finalEvent.getFileID(), finalEvent.getEventType());
-            toolResult = ToolResult.fail(rootDomsItem, "Could not process " + finalEvent.getFileID());
-        } else {
-            log.debug("Got an event that I really don't care about, event type: '{}' for fileID '{}'", finalEvent.getEventType(), finalEvent.getFileID());
-
+                } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+                    log.error("ObjectId: " + fileObjectId + " relativePath: " + relativePath.toString(), e);
+                    throw new RuntimeException("Could not process " + finalEvent.getFileID(), e);
+                }
+                break;
+            case FAILED:
+                log.info("Failed to find PutJob for file '{}' for event '{}', skipping further handling", finalEvent.getFileID(), finalEvent.getEventType());
+                toolResult = ToolResult.fail(rootDomsItem, "Bitrepository failed for " + finalEvent.getFileID());
+                break;
+            default:
+                log.debug("Got an event that I really don't care about, event type: '{}' for fileID '{}'", finalEvent.getEventType(), finalEvent.getFileID());
+                break;
         }
         return toolResult;
     }
 
     /**
-     * Ensure that we have a valid DOMS id for the given dcIdentifier.  If it is not found, create
-     * a new empty DOMS object and use that.
+     * Ensure that we have a valid DOMS id for the given dcIdentifier. If it is
+     * not found, create a new empty DOMS object and use that.
      *
      * @param dcIdentifier identifier to lookup in DOMS.
      * @return an existing DOMS id.
@@ -585,8 +590,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     }
 
     /**
-     * Return the basename of the given path, by converting to a string, locating the last "." and returning the string
-     * up to that point.  For "foo/bar.txt", return "foo/bar".
+     * Return the basename of the given path, by converting to a string,
+     * locating the last "." and returning the string up to that point. For
+     * "foo/bar.txt", return "foo/bar".
      *
      * @param path path to find basename for
      * @return basename for path

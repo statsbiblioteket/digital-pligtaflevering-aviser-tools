@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author tra
  */
-@WebServlet(name = "StateIngestFailed", urlPatterns = {"/StateIngestFailed"})
+@WebServlet(name = "StateCreated", urlPatterns = {"/StateCreated"})
 public class StateCreated extends HttpServlet {
 
     //@Inject
