@@ -20,11 +20,11 @@
         }
     }
 %>
-<h2><c:out value="${item.path}"/></h2>
-Id: ${item.domsId.id()}
+<a href="listStates.jsp"><h2><c:out value="${item.path}"/></h2></a>
+${item.domsId.id()}
 
 <p/>
-<%@include file="WEB-INF/listItemEvents.jsp"%>
+<%@include file="WEB-INF/listItemEvents.jsp" %>
 <p/>
 Data streams:
 
@@ -33,7 +33,7 @@ Data streams:
         <tr>
             <td>${datastream.id}</td>
             <td>${datastream.mimeType}</td>
-            <td>${datastream.url}</td>
+            <td>FIXME: ${datastream.url}</td>
         </tr>
     </c:forEach>
 </table>

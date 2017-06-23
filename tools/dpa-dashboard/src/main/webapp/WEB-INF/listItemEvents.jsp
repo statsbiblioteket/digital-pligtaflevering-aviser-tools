@@ -9,7 +9,7 @@
             <td>${event.date}</td>
             <td>
                 <form action="deleteEventOnItem.jsp">
-                    <input type="submit" value="Delete ${event.eventID}"/>
+                    <input type="submit" value="Fjern ${event.eventID}"/>
                     <input type="hidden" name="e" value="${event.eventID}"/>
                     <input type="hidden" name="id" value="${item.domsId.id()}"/>
                 </form>
@@ -18,7 +18,7 @@
         <c:if test="${not empty event.details}">
             <tr>
                 <td colspan="4">
-            <Disabledpre>${fn:substring(event.details, 0, 1000)}</Disabledpre>
+            <tt>${fn:substring(event.details, 0, 1000)}</tt>
         </td>
     </tr>
 </c:if>
@@ -27,5 +27,5 @@
 <form action='setEventOnItem.jsp' method="get">
     <input type="hidden" name="id" value="${item.domsId.id()}"/>
     <input type="hidden" name="e" value="Manually_stopped"/>
-    <input type='submit' value='Set Manually_stopped'/>
+    <input type='submit' value='S&aelig;t Manually_stopped'/>
 </form>
