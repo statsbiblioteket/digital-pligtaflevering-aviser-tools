@@ -9,6 +9,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.RelativePathToURLConverter;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
@@ -43,6 +44,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -404,8 +406,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
 
                                         String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
-                                        String urlEncodedFileSource = URLEncoder.encode(relativePath.toString(), CharEncoding.UTF_8);
-                                        final URL urlWhereBitrepositoryCanDownloadTheFile = new URL(urlToBitmagBatchPath + urlEncodedFileSource);
+
+                                        final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatchPath).apply(relativePath);
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
