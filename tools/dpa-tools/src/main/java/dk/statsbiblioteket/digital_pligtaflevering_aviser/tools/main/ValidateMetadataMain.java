@@ -94,7 +94,7 @@ public class ValidateMetadataMain {
             throw new UnsupportedOperationException();
         }
 
-        class OkFailThrown {
+        static class OkFailThrown {
             public OkFailThrown(List<ToolResult> ok, List<ToolResult> fail, List<Try<ToolResult>> thrown) {
                 this.ok = Objects.requireNonNull(ok, "ok");
                 this.fail = Objects.requireNonNull(fail, "fail");

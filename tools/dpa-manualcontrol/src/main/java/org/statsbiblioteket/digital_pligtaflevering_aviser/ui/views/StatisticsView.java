@@ -80,28 +80,33 @@ public class StatisticsView extends VerticalLayout implements View {
         final VerticalLayout layout = new VerticalLayout();
 
         pdfComponent.setMimeType("application/pdf");
+        //noinspection deprecation
         pdfComponent.setType(Embedded.TYPE_BROWSER);
         metadatalink.setTargetName("_blank");
 
         MenuBar.Command configCommand = new MenuBar.Command() {
+            @Override
             public void menuSelected(MenuBar.MenuItem selectedItem) {
                 getUI().getNavigator().navigateTo(NewspaperUI.CONFIGPANEL);
             }
         };
 
         MenuBar.Command otherCommand1 = new MenuBar.Command() {
+            @Override
             public void menuSelected(MenuBar.MenuItem selectedItem) {
                 getUI().getNavigator().navigateTo(NewspaperUI.DELIVERYPANEL);
             }
         };
 
         MenuBar.Command otherCommand2 = new MenuBar.Command() {
+            @Override
             public void menuSelected(MenuBar.MenuItem selectedItem) {
                 getUI().getNavigator().navigateTo(NewspaperUI.TITLEVALIDATIONPANEL);
             }
         };
 
         MenuBar.Command otherCommand3 = new MenuBar.Command() {
+            @Override
             public void menuSelected(MenuBar.MenuItem selectedItem) {
                 getUI().getNavigator().navigateTo(NewspaperUI.OVERVIEW);
             }
@@ -166,6 +171,7 @@ public class StatisticsView extends VerticalLayout implements View {
         }
 
         searchPanel.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 try {
                     if (SearchPanel.prepareButtonId.equals(event.getButton().getId())) {
@@ -240,6 +246,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         Button confirmViewButton = new Button("Confirmed");
         confirmViewButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
 
                 if(currentSelectedPage!=null) {
@@ -257,6 +264,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         Button rejectViewButton = new Button("Reject");
         rejectViewButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
 
                 if(currentSelectedPage!=null) {

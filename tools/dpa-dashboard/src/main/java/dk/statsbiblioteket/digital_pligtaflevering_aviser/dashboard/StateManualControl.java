@@ -45,6 +45,7 @@ public class StateManualControl extends HttpServlet {
             synchronized(this) {
                 if (repository == null) {
                     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
+                    //noinspection deprecation
                     repository = new RepositoryConfigurator().apply(map);
                 }
             }

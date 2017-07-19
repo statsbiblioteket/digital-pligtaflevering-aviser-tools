@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,7 +105,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
             String premisBlob = premisFactory.createInitialPremisBlob(fullItemID).toXML();
             fedora.modifyDatastreamByValue(
-                    roundTripObject, eventsDatastream, null,null,premisBlob.getBytes(), null, "text/xml", createDeliveryRoundTripComment,null);
+                    roundTripObject, eventsDatastream, null,null,premisBlob.getBytes(StandardCharsets.UTF_8), null, "text/xml", createDeliveryRoundTripComment,null);
 
 
             return roundTripObject;

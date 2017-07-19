@@ -165,6 +165,7 @@ public class RdfManipulator {
             return object;
         }
 
+        @Override
         public String toString() {
             return "<" + predicateName + " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
                     + "xmlns=\"" + predicateNS + "\" rdf:resource=\"info:fedora/" + object + "\"/>";
