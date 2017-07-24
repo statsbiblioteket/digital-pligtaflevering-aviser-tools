@@ -112,11 +112,13 @@ public class GenericListTable extends VerticalLayout {
      * Set the component to be vieved as enabled in the UI
      * @param enabled
      */
+    @Override
     public void setEnabled(boolean enabled) {
         beans.removeAllItems();
         super.setEnabled(enabled);
     }
 
+    @Override
     public void setCaption(String caption) {
         table.setCaption(caption);
     }

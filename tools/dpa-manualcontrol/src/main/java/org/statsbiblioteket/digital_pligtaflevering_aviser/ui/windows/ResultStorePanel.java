@@ -104,6 +104,7 @@ public class ResultStorePanel extends VerticalLayout {
     }
 
 
+    @Override
     public void setEnabled(boolean enabled) {
         pageBeans.removeAllItems();
         articleBeans.removeAllItems();
@@ -114,6 +115,7 @@ public class ResultStorePanel extends VerticalLayout {
      * Set a caption to the panel
      * @param caption
      */
+    @Override
     public void setCaption(String caption) {
         pageTable.setCaption(caption);
     }

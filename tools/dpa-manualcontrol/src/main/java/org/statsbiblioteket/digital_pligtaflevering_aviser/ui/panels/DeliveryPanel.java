@@ -75,6 +75,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     /**
      * Initiate columnwith of the graphical components
      */
+    @Override
     public void initialLayout() {
         tablesLayout.addComponent(deliveryPanel);
         tablesLayout.addComponent(sectionSectionTable);
@@ -87,6 +88,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
         tablesLayout.setExpandRatio(articleSelectionPanel, 0.1f);
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 viewDialogForSettingDeliveryToChecked();
             }});
@@ -102,6 +104,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * @param itemId
      * @param checkedState
      */
+    @Override
     public void checkThePage(Object itemId, ConfirmationState checkedState) {
         fileSelectionPanel.checkSpecific(itemId, checkedState);
     }
@@ -111,6 +114,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * @param itemId
      * @param checkedState
      */
+    @Override
     public void checkTheArticle(Object itemId, ConfirmationState checkedState) {
         articleSelectionPanel.checkSpecific(itemId, checkedState);
     }
@@ -180,12 +184,13 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * Add selectionListener to fileSelectionTable
      * @param listener
      */
+    @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
         articleSelectionPanel.addItemClickListener(listener);
     }
 
-
+    @Override
     public void insertInitialTableValues() throws Exception {
 
     }
@@ -194,6 +199,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * Show a dialog with the currently selected delivery and title.
      * The delivery can then be saved as a valideted delivery
      */
+    @Override
     public void viewDialogForSettingDeliveryToChecked() {
         String selectedDelivery = model.getSelectedDelivery();
         String selectedTitle = model.getSelectedTitle();
@@ -209,6 +215,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
         UI.getCurrent().addWindow(dialog);
         dialog.setListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
@@ -225,12 +232,14 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
         dialog.addCloseListener(new Window.CloseListener() {
             //This event gets called when the dialog is closed
+            @Override
             public void windowClose(Window.CloseEvent e) {
                 UI.getCurrent().removeWindow(dialog);
             }
         });
     }
 
+    @Override
     public void viewIsEntered() {
         if(model.getSelectedDelivery()!=null && model.getSelectedTitle()!=null) {
             try {

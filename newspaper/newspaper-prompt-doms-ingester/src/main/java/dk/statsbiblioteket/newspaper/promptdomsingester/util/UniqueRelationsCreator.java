@@ -7,6 +7,7 @@ import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.FedoraRelation;
 import dk.statsbiblioteket.doms.central.connectors.fedora.utils.FedoraUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +64,7 @@ public class UniqueRelationsCreator {
             fedora.modifyDatastreamByValue(pid, "RELS-EXT",
                     null,
                     null,
-                    rdfManipulator.toString().getBytes(),
+                    rdfManipulator.toString().getBytes(StandardCharsets.UTF_8),
                     new ArrayList<String>(), "application/rdf+xml",
                     addRelationsRequest.getComment(),
                     lastModifiedDate.getTime());

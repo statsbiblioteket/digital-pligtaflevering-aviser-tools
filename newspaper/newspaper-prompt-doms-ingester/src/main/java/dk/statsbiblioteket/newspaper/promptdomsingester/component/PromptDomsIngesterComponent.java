@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Properties;
 
 /**
@@ -92,7 +94,7 @@ public class PromptDomsIngesterComponent {
         if (!propsFile.exists()) {
             throw new FileNotFoundException("No such file: " + propsFile.getAbsolutePath());
         }
-        properties.load(new FileReader(propsFile));
+        properties.load(Files.newBufferedReader(propsFile.toPath(), StandardCharsets.UTF_8));
         checkProperties(properties, requiredProperties);
         return properties;
     }

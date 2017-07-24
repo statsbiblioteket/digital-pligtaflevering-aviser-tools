@@ -35,7 +35,7 @@ public class PutFileClientStub implements PutFileClient {
     /**
      * Contains all the parameters used in a putFile call.
      */
-    public class ActivePutOperation {
+    public static class ActivePutOperation {
         String collectionID;
         URL url;
         String fileId;
