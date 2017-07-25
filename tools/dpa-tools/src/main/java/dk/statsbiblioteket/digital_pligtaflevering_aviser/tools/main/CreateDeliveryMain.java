@@ -37,6 +37,8 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERA
  * Unfinished create batch trigger main.
  */
 public class CreateDeliveryMain {
+    public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
+
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
@@ -52,7 +54,6 @@ public class CreateDeliveryMain {
     @Module
     static class CreateDeliveryModule {
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
-        public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 

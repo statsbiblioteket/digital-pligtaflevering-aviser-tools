@@ -99,7 +99,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private final String gitId;
     private String domsCollection;
     private Settings settings;
-    private String bitmagUrl = null;
+    //private String bitmagUrl = null;
     private String bitrepositoryIngesterCollectionId = null;
 
     protected final OutputHandler output = new DefaultOutputHandler(getClass());
@@ -137,7 +137,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.eventMessageForToolResults = eventMessageForToolResults;
         this.mxBean = mxBean;
 
-        this.bitmagUrl = bitmagUrl;
+        //this.bitmagUrl = bitmagUrl;
         this.bitrepositoryIngesterCollectionId = bitrepositoryIngesterCollectionId;
 
         ignoredFilesSet = new TreeSet<>(Arrays.asList(ignoredFiles.split(" *, *")));
