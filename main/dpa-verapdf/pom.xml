@@ -13,23 +13,12 @@
 
     <artifactId>dpa-verapdf</artifactId>
 
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>vera-dev</id>
-            <name>Vera development</name>
-            <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
-        </repository>
-    </repositories>
-
     <properties>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
-        <!-- as of 2017-01-23 /tra -->
-        <verapdf.validation.version>1.1.6</verapdf.validation.version>
+        <!-- Newest in Maven Central as of 2017-06-22 /tra -->
+        <verapdf.validation.version>1.4.7</verapdf.validation.version>
     </properties>
 
     <dependencies>

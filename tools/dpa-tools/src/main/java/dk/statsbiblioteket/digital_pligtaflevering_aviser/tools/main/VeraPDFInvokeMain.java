@@ -65,7 +65,7 @@ public class VeraPDFInvokeMain {
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
-                m -> DaggerVeraPDFInvokeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool()
+                m -> dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.DaggerVeraPDFInvokeMain_VeraPdfTaskDaggerComponent.builder().configurationMap(m).build().getTool()
         );
     }
 

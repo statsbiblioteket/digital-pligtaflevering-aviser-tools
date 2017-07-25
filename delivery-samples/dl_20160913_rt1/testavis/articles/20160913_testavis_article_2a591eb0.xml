@@ -7,12 +7,17 @@
     <metadata>
         <source>testavis</source>
         <publishdate>20160913</publishdate>
+	<pages>
+	    <page>
+	        <pagefile>1</pagefile>
         <sectionname>kultur</sectionname>
         <sectionnumber>2</sectionnumber>
         <pagename>kultur</pagename>
         <pagenumber>2</pagenumber>
+            </page>
+	</pages>
         <type>Print</type>
-        <links>
+	<links>
             <link>http://www.example.com/test2</link>
         </links>
         <classification>

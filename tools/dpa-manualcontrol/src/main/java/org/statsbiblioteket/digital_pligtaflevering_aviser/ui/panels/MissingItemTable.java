@@ -41,6 +41,7 @@ public class MissingItemTable extends VerticalLayout {
         table.setImmediate(true);
 
         add.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 MissingItem item = new MissingItem(type.getValue(), name.getValue());
                 beans.addBean(item);

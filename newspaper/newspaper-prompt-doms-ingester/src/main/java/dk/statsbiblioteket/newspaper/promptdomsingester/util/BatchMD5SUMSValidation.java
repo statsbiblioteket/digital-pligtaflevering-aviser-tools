@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -48,7 +50,7 @@ public class BatchMD5SUMSValidation {
 
         //Start reading the checksum-file, and store all checksums in a hashmap
         Map<String, String> md5Map = new HashMap<String, String>();
-        try(BufferedReader br = new BufferedReader(new FileReader(checksumFile))) {
+        try(BufferedReader br = Files.newBufferedReader(checksumFile.toPath(), StandardCharsets.UTF_8)) {
             String line = br.readLine();
             while (line != null) {
                 //Each line in the file is stored in a String, a line consists of a checksum and a filename, they a seperated by 2 spaces.
@@ -66,7 +68,7 @@ public class BatchMD5SUMSValidation {
 
         //Walk through the filesystem in tha batch and confirm that all files inside the batch is also mentioned in the checksum-file
         //It is possible ti indicate some specific files whish should be ignored, thease is not part of the validation
-        Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()))
+        Files.walk(Paths.get(Paths.get(batchFolder, batchName).toFile().getAbsolutePath()), FileVisitOption.FOLLOW_LINKS)
                 .filter(Files::isRegularFile)
                 .forEach(filePath -> {
             String fileName=filePath.getFileName().toString();

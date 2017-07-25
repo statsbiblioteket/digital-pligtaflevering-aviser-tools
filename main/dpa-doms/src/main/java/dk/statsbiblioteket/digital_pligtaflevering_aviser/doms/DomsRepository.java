@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, WebResource webResource,
+    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
                           EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                           @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
                           @Named(DOMS_COLLECTION) String recordBase) {
@@ -265,7 +266,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
 
         PremisManipulator<Item> premisObject = Try.of(
-                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes()))
+                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes(StandardCharsets.UTF_8)))
         ).getOrElse(Try.of(
                 () -> factory.createInitialPremisBlob(/* we don't have item.getFullID() */ id)
                 ).get()

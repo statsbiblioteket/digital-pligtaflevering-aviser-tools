@@ -61,6 +61,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
         super.initialLayout();
 
         doneDeliveryButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 setDone();
             }});
@@ -72,6 +73,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
      * Insert deliveries into first table
      * @throws Exception
      */
+    @Override
     public void insertInitialTableValues()  {
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
@@ -95,6 +97,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
 
         UI.getCurrent().addWindow(dialog);
         dialog.setListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 UI.getCurrent().removeWindow(dialog);
                 if("OKBUTTON".equals(event.getButton().getId())) {
@@ -105,12 +108,14 @@ public class DeliveryValidationPanel extends DeliveryPanel {
 
         dialog.addCloseListener(new Window.CloseListener() {
             // inline close-listener
+            @Override
             public void windowClose(Window.CloseEvent e) {
                 UI.getCurrent().removeWindow(dialog);
             }
         });
     }
 
+    @Override
     public void viewIsEntered() {
         if(model.getSelectedDelivery() != null) {
             List<DeliveryTitleInfo> l = model.getDeliveryTitleObjects();

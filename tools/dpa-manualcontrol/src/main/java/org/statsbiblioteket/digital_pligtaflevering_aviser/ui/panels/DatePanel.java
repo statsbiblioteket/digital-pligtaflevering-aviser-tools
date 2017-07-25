@@ -113,6 +113,7 @@ public class DatePanel extends VerticalLayout {
      * Set the component to be vieved as enabled in the UI
      * @param enabled
      */
+    @Override
     public void setEnabled(boolean enabled) {
         beans.removeAllItems();
         super.setEnabled(enabled);
@@ -122,6 +123,7 @@ public class DatePanel extends VerticalLayout {
      * Set a caption of the embedded Table
      * @param caption
      */
+    @Override
     public void setCaption(String caption) {
         table.setCaption(caption);
     }
@@ -129,7 +131,7 @@ public class DatePanel extends VerticalLayout {
     /**
      * Generate textareas as cells in the table
      */
-    class FieldGenerator implements Table.ColumnGenerator {
+    static class FieldGenerator implements Table.ColumnGenerator {
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {

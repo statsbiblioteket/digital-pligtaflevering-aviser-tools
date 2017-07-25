@@ -18,6 +18,7 @@ public class ConfigPanel extends DeliveryValidationPanel {
         super(model);
         super.initialLayout();
         clearDeliveryButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 try {
                     model.removeCurrentSelectedTitleInDelivery();

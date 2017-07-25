@@ -13,6 +13,7 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import javax.enterprise.inject.Produces;
 
 /**
  * Dagger module for bitrepository related dependencies.
@@ -32,6 +33,7 @@ public class BitRepositoryModule {
      * @param map configuration map
      * @return the configuration parameter provided (required)
      */
+    @Produces
     @Provides
     public
     @Named(BITMAG_BASEURL_PROPERTY)
@@ -46,12 +48,14 @@ public class BitRepositoryModule {
      * @param map configuration map
      * @return the configuration parameter provided (required)
      */
+    @Produces
     @Provides
     @Named(BITREPOSITORY_SBPILLAR_MOUNTPOINT)
     String getPutfileDestinationPath(ConfigurationMap map) {
         return map.getRequired(BITREPOSITORY_SBPILLAR_MOUNTPOINT);
     }
 
+    @Produces
     @Provides
     @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID)
     public Function<String, String> provideEncodePublicURLForFileID(@Named(BITMAG_BASEURL_PROPERTY) String bitmagUrl) {

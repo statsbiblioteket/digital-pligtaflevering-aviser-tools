@@ -37,6 +37,12 @@
       <groupId>org.bitrepository.reference</groupId>
       <artifactId>bitrepository-client</artifactId>
       <version>1.9</version>
+      <exclusions>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>dk.statsbiblioteket.newspaper</groupId>

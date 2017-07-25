@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -76,7 +78,7 @@ public class FedoraIngesterTestIT extends AbstractFedoraIngesterTest {
     public EnhancedFedora getEnhancedFedora() throws JAXBException, PIDGeneratorException, MalformedURLException {
         Properties props = new Properties();
         try {
-            props.load(new FileReader(new File(System.getProperty("integration.test.newspaper.properties"))));
+            props.load(Files.newBufferedReader(new File(System.getProperty("integration.test.newspaper.properties")).toPath(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

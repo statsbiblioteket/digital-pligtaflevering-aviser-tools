@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,25 +44,29 @@ public class ValidateMD5FileTest {
         assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
     }
 
-    /**
-     * MD5SUMS.txt is the old checksum format from Infomedia, the deliveries is not supplied in that way anymore, but the functionality is still tested
-     * @throws Exception
-     */
-    @org.junit.Test
-    public void analyzeDeliveriesAgainstMD5SUMS() throws Exception {
+    // MD5SUMS.txt are not present anymore and the test is rather misleading.
 
-        String folder = getBatchFolder();
-
-        //Check against wron function
-        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
-        boolean validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, false);
-
-        //Check against expected function
-        md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
-        validated = md5Validator.validation("dl_20160811_rt1");
-        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", validated, true);
-    }
+//    /**
+//     * MD5SUMS.txt is the old checksum format from Infomedia, the deliveries is not supplied in that way anymore, but
+//     * the functionality is still tested
+//     *
+//     * @throws Exception
+//     */
+//    @org.junit.Test
+//    public void analyzeDeliveriesAgainstMD5SUMS() throws Exception {
+//
+//        String folder = getBatchFolder();
+//
+//        //Check against wrong function
+//        DeliveryMD5Validation md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", ingesterModule.provideFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+//        boolean validated = md5Validator.validation("dl_20160811_rt1");
+//        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", false, validated);
+//
+//        //Check against expected function
+//        md5Validator = new DeliveryMD5Validation(folder, "MD5SUMS.txt", providePreviousFilePathConverter(), "transfer_acknowledged,transfer_complete,checksums.txt,MD5SUMS.txt");
+//        validated = md5Validator.validation("dl_20160811_rt1");
+//        assertEquals("Validation of correspondance between checksum-file and content in testdeliveries", true, validated);
+//    }
 
 
     /**

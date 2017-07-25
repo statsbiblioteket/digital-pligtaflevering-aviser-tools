@@ -10,6 +10,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecificatio
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -35,7 +36,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.Date;
@@ -53,8 +53,7 @@ import static java.util.Collections.emptyList;
 
 /**
  * Main class for starting autonomous component
- * This component is used for validation of metadata from newspaper deliveries.
- * The metadata is ingested into fedora-commons and is now validated against *.xsd and defined rules
+ * This component is used for validation of XML data in one or more delivery
  */
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
@@ -82,13 +81,16 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification workToDoQuery, DomsRepository domsRepository) {
+        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
+                         QuerySpecification workToDoQuery,
+                         DomsRepository domsRepository,
+                         DefaultToolMXBean mxBean) {
             final String agent = ValidateXMLModule.class.getSimpleName();
 
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
-                    .map(domsItem -> processChildDomsId().apply(domsItem))
+                    .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
                     .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.getResult()))
                     .count() + " items processed";
 
@@ -99,8 +101,9 @@ public class ValidateXMLMain {
          * Validate all xml-contents located as child under the delivery
          *
          * @return
+         * @param mxBean
          */
-        private Function<DomsItem, ToolResult> processChildDomsId() {
+        private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean) {
             return domsItem -> {
                 String deliveryName = domsItem.getPath();
                 long startDeliveryIngestTime = System.currentTimeMillis();
@@ -108,7 +111,7 @@ public class ValidateXMLMain {
 
                 // Single doms item
                 Map<Boolean, List<Try<ToolResult>>> toolResultMap = domsItem.allChildren()
-                        .flatMap(childDomsItem -> analyzeXML(childDomsItem))
+                        .flatMap(childDomsItem -> analyzeXML(childDomsItem, mxBean))
                         .collect(Collectors.partitioningBy(Try::isSuccess));
 
                 final List<Try<ToolResult>> failed = toolResultMap.getOrDefault(FALSE, emptyList());
@@ -170,9 +173,10 @@ public class ValidateXMLMain {
          * Start validating xml-content in fedora and return results
          *
          * @param domsItem
+         * @param mxBean
          * @return
          */
-        protected Stream<Try<ToolResult>> analyzeXML(DomsItem domsItem) {
+        protected Stream<Try<ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -184,53 +188,32 @@ public class ValidateXMLMain {
                 return Stream.of();
             }
 
+            mxBean.idsProcessed++;
+            mxBean.currentId = domsItem.getDomsId().toString();
+
             Map<String, String> xsdMap = provideXsdRootMap();
             DomsDatastream ds = profileOptional.get();
 
-            return Stream.of(Try.of(() ->
-            {
-                //We are reading this textstring as a String and are aware that thish might leed to encoding problems
-                StringReader reader = new StringReader(ds.getDatastreamAsString());
-                InputSource inps = new InputSource(reader);
+            // Note:  We ignore character set problems for now.
+            final String datastreamAsString = ds.getDatastreamAsString();
 
-                String rootnameInCurrentXmlFile = getRootTagName(inps);
+            return Stream.of(Try.of(() -> {
+
+                String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root");
+                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root:" + rootnameInCurrentXmlFile);
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
-                reader = new StringReader(ds.getDatastreamAsString());
 
-                if (validate(reader, url)) {
-                    //If returning true the parsing is accepted
-                    return ToolResult.ok(domsItem, "id: " + domsItem + " " + "XML approved");
-                } else {
-                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "XML invalid");
-                }
-            }));
-        }
-
-        /**
-         * Try parsing the content inside the reader against the schema located at the url
-         * The function returns true if the xml is validated
-         *
-         * @param reader    Reader containing the content to get parsed
-         * @param schemaUrl The url of the schema to validate against
-         * @return true if validated
-         */
-        protected boolean validate(Reader reader, URL schemaUrl) {
-            try {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                Schema schema = schemaFactory.newSchema(schemaUrl);
+                Schema schema = schemaFactory.newSchema(url);
                 Validator validator = schema.newValidator();
-                validator.validate(new StreamSource(reader));
-                log.trace("Validation of the xml-content is accepted");
-                return true;
-            } catch (IOException | SAXException e) {
-                //This exception is not keept since this exception should just result in registrating that the xml is not validate
-                log.info("Validation of the xml-content is rejected");
-                return false;
-            }
+                validator.validate(new StreamSource(new StringReader(datastreamAsString))); // only succedes if valid
+                log.trace("{}: XML valid", domsItem.getDomsId());
+
+                return ToolResult.ok(domsItem, "id: " + domsItem.getDomsId() + " XML valid");
+            }));
         }
 
         /**
@@ -282,3 +265,4 @@ public class ValidateXMLMain {
 
     }
 }
+

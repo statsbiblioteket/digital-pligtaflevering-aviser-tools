@@ -20,6 +20,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -183,7 +184,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     /**
      * return all direct children nodes for the current node.  For now the interface is a stream, but
-     * internally the whole response is built.
+     * internally the whole response is built up front.
      */
     public Stream<DomsItem> allChildren() {
         List<DomsItem> allChildrenSoFar = new ArrayList<>();
@@ -265,7 +266,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
         String dcContent = getDC();
         log.trace("DC={}", dcContent);
-        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true);
+        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes(StandardCharsets.UTF_8)), true);
 
         NodeList nodeList;
         try {
