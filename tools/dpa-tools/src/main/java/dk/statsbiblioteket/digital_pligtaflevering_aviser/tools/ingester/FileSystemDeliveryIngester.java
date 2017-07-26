@@ -43,6 +43,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
@@ -86,6 +87,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     public static final String BITREPOSITORY_INGESTER_COLLECTIONID = "bitrepository.ingester.collectionid";
     private static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     private static final String CONTENTS = "CONTENTS";
+    private final URL urlToBitmagBatch;
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
@@ -132,7 +134,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.putfileClient = putfileClient;
         this.fileNameToFileIDConverter = fileNameToFileIDConverter;
         this.md5Convert = md5Convert;
-        this.urlToBitmagBatchPath = urlToBitmagBatchPath;
+        this.urlToBitmagBatchPath = urlToBitmagBatchPath; // file:///delivery-samples/
+        try {
+            this.urlToBitmagBatch = new URL(urlToBitmagBatchPath);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(URL_TO_BATCH_DIR_PROPERTY + "=" + urlToBitmagBatchPath + " not valid url", e);
+        }
+
         this.restApi = restApi;
         this.efedora = efedora;
         this.encodePublicURLForFileID = encodePublicURLForFileID;
@@ -386,7 +394,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
                                         String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
 
-                                        final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatchPath).apply(relativePath);
+                                        final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatch).apply(relativePath);
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient

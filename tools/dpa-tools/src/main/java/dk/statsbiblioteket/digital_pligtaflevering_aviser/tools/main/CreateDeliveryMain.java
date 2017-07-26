@@ -1,11 +1,20 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
+import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
+import javaslang.control.Try;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Provider;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,22 +27,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Named;
-import javax.inject.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.medieplatform.autonomous.newspaper.CreateDelivery;
-import javaslang.control.Try;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PIDGENERATOR_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
+import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 
 /**
  * Unfinished create batch trigger main.
@@ -41,6 +39,7 @@ import javaslang.control.Try;
 public class CreateDeliveryMain {
 
     public static final String TRANSFER_COMPLETE = "transfer_complete";
+    public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -57,7 +56,6 @@ public class CreateDeliveryMain {
     @Module
     static class CreateDeliveryModule {
         public static final String AUTONOMOUS_AGENT = "autonomous.agent";
-        public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 

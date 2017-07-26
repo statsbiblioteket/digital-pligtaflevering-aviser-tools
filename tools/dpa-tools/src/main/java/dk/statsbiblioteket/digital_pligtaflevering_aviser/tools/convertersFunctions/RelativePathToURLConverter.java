@@ -11,9 +11,9 @@ import java.util.function.Function;
  *
  */
 public class RelativePathToURLConverter implements Function<Path, URL> {
-    private final String root;
+    private final URL root;
 
-    public RelativePathToURLConverter(String root) {
+    public RelativePathToURLConverter(URL root) {
         this.root = root;
     }
 
@@ -22,7 +22,7 @@ public class RelativePathToURLConverter implements Function<Path, URL> {
     public URL apply(Path relativePath)  {
         // http://www.baeldung.com/java-url-encoding-decoding
         try {
-            URI uri = new URI("file", null, root + relativePath.toString(), null);
+            URI uri = new URI(root.getProtocol(), root.getHost(), root.getPath() + relativePath.toString(), null);
             return uri.toURL();
         } catch (URISyntaxException | MalformedURLException e) {
             throw new RuntimeException(e);
