@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -78,7 +78,7 @@ public class ConfigurationMapHelper {
             map.addPropertyFile(fileReader);
             fileReader.close();
             return map;
-        } catch (FileNotFoundException e) {
+        } catch (NoSuchFileException e) {
             // fall through if not present!
         } catch (IOException e) {
             throw new RuntimeException(configurationFile.getAbsolutePath() + " cannot be read", e);
