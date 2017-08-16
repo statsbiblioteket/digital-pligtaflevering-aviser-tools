@@ -17,9 +17,24 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
-        <!-- Newest in Maven Central as of 2017-06-22 /tra -->
+        <!-- Newest in Maven Central as of 2017-06-22 /tra
         <verapdf.validation.version>1.4.7</verapdf.validation.version>
+        -->
+        <!-- First fixed file leak version /tra -->
+        <verapdf.validation.version>1.9.3</verapdf.validation.version>
     </properties>
+
+    <!-- to get latest builds before they arrive on maven central -->
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>vera-dev</id>
+            <name>Vera development</name>
+            <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
