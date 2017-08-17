@@ -48,7 +48,7 @@ public class VeraPDFValidatorTest {
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("flavour=\"PDFA_1_A\""));
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("isCompliant=\"false\""));
-        Assert.assertThat(actualResponsea, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary whose sole entry, Marked, shall have a value of true</message>"));
+        Assert.assertThat(actualResponsea, CoreMatchers.containsString("<message>The document catalog dictionary shall include a MarkInfo dictionary with a Marked entry in it, whose value shall be true.</message>"));
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("specification=\"ISO_19005_1\""));
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("clause=\"6.8.2\""));
         Assert.assertThat(actualResponsea, CoreMatchers.containsString("testNumber=\"1\"/>"));
