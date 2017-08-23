@@ -12,11 +12,14 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolCompletedResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolThrewExceptionResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
+import javaslang.control.Either;
 import javaslang.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,18 +29,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.inject.Named;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,8 +48,8 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
 
 /**
- * Main class for starting autonomous component
- * This component is used for validation of XML data in one or more delivery
+ * Main class for starting autonomous component This component is used for validation of XML data in one or more
+ * delivery
  */
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
@@ -100,8 +96,8 @@ public class ValidateXMLMain {
         /**
          * Validate all xml-contents located as child under the delivery
          *
-         * @return
          * @param mxBean
+         * @return
          */
         private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean) {
             return domsItem -> {
@@ -110,9 +106,9 @@ public class ValidateXMLMain {
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
                 // Single doms item
-                Map<Boolean, List<Try<ToolResult>>> toolResultMap = domsItem.allChildren()
+                Map<Boolean, List<Either<ToolThrewExceptionResult, ToolCompletedResult>>> toolResultMap = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem, mxBean))
-                        .collect(Collectors.partitioningBy(Try::isSuccess));
+                        .collect(Collectors.toList());
 
                 final List<Try<ToolResult>> failed = toolResultMap.getOrDefault(FALSE, emptyList());
                 failed.forEach(
@@ -176,7 +172,7 @@ public class ValidateXMLMain {
          * @param mxBean
          * @return
          */
-        protected Stream<Try<ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
+        protected Stream<Either<ToolThrewExceptionResult, ToolCompletedResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -197,6 +193,9 @@ public class ValidateXMLMain {
             // Note:  We ignore character set problems for now.
             final String datastreamAsString = ds.getDatastreamAsString();
 
+            throw new UnsupportedOperationException("not rewritten yet");  //FIXME: rewrite with Either.
+            /*
+-------
             return Stream.of(Try.of(() -> {
 
                 String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
@@ -214,6 +213,7 @@ public class ValidateXMLMain {
 
                 return ToolResult.ok(domsItem, "id: " + domsItem.getDomsId() + " XML valid");
             }));
+            */
         }
 
         /**
@@ -221,6 +221,7 @@ public class ValidateXMLMain {
          *
          * @param reader
          * @return
+         *
          * @throws ParserConfigurationException
          * @throws IOException
          * @throws SAXException

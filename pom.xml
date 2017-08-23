@@ -49,7 +49,7 @@
     </build>
     <dependencyManagement>
         <dependencies>
-            <!-- to get Try -->
+            <!-- to get Either -->
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>

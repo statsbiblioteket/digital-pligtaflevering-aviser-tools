@@ -180,7 +180,7 @@ public class VeraPDFInvokeMain {
             final String url = ds.getUrl();
             if (url.startsWith(bitrepositoryUrlPrefix) == false) {
                 try {
-                    //return Stream.of(ToolResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+                    //return Stream.of(ToolCompletedResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
                     resourceName = url;
                     inputStream = new URL(url).openStream();
                 } catch (IOException e) {

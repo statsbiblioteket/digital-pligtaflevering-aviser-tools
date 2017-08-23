@@ -1,5 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
+import javaslang.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDate.now;
+import static javaslang.control.Either.right;
 
 /**
  * <p> This is the entry point in the scaffolding.  Reads in a configuration map (exact way depends on the method
@@ -27,8 +30,7 @@ public class AutonomousPreservationToolHelper {
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from the
      * configuration file/resource denoted by args[0], plus the remaining arguments interpreted as "key=value" lines,
-     * and pass it into the given function returning a Tool, which is then executed.  It is not
-     * expected to return.
+     * and pass it into the given function returning a Tool, which is then executed.  It is not expected to return.
      *
      * @param args     like passed in to "main(String[] args)"
      * @param function function creating a populated Tool from a configuration map.
@@ -67,8 +69,7 @@ public class AutonomousPreservationToolHelper {
 
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from args[0], and
-     * pass it into the given function returning a Tool, which is then executed.  It is not
-     * expected to return.
+     * pass it into the given function returning a Tool, which is then executed.  It is not expected to return.
      *
      * @param map          configuration map to pass into <code>function</code>
      * @param toolFunction function creating a populated Tool from a configuration map.
@@ -97,4 +98,19 @@ public class AutonomousPreservationToolHelper {
         }
     }
 
+    /**
+     * Method to invoke a mapping on an Id, and according to convention return an Either.Left in case of problems
+     * capturing the exception and the id, or an Either.Right capturing the result.  We need this because we need to store
+     * the id along with the exception for later.
+     *
+     * @param id the Id to pass in that we are working on.  Captured in the failure.
+     * @return
+     */
+    public static Either<ToolThrewExceptionResult, ToolCompletedResult> applyOn(Id id, Function<Id, ToolCompletedResult> mapping) {
+        try {
+            return Either.right(mapping.apply(id));
+        } catch (Exception e) {
+            return Either.left(new ToolThrewExceptionResult(id, e));
+        }
+    }
 }
