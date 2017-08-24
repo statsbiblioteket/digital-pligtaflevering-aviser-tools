@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
  * the renderResultFunction, and the failed (which threw an exception) ones have their stack traces added.   This is
  * useful for creating event descriptions from multiple tasks.
  */
-public class ToolResultsReport implements BiFunction<Id, List<Either<ToolThrewExceptionResult, ToolCompletedResult>>, ToolCompletedResult> {
-    private final BiFunction<List<ToolCompletedResult>, List<ToolCompletedResult>, String> renderResultFunction;
+public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolThrewExceptionResult, ToolResult>>, ToolResult> {
+    private final BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
 
     /**
      * This is the method intended to be used in actual code
      */
     @Inject
-    public ToolResultsReport(BiFunction<List<ToolCompletedResult>, List<ToolCompletedResult>, String> renderResultFunction) {
+    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction) {
         this(renderResultFunction, Throwables::getStackTraceAsString);
     }
 
@@ -33,13 +33,13 @@ public class ToolResultsReport implements BiFunction<Id, List<Either<ToolThrewEx
      * This is to be used in unit tests, to control stack traces so they can be compared as strings
      */
 
-    public ToolResultsReport(BiFunction<List<ToolCompletedResult>, List<ToolCompletedResult>, String> renderResultFunction, Function<Throwable, String> stackTraceRenderer) {
+    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction, Function<Throwable, String> stackTraceRenderer) {
         this.renderResultFunction = renderResultFunction;
         this.stackTraceRenderer = stackTraceRenderer;
     }
 
     @Override
-    public ToolCompletedResult apply(Id id, List<Either<ToolThrewExceptionResult, ToolCompletedResult>> eitherList) {
+    public ToolResult apply(DomsItem resultItem, List<Either<ToolThrewExceptionResult, ToolResult>> eitherList) {
 
         // find all that threw exception.
 
@@ -50,13 +50,13 @@ public class ToolResultsReport implements BiFunction<Id, List<Either<ToolThrewEx
 
         // find all that completed successfully
 
-        List<ToolCompletedResult> ok = eitherList.stream()
+        List<ToolResult> ok = eitherList.stream()
                 .filter(Either::isRight)
                 .map(Either::get)
-                .filter(ToolCompletedResult::isSuccess)
+                .filter(ToolResult::isSuccess)
                 .collect(Collectors.toList());
 
-        List<ToolCompletedResult> failed = eitherList.stream()
+        List<ToolResult> failed = eitherList.stream()
                 .filter(Either::isRight)
                 .map(Either::get)
                 .filter(a -> !a.isSuccess())
@@ -84,9 +84,9 @@ public class ToolResultsReport implements BiFunction<Id, List<Either<ToolThrewEx
                 .collect(Collectors.joining("\n"));
 
         if (failed.size() == 0 && threwException.size() == 0) { // Nothing went wrong.
-            return new ToolCompletedResult(id, true, renderResultFunction.apply(ok, failed));
+            return new ToolResult(resultItem, true, renderResultFunction.apply(ok, failed));
         } else {
-            return new ToolCompletedResult(id, false,
+            return new ToolResult(resultItem, false,
                     renderResultFunction.apply(ok, failed)
                     //renderedOk
                     //+ "\n\nfailed:\n---\n" + renderedFails
@@ -100,14 +100,14 @@ public class ToolResultsReport implements BiFunction<Id, List<Either<ToolThrewEx
      * capturing the exception and the id, or an Either.Right capturing the result.  We need this because we need to store
      * the id along with the exception for later.
      *
-     * @param id the Id to pass in that we are working on.  Captured in the failure.
+     * @param item the Id to pass in that we are working on.  Captured in the failure.
      * @return
      */
-    public static Either<ToolThrewExceptionResult, ToolCompletedResult> applyOn(Id id, Function<Id, ToolCompletedResult> mapping) {
+    public static Either<ToolThrewExceptionResult, ToolResult> applyOn(DomsItem item, Function<DomsItem, ToolResult> mapping) {
         try {
-            return Either.right(mapping.apply(id));
+            return Either.right(mapping.apply(item));
         } catch (Exception e) {
-            return Either.left(new ToolThrewExceptionResult(id, e));
+            return Either.left(new ToolThrewExceptionResult(item, e));
         }
     }
 }

@@ -3,7 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 
 /**
- * ToolResult is a helper class for returning a tuple of (result, message[, throwable]) for individual
+ * ToolResult is a helper class for returning a tuple of (success, message[, throwable]) for individual
  * processing steps in a stream, in order for the final collector to decide the overall outcome.  Inspired
  * by the ResultCollector in the newspaper project.
  *
@@ -12,9 +12,9 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 public class ToolResult implements Id {
     final private DomsItem item;
     /**
-     * Holds the result of the operation.  TRUE=successful.  FALSE=failed.
+     * Holds the success of the operation.  TRUE=successful.  FALSE=failed.
      */
-    private final Boolean result;
+    private final boolean success;
     /**
      * Holds a message intended to be read by a human.  Do not use this for anything else.
      */
@@ -24,9 +24,9 @@ public class ToolResult implements Id {
      * in a DOMS datastream.
      */
 
-    public ToolResult(DomsItem item, Boolean result, String humanlyReadableMessage) {
+    public ToolResult(DomsItem item, boolean success, String humanlyReadableMessage) {
         this.item = item;
-        this.result = result;
+        this.success = success;
         this.humanlyReadableMessage = humanlyReadableMessage;
     }
 
@@ -71,19 +71,19 @@ public class ToolResult implements Id {
 
 
     /**
-     * Get the result.  TRUE=ok, FALSE=failure
+     * Get the success.  TRUE=ok, FALSE=failure
      *
-     * @return result
+     * @return success
      */
-    public Boolean getResult() {
-        return result;
+    public boolean isSuccess() {
+        return success;
     }
 
     @Override
     public String toString() {
         return "ToolResult{" +
                 "item=" + item +
-                ", result=" + result +
+                ", success=" + success +
                 ", humanlyReadableMessage='" + humanlyReadableMessage + '\'' +
                 '}';
     }

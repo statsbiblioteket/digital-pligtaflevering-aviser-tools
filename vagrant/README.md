@@ -65,7 +65,7 @@ Ingesting deliveries:
 Not written yet.
 
 Successful ingestion of a delivery is indicated with log lines on the
-form `2016-07-12 ... PromptDomsIngesterComponent - result was: Worked
+form `2016-07-12 ... PromptDomsIngesterComponent - success was: Worked
 on ... successfully`
 
 Updating Summa:

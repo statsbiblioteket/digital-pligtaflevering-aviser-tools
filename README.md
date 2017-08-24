@@ -40,7 +40,7 @@ https://www.statsbiblioteket.dk/om-statsbiblioteket/udbud/levering-af-digitale-a
 
 The traditional mindset for digital preservation is to do all the work
 for a given item, collecting metadata, normalizing files, ensuring
-consistency and so on, and THEN store the result for eternity.  This
+consistency and so on, and THEN store the success for eternity.  This
 process is called "_ingestion_".  We have found that the amount of
 work necessary to properly handle a given collection from end to end
 is typically rather large, regardless of the size of the collection,
@@ -99,7 +99,7 @@ form of PREMIS events.
 
 Each step taken is implemented as a traditional stand-alone Java
 application which regularily asks DOMS through Summa if there is any
-PDF's ready to be worked on, and if any, work on those.  The result of
+PDF's ready to be worked on, and if any, work on those.  The success of
 the work is added as an event and/or a datastream if appropriate for
 later.
 

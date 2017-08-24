@@ -1,8 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolCompletedResult;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolThrewExceptionResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 import javaslang.control.Either;
 import org.junit.Test;
@@ -28,7 +25,7 @@ public class ToolResultsReportTest {
     @Test
     public void test1() {
 
-        Id id0 = () -> "*";
+        DomsItem id0 = i("*");
 
         // do not process individually, just count the stream.
         //final Function<Stream<String>, String> successfulRendering = s -> "> " + s.count();
@@ -37,33 +34,33 @@ public class ToolResultsReportTest {
         final Function<Throwable, String> stacktraceRendering = Throwable::getMessage;
 
         // Fail for id "A","B","C". Otherwise success is if the id.length is an odd length.
-        final BiFunction<Id, String, Either<ToolThrewExceptionResult, ToolCompletedResult>> tool =
-                (Id id, String output) -> applyOn(id, id1 -> {
-                    if (id1.id().equals("A") || id1.id().equals("B") || id1.id().equals("C")) {
-                        throw new IllegalArgumentException(id1.id() + ": '" + output + "'");
+        final BiFunction<DomsItem, String, Either<ToolThrewExceptionResult, ToolResult>> tool =
+                (DomsItem item, String output) -> applyOn(item, item1 -> {
+                    if (item1.getDomsId().id().equals("A") || item1.getDomsId().id().equals("B") || item1.getDomsId().id().equals("C")) {
+                        throw new IllegalArgumentException(item1.getDomsId().id() + ": '" + output + "'");
                     } else {
-                        return new ToolCompletedResult(id, (id.id().length() % 2) == 1, output);
+                        return new ToolResult(item, (item.getDomsId().id().length() % 2) == 1, output);
                     }
                 });
 
         // We are interested in the number of those successful, the exact id's that were not succesful, and the stacktraces of
         // those that threw an exception.
 
-        BiFunction<List<ToolCompletedResult>, List<ToolCompletedResult>, String> successfulRendering =
+        BiFunction<List<ToolResult>, List<ToolResult>, String> successfulRendering =
                 (ok, failed) -> ok.size() + " ok" +
                         (failed.size() > 0
                                 ? "\n\nfailed:\n---\n" +
                                 failed.stream()
-                                        .map(t -> t.id() + ": " + t.getPayload())
+                                        .map(t -> t.id() + ": " + t.getHumanlyReadableMessage())
                                         .collect(Collectors.joining("\n"))
                                 : ""
                         );
 
         final ToolResultsReport tf = new ToolResultsReport(successfulRendering, stacktraceRendering);
 
-        Function<ToolCompletedResult, String> toString = tr -> tr.getId().id() + " " + tr.isSuccess() + ": " + tr.getPayload();
+        Function<ToolResult, String> toString = tr -> tr.id() + " " + tr.isSuccess() + ": " + tr.getHumanlyReadableMessage();
 
-        Function<List<Either<ToolThrewExceptionResult, ToolCompletedResult>>, String> f = eitherList -> toString.apply(tf.apply(id0, eitherList));
+        Function<List<Either<ToolThrewExceptionResult, ToolResult>>, String> f = eitherList -> toString.apply(tf.apply(id0, eitherList));
 
         // -- the below code is hard to read as Java 8 does not support multiline strings.  Note that IntelliJ allows for
         // -- "Alt-Enter->Copy String concatenation text to clipboard" for string concatenations where it
@@ -71,15 +68,15 @@ public class ToolResultsReportTest {
 
         assertEquals("* true: 0 ok", f.apply(emptyList()));
 
-        assertEquals("* true: 1 ok", f.apply(singletonList(tool.apply(() -> "1", "x"))));
+        assertEquals("* true: 1 ok", f.apply(singletonList(tool.apply(i("1"), "x"))));
 
-        assertEquals("* false: 0 ok\n\nfailed:\n---\n22: ", f.apply(singletonList(tool.apply(() -> "22", ""))));
+        assertEquals("* false: 0 ok\n\nfailed:\n---\n22: ", f.apply(singletonList(tool.apply(i("22"), ""))));
 
         assertEquals("* false: 0 ok\n\nfailed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n\n\n---\nA:\nA: 'Amsg'\n",
-                f.apply(asList(tool.apply(() -> "22", ""), tool.apply(() -> "A", "Amsg"))));
+                f.apply(asList(tool.apply(i("22"), ""), tool.apply(i("A"), "Amsg"))));
 
         assertEquals("* false: 0 ok\n\nfailed:\n---\n22: error 1\n44: error 4",
-                f.apply(asList(tool.apply(() -> "22", "error 1"), tool.apply(() -> "44", "error 4"))));
+                f.apply(asList(tool.apply(i("22"), "error 1"), tool.apply(i("44"), "error 4"))));
 
         assertEquals("* false: 0 ok\n\nfailed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n" +
                         "\n" +
@@ -96,9 +93,9 @@ public class ToolResultsReportTest {
                         "\n" +
                         "C:\n" +
                         "C: 'Cmsg'\n",
-                f.apply(asList(tool.apply(() -> "22", ""), tool.apply(() -> "A", "Amsg"),
-                        tool.apply(() -> "B", "Bmsg"),
-                        tool.apply(() -> "C", "Cmsg"))));
+                f.apply(asList(tool.apply(i("22"), ""), tool.apply(i("A"), "Amsg"),
+                        tool.apply(i("B"), "Bmsg"),
+                        tool.apply(i("C"), "Cmsg"))));
 
         assertEquals("* false: 1 ok\n\nfailed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n" +
                         "\n" +
@@ -115,11 +112,11 @@ public class ToolResultsReportTest {
                         "\n" +
                         "C:\n" +
                         "C: 'Cmsg'\n",
-                f.apply(asList(tool.apply(() -> "22", ""),
-                        tool.apply(() -> "A", "Amsg"),
-                        tool.apply(() -> "B", "Bmsg"),
-                        tool.apply(() -> "123", ""),
-                        tool.apply(() -> "C", "Cmsg"))));
+                f.apply(asList(tool.apply(i("22"), ""),
+                        tool.apply(i("A"), "Amsg"),
+                        tool.apply(i("B"), "Bmsg"),
+                        tool.apply(i("123"), ""),
+                        tool.apply(i("C"), "Cmsg"))));
         assertEquals("* false: 1 ok\n\nfailed:\n---\n22: \n\nA, A, A:\n---\nA: 'Amsg'\n" +
                         "\n" +
                         "B, B:\n" +
@@ -138,38 +135,19 @@ public class ToolResultsReportTest {
                         "\n" +
                         "C:\n" +
                         "C: 'Cmsg'\n",
-                f.apply(asList(tool.apply(() -> "22", ""),
-                        tool.apply(() -> "A", "Amsg"),
-                        tool.apply(() -> "B", "Bmsg"),
-                        tool.apply(() -> "B", "Bmsg"),
-                        tool.apply(() -> "123", ""),
-                        tool.apply(() -> "A", "Amsg"),
-                        tool.apply(() -> "A", "Amsg"),
-                        tool.apply(() -> "C", "Cmsg"))));
-//
-//        assertEquals("> 2", tf.apply(id0, asList(Try.of(() -> "!"), Try.of(() -> " not ok"))));
-//
-//        // one successful, one failed
-//        assertEquals("> 1\n\nA", tf.apply(id0, asList(Try.of(() -> "!"), Try.of(() -> {
-//            throw new RuntimeException("A");
-//        }))));
-//
-//        // two successful, one failed.
-//        assertEquals("> 2\n\nA", tf.apply(asList(Try.of(() -> "!"), Try.of(() -> {
-//            throw new RuntimeException("A");
-//        }), Try.of(() -> "!"))));
-//
-//        // one succesful, three failed.
-//        assertEquals("> 1\n\nA\n\nB\n\nC", tf.apply(
-//                asList(Try.of(() -> "!"),
-//                        Try.of(() -> {
-//                            throw new RuntimeException("A");
-//                        }), Try.of(() -> {
-//                            throw new RuntimeException("B");
-//                        }), Try.of(() -> {
-//                            throw new RuntimeException("C");
-//                        }))
-//        ));
+                f.apply(asList(tool.apply(i("22"), ""),
+                        tool.apply(i("A"), "Amsg"),
+                        tool.apply(i("B"), "Bmsg"),
+                        tool.apply(i("B"), "Bmsg"),
+                        tool.apply(i("123"), ""),
+                        tool.apply(i("A"), "Amsg"),
+                        tool.apply(i("A"), "Amsg"),
+                        tool.apply(i("C"), "Cmsg"))));
+
+    }
+
+    private DomsItem i(String s) {
+        return new DomsItem(new DomsId(s), null);
     }
 
     public class TestId implements Id {
