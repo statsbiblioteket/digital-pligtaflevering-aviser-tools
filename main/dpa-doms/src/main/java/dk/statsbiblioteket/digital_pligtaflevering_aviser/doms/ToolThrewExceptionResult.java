@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 

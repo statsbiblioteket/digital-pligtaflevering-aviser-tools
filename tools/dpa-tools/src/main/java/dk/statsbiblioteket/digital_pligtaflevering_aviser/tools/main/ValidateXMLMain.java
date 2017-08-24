@@ -12,8 +12,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolCompletedResult;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolThrewExceptionResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolCompletedResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolThrewExceptionResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;

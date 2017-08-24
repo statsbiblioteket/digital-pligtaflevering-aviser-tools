@@ -1,5 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
+
 /**
  * ToolResult is a helper class for returning a tuple of (result, message[, throwable]) for individual
  * processing steps in a stream, in order for the final collector to decide the overall outcome.  Inspired
@@ -7,7 +9,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
  *
  * FIXME:  AVIS-64 mentioned that the use of DomsItem instead of DomsId might be a memory bottleneck.
  */
-public class ToolResult {
+public class ToolResult implements Id {
     final private DomsItem item;
     /**
      * Holds the result of the operation.  TRUE=successful.  FALSE=failed.
@@ -84,5 +86,10 @@ public class ToolResult {
                 ", result=" + result +
                 ", humanlyReadableMessage='" + humanlyReadableMessage + '\'' +
                 '}';
+    }
+
+    @Override
+    public String id() {
+        return item.getDomsId().id();
     }
 }

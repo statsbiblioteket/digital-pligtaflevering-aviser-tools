@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import static java.lang.management.ManagementFactory.getRuntimeMXBean;
 import static java.time.LocalDate.now;
-import static javaslang.control.Either.right;
 
 /**
  * <p> This is the entry point in the scaffolding.  Reads in a configuration map (exact way depends on the method
@@ -98,19 +97,5 @@ public class AutonomousPreservationToolHelper {
         }
     }
 
-    /**
-     * Method to invoke a mapping on an Id, and according to convention return an Either.Left in case of problems
-     * capturing the exception and the id, or an Either.Right capturing the result.  We need this because we need to store
-     * the id along with the exception for later.
-     *
-     * @param id the Id to pass in that we are working on.  Captured in the failure.
-     * @return
-     */
-    public static Either<ToolThrewExceptionResult, ToolCompletedResult> applyOn(Id id, Function<Id, ToolCompletedResult> mapping) {
-        try {
-            return Either.right(mapping.apply(id));
-        } catch (Exception e) {
-            return Either.left(new ToolThrewExceptionResult(id, e));
-        }
-    }
+
 }
