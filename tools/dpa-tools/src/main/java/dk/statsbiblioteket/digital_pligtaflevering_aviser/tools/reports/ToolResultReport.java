@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class ToolResultReport implements Function<Stream<ToolResult>, String> {
     @Override
     public String apply(Stream<ToolResult> toolResultStream) {
-        Map<Boolean, List<ToolResult>> m = toolResultStream.collect(Collectors.groupingBy(tr -> tr.getResult()));
+        Map<Boolean, List<ToolResult>> m = toolResultStream.collect(Collectors.groupingBy(tr -> tr.isSuccess()));
 
         List<ToolResult> ok = m.getOrDefault(Boolean.TRUE, Collections.emptyList());
         List<ToolResult> failed = m.getOrDefault(Boolean.FALSE, Collections.emptyList());

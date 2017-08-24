@@ -5,11 +5,11 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 /**
  *
  */
-public class ToolThrewExceptionResult implements Id {
+public class ToolThrewException implements Id {
     protected final DomsItem item;
     protected final Exception exception;
 
-    public ToolThrewExceptionResult(DomsItem item, Exception exception) {
+    public ToolThrewException(DomsItem item, Exception exception) {
         this.item = item;
         this.exception = exception;
     }

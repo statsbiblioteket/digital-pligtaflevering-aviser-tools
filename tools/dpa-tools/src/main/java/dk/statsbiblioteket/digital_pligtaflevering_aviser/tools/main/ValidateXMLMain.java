@@ -8,12 +8,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolThrewException;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolCompletedResult;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolThrewExceptionResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -29,11 +29,18 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.inject.Named;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +94,7 @@ public class ValidateXMLMain {
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
-                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.getResult()))
+                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()))
                     .count() + " items processed";
 
             return f;
@@ -106,10 +113,15 @@ public class ValidateXMLMain {
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
                 // Single doms item
-                Map<Boolean, List<Either<ToolThrewExceptionResult, ToolCompletedResult>>> toolResultMap = domsItem.allChildren()
+                List<Either<ToolThrewException, ToolResult>> toolResults = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem, mxBean))
                         .collect(Collectors.toList());
 
+                ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, t -> log.error("id: {}", t.id(), t.getException()));
+
+                ToolResult result = trr.apply(domsItem, toolResults);
+
+                /*
                 final List<Try<ToolResult>> failed = toolResultMap.getOrDefault(FALSE, emptyList());
                 failed.forEach(
                         t -> log.error("failed", t.getCause())
@@ -153,15 +165,12 @@ public class ValidateXMLMain {
                 }
 
                 final String deliveryEventMessage = message.toString();
+                */
 
                 long finishedDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
 
-                if (outcome == true) {
-                    return ToolResult.ok(domsItem, deliveryEventMessage);
-                } else {
-                    return ToolResult.fail(domsItem, deliveryEventMessage);
-                }
+                return result;
             };
         }
 
@@ -172,7 +181,7 @@ public class ValidateXMLMain {
          * @param mxBean
          * @return
          */
-        protected Stream<Either<ToolThrewExceptionResult, ToolCompletedResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
+        protected Stream<Either<ToolThrewException, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -193,27 +202,23 @@ public class ValidateXMLMain {
             // Note:  We ignore character set problems for now.
             final String datastreamAsString = ds.getDatastreamAsString();
 
-            throw new UnsupportedOperationException("not rewritten yet");  //FIXME: rewrite with Either.
-            /*
--------
-            return Stream.of(Try.of(() -> {
-
+            try {
                 String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root:" + rootnameInCurrentXmlFile);
+                    return Stream.of(Either.right(ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root:" + rootnameInCurrentXmlFile)));
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
 
-                SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                Schema schema = schemaFactory.newSchema(url);
-                Validator validator = schema.newValidator();
-                validator.validate(new StreamSource(new StringReader(datastreamAsString))); // only succedes if valid
+                Validator validator = getValidatorFor(url);
+                final StreamSource source = new StreamSource(new StringReader(datastreamAsString));
+                validator.validate(source); // only succedes if valid
                 log.trace("{}: XML valid", domsItem.getDomsId());
 
-                return ToolResult.ok(domsItem, "id: " + domsItem.getDomsId() + " XML valid");
-            }));
-            */
+                return Stream.of(Either.right(ToolResult.ok(domsItem, "id: " + domsItem.getDomsId() + " XML valid")));
+            } catch (Exception e) {
+                return Stream.of(Either.left(new ToolThrewException(domsItem, e)));
+            }
         }
 
         /**
@@ -227,12 +232,16 @@ public class ValidateXMLMain {
          * @throws SAXException
          * @throws XPathExpressionException
          */
-        protected String getRootTagName(InputSource reader) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            Document xmlDocument = builder.parse(reader);
-            Element root = xmlDocument.getDocumentElement();
-            return root.getTagName();
+        protected String getRootTagName(InputSource reader) {
+            try {
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                Document xmlDocument = builder.parse(reader);
+                Element root = xmlDocument.getDocumentElement();
+                return root.getTagName();
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                throw new RuntimeException("getRootTagName", e);
+            }
         }
 
         /**
@@ -264,6 +273,15 @@ public class ValidateXMLMain {
             return id -> new Item();
         }
 
+    }
+
+    public static Validator getValidatorFor(URL url)  {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            return schemaFactory.newSchema(url).newValidator();
+        } catch (SAXException e) {
+            throw new RuntimeException("getValidatorFor: url=" +url, e);
+        }
     }
 }
 

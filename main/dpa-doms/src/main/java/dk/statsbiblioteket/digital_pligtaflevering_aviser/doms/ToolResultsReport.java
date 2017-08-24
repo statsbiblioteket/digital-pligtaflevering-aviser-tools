@@ -1,7 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.google.common.base.Throwables;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 import javaslang.control.Either;
 
 import javax.inject.Inject;
@@ -9,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,33 +17,36 @@ import java.util.stream.Collectors;
  * the renderResultFunction, and the failed (which threw an exception) ones have their stack traces added.   This is
  * useful for creating event descriptions from multiple tasks.
  */
-public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolThrewExceptionResult, ToolResult>>, ToolResult> {
+public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolThrewException, ToolResult>>, ToolResult> {
     private final BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
+    private final Consumer<ToolThrewException> stackTraceLogger;
 
     /**
      * This is the method intended to be used in actual code
      */
     @Inject
-    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction) {
-        this(renderResultFunction, Throwables::getStackTraceAsString);
+    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction, Consumer<ToolThrewException> stackTraceLogger) {
+        this(renderResultFunction, Throwables::getStackTraceAsString, stackTraceLogger);
     }
 
     /**
      * This is to be used in unit tests, to control stack traces so they can be compared as strings
      */
 
-    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction, Function<Throwable, String> stackTraceRenderer) {
+    public ToolResultsReport(BiFunction<List<ToolResult>, List<ToolResult>, String> renderResultFunction, Function<Throwable, String> stackTraceRenderer,
+                             Consumer<ToolThrewException> stackTraceLogger) {
         this.renderResultFunction = renderResultFunction;
         this.stackTraceRenderer = stackTraceRenderer;
+        this.stackTraceLogger = stackTraceLogger;
     }
 
     @Override
-    public ToolResult apply(DomsItem resultItem, List<Either<ToolThrewExceptionResult, ToolResult>> eitherList) {
+    public ToolResult apply(DomsItem resultItem, List<Either<ToolThrewException, ToolResult>> eitherList) {
 
         // find all that threw exception.
 
-        List<ToolThrewExceptionResult> threwException = eitherList.stream()
+        List<ToolThrewException> threwException = eitherList.stream()
                 .filter(Either::isLeft)
                 .map(Either::getLeft)
                 .collect(Collectors.toList());
@@ -70,7 +73,7 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolT
                 .collect(Collectors.groupingBy(t -> stackTraceRenderer.apply((Throwables.getRootCause(t.getException()))),
                         Collectors.mapping(t -> t.id(), Collectors.toList())));
 
-         // a, b, c:
+        // a, b, c:
         // ----
         // (root cause stack trace)
 
@@ -80,6 +83,7 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolT
 
         String renderedStacktraces = threwException.stream()
                 .sorted(Comparator.comparing(t -> t.id()))
+                .peek(stackTraceLogger)
                 .map(t -> t.id() + ":\n" + stackTraceRenderer.apply(t.getException()) + "\n")
                 .collect(Collectors.joining("\n"));
 
@@ -88,26 +92,38 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolT
         } else {
             return new ToolResult(resultItem, false,
                     renderResultFunction.apply(ok, failed)
-                    //renderedOk
-                    //+ "\n\nfailed:\n---\n" + renderedFails
-                    + (threwException.size() > 0 ? "\n\n" + renderedIdsForRootCauses + "\n\n---\n" + renderedStacktraces : "")
+                            //renderedOk
+                            //+ "\n\nfailed:\n---\n" + renderedFails
+                            + (threwException.size() > 0 ? "\n\n" + renderedIdsForRootCauses + "\n\n---\n" + renderedStacktraces : "")
             );
         }
     }
 
     /**
      * Method to invoke a mapping on an Id, and according to convention return an Either.Left in case of problems
-     * capturing the exception and the id, or an Either.Right capturing the result.  We need this because we need to store
-     * the id along with the exception for later.
+     * capturing the exception and the id, or an Either.Right capturing the result.  We need this because we need to
+     * store the id along with the exception for later.
      *
      * @param item the Id to pass in that we are working on.  Captured in the failure.
      * @return
      */
-    public static Either<ToolThrewExceptionResult, ToolResult> applyOn(DomsItem item, Function<DomsItem, ToolResult> mapping) {
+    @Deprecated
+    public static Either<ToolThrewException, ToolResult> applyOn(DomsItem item, Function<DomsItem, ToolResult> mapping) {
         try {
             return Either.right(mapping.apply(item));
         } catch (Exception e) {
-            return Either.left(new ToolThrewExceptionResult(item, e));
+            return Either.left(new ToolThrewException(item, e));
         }
     }
+
+    public final static BiFunction<List<ToolResult>, List<ToolResult>, String> OK_COUNT_FAIL_LIST_RENDERER =
+            (ok, failed) -> ok.size() + " ok" +
+                    (failed.size() > 0
+                            ? "\n\n" + failed.size() + " failed:\n---\n" +
+                            failed.stream()
+                                    .map(t -> t.id() + ": " + t.getHumanlyReadableMessage())
+                                    .collect(Collectors.joining("\n"))
+                            : ""
+                    );
+
 }

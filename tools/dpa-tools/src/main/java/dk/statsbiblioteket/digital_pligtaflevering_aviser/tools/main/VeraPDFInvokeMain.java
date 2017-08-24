@@ -117,7 +117,7 @@ public class VeraPDFInvokeMain {
 
                 // Sort according to result
                 final Map<Boolean, List<ToolResult>> toolResultMap = toolResults.stream()
-                        .collect(Collectors.groupingBy(tr -> tr.getResult()));
+                        .collect(Collectors.groupingBy(tr -> tr.isSuccess()));
 
                 List<ToolResult> failingToolResults = toolResultMap.getOrDefault(Boolean.FALSE, Collections.emptyList());
 

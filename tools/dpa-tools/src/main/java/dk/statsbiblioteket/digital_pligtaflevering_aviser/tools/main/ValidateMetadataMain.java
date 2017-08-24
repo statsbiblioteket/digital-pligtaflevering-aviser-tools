@@ -112,7 +112,7 @@ public class ValidateMetadataMain {
                 BiConsumer<OkFailThrown, Try<ToolResult>> accumulator = (c, t) -> {
                     if (t.isFailure()) {
                         c.thrown.add(t);
-                    } else if (t.get().getResult()) {
+                    } else if (t.get().isSuccess()) {
                         c.ok.add(t.get());
                     } else {
                         c.fail.add(t.get());

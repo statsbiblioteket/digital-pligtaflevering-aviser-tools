@@ -64,7 +64,7 @@ public class GenerateStatisticsMain {
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId().apply(domsItem))
-                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.getResult()))
+                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()))
                     .count() + " items processed";
 
             return f;

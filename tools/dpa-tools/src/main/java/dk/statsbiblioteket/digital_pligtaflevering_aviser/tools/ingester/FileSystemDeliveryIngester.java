@@ -191,7 +191,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         String deliveryEventMessage = eventMessageForToolResults.apply(toolResult);
 
         // total outcome is successful only if all toolResults are.
-        boolean outcome = toolResult.stream().allMatch(tr -> tr.getResult() == true);
+        boolean outcome = toolResult.stream().allMatch(tr -> tr.isSuccess() == true);
 
         final String keyword = getClass().getSimpleName();
 
@@ -454,7 +454,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // All files now processed and created in DOMS.  If any failures so far, stop here.
         toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
 
-        if (toolResultsForThisDirectory.stream().allMatch(ToolResult::getResult)) {
+        if (toolResultsForThisDirectory.stream().allMatch(ToolResult::isSuccess)) {
             log.trace("All successful.  Adding relations.");
         } else {
             // a failure has happened up til now, return now for cleanest error messages

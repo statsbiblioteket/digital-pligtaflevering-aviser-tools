@@ -96,6 +96,4 @@ public class AutonomousPreservationToolHelper {
             log.error("Runnable threw exception:", e);
         }
     }
-
-
 }
