@@ -116,7 +116,7 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<Either<ToolT
         }
     }
 
-    public final static BiFunction<List<ToolResult>, List<ToolResult>, String> OK_COUNT_FAIL_LIST_RENDERER =
+    public static final BiFunction<List<ToolResult>, List<ToolResult>, String> OK_COUNT_FAIL_LIST_RENDERER =
             (ok, failed) -> ok.size() + " ok" +
                     (failed.size() > 0
                             ? "\n\n" + failed.size() + " failed:\n---\n" +

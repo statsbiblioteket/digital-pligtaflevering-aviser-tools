@@ -82,7 +82,7 @@ public class GenerateStatisticsMain {
                 long startDeliveryStatTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.START_GENERATE_STATISTICS, deliveryName);
                 DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(domsItem);
-                if(deliveryStatistics == null) {
+                if (deliveryStatistics == null) {
                     return ToolResult.fail(domsItem, "The statistics which should be generated from the delivery could not get generated");
                 }
                 byte[] statisticsStream = parser.processDeliveryStatisticsToBytestream().apply(deliveryStatistics);

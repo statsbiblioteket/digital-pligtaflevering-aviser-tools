@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class ToolResultReportTest {
 
     @Test
-    public void test1(){
+    public void test1() {
         ToolResultReport trr = new ToolResultReport();
 
         final ToolResult ok1 = ToolResult.ok(null, "Yes!");

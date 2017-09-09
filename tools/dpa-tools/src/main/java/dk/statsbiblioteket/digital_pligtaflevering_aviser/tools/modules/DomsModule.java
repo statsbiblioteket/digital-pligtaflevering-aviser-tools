@@ -349,7 +349,8 @@ public class DomsModule {
      */
     @Provides
     @Produces
-    @Named(DomsId.DPA_WEBRESOURCE) public WebResource provideConfiguredFedoraWebResource(
+    @Named(DomsId.DPA_WEBRESOURCE)
+    public WebResource provideConfiguredFedoraWebResource(
             @Named(DOMS_URL) String domsUrl,
             @Named(DOMS_USERNAME) String domsUsername,
             @Named(DOMS_PASSWORD) String domsPassword) {

@@ -31,7 +31,6 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
     private final String roundTripTemplate;
     private final String hasPart_relation;
 
-
     private final String createDeliveryRoundTripComment = "Creating delivery round trip";
 
     public DeliveryDomsEventStorage(EnhancedFedora fedora, String type, String deliveryTemplate, String roundTripTemplate,
@@ -62,8 +61,8 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
      * Create a batch and round trip object, without adding any events
      *
      * @param fullItemID the full item id
-     *
      * @return the pid of the doms object corresponding to the round trip
+     *
      * @throws dk.statsbiblioteket.medieplatform.autonomous.CommunicationException if communication with doms failed
      */
     public String createDeliveryRoundTrip(String fullItemID) throws CommunicationException {
@@ -105,8 +104,7 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
 
             String premisBlob = premisFactory.createInitialPremisBlob(fullItemID).toXML();
             fedora.modifyDatastreamByValue(
-                    roundTripObject, eventsDatastream, null,null,premisBlob.getBytes(StandardCharsets.UTF_8), null, "text/xml", createDeliveryRoundTripComment,null);
-
+                    roundTripObject, eventsDatastream, null, null, premisBlob.getBytes(StandardCharsets.UTF_8), null, "text/xml", createDeliveryRoundTripComment, null);
 
             return roundTripObject;
         } catch (BackendMethodFailedException | BackendInvalidCredsException | PIDGeneratorException |
@@ -115,10 +113,10 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
         }
     }
 
-
     /**
-     * Returns all Batch roundtrip objects for a given batchId, sorted in ascending order.
-     * Returns null if the batchId is not known.
+     * Returns all Batch roundtrip objects for a given batchId, sorted in ascending order. Returns null if the batchId
+     * is not known.
+     *
      * @param batchId the batchId.
      * @return the sorted list of roundtrip objects.
      */
@@ -130,14 +128,14 @@ public class DeliveryDomsEventStorage extends DomsEventStorage<Delivery> {
             }
         };
         try {
-            List<String> founds = fedora.findObjectFromDCIdentifier(new Delivery.DeliveryRoundtripID(batchId,0).batchDCIdentifier());
+            List<String> founds = fedora.findObjectFromDCIdentifier(new Delivery.DeliveryRoundtripID(batchId, 0).batchDCIdentifier());
             if (founds == null || founds.size() == 0) {
                 return null;
             }
             String batchObjectPid = founds.get(0);
             List<FedoraRelation> roundtripRelations = fedora.getNamedRelations(batchObjectPid, hasPart_relation, null);
             List<Delivery> roundtrips = new ArrayList<>();
-            for (FedoraRelation roundtripRelation: roundtripRelations) {
+            for (FedoraRelation roundtripRelation : roundtripRelations) {
                 try {
                     final Delivery itemFromDomsID = getItemFromDomsID(FedoraUtil.ensurePID(roundtripRelation.getObject()));
                     if (itemFromDomsID != null) {

@@ -98,7 +98,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
-    final private List<String> collections;
+    private final  List<String> collections;
     private Set<String> ignoredFilesSet;
     private final String gitId;
     private String domsCollection;
@@ -417,7 +417,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                         FileInputStream fis = new FileInputStream(path.toFile());
                                         String calculatedChecksum = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
                                         fis.close();
-                                        if (calculatedChecksum.equals(expectedChecksum)) {//If checksum is validated start ingesting otherwise return fail
+                                        if (calculatedChecksum.equals(expectedChecksum)) { //If checksum is validated start ingesting otherwise return fail
                                             final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
                                             byte[] allBytes = Files.readAllBytes(path);
                                             efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, expectedChecksum, allBytes, null, mimeType, "From " + path, null);

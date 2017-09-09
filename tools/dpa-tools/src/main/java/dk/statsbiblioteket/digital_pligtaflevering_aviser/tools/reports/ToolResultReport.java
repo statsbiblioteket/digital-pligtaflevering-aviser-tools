@@ -26,7 +26,7 @@ public class ToolResultReport implements Function<Stream<ToolResult>, String> {
 
         StringBuilder sb = new StringBuilder("" + ok.size() + " processed.\n\n");
         sb.append(failed.size() + " failed!\n\n--------------\n");
-        for(ToolResult f:failed) {
+        for (ToolResult f:failed) {
             sb.append(f.getItem() + ": " + f.getHumanlyReadableMessage() + "\n");
         }
         sb.append("\n--------------\n");

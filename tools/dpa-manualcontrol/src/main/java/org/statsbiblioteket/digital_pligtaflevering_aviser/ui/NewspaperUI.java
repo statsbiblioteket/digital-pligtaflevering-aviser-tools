@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 
-
 /**
  * The Application's "main" class
  */
@@ -26,14 +25,16 @@ public class NewspaperUI extends UI {
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
 
     private DataModel model = new DataModel();
+
     /**
      * Initiate the application
+     *
      * @param request
      */
     @Override
     protected void init(VaadinRequest request) {
 
-        if(request.getUserPrincipal()!=null) {
+        if (request.getUserPrincipal() != null) {
             String initials = request.getUserPrincipal().getName();
             model.setInitials(initials);
         }
@@ -42,7 +43,7 @@ public class NewspaperUI extends UI {
         String month = request.getParameter("month");
         String del = request.getParameter("del");
         String title = request.getParameter("title");
-        boolean validated = "true".equals(request.getParameter("validated"));//This parameter is a backdoor to view information that is normally hidden from the user
+        boolean validated = "true".equals(request.getParameter("validated")); //This parameter is a backdoor to view information that is normally hidden from the user
 
         model.setSelectedMonth(month);
         model.setSelectedDelivery(del);

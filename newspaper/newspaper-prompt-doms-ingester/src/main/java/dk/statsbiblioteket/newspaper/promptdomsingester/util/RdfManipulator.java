@@ -59,7 +59,7 @@ public class RdfManipulator {
      * @param fragment The rdf/xml fragment to be added
      */
     public void addFragmentToDescription(Fragment fragment) {
-        if(!containsFragment(fragment)) {
+        if (!containsFragment(fragment)) {
             Document fragmentNode = DOM.stringToDOM(fragment.toString(), true);
             Node importedNode = document.importNode(fragmentNode.getDocumentElement(), true);
             rdfDescriptionNode.appendChild(importedNode);
@@ -105,7 +105,7 @@ public class RdfManipulator {
                 "rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         String xpath = "//our:" + "hasModel";
         NodeList nodes = selector.selectNodeList(rdfDescriptionNode, xpath);
-        if(nodes != null) {
+        if (nodes != null) {
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
                 node.getParentNode().removeChild(node);
@@ -136,7 +136,7 @@ public class RdfManipulator {
     /**
      * Class representing an xml-fragment (a single relation) from an rdf-xml document.
      */
-    static public class Fragment {
+    public static class Fragment {
         private String predicateNS;
         private String predicateName;
         private String object;
@@ -178,7 +178,7 @@ public class RdfManipulator {
         String xpath = "//our:" + fragment.getPredicateName()
                 + "[@rdf:resource='info:fedora/" + fragment.getObject() + "']";
         Node node = selector.selectNode(rdfDescriptionNode, xpath);
-        if(node == null) {
+        if (node == null) {
             return false;
         } else {
             return true;

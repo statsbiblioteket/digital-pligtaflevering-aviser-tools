@@ -1,7 +1,10 @@
 package dk.statsbiblioteket.newspaper.promptdomsingester.component;
 
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
-import dk.statsbiblioteket.medieplatform.autonomous.*;
+import dk.statsbiblioteket.medieplatform.autonomous.Batch;
+import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
+import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
+import dk.statsbiblioteket.medieplatform.autonomous.TreeProcessorAbstractRunnableComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.common.TreeIterator;
 import dk.statsbiblioteket.medieplatform.autonomous.iterator.filesystem.transforming.TransformingIteratorForFileSystems;
 import dk.statsbiblioteket.newspaper.promptdomsingester.IngesterInterface;
@@ -21,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableComponent {
     private final EnhancedFedora eFedora;
-    private final static String eventId = "Metadata_Archived";
+    private static final String eventId = "Metadata_Archived";
 
     public RunnablePromptDomsIngester(Properties properties, EnhancedFedora eFedora) {
         super(properties);
@@ -37,15 +40,15 @@ public class RunnablePromptDomsIngester extends TreeProcessorAbstractRunnableCom
     public void doWorkOnItem(Batch batch, ResultCollector resultCollector) {
         try {
             BatchMD5SUMSValidation md5Validator = new BatchMD5SUMSValidation(getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER), getProperties().getProperty(ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES));
-            if(!md5Validator.validation(batch.getFullID())) {
+            if (!md5Validator.validation(batch.getFullID())) {
                 List<String> validationFailureResult = md5Validator.getValidationResult();
-                for(String failure : validationFailureResult) {
+                for (String failure : validationFailureResult) {
                     resultCollector.addFailure(batch.getFullID(), "md5Validator", this.getClass().getSimpleName(), "md5Validator validation was not accepted with message:" + failure);
                 }
             } else {
                 IngesterInterface ingester = SimpleFedoraIngester.getNewspaperInstance(
                         eFedora, new String[]{getProperties().getProperty(
-                                ConfigConstants.DOMS_COLLECTION, "doms:DPA_Collection")} );
+                                ConfigConstants.DOMS_COLLECTION, "doms:DPA_Collection")});
                 ingester.ingest(createIterator(batch));
             }
         } catch (Exception e) {

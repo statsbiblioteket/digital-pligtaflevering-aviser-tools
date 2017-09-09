@@ -1,16 +1,16 @@
 package dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository;
 
-import java.util.Properties;
-
 import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 
+import java.util.Properties;
+
 public class IngesterConfiguration {
-    public static final String COLLECTIONID_PROPERTY="bitrepository.ingester.collectionid";
-    public static final String COMPONENTID_PROPERTY="bitrepository.ingester.componentid";
-    public static final String SETTINGS_DIR_PROPERTY="bitrepository.ingester.settingsdir";
-    public static final String CERTIFICATE_PROPERTY="bitrepository.ingester.certificate";
-    public static final String URL_TO_BATCH_DIR_PROPERTY="bitrepository.ingester.urltobatchdir";
-    public static final String MAX_NUMBER_OF_PARALLEL_PUTS_PROPERTY="bitrepository.ingester.numberofparrallelPuts";
+    public static final String COLLECTIONID_PROPERTY = "bitrepository.ingester.collectionid";
+    public static final String COMPONENTID_PROPERTY = "bitrepository.ingester.componentid";
+    public static final String SETTINGS_DIR_PROPERTY = "bitrepository.ingester.settingsdir";
+    public static final String CERTIFICATE_PROPERTY = "bitrepository.ingester.certificate";
+    public static final String URL_TO_BATCH_DIR_PROPERTY = "bitrepository.ingester.urltobatchdir";
+    public static final String MAX_NUMBER_OF_PARALLEL_PUTS_PROPERTY = "bitrepository.ingester.numberofparrallelPuts";
     public static final String BITMAG_BASEURL_PROPERTY = "bitrepository.ingester.baseurl";
     public static final String FORCE_ONLINE_COMMAND = "bitrepository.ingester.forceOnlineCommand";
     public static final String DOMS_TIMEOUT = "bitrepository.ingester.domsTimeout";

@@ -101,7 +101,7 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
                 }
             }
             return rootPid;
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -201,7 +201,7 @@ public abstract class AbstractFedoraIngester implements IngesterInterface {
             String logMessage = "Created object with DC id " + id;
             currentNodePid = fedora.newEmptyObject(oldIds, getCollections(), logMessage);
             //Add a title to the object in Fedora
-            fedora.modifyObjectLabel(currentNodePid,id, "Adding label to Object");
+            fedora.modifyObjectLabel(currentNodePid, id, "Adding label to Object");
             log.debug(logMessage + " / " + currentNodePid);
         }
         String parentPid = pidStack.peekFirst();

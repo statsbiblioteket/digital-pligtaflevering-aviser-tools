@@ -45,7 +45,7 @@ public class ParallelOperationLimiter {
      */
     public void removeJob(PutJob job) {
         PutJob removedJob = jobs.remove(job.getIngestableFile().getFileID());
-        if(removedJob != null) {
+        if (removedJob != null) {
             jobLimiter.release();
         }
     }

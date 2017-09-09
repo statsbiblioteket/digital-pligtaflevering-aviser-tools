@@ -23,10 +23,10 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 
 /**
- * Used for stubbing a actual bitrepository, thereby avoiding all the complications associated with
- * testing agaist a real backend. All calls to the put file client are store in the.
- * The purpose of this class is not to have functionally god and errorconsistent code, but rather to have something that simulates the use of the ingester client.
- * <code>runningOperations</code> list.
+ * Used for stubbing a actual bitrepository, thereby avoiding all the complications associated with testing agaist a
+ * real backend. All calls to the put file client are store in the. The purpose of this class is not to have
+ * functionally god and errorconsistent code, but rather to have something that simulates the use of the ingester
+ * client. <code>runningOperations</code> list.
  */
 public class BitrepositoryPutFileClientStub implements AutoCloseablePutFileClient {
     private static Logger log = LoggerFactory.getLogger(BitrepositoryPutFileClientStub.class);
@@ -51,14 +51,14 @@ public class BitrepositoryPutFileClientStub implements AutoCloseablePutFileClien
 
         CompleteEvent completeEvent = new CompleteEvent(null, null);
         try {
-            if(!Arrays.equals(this.getFileChecksum(MessageDigest.getInstance("md5"), url.openStream()), checksumForValidationAtPillar.getChecksumValue())) {
+            if (!Arrays.equals(this.getFileChecksum(MessageDigest.getInstance("md5"), url.openStream()), checksumForValidationAtPillar.getChecksumValue())) {
                 completeEvent.setEventType(OperationEvent.OperationEventType.FAILED);
                 completeEvent.setInfo("MD5 check has failed on the file : " + url);
             }
             String newFileId = this.destinationPath + File.separator + fileId;
             File newFile = new File(newFileId);
             File parent = newFile.getParentFile();
-            if(!parent.exists() && !parent.mkdirs()){
+            if (!parent.exists() && !parent.mkdirs()) {
                 throw new IllegalStateException("Couldn't create dir: " + parent);
             }
 
@@ -67,7 +67,7 @@ public class BitrepositoryPutFileClientStub implements AutoCloseablePutFileClien
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             completeEvent.setFileID(fileId);
             completeEvent.setOperationType(OperationType.PUT_FILE);
-        } catch(Exception e) {
+        } catch (Exception e) {
             completeEvent.setEventType(OperationEvent.OperationEventType.FAILED);
             completeEvent.setInfo(e.getMessage());
             log.error("Ingester simulator failed :" + e.getMessage());
@@ -77,9 +77,11 @@ public class BitrepositoryPutFileClientStub implements AutoCloseablePutFileClien
 
     /**
      * Get the md5 checksum of a file
+     *
      * @param digest Digester (i.e. md5)
-     * @param fis  inputstream to digest
+     * @param fis    inputstream to digest
      * @return checksum
+     *
      * @throws IOException
      */
     private byte[] getFileChecksum(MessageDigest digest, InputStream fis) throws IOException {

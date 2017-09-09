@@ -43,7 +43,7 @@ public class ToolResultsReportTest {
 
 
     // we do not want to actually log the captured exceptions
-    protected Consumer<ToolThrewException> noLogging = throwable -> {};
+    protected Consumer<ToolThrewException> noLogging = throwable -> { };
 
     //
     protected final ToolResultsReport tf = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, stacktraceRendering, noLogging);

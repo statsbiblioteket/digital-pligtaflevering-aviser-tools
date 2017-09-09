@@ -132,25 +132,17 @@ public class CreateDeliveryMain {
         }
 
         /**
-         * <p>
-         * Locate deliveries in the current folder and below in reverse order
-         * (by looking for the transfer completed file).
-         * </p>
+         * <p> Locate deliveries in the current folder and below in reverse order (by looking for the transfer completed
+         * file). </p> <p> Reversing them mean that "A_rt2" will be processed before "A_rt1" so when "A_rt1" is
+         * considered there is already "A_rt2" present for delivery "A". (This only works properly up to 9 roundtrips,
+         * but that should hopefully be rare). </p>
          *
-         * <p>
-         * Reversing them mean that "A_rt2" will be processed before "A_rt1" so
-         * when "A_rt1" is considered there is already "A_rt2" present for
-         * delivery "A". (This only works properly up to 9 roundtrips, but that
-         * should hopefully be rare).
-         * </p>
-         *
-         * @param deliveryFolderName
-         *            Path name for delivery folder (containing deliveries).
+         * @param deliveryFolderName Path name for delivery folder (containing deliveries).
          * @return Reverse sorted stream of paths of deliveries.
          */
         @Provides
         Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName) {
-            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName),1 )
+            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName), 1)
                     .filter(Files::isDirectory)
                     .filter(p -> Files.exists(p.resolve(TRANSFER_COMPLETE)))
                     .sorted(Comparator.reverseOrder())
@@ -159,8 +151,8 @@ public class CreateDeliveryMain {
     }
 
     /**
-     * Create an empty file to indicate that the batch has been run.  Last modified time is set to now.
-     * A simple implementation of the Unix "touch" command.
+     * Create an empty file to indicate that the batch has been run.  Last modified time is set to now. A simple
+     * implementation of the Unix "touch" command.
      *
      * @param file file to "touch"
      * @throws IOException

@@ -18,7 +18,7 @@ public class DeliveryItemFactory implements ItemFactory<Delivery> {
     public Delivery create(String id) {
         Delivery.DeliveryRoundtripID splits = new Delivery.DeliveryRoundtripID(id);
         Delivery.DeliveryType deleveryType = Delivery.DeliveryType.STDDELIVERY;
-        if(id.startsWith("mt_")) {
+        if (id.startsWith("mt_")) {
             deleveryType = Delivery.DeliveryType.MUTATION;
         }
         Delivery result = new Delivery(splits.getDeliveryID(), splits.getRoundTripNumber(), deleveryType);

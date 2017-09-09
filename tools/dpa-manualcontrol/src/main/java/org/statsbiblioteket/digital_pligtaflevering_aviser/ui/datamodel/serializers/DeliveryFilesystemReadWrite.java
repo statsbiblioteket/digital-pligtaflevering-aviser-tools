@@ -128,7 +128,7 @@ public class DeliveryFilesystemReadWrite {
      * @return
      */
     public File createCashingFile(String selectedMonth, String deliveryName, String titleName) {
-        File file = new File(cachingPath + selectedMonth +"/" + deliveryName + "_" + titleName + ".xml");
+        File file = new File(cachingPath + selectedMonth + "/" + deliveryName + "_" + titleName + ".xml");
         return file;
     }
 }

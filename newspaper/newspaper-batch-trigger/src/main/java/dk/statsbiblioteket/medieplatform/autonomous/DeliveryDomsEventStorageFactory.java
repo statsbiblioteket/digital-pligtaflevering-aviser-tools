@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 
 /**
  * Factory implementation of a DomsEventStorageFactory which generates a DeliveryDomsEventStorage-object
+ *
  * @noinspection WeakerAccess
  */
 public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Delivery> {
@@ -33,7 +34,7 @@ public class DeliveryDomsEventStorageFactory extends DomsEventStorageFactory<Del
                 null,
                 retries,
                 delayBetweenRetries);
-        if (itemFactory == null){
+        if (itemFactory == null) {
             itemFactory = new DeliveryItemFactory();
         }
         return new DeliveryDomsEventStorage(fedora, premisIdentifierType, deliveryTemplate, roundTripTemplate, hasPartRelation, eventsDatastream, itemFactory);

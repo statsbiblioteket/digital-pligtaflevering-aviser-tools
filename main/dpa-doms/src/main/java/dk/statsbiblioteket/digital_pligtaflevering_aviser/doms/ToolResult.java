@@ -10,7 +10,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
  * FIXME:  AVIS-64 mentioned that the use of DomsItem instead of DomsId might be a memory bottleneck.
  */
 public class ToolResult implements Id {
-    final private DomsItem item;
+    private final DomsItem item;
     /**
      * Holds the success of the operation.  TRUE=successful.  FALSE=failed.
      */

@@ -1,22 +1,21 @@
 package dk.statsbiblioteket.newspaper.bitrepository.ingester;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngestableFile;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
+import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
+import org.testng.annotations.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.testng.annotations.Test;
-
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngestableFile;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.ParallelOperationLimiter;
-import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.PutJob;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 
 public class ParallelOperationLimiterTest {
 
-    public final static String TEST_FILE_ID1 = "file1";
-    public final static String TEST_FILE_ID2 = "file2";
+    public static final String TEST_FILE_ID1 = "file1";
+    public static final String TEST_FILE_ID2 = "file2";
     
     @Test
     public void putGetRemoveTest() throws MalformedURLException {

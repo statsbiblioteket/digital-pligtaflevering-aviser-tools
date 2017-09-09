@@ -42,13 +42,13 @@ public class VeraPDFOutputValidatorTest {
         int unknown = 0;
         int manual = 0;
 
-        for(ValidationResult vr : validationResults.getRulesBroken()) {
+        for (ValidationResult vr : validationResults.getRulesBroken()) {
 
-            if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.INVALID) {
+            if (vr.getValidationEnum() == ValidationResult.ValidationResultEnum.INVALID) {
                 invalid++;
-            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.UNKNOWN) {
+            } else if (vr.getValidationEnum() == ValidationResult.ValidationResultEnum.UNKNOWN) {
                 unknown++;
-            } else if(vr.getValidationEnum() == ValidationResult.ValidationResultEnum.MANUAL_INSPECTION) {
+            } else if (vr.getValidationEnum() == ValidationResult.ValidationResultEnum.MANUAL_INSPECTION) {
                 manual++;
             }
         }

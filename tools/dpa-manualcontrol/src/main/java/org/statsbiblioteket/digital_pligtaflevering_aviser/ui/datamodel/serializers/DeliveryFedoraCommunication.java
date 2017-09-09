@@ -37,17 +37,15 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * Helper-class for serializing objects between datamodel and fedora
- * This is used for writing xml-streams to fedora and reading xml-streams into objectmodels.
- * Each roundtrip contains a datastream with metadata of the filestructure under each delivery.
- * The result af a check is stored in the Title under a delivery
+ * Helper-class for serializing objects between datamodel and fedora This is used for writing xml-streams to fedora and
+ * reading xml-streams into objectmodels. Each roundtrip contains a datastream with metadata of the filestructure under
+ * each delivery. The result af a check is stored in the Title under a delivery
  */
 public class DeliveryFedoraCommunication {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private final static String VALIDATION_INFO_STREAMNAME = "VALIDATIONINFO";
-    private final static String STATISTICS_STREAM_NAME = "DELIVERYSTATISTICS";
-
+    private static final String VALIDATION_INFO_STREAMNAME = "VALIDATIONINFO";
+    private static final String STATISTICS_STREAM_NAME = "DELIVERYSTATISTICS";
 
     private static String itemType;
     private static String pastEvents;
@@ -67,6 +65,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Initiate the list of deliveries
+     *
      * @param eventStatus
      * @param deliveryFilter
      */
@@ -74,7 +73,7 @@ public class DeliveryFedoraCommunication {
         deliveryList.clear();
         Stream<DomsItem> items = null;
 
-        switch(eventStatus) {
+        switch (eventStatus) {
             case READYFORMANUALCHECK:
                 items = getReadyForManual(deliveryFilter);
                 break;
@@ -93,6 +92,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get a list of deliveries, which are ready for manual inspections
+     *
      * @param deliveryFilter
      * @return
      */
@@ -104,6 +104,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get a list of deliveries, which is has already added an event that manual inspections has been done
+     *
      * @param deliveryFilter
      * @return
      */
@@ -115,6 +116,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get the domsItem from the uuid. The Item is fetched directly from fedora
+     *
      * @param id
      * @return
      */
@@ -124,9 +126,10 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get the DomsItem from the list of items, which has been cashed
+     *
      * @param name deliveryname as used in fedora "dl_######_rt#"
-     * @return the DomsItem which is used for iterating through the tree-structure below the item,
-     * {@code null} if a delivery with this name has not been initialized from Fedora
+     * @return the DomsItem which is used for iterating through the tree-structure below the item, {@code null} if a
+     * delivery with this name has not been initialized from Fedora
      */
     public DomsItem getDeliveryFromName(String name) {
         return deliveryList.get(name);
@@ -134,6 +137,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get the list of deliveryNames which are cashed
+     *
      * @return
      */
     public Set<String> getInitiatedDeliveries() {
@@ -142,20 +146,22 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get all Title objects from Fedora.
+     *
      * @return
+     *
      * @throws Exception
      */
     public TitleDeliveryHierarchy getTitleHierachyFromFedora() throws Exception {
 
         TitleDeliveryHierarchy currentlySelectedTitleHiearachy = new TitleDeliveryHierarchy();
 
-        for(String delivery: deliveryList.keySet()) {
+        for (String delivery : deliveryList.keySet()) {
 
             DomsItem deliveryItem = deliveryList.get(delivery);
             Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(deliveryItem);
 
             //First search through tileObjects to find all performed checks
-            while(titleSubfolder.hasNext()) {
+            while (titleSubfolder.hasNext()) {
 
                 DomsItem titleItem = titleSubfolder.next();
                 Optional<DomsDatastream> validationStream = titleItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(VALIDATION_INFO_STREAMNAME)).findAny();
@@ -188,12 +194,12 @@ public class DeliveryFedoraCommunication {
                 XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
                 NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-                for(int i = 0; i< nl.getLength(); i++) {
+                for (int i = 0; i < nl.getLength(); i++) {
                     String titleItem = nl.item(i).getNodeValue();
 
-                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='"+titleItem+"']/*[local-name()='articles']/*[local-name()='article']");
+                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='articles']/*[local-name()='article']");
                     NodeList articles = (NodeList) articleExpression.evaluate(doc, XPathConstants.NODESET);
-                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='"+titleItem+"']/*[local-name()='pages']/*[local-name()='page']");
+                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
                     NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
 
                     currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryTitleInfo(delivery, titleItem, articles.getLength(), pages.getLength()));
@@ -205,26 +211,25 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Get the object of the title in the delivery fetched from fedora
+     *
      * @param selectedDelivery
      * @param selectedTitle
-     * @return the Title which contains metadate of a newspapertitle in a delivery
-     * {@code null} if a delivery with this name has not been initialized from Fedora
+     * @return the Title which contains metadate of a newspapertitle in a delivery {@code null} if a delivery with this
+     * name has not been initialized from Fedora
      */
     public Title getTitleObj(String selectedDelivery, String selectedTitle) {
-        if(selectedDelivery==null || selectedTitle==null) {
+        if (selectedDelivery == null || selectedTitle == null) {
             return null;
         }
         DomsItem domsItem = this.getDeliveryFromName(selectedDelivery);
-        if(domsItem==null) {
+        if (domsItem == null) {
             return null;
         }
-
 
         final List<DomsDatastream> datastreams = domsItem.datastreams();
         Optional<DomsDatastream> profileOptional = datastreams.stream()
                 .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
                 .findAny();
-
 
         if (profileOptional.isPresent()) {
             try {
@@ -235,17 +240,16 @@ public class DeliveryFedoraCommunication {
 
                 JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                DeliveryStatistics deserializedObject = (DeliveryStatistics)jaxbUnmarshaller.unmarshal(inps);
-
+                DeliveryStatistics deserializedObject = (DeliveryStatistics) jaxbUnmarshaller.unmarshal(inps);
 
                 Title selectedTitleObj = null;
                 List<Title> titleList = deserializedObject.getTitles().getTitles();
-                for(Title title : titleList) {
-                    if(selectedTitle.equals(title.getTitleName())) {
+                for (Title title : titleList) {
+                    if (selectedTitle.equals(title.getTitleName())) {
                         selectedTitleObj = title;
                     }
                 }
-                if(selectedTitleObj==null) {
+                if (selectedTitleObj == null) {
                     return null;
                 }
 
@@ -261,8 +265,10 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Write the delivery to the title-object in fedora
+     *
      * @param deli
      * @return
+     *
      * @throws JAXBException
      */
     public boolean writeDeliveryToFedora(DeliveryTitleInfo deli) throws JAXBException {
@@ -277,6 +283,7 @@ public class DeliveryFedoraCommunication {
 
     /**
      * Write to current title in delivery
+     *
      * @param deliveryName
      * @param titleName
      * @param statisticsStream
@@ -285,19 +292,19 @@ public class DeliveryFedoraCommunication {
     public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
-        if(domsItem == null) {
+        if (domsItem == null) {
             return false;
         }
         DomsItem selectedTitleItem;
 
         Iterator<DomsItem> titleSubfolder = parser.processChildDomsId().apply(domsItem);
-        while(titleSubfolder.hasNext()) {
+        while (titleSubfolder.hasNext()) {
             DomsItem titleItem = titleSubfolder.next();
             String itemPath = titleItem.getPath();
 
             //path:dl_20160811_rt1/verapdf
             //Find the title part of the path, the title part is the title of the newspaper (bt/politikken/jyllandsposten etc.)
-            if(titleName.equals(itemPath.substring(itemPath.indexOf("/")+1))) {
+            if (titleName.equals(itemPath.substring(itemPath.indexOf("/") + 1))) {
                 selectedTitleItem = titleItem;
                 final List<DomsDatastream> datastreams = selectedTitleItem.datastreams();
                 Optional<DomsDatastream> profileOptional = datastreams.stream()
