@@ -20,7 +20,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModu
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import javaslang.control.Either;
-import javaslang.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -34,7 +33,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import javax.xml.xpath.XPathExpressionException;
@@ -50,9 +48,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-import static java.util.Collections.emptyList;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 
 /**
  * Main class for starting autonomous component This component is used for validation of XML data in one or more
@@ -94,7 +90,12 @@ public class ValidateXMLMain {
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
-                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()))
+                    .peek(tr -> {
+                        tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess());
+                        if (tr.isSuccess() == false) {
+                            tr.getItem().appendEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false);
+                        }
+                    })
                     .count() + " items processed";
 
             return f;
@@ -275,12 +276,12 @@ public class ValidateXMLMain {
 
     }
 
-    public static Validator getValidatorFor(URL url)  {
+    public static Validator getValidatorFor(URL url) {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
             return schemaFactory.newSchema(url).newValidator();
         } catch (SAXException e) {
-            throw new RuntimeException("getValidatorFor: url=" +url, e);
+            throw new RuntimeException("getValidatorFor: url=" + url, e);
         }
     }
 }

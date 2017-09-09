@@ -5,5 +5,5 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.model;
  * related to a given RepositoryItem in a Repository.
  */
 public interface Event {
-
+    String STOPPED_STATE = "Manually_stopped";
 }

@@ -4,6 +4,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -19,7 +20,6 @@ import static dk.statsbiblioteket.medieplatform.autonomous.newspaper.KibanaLoggi
  * Called from shell script with arguments to create a batch object in DOMS with proper Premis event added.
  */
 public class CreateDelivery {
-    private static final String STOPPED_STATE = "Manually_stopped";
     public static Logger log = org.slf4j.LoggerFactory.getLogger(CreateDelivery.class);
 
     /**
@@ -133,7 +133,7 @@ public class CreateDelivery {
                 if (!roundtrip.getRoundTripNumber().equals(delivery.getRoundTripNumber())) {
                     domsEventClient.appendEventToItem(roundtrip, premisAgent, new Date(),
                             "Newer roundtrip (" + roundtrip.getRoundTripNumber()
-                                    + ") has been received, so this batch should be stopped", STOPPED_STATE, true);
+                                    + ") has been received, so this batch should be stopped", dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE, true);
                     log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), roundtrip.getFullID());
                 }
             }
