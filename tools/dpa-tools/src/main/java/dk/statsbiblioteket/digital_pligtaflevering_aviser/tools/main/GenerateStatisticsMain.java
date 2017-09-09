@@ -3,6 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -64,7 +65,7 @@ public class GenerateStatisticsMain {
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId().apply(domsItem))
-                    .peek(tr -> tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()))
+                    .peek(tr -> tr.getItem().appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
                     .count() + " items processed";
 
             return f;

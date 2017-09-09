@@ -4,6 +4,7 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -91,9 +92,9 @@ public class ValidateXMLMain {
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
                     .peek(tr -> {
-                        tr.getItem().appendEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess());
+                        tr.getItem().appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()));
                         if (tr.isSuccess() == false) {
-                            tr.getItem().appendEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false);
+                            tr.getItem().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
                         }
                     })
                     .count() + " items processed";

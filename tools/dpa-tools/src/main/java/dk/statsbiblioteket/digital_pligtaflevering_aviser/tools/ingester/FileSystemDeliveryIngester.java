@@ -2,6 +2,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.google.common.base.Joiner;
 import com.sun.jersey.api.client.WebResource;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -195,7 +196,8 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         final String keyword = getClass().getSimpleName();
 
-        domsItem.appendEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome);
+
+        domsItem.appendEvent(new DomsEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome));
         log.info("{} {} Took: {} ms", keyword, domsItem, System.currentTimeMillis() - startTime);
         log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage, outcome);
         return "item " + domsItem + " ingested. outcome = " + outcome;

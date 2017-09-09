@@ -4,6 +4,7 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -132,7 +133,7 @@ public class VeraPDFInvokeMain {
                 final String keyword = getClass().getSimpleName();
                 final Date timestamp = new Date();
 
-                domsItem.appendEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome);
+                domsItem.appendEvent(new DomsEvent(keyword, timestamp, deliveryEventMessage, VERAPDF_INVOKED, outcome));
 
                 log.info(KibanaLoggingStrings.FINISHED_DELIVERY_PDFINVOKE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
                 return domsItem + " processed. " + failingToolResults.size() + " failed. outcome = " + outcome;
