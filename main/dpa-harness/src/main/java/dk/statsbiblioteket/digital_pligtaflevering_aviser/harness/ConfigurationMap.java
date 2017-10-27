@@ -169,7 +169,7 @@ public class ConfigurationMap {
 
     /**
      * getRequiredInt returns a configuration map entry as a string.  If the value stored for the key is not a valid
-     * integer, a meaningful message is returned.
+     * integer, a meaningful message is returned.  FIXME: Consider deprecating and move into providers.
      *
      * @param key configuration key
      * @return value stored in map converted with Integer.parseInt()
@@ -186,12 +186,12 @@ public class ConfigurationMap {
 
     /**
      * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their actual value.
-     * Adapted from the AbstractMap implementation.
+     * Adapted from the AbstractMap implementation.  Final to ensure that it is not re-overwritten.
      *
      * @return Normal Map toString() but with password values given as "***"
      */
     @Override
-    public String toString() {
+    public final String toString() {
         // Adapted as closely as possible from AbstractMap
         Iterator<Map.Entry<String, String>> i = map.entrySet().iterator();
         if (!i.hasNext())

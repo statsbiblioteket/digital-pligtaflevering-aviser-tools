@@ -20,29 +20,33 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.3</version>
+                    <version>3.7.0</version>
                     <configuration>
+                        <!-- more picky compiler, does not work with Java 9 yet
                         <compilerId>javac-with-errorprone</compilerId>
                         <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                        -->
                         <!-- maven-compiler-plugin defaults to targeting Java 5, but our javac
                              only supports >=6 -->
                         <source>8</source>
                         <target>8</target>
                     </configuration>
+                    <!-- error prone does not work with Java 9 yet.
                     <dependencies>
                         <dependency>
                             <groupId>org.codehaus.plexus</groupId>
                             <artifactId>plexus-compiler-javac-errorprone</artifactId>
                             <version>2.8.1</version>
                         </dependency>
-                        <!-- override plexus-compiler-javac-errorprone's dependency on
-                             Error Prone with the latest version -->
+                        <!- - override plexus-compiler-javac-errorprone's dependency on
+                             Error Prone with the latest version - ->
                         <dependency>
                             <groupId>com.google.errorprone</groupId>
                             <artifactId>error_prone_core</artifactId>
                             <version>2.0.19</version>
                         </dependency>
                     </dependencies>
+                    -->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -94,6 +98,19 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- java 9 -->
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3</version>
+            </dependency>
+
 
             <!-- bitrepository reference implementation to be installed inside vagrant -->
             <dependency>

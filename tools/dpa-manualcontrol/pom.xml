@@ -183,8 +183,8 @@
                 <artifactId>vaadin-maven-plugin</artifactId>
                 <version>${vaadin.plugin.version}</version>
                 <configuration>
-
-                    <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+                    <!-- java 9 only -->
+                    <extraJvmArgs>--add-modules java.se.ee -Xmx512M</extraJvmArgs>
                     <!-- <runTarget>mobilemail</runTarget> -->
                     <!-- We are doing "inplace" but into subdir VAADIN/widgetsets. This
                         way compatible with Vaadin eclipse plugin. -->

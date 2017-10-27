@@ -23,6 +23,11 @@
             <artifactId>dagger-compiler</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- needed for Java 9 -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
