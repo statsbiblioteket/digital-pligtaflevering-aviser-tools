@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
 
 /**
  *

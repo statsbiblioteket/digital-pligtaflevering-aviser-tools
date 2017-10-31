@@ -4,7 +4,6 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 
 import java.util.Collections;

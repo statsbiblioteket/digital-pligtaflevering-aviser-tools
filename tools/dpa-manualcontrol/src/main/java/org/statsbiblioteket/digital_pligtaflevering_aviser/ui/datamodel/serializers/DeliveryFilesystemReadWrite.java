@@ -5,7 +5,6 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDel
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Iterator;
 

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport.applyOn;
 import static java.util.Arrays.asList;

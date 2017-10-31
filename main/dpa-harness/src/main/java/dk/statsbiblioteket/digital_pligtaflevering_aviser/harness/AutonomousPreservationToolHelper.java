@@ -1,7 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
-import javaslang.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

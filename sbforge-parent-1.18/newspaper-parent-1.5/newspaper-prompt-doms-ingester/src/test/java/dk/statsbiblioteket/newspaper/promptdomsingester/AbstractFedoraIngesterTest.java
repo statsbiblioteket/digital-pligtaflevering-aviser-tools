@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertTrue;
 
