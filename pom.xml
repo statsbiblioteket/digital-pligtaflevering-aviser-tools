@@ -134,9 +134,9 @@
         <module>main/dpa-statistics</module>
 
         <!-- folder names, not modules -->
-        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-batch-trigger</module>
-        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-bitrepository-ingester</module>
-        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-prompt-doms-ingester</module>
+        <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-batch-trigger</module>
+        <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-bitrepository-ingester</module>
+        <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-prompt-doms-ingester</module>
 
         <!-- dashboard web interface -->
         <module>tools/dpa-dashboard</module>
