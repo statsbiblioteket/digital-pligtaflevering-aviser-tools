@@ -17,14 +17,17 @@
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
-        <!-- Newest in Maven Central as of 2017-06-22 /tra
-        <verapdf.validation.version>1.4.7</verapdf.validation.version>
-        -->
-        <!-- First fixed file leak version /tra -->
-        <verapdf.validation.version>1.9.3</verapdf.validation.version>
+
+        <!-- File leak claimed fixed: https://github.com/veraPDF/veraPDF-library/issues/882#issuecomment-340377150 -->
+        <verapdf.validation.version>1.9.51</verapdf.validation.version>
     </properties>
 
-    <!-- to get latest builds before they arrive on maven central -->
+    <!-- To get latest builds before they arrive on maven central. As the
+    development team does not update the version in the public sources, we
+    cannot build them ourselves.
+    -->
+    <!-- http://docs.verapdf.org/develop/ -->
+
     <repositories>
         <repository>
             <snapshots>
