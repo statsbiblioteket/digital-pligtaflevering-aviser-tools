@@ -44,6 +44,18 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>3.0.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -122,9 +134,9 @@
         <module>main/dpa-statistics</module>
 
         <!-- folder names, not modules -->
-        <module>newspaper/newspaper-batch-trigger</module>
-        <module>newspaper/newspaper-bitrepository-ingester</module>
-        <module>newspaper/newspaper-prompt-doms-ingester</module>
+        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-batch-trigger</module>
+        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-bitrepository-ingester</module>
+        <module>sbforge-parent-18/newspaper-parent-1.5/newspaper-prompt-doms-ingester</module>
 
         <!-- dashboard web interface -->
         <module>tools/dpa-dashboard</module>
