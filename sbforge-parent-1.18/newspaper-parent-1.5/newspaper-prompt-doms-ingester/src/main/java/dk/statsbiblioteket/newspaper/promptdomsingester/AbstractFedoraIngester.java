@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.newspaper.promptdomsingester;
 
-import com.google.common.io.CharStreams;
+import com.google.common.io .CharStreams;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceException;
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
