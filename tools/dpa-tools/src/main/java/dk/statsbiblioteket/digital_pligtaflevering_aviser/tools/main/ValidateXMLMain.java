@@ -93,6 +93,7 @@ public class ValidateXMLMain {
                     .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
                     .peek(tr -> {
                         tr.getItem().appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()));
+                        //noinspection PointlessBooleanExpression
                         if (tr.isSuccess() == false) {
                             tr.getItem().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
                         }
@@ -123,51 +124,6 @@ public class ValidateXMLMain {
 
                 ToolResult result = trr.apply(domsItem, toolResults);
 
-                /*
-                final List<Try<ToolResult>> failed = toolResultMap.getOrDefault(FALSE, emptyList());
-                failed.forEach(
-                        t -> log.error("failed", t.getCause())
-                );
-
-                final Map<Boolean, List<ToolResult>> notFailedMap = toolResultMap.getOrDefault(TRUE, emptyList()).stream()
-                        .map(Try::get)
-                        .collect(Collectors.partitioningBy(toolResult -> toolResult.getResult()));
-
-                final List<ToolResult> successful = notFailedMap.getOrDefault(TRUE, emptyList());
-                final List<ToolResult> notSuccessful = notFailedMap.getOrDefault(FALSE, emptyList());
-
-                // we now have organized the responses in "failed", "succesful", and "notSucessful"
-
-                final boolean outcome = failed.size() == 0 && notSuccessful.size() == 0;
-
-                StringBuilder message = new StringBuilder();
-                if (outcome == false) {
-                    message.append("item: " + domsItem + "\n");
-                    if (failed.size() > 0) {
-                        message.append("failed (see full traces in log file)\n");
-                        message.append("==============\n");
-                        failed.forEach(tr -> message.append(tr.getCause().getMessage()).append("\n"));
-                        message.append("\n");
-                    }
-                    if (notSuccessful.size() > 0) {
-                        message.append("not successful\n");
-                        message.append("==============\n");
-                        notSuccessful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
-                        message.append("\n");
-                    }
-
-                    if (successful.size() > 0) {
-                        message.append("successful\n");
-                        message.append("==========\n");
-                        successful.forEach(tr -> message.append("item: ").append(tr.getItem()).append(", reason: ").append(tr.getHumanlyReadableMessage()).append("\n"));
-                        message.append("\n");
-                    }
-                } else {
-                    message.append(successful.size() + " valid.");
-                }
-
-                final String deliveryEventMessage = message.toString();
-                */
 
                 long finishedDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
