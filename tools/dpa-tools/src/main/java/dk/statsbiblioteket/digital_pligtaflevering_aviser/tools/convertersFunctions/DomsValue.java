@@ -5,7 +5,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 /**
  *
  */
-public class DomsValue<V> extends StreamIdValue<DomsId, V> {
+public class DomsValue<V> extends IdValue<DomsId, V> {
     public DomsValue(DomsId id, V value) {
         super(id, value);
     }
