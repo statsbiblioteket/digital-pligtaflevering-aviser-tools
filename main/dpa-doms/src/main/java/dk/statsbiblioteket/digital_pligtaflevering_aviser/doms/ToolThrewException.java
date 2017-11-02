@@ -5,6 +5,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 /**
  *
  */
+@Deprecated
 public class ToolThrewException implements Id {
     protected final DomsItem item;
     protected final Exception exception;

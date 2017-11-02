@@ -15,6 +15,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -90,12 +91,13 @@ public class ValidateXMLMain {
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
-                    .map(domsItem -> processChildDomsId(mxBean).apply(domsItem))
-                    .peek(tr -> {
-                        tr.getItem().appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess()));
+                    .map(DomsValue::create)
+                    .map(c -> c.map(domsItem -> processChildDomsId(mxBean).apply(domsItem)))
+                    .peek(c -> {
+                        c.value().getItem().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
                         //noinspection PointlessBooleanExpression
-                        if (tr.isSuccess() == false) {
-                            tr.getItem().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                        if (c.value().isSuccess() == false) {
+                            c.value().getItem().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
                         }
                     })
                     .count() + " items processed";
@@ -116,7 +118,7 @@ public class ValidateXMLMain {
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
                 // Single doms item
-                List<Either<ToolThrewException, ToolResult>> toolResults = domsItem.allChildren()
+                List<Either<Exception, ToolResult>> toolResults = domsItem.allChildren()
                         .flatMap(childDomsItem -> analyzeXML(childDomsItem, mxBean))
                         .collect(Collectors.toList());
 
@@ -139,7 +141,7 @@ public class ValidateXMLMain {
          * @param mxBean
          * @return
          */
-        protected Stream<Either<ToolThrewException, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
+        protected Stream<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
