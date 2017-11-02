@@ -1,5 +1,7 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.streams;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 

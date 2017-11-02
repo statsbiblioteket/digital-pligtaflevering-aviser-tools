@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.streams;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -14,16 +14,9 @@ import java.util.function.Predicate;
  * @noinspection WeakerAccess
  */
 public class IdValue<I, V> {
-    public I id() {
-        return id;
-    }
 
-    public V value() {
-        return value;
-    }
-
-    final I id;
-    final V value;
+    protected final I id;
+    protected final V value;
 
     /**
      *
@@ -39,6 +32,14 @@ public class IdValue<I, V> {
 
     public static <I> IdValue<I, I> create(I id) {
         return new IdValue<>(id, id);
+    }
+
+    public I id() {
+        return id;
+    }
+
+    public V value() {
+        return value;
     }
 
     /**
