@@ -1,7 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.streams;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -86,6 +84,33 @@ public class IdValueTest {
 
         Map<Integer, Integer> expected = new TreeMap<>();
         expected.put(1, 1);
+
+        assertThat(m, is(expected));
+    }
+
+    @Test
+    public void flatMap1() {
+        Map<Integer, Integer> m = Stream.of(1, 2, 3)
+                .map(IdValue::create)
+                .flatMap(c -> c.flatMap(v -> v % 2 == 1 ? Stream.of(v * 2) : Stream.of()))
+                .collect(toMap(c -> c.id(), c -> c.value()));
+
+        Map<Integer, Integer> expected = new TreeMap<>();
+        expected.put(1, 2);
+        expected.put(3, 6);
+
+        assertThat(m, is(expected));
+    }
+    @Test
+    public void flatMap2() {
+        Map<Integer, Integer> m = Stream.of(1, 2, 3)
+                .map(IdValue::create)
+                .flatMap(c -> c.flatMap((id, v) -> id % 2 == 1 ? Stream.of(v * 2) : Stream.of()))
+                .collect(toMap(c -> c.id(), c -> c.value()));
+
+        Map<Integer, Integer> expected = new TreeMap<>();
+        expected.put(1, 2);
+        expected.put(3, 6);
 
         assertThat(m, is(expected));
     }
