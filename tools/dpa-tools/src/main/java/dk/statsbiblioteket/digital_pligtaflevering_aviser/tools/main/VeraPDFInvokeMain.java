@@ -14,6 +14,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -26,6 +28,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import javaslang.control.Either;
 import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +56,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 
 /**
@@ -97,8 +101,16 @@ public class VeraPDFInvokeMain {
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(domsItem -> processChildDomsId(domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream).apply(domsItem))
+                    .map(DomsValue::create)
+                    .map(c -> processChildDomsId(domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream).apply(c.value()))
                     // Collect results for each domsId
+                    .peek(c -> {
+                        c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
+                        //noinspection PointlessBooleanExpression
+                        if (c.value().isSuccess() == false) {
+                            c.id().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                        }
+                    })
                     .peek(o -> log.trace("Result: {}", o))
                     .collect(Collectors.toList())
                     // FIXME:  Save result on event on delivery.
@@ -107,13 +119,38 @@ public class VeraPDFInvokeMain {
             return f;
         }
 
-        private Function<DomsItem, String> processChildDomsId(DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
+        private Function<DomsItem, ToolResult> processChildDomsId(DomsEventStorage<Item> domsEventStorage, String bitrepositoryUrlPrefix, String bitrepositoryMountpoint, Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider, boolean reuseExistingDatastream) {
             return domsItem -> {
                 long startTime = System.currentTimeMillis();
 
+                // FIXME:  Tool Report
                 // Single doms item
-                List<ToolResult> toolResults = domsItem.allChildren()
-                        .flatMap(childDomsItem -> invokeVeraPDFOnPhysicalFiles(childDomsItem, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream))
+//
+//                Function<DomsItem, Optional<Either<Exception, ToolResult>>> fff = childDomsItem -> {
+//                    try {
+//                        final Optional<ToolResult> toolResult = invokeVeraPDFOnPhysicalFiles(childDomsItem, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream);
+//                        if (toolResult.isPresent()) {
+//                            return Optional.of(Either.right(toolResult.get()));
+//                        } else {
+//                            return Optional.empty();
+//                        }
+//                    } catch (Exception e) {
+//                        return Optional.of(Either.left(e));
+//                    }
+//                };
+
+                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
+                        .map(DomsValue::create)
+                        // Figure out flatMap usage with IdValue
+                        .flatMap(c -> c.flatMap((Function<DomsItem, Either<Exception, ToolResult>>) childDomsItem -> {
+                            try {
+                                final Stream<ToolResult> toolResultStream = invokeVeraPDFOnPhysicalFiles(childDomsItem, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream);
+                                final Stream<Either<Exception, ToolResult>> t2 = toolResultStream.map(tr -> Either.right(tr));
+                                return t2;
+                            } catch (Exception e) {
+                                return Either.left(e);
+                            }
+                        }))
                         .collect(Collectors.toList());
 
                 // Sort according to result
@@ -156,9 +193,9 @@ public class VeraPDFInvokeMain {
             log.trace("Found PDF datastream on {}", domsItem);
 
             if (reuseExistingDatastream) {
-                if (datastreams.stream().filter(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)).findAny().isPresent()) {
+                if (datastreams.stream().anyMatch(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME))) {
                     log.trace("Reused existing VERAPDF datastream for {}", domsItem);
-                    return Stream.of(ToolResult.ok(domsItem, "Reused existing VERAPDF datastream for " + domsItem));
+                    return Stream.of(ToolResult.ok("Reused existing VERAPDF datastream for " + domsItem));
                 }
             }
 
@@ -179,17 +216,10 @@ public class VeraPDFInvokeMain {
             final String resourceName;
 
             final String url = ds.getUrl();
-            if (url.startsWith(bitrepositoryUrlPrefix) == false) {
-                try {
-                    //return Stream.of(ToolCompletedResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
-                    resourceName = url;
-                    inputStream = new URL(url).openStream();
-                } catch (IOException e) {
-                    throw new RuntimeException(domsItem + " url '" + url + " fails", e);
-                }
-            } else {
+            if (url.startsWith(bitrepositoryUrlPrefix)) {
+                // We have an URL pointing to a
                 if (url.length() < bitrepositoryUrlPrefix.length()) {
-                    return Stream.of(ToolResult.fail(domsItem, " url '" + url + "' shorter than bitrepositoryUrlPrefix"));
+                    return Stream.of(ToolResult.fail(" url '" + url + "' shorter than bitrepositoryUrlPrefix"));
                 }
                 resourceName = url.substring(bitrepositoryUrlPrefix.length());
                 final File file;
@@ -202,6 +232,14 @@ public class VeraPDFInvokeMain {
                     throw new RuntimeException(domsItem + " '" + resourceName + "' could not get decoded", e);
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException(domsItem + " '" + resourceName + "' not found", e);
+                }
+            } else {
+                try {
+                    //return Stream.of(ToolCompletedResult.fail(domsItem + " url '" + url + " does not start with '" + bitrepositoryUrlPrefix + "'"));
+                    resourceName = url;
+                    inputStream = new URL(url).openStream();
+                } catch (IOException e) {
+                    throw new RuntimeException(domsItem + " url '" + url + " fails", e);
                 }
             }
 
@@ -235,7 +273,7 @@ public class VeraPDFInvokeMain {
             } catch (Exception e) {
                 throw new RuntimeException(domsItem + " '" + resourceName + "' could not save to datastream");
             }
-            return Stream.of(ToolResult.ok(domsItem, comment));
+            return Stream.of(ToolResult.ok(comment));
         }
 
         @Provides

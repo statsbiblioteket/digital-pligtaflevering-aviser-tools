@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -24,16 +24,16 @@ import static java.util.stream.Collectors.toList;
  *
  * @noinspection ALL
  */
-public class ToolResultsReport implements Function<List<IdValue<DomsItem, Either<Exception, ToolResult>>>, ToolResult> {
+public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<DomsItem, Either<Exception, ToolResult>>>, ToolResult> {
     private final BiFunction<List<IdValue<DomsItem, ToolResult>>, List<IdValue<DomsItem, ToolResult>>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
-    private final Consumer<Exception> stackTraceLogger;
+    private final BiConsumer<DomsItem, Exception> stackTraceLogger;
 
     /**
      * This is the method intended to be used in actual code
      */
     @Inject
-    public ToolResultsReport(BiFunction<List<IdValue<DomsItem, ToolResult>>, List<IdValue<DomsItem, ToolResult>>, String> renderResultFunction, Consumer<Exception> stackTraceLogger) {
+    public ToolResultsReport(BiFunction<List<IdValue<DomsItem, ToolResult>>, List<IdValue<DomsItem, ToolResult>>, String> renderResultFunction, BiConsumer<DomsItem, Exception> stackTraceLogger) {
         this(renderResultFunction, Throwables::getStackTraceAsString, stackTraceLogger);
     }
 
@@ -42,14 +42,14 @@ public class ToolResultsReport implements Function<List<IdValue<DomsItem, Either
      */
 
     public ToolResultsReport(BiFunction<List<IdValue<DomsItem, ToolResult>>, List<IdValue<DomsItem, ToolResult>>, String> renderResultFunction, Function<Throwable, String> stackTraceRenderer,
-                             Consumer<Exception> stackTraceLogger) {
+                             BiConsumer<DomsItem, Exception> stackTraceLogger) {
         this.renderResultFunction = renderResultFunction;
         this.stackTraceRenderer = stackTraceRenderer;
         this.stackTraceLogger = stackTraceLogger;
     }
 
     @Override
-    public ToolResult apply(List<IdValue<DomsItem, Either<Exception, ToolResult>>> idValues) {
+    public ToolResult apply(DomsItem domsItem, List<IdValue<DomsItem, Either<Exception, ToolResult>>> idValues) {
 
         // These can probably be written smarter, but for now keep it simple.
 
@@ -91,8 +91,8 @@ public class ToolResultsReport implements Function<List<IdValue<DomsItem, Either
                 .collect(joining("\n"));
 
         String renderedStacktraces = threwException.stream()
-                .sorted(Comparator.comparing(t -> null))
-                .peek(c -> stackTraceLogger.accept(c.value()))
+                .sorted(Comparator.comparing(c -> c.id().getDomsId().id())) // sort by DomsId.
+                .peek(c -> stackTraceLogger.accept(c.id(), c.value()))
                 .map(c -> c.id() + ":\n" + stackTraceRenderer.apply(c.value()) + "\n")
                 .collect(joining("\n"));
 

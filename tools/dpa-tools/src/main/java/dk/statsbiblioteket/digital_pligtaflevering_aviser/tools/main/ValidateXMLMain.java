@@ -10,7 +10,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolThrewException;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
@@ -94,10 +93,10 @@ public class ValidateXMLMain {
                     .map(DomsValue::create)
                     .map(c -> c.map(domsItem -> processChildDomsId(mxBean).apply(domsItem)))
                     .peek(c -> {
-                        c.value().getItem().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
+                        c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
                         //noinspection PointlessBooleanExpression
                         if (c.value().isSuccess() == false) {
-                            c.value().getItem().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                            c.id().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
                         }
                     })
                     .count() + " items processed";
@@ -118,14 +117,20 @@ public class ValidateXMLMain {
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
                 // Single doms item
-                List<Either<Exception, ToolResult>> toolResults = domsItem.allChildren()
-                        .flatMap(childDomsItem -> analyzeXML(childDomsItem, mxBean))
+
+                //final Function<IdValue<DomsItem, U>, Stream<V>> idValueStreamFunction = c -> c.flatMap(v -> analyzeXML(v, mxBean));
+                List toolResults = domsItem.allChildren()
+                        .map(DomsValue::create)
+                        // Figure out flatMap usage with IdValue
+                        .map(c -> c.map(v -> analyzeXML(v, mxBean)))
+                        .filter(c -> c.filter(v -> v.isPresent()))
+                        .map(c -> c.map(v -> v.get()))
+                        //
                         .collect(Collectors.toList());
 
-                ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, t -> log.error("id: {}", t.id(), t.getException()));
+                ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
 
                 ToolResult result = trr.apply(domsItem, toolResults);
-
 
                 long finishedDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
@@ -141,7 +146,7 @@ public class ValidateXMLMain {
          * @param mxBean
          * @return
          */
-        protected Stream<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
+        protected Optional<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -150,7 +155,7 @@ public class ValidateXMLMain {
                     .findAny();
 
             if (profileOptional.isPresent() == false) {
-                return Stream.of();
+                return Optional.empty();
             }
 
             mxBean.idsProcessed++;
@@ -166,7 +171,7 @@ public class ValidateXMLMain {
                 String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return Stream.of(Either.right(ToolResult.fail(domsItem, "id: " + domsItem + " " + "Unknown root:" + rootnameInCurrentXmlFile)));
+                    return Optional.of(Either.right(ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile)));
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
 
@@ -175,9 +180,9 @@ public class ValidateXMLMain {
                 validator.validate(source); // only succedes if valid
                 log.trace("{}: XML valid", domsItem.getDomsId());
 
-                return Stream.of(Either.right(ToolResult.ok(domsItem, "id: " + domsItem.getDomsId() + " XML valid")));
+                return Optional.of(Either.right(ToolResult.ok("XML valid")));
             } catch (Exception e) {
-                return Stream.of(Either.left(new ToolThrewException(domsItem, e)));
+                return Optional.of(Either.left(e));
             }
         }
 
