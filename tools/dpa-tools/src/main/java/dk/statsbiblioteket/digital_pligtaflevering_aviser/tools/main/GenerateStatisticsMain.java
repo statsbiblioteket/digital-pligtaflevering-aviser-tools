@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+
 /**
  * Main class for starting autonomous component This component is used for validation of metadata from newspaper
  * deliveries. The metadata is ingested into fedora-commons and is now validated against *.xsd and defined rules
@@ -34,7 +36,6 @@ import java.util.stream.Stream;
 public class GenerateStatisticsMain {
     protected static final Logger log = LoggerFactory.getLogger(GenerateStatisticsMain.class);
 
-    public static final String AUTONOMOUS_THIS_EVENT = "autonomous.thisEvent";
     public static final String STATISTICS_STREAM_NAME = "DELIVERYSTATISTICS";
 
     public static void main(String[] args) {
@@ -109,18 +110,6 @@ public class GenerateStatisticsMain {
                     return ToolResult.fail("Statistics could not get generated on " + deliveryName + " at the time " + settingDate);
                 }
             };
-        }
-
-        /**
-         * Provide the parameter to be written as sucessfull when the component has finished
-         *
-         * @param map
-         * @return
-         */
-        @Provides
-        @Named(AUTONOMOUS_THIS_EVENT)
-        String thisEventName(ConfigurationMap map) {
-            return map.getRequired(AUTONOMOUS_THIS_EVENT);
         }
 
         @Provides

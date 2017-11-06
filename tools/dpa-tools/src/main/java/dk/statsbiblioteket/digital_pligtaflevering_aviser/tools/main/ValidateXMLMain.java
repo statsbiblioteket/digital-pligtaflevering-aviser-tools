@@ -14,6 +14,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -49,6 +50,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 
 /**
@@ -57,8 +59,6 @@ import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STO
  */
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
-
-    public static final String AUTONOMOUS_THIS_EVENT = "autonomous.thisEvent";
 
     public static void main(String[] args) {
 
@@ -85,7 +85,7 @@ public class ValidateXMLMain {
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
                          DefaultToolMXBean mxBean) {
-            final String agent = ValidateXMLModule.class.getSimpleName();
+            final String agent = getClass().getSimpleName();
 
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
@@ -119,13 +119,9 @@ public class ValidateXMLMain {
                 // Single doms item
 
                 //final Function<IdValue<DomsItem, U>, Stream<V>> idValueStreamFunction = c -> c.flatMap(v -> analyzeXML(v, mxBean));
-                List toolResults = domsItem.allChildren()
+                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
                         .map(DomsValue::create)
-                        // Figure out flatMap usage with IdValue
-                        .map(c -> c.map(v -> analyzeXML(v, mxBean)))
-                        .filter(c -> c.filter(v -> v.isPresent()))
-                        .map(c -> c.map(v -> v.get()))
-                        //
+                        .flatMap(c -> c.flatMap(v -> analyzeXML(v, mxBean)))
                         .collect(Collectors.toList());
 
                 ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
@@ -146,7 +142,7 @@ public class ValidateXMLMain {
          * @param mxBean
          * @return
          */
-        protected Optional<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
+        protected Stream<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
 
             final List<DomsDatastream> datastreams = domsItem.datastreams();
 
@@ -155,7 +151,7 @@ public class ValidateXMLMain {
                     .findAny();
 
             if (profileOptional.isPresent() == false) {
-                return Optional.empty();
+                return Stream.of();
             }
 
             mxBean.idsProcessed++;
@@ -171,7 +167,7 @@ public class ValidateXMLMain {
                 String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return Optional.of(Either.right(ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile)));
+                    return Stream.of(Either.right(ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile)));
                 }
                 URL url = getClass().getClassLoader().getResource(xsdFile);
 
@@ -180,9 +176,9 @@ public class ValidateXMLMain {
                 validator.validate(source); // only succedes if valid
                 log.trace("{}: XML valid", domsItem.getDomsId());
 
-                return Optional.of(Either.right(ToolResult.ok("XML valid")));
+                return Stream.of(Either.right(ToolResult.ok("XML valid")));
             } catch (Exception e) {
-                return Optional.of(Either.left(e));
+                return Stream.of(Either.left(e));
             }
         }
 
@@ -219,18 +215,6 @@ public class ValidateXMLMain {
             xsdMap.put("article", "xmlValidation/Article.xsd");
             xsdMap.put("pdfinfo", "xmlValidation/PdfInfo.xsd");
             return xsdMap;
-        }
-
-        /**
-         * Provide the parameter to be written as sucessfull when the component has finished
-         *
-         * @param map
-         * @return
-         */
-        @Provides
-        @Named(AUTONOMOUS_THIS_EVENT)
-        String thisEventName(ConfigurationMap map) {
-            return map.getRequired(AUTONOMOUS_THIS_EVENT);
         }
 
         @Provides

@@ -10,4 +10,8 @@ public class DomsValue<V> extends IdValue<DomsItem, V> {
     public DomsValue(DomsItem domsItem, V value) {
         super(domsItem, value);
     }
+
+    public static DomsValue<DomsItem> create(DomsItem id) {
+        return new DomsValue<>(id, id);
+    }
 }
