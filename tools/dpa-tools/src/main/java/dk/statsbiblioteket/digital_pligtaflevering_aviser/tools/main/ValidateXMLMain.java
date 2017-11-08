@@ -39,13 +39,15 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,21 +82,23 @@ public class ValidateXMLMain {
     protected static class ValidateXMLModule {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
+        /**
+         * @noinspection PointlessBooleanExpression
+         */
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
                          DefaultToolMXBean mxBean) {
-            final String agent = getClass().getSimpleName();
+            final String agent = ValidateXMLMain.class.getSimpleName();
 
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(DomsValue::create)
-                    .map(c -> c.map(domsItem -> processChildDomsId(mxBean).apply(domsItem)))
+                    .map(c -> c.map(domsItem -> processChildDomsId(mxBean, eventName).apply(domsItem)))
                     .peek(c -> {
                         c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
-                        //noinspection PointlessBooleanExpression
                         if (c.value().isSuccess() == false) {
                             c.id().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
                         }
@@ -108,9 +112,10 @@ public class ValidateXMLMain {
          * Validate all xml-contents located as child under the delivery
          *
          * @param mxBean
+         * @param eventName
          * @return
          */
-        private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean) {
+        private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean, String eventName) {
             return domsItem -> {
                 String deliveryName = domsItem.getPath();
                 long startDeliveryIngestTime = System.currentTimeMillis();
@@ -118,10 +123,21 @@ public class ValidateXMLMain {
 
                 // Single doms item
 
+                final String agent = ValidateXMLMain.class.getSimpleName();
+
                 //final Function<IdValue<DomsItem, U>, Stream<V>> idValueStreamFunction = c -> c.flatMap(v -> analyzeXML(v, mxBean));
                 List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
                         .map(DomsValue::create)
-                        .flatMap(c -> c.flatMap(v -> analyzeXML(v, mxBean)))
+                        .flatMap(c -> c.flatMap(v -> v.datastreams().stream()
+                                .filter(ds -> ds.getId().equals("XML"))
+                                .peek(z -> mxBean.idsProcessed++)
+                                .peek(z -> mxBean.currentId = c.toString())
+                                .map(ds -> analyzeXML(ds, mxBean, eventName))
+                                .peek(either -> either.bimap(
+                                        e -> domsItem.appendEvent(new DomsEvent(agent, new Date(), stacktraceFor(e), eventName, false)),
+                                        tr -> domsItem.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
+                                ))
+                        )
                         .collect(Collectors.toList());
 
                 ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
@@ -138,47 +154,37 @@ public class ValidateXMLMain {
         /**
          * Start validating xml-content in fedora and return results
          *
-         * @param domsItem
+         * @param ds        DomsDatastream containing the XML file to validate.
          * @param mxBean
+         * @param eventName
          * @return
          */
-        protected Stream<Either<Exception, ToolResult>> analyzeXML(DomsItem domsItem, DefaultToolMXBean mxBean) {
-
-            final List<DomsDatastream> datastreams = domsItem.datastreams();
-
-            Optional<DomsDatastream> profileOptional = datastreams.stream()
-                    .filter(ds -> ds.getId().equals("XML"))
-                    .findAny();
-
-            if (profileOptional.isPresent() == false) {
-                return Stream.of();
-            }
-
-            mxBean.idsProcessed++;
-            mxBean.currentId = domsItem.getDomsId().toString();
+        protected Either<Exception, ToolResult> analyzeXML(DomsDatastream ds, DefaultToolMXBean mxBean, String eventName) {
 
             Map<String, String> xsdMap = provideXsdRootMap();
-            DomsDatastream ds = profileOptional.get();
-
             // Note:  We ignore character set problems for now.
             final String datastreamAsString = ds.getDatastreamAsString();
 
             try {
+                final ToolResult toolResult;
+
                 String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
                 String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
                 if (xsdFile == null) {
-                    return Stream.of(Either.right(ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile)));
+                    toolResult = ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile);
+                } else {
+                    URL url = Objects.requireNonNull(getClass().getClassLoader().getResource(xsdFile), "xsdFile not found: " + xsdFile);
+
+                    Validator validator = getValidatorFor(url);
+
+                    final StreamSource source = new StreamSource(new StringReader(datastreamAsString));
+                    validator.validate(source); // throws exception if invalid.
+                    log.trace("{}: XML valid", ds.getDomsItem().getDomsId().id());
+                    toolResult = ToolResult.ok(""); // Empty message if ok.  Makes GUI presentation smaller.
                 }
-                URL url = getClass().getClassLoader().getResource(xsdFile);
-
-                Validator validator = getValidatorFor(url);
-                final StreamSource source = new StreamSource(new StringReader(datastreamAsString));
-                validator.validate(source); // only succedes if valid
-                log.trace("{}: XML valid", domsItem.getDomsId());
-
-                return Stream.of(Either.right(ToolResult.ok("XML valid")));
+                return Either.right(toolResult);
             } catch (Exception e) {
-                return Stream.of(Either.left(e));
+                return Either.left(e);
             }
         }
 
@@ -231,6 +237,14 @@ public class ValidateXMLMain {
         } catch (SAXException e) {
             throw new RuntimeException("getValidatorFor: url=" + url, e);
         }
+    }
+
+    public static String stacktraceFor(Throwable t) {
+        // https://stackoverflow.com/a/1149721/53897
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        t.printStackTrace(pw);
+        return sw.toString();
     }
 }
 
