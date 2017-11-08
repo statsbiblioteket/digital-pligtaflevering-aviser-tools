@@ -116,8 +116,8 @@ public class ValidateXMLMain {
          * @return
          */
         private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean, String eventName) {
-            return domsItem -> {
-                String deliveryName = domsItem.getPath();
+            return parentDomsItem -> {
+                String deliveryName = parentDomsItem.getPath();
                 long startDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
@@ -126,13 +126,14 @@ public class ValidateXMLMain {
                 final String agent = ValidateXMLMain.class.getSimpleName();
 
                 //final Function<IdValue<DomsItem, U>, Stream<V>> idValueStreamFunction = c -> c.flatMap(v -> analyzeXML(v, mxBean));
-                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
+                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
                         .map(DomsValue::create)
-                        .flatMap(c -> c.flatMap(v -> v.datastreams().stream()
+                        .flatMap(c -> c.flatMap(domsItem -> domsItem.datastreams().stream()
                                 .filter(ds -> ds.getId().equals("XML"))
                                 .peek(z -> mxBean.idsProcessed++)
                                 .peek(z -> mxBean.currentId = c.toString())
                                 .map(ds -> analyzeXML(ds, mxBean, eventName))
+                                // Save individual result as event on node.
                                 .peek(either -> either.bimap(
                                         e -> domsItem.appendEvent(new DomsEvent(agent, new Date(), stacktraceFor(e), eventName, false)),
                                         tr -> domsItem.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
@@ -142,7 +143,7 @@ public class ValidateXMLMain {
 
                 ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
 
-                ToolResult result = trr.apply(domsItem, toolResults);
+                ToolResult result = trr.apply(parentDomsItem, toolResults);
 
                 long finishedDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
