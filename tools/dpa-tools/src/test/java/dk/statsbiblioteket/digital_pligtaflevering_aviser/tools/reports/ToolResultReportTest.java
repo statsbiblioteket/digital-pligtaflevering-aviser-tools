@@ -30,7 +30,7 @@ public class ToolResultReportTest {
                 "1 failed!\n" +
                 "\n" +
                 "--------------\n" +
-                "null: No!\n" +
+                "FIXME: No!\n" +
                 "\n" +
                 "--------------\n", trr.apply(Stream.of(ok1, fail1)));
         assertEquals("2 processed.\n" +
@@ -38,7 +38,7 @@ public class ToolResultReportTest {
                 "1 failed!\n" +
                 "\n" +
                 "--------------\n" +
-                "null: Zip!\n" +
+                "FIXME: Zip!\n" +
                 "\n" +
                 "--------------\n", trr.apply(Stream.of(ok1, ok2, fail2)));
         assertEquals("3 processed.\n" +
@@ -46,8 +46,8 @@ public class ToolResultReportTest {
                 "2 failed!\n" +
                 "\n" +
                 "--------------\n" +
-                "null: No!\n" +
-                "null: Zip!\n" +
+                "FIXME: No!\n" +
+                "FIXME: Zip!\n" +
                 "\n" +
                 "--------------\n", trr.apply(Stream.of(ok1, ok2, ok3, fail1, fail2)));
     }
