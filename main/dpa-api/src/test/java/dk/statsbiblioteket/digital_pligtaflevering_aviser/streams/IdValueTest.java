@@ -3,14 +3,20 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.streams;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+/** @noinspection Convert2MethodRef, ArraysAsListWithZeroOrOneArgument */
 public class IdValueTest {
     @Test
     public void basicFunctionality() {
@@ -19,6 +25,20 @@ public class IdValueTest {
         IdValue<String, String> iv = new IdValue<>(s1, s2);
         Assert.assertEquals(s1, iv.id());
         Assert.assertEquals(s2, iv.value());
+    }
+
+    @Test
+    public void map0() {
+        Map<String, String> m = Stream.of("1", "2", "3")
+                .map(IdValue::create)
+                .collect(toMap(IdValue::id, IdValue::value));
+
+        Map<String, String> expected = new TreeMap<>();
+        expected.put("1", "1");
+        expected.put("2", "2");
+        expected.put("3", "3");
+
+        assertThat(m, is(expected));
     }
 
     @Test
@@ -101,16 +121,18 @@ public class IdValueTest {
 
         assertThat(m, is(expected));
     }
+
     @Test
     public void flatMap2() {
-        Map<Integer, Integer> m = Stream.of(1, 2, 3)
+        Map<Integer, List<Integer>> m = Stream.of(1, 2, 3)
                 .map(IdValue::create)
-                .flatMap(c -> c.flatMap((id, v) -> id % 2 == 1 ? Stream.of(v * 2) : Stream.of()))
-                .collect(toMap(c -> c.id(), c -> c.value()));
+                .flatMap(c -> c.flatMap((id, v) -> id % 2 == 1 ? Stream.of(v * 2) : Stream.of(v, v * 2, v * 3)))
+                .collect(groupingBy(c -> c.id(), mapping(c -> c.value(), toList()))); // multi-valued map
 
-        Map<Integer, Integer> expected = new TreeMap<>();
-        expected.put(1, 2);
-        expected.put(3, 6);
+        Map<Integer, List<Integer>> expected = new TreeMap<>();
+        expected.put(1, Arrays.asList(2));
+        expected.put(2, Arrays.asList(2, 4, 6));
+        expected.put(3, Arrays.asList(6));
 
         assertThat(m, is(expected));
     }

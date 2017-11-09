@@ -19,10 +19,7 @@ public class IdValue<I, V> {
     protected final I id;
     protected final V value;
 
-    /**
-     *
-     */
-    protected IdValue(I id, V value) {
+    public IdValue(I id, V value) {
         this.id = id;
         this.value = value;
     }
@@ -48,7 +45,7 @@ public class IdValue<I, V> {
      * this object) and the same context.
      *
      * @param value value for new object.
-     * @return
+     * @return IdValue with the same id and the new value.
      */
     public <U> IdValue<I, U> of(U value) {
         return new IdValue<>(id, value);
@@ -58,7 +55,7 @@ public class IdValue<I, V> {
      * Apply a given function to the value and return a new IdValue object with the result (and same context).
      *
      * @param f function to apply to the current value to get the new value.
-     * @return
+     * @return new IdValue with the same id and the result of applying f to current value.
      */
     public <U> IdValue<I, U> map(Function<V, U> f) {
         return of(f.apply(value));
@@ -69,7 +66,7 @@ public class IdValue<I, V> {
      * result (and the same context).
      *
      * @param f function to apply to context and value to get new value.
-     * @return
+     * @return new IdValue with the same id and the result of applying f to current id and value.
      */
     public <U> IdValue<I, U> map(BiFunction<I, V, U> f) {
         return of(f.apply(id, value));
@@ -82,14 +79,16 @@ public class IdValue<I, V> {
         return predicate.test(value);
     }
 
-    /** for <pre>.flatMap(c->c.flatMap(v -> ....))</pre>
+    /**
+     * for <pre>.flatMap(c->c.flatMap(v -> ....))</pre>
      */
 
     public <U> Stream<IdValue<I, U>> flatMap(Function<V, Stream<U>> f) {
         return f.apply(value).map(u -> of(u));
     }
 
-    /** for <pre>.flatMap(c->c.flatMap((id, v) -> ....))</pre>
+    /**
+     * for <pre>.flatMap(c->c.flatMap((id, v) -> ....))</pre>
      */
     public <U> Stream<IdValue<I, U>> flatMap(BiFunction<I, V, Stream<U>> f) {
         return f.apply(id, value).map(u -> of(u));

@@ -37,7 +37,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -58,6 +57,8 @@ import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STO
 /**
  * Main class for starting autonomous component This component is used for validation of XML data in one or more
  * delivery
+ *
+ * @noinspection WeakerAccess
  */
 public class ValidateXMLMain {
     protected static final Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);
@@ -76,14 +77,14 @@ public class ValidateXMLMain {
     }
 
     /**
-     * @noinspection Convert2MethodRef
+     * @noinspection Convert2MethodRef, WeakerAccess
      */
     @Module
     protected static class ValidateXMLModule {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         /**
-         * @noinspection PointlessBooleanExpression
+         * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable
          */
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
@@ -111,9 +112,9 @@ public class ValidateXMLMain {
         /**
          * Validate all xml-contents located as child under the delivery
          *
-         * @param mxBean
-         * @param eventName
-         * @return
+         * @param mxBean JMX bean to update statistics in
+         * @param eventName event name to use for events stored in DOMS.
+         * @return function to apply on delivery DOMS items.
          */
         private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean, String eventName) {
             return parentDomsItem -> {
@@ -122,21 +123,19 @@ public class ValidateXMLMain {
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
 
                 // Single doms item
-
                 final String agent = ValidateXMLMain.class.getSimpleName();
 
-                //final Function<IdValue<DomsItem, U>, Stream<V>> idValueStreamFunction = c -> c.flatMap(v -> analyzeXML(v, mxBean));
                 List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
                         .map(DomsValue::create)
-                        .flatMap(c -> c.flatMap(domsItem -> domsItem.datastreams().stream()
-                                .filter(ds -> ds.getId().equals("XML"))
-                                .peek(z -> mxBean.idsProcessed++)
-                                .peek(z -> mxBean.currentId = c.toString())
-                                .map(ds -> analyzeXML(ds, mxBean, eventName))
+                        .flatMap(c -> c.flatMap(item -> item.datastreams().stream()
+                                .filter(datastream -> datastream.getId().equals("XML"))
+                                .peek(datastream -> mxBean.idsProcessed++)
+                                .peek(datastream -> mxBean.currentId = c.toString())
+                                .map(datastream -> analyzeXML(datastream))
                                 // Save individual result as event on node.
-                                .peek(either -> either.bimap(
-                                        e -> domsItem.appendEvent(new DomsEvent(agent, new Date(), stacktraceFor(e), eventName, false)),
-                                        tr -> domsItem.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
+                                .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
+                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), stacktraceFor(e), eventName, false)),
+                                        tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
                                 ))
                         )
                         .collect(Collectors.toList());
@@ -156,11 +155,9 @@ public class ValidateXMLMain {
          * Start validating xml-content in fedora and return results
          *
          * @param ds        DomsDatastream containing the XML file to validate.
-         * @param mxBean
-         * @param eventName
-         * @return
+         * @return a ToolResult indicating if it went well or not (wrapped in an Either to hold any exception).
          */
-        protected Either<Exception, ToolResult> analyzeXML(DomsDatastream ds, DefaultToolMXBean mxBean, String eventName) {
+        protected Either<Exception, ToolResult> analyzeXML(DomsDatastream ds) {
 
             Map<String, String> xsdMap = provideXsdRootMap();
             // Note:  We ignore character set problems for now.
@@ -192,13 +189,8 @@ public class ValidateXMLMain {
         /**
          * Get the rootname of the xml-stream delivered to the function
          *
-         * @param reader
-         * @return
-         *
-         * @throws ParserConfigurationException
-         * @throws IOException
-         * @throws SAXException
-         * @throws XPathExpressionException
+         * @param reader input source to process.  Note: not closed.
+         * @return return root tag as a string.
          */
         protected String getRootTagName(InputSource reader) {
             try {
@@ -213,12 +205,12 @@ public class ValidateXMLMain {
         }
 
         /**
-         * Previd a map between rootitems in xmlfiles and their corresponding schemafile
+         * Provide a map between root items in XML files and their corresponding schema file
          *
-         * @return
+         * @return map from root tag (as a string) to resource name of XSD.
          */
         protected Map<String, String> provideXsdRootMap() {
-            Map<String, String> xsdMap = new HashMap<String, String>();
+            Map<String, String> xsdMap = new HashMap<>();
             xsdMap.put("article", "xmlValidation/Article.xsd");
             xsdMap.put("pdfinfo", "xmlValidation/PdfInfo.xsd");
             return xsdMap;
@@ -231,6 +223,10 @@ public class ValidateXMLMain {
 
     }
 
+    /**
+     * returns a schema validating XML validator for the given URL
+     */
+
     public static Validator getValidatorFor(URL url) {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
@@ -239,6 +235,10 @@ public class ValidateXMLMain {
             throw new RuntimeException("getValidatorFor: url=" + url, e);
         }
     }
+
+    /**
+     * Helper method to get the stacktrace of a throwable as a string.   Why is this not in the runtime library??
+     */
 
     public static String stacktraceFor(Throwable t) {
         // https://stackoverflow.com/a/1149721/53897
