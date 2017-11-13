@@ -23,8 +23,8 @@ RUN echo "XMLTAPES_DATASTREAMS_JDBC=jdbc:postgresql://postgres/xmltapesDatastrea
 # TODO:  Disable log4j configuration files instead of sending to innocent example.com
 RUN echo "MAILER_RECIPIENT=null@example.com" >> bin/setenv.sh
 
-# package.sh needs "zip" to create fedora.war.  For now install official package.
-RUN apt-get update && apt-get install -y zip
+# package.sh needs "zip" which is not in the image, but it is used exactly once, so we can make a works-only-here replacement.
+RUN echo 'jar cf $2 .' > /usr/bin/zip && chmod +x /usr/bin/zip
 
 RUN bin/package.sh /build/package
 # RUN find . -print
