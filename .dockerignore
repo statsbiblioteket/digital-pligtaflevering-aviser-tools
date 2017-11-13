@@ -1,0 +1,10 @@
+# ignore all maven output on host.
+**/target/**
+/.idea/
+/.git/
+**/.DS_Store
+**/Dockerfile
+docker-compose.yml
+.dockerignore
+**/.git
+**/*.iml
