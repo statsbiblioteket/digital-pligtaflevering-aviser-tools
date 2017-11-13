@@ -10,21 +10,25 @@ services:
     volumes:
       - doms-postgres-volume:/var/lib/postgresql/data # So we can refer to it by name.
 
-  bitrepository:
-    build:
-      context: .
-      dockerfile: bitrepository/Dockerfile
-    image: kb/bitrepository-reference
+#  bitrepository:
+#    build:
+#      context: .
+#      dockerfile: bitrepository/Dockerfile
+#    image: kb/bitrepository-reference
 
   doms:
     build:
       context: doms
-      #dockerfile: doms/Dockerfile
+      # dockerfile: doms/Dockerfile
     image: kb/doms
+    expose:
+      - "7880"
+    ports:
+      - 7880:7880
     volumes:
       - fedora-data:/build/package/data/
     depends_on:
-#      - postgres
+      - postgres
       - zookeeper
 
   zookeeper:

@@ -8,3 +8,5 @@ docker-compose.yml
 .dockerignore
 **/.git
 **/*.iml
+delivery-samples
+
