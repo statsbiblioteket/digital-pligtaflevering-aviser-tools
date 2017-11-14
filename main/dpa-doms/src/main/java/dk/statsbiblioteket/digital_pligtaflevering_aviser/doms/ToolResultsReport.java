@@ -30,7 +30,11 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Doms
     private final BiConsumer<DomsItem, Exception> stackTraceLogger;
 
     /**
-     * This is the method intended to be used in actual code
+     * <p>This is the method intended to be used in actual code.</p>
+     * <p><code>stackTraceLogger</code> allows for the calling code to determine how a given exception should be logged.
+     *  An example is <code> (id, t) -> log.error("id: {}", id, t)</code>.  Note that the logger is in the scope of the
+     * caller, so it is the logger variable defined _there_ and the class name is that of the caller, not deep in some
+     * library!</p>
      */
     @Inject
     public ToolResultsReport(BiFunction<List<IdValue<DomsItem, ToolResult>>, List<IdValue<DomsItem, ToolResult>>, String> renderResultFunction, BiConsumer<DomsItem, Exception> stackTraceLogger) {

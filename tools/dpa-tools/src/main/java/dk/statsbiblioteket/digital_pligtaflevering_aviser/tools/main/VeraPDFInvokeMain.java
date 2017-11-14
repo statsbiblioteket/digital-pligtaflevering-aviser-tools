@@ -90,6 +90,7 @@ public class VeraPDFInvokeMain {
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
+        /** @noinspection PointlessBooleanExpression*/
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
         protected Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
@@ -103,52 +104,61 @@ public class VeraPDFInvokeMain {
                                    Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider,
                                    DefaultToolMXBean mxBean) {
 
-            final Function<DomsItem, ToolResult> g = processChildDomsId(domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream, mxBean);
-
             final String agent = getClass().getSimpleName();
 
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
                     .map(DomsValue::create)
-                    .map(c -> c.map(g::apply))
+                    .map(c -> c.map(item -> processChildDomsId(domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream, mxBean).apply(item)))
                     // Collect results for each domsId
                     .peek(c -> {
-                        c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
-                        //noinspection PointlessBooleanExpression
-                        if (c.value().isSuccess() == false) {
-                            c.id().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                        final DomsItem item = c.id();
+                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
+                        if (value.isLeft()) {
+                            // Processing of _this_ domsItem threw unexpected exception
+                            item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
+                        } else {
+                            final ToolResult toolResult = (ToolResult) value.get();
+                            item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
+                            if (toolResult.isSuccess() == false) {
+                                item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                            }
                         }
                     })
                     .peek(o -> log.trace("Result: {}", o))
-                    .count() + " items processed";
+                    .count() + " items processed";  // FIXME:  Better message from list.
 
             return f;
         }
 
-        private Function<DomsItem, ToolResult> processChildDomsId(DomsEventStorage<Item> domsEventStorage,
-                                                                  String bitrepositoryUrlPrefix,
-                                                                  String bitrepositoryMountpoint,
-                                                                  Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider,
-                                                                  boolean reuseExistingDatastream,
-                                                                  DefaultToolMXBean mxBean) {
+        private Function<DomsItem, Either<Exception, ToolResult>> processChildDomsId(DomsEventStorage<Item> domsEventStorage,
+                                                                                     String bitrepositoryUrlPrefix,
+                                                                                     String bitrepositoryMountpoint,
+                                                                                     Provider<Function<InputStream, byte[]>> veraPdfInvokerProvider,
+                                                                                     boolean reuseExistingDatastream,
+                                                                                     DefaultToolMXBean mxBean) {
             return domsItem -> {
-                long startTime = System.currentTimeMillis();
+                try {
+                    long startTime = System.currentTimeMillis();
 
-                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
-                        .peek(i -> mxBean.currentId = String.valueOf(i))
-                        .peek(i -> mxBean.idsProcessed++)
-                        .map(DomsValue::create)
-                        .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
-                        .collect(Collectors.toList());
+                    List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
+                            .peek(i -> mxBean.currentId = String.valueOf(i))
+                            .peek(i -> mxBean.idsProcessed++)
+                            .map(DomsValue::create)
+                            .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
+                            .collect(Collectors.toList());
 
-                ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
+                    ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
 
-                ToolResult result = trr.apply(domsItem, toolResults);
+                    ToolResult result = trr.apply(domsItem, toolResults);
 
-                log.info(KibanaLoggingStrings.FINISHED_DELIVERY_PDFINVOKE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
+                    log.info(KibanaLoggingStrings.FINISHED_DELIVERY_PDFINVOKE, domsItem.getDomsId().id(), (System.currentTimeMillis() - startTime));
 
-                return result;
+                    return Either.right(result);
+                } catch (Exception e) {
+                    return Either.left(e);
+                }
             };
         }
 
@@ -232,7 +242,9 @@ public class VeraPDFInvokeMain {
 
             byte[] veraPDF_output;
             try (InputStream inputStreamForVeraPDF = inputStream) {
+                // actual work starts
                 veraPDF_output = veraPdfInvokerProvider.get().apply(inputStreamForVeraPDF);
+                // actual work ends.
             } catch (Exception e) {
                 throw new RuntimeException(domsItem + " " + resourceName + " failed validation", e);
             }

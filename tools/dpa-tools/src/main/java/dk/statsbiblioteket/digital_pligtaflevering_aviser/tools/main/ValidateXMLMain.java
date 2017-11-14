@@ -38,9 +38,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -97,14 +95,28 @@ public class ValidateXMLMain {
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(DomsValue::create)
-                    .map(c -> c.map(domsItem -> processChildDomsId(mxBean, eventName).apply(domsItem)))
+                    .map(c -> c.map(domsItem -> {
+                        try {
+                            return Either.right(processChildDomsId(mxBean, eventName).apply(domsItem));
+                        } catch (Exception e) {
+                            return Either.left(e);
+                        }
+                    }))
                     .peek(c -> {
-                        c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess()));
-                        if (c.value().isSuccess() == false) {
-                            c.id().appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                        final DomsItem item = c.id();
+                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
+                        if (value.isLeft()) {
+                            // Processing of _this_ domsItem threw unexpected exception
+                            item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
+                        } else {
+                            final ToolResult toolResult = (ToolResult) value.get();
+                            item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
+                            if (toolResult.isSuccess() == false) {
+                                item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                            }
                         }
                     })
-                    .count() + " items processed";
+                    .count() + " items processed"; // FIXME:  Better message from list.
 
             return f;
         }
@@ -112,7 +124,7 @@ public class ValidateXMLMain {
         /**
          * Validate all xml-contents located as child under the delivery
          *
-         * @param mxBean JMX bean to update statistics in
+         * @param mxBean    JMX bean to update statistics in
          * @param eventName event name to use for events stored in DOMS.
          * @return function to apply on delivery DOMS items.
          */
@@ -127,17 +139,23 @@ public class ValidateXMLMain {
 
                 List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
                         .map(DomsValue::create)
-                        .flatMap(c -> c.flatMap(item -> item.datastreams().stream()
-                                .filter(datastream -> datastream.getId().equals("XML"))
-                                .peek(datastream -> mxBean.idsProcessed++)
-                                .peek(datastream -> mxBean.currentId = c.toString())
-                                .map(datastream -> analyzeXML(datastream))
-                                // Save individual result as event on node.
-                                .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
-                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), stacktraceFor(e), eventName, false)),
-                                        tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
-                                ))
-                        )
+                        .flatMap(c -> c.flatMap(item -> { // For an individual child, process XML datastream if present.
+                                    try {
+                                        return item.datastreams().stream()
+                                                .filter(datastream -> datastream.getId().equals("XML"))
+                                                .peek(datastream -> mxBean.idsProcessed++)
+                                                .peek(datastream -> mxBean.currentId = c.toString())
+                                                .map(datastream -> analyzeXML(datastream))
+                                                // Save individual result as event on node.
+                                                .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
+                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsValue.stacktraceFor(e), eventName, false)),
+                                                        tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
+                                                );
+                                    } catch (Exception e) {
+                                        return Stream.of(Either.left(e));
+                                    }
+                                }
+                        ))
                         .collect(Collectors.toList());
 
                 ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
@@ -154,7 +172,7 @@ public class ValidateXMLMain {
         /**
          * Start validating xml-content in fedora and return results
          *
-         * @param ds        DomsDatastream containing the XML file to validate.
+         * @param ds DomsDatastream containing the XML file to validate.
          * @return a ToolResult indicating if it went well or not (wrapped in an Either to hold any exception).
          */
         protected Either<Exception, ToolResult> analyzeXML(DomsDatastream ds) {
@@ -236,16 +254,5 @@ public class ValidateXMLMain {
         }
     }
 
-    /**
-     * Helper method to get the stacktrace of a throwable as a string.   Why is this not in the runtime library??
-     */
-
-    public static String stacktraceFor(Throwable t) {
-        // https://stackoverflow.com/a/1149721/53897
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        t.printStackTrace(pw);
-        return sw.toString();
-    }
 }
 
