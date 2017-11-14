@@ -12,10 +12,11 @@ import java.util.stream.Stream;
 /**
  *
  */
+@Deprecated
 public class ToolResultReport implements Function<Stream<ToolResult>, String> {
     @Override
     public String apply(Stream<ToolResult> toolResultStream) {
-        Map<Boolean, List<ToolResult>> m = toolResultStream.collect(Collectors.groupingBy(tr -> tr.getResult()));
+        Map<Boolean, List<ToolResult>> m = toolResultStream.collect(Collectors.groupingBy(tr -> tr.isSuccess()));
 
         List<ToolResult> ok = m.getOrDefault(Boolean.TRUE, Collections.emptyList());
         List<ToolResult> failed = m.getOrDefault(Boolean.FALSE, Collections.emptyList());
@@ -26,8 +27,8 @@ public class ToolResultReport implements Function<Stream<ToolResult>, String> {
 
         StringBuilder sb = new StringBuilder("" + ok.size() + " processed.\n\n");
         sb.append(failed.size() + " failed!\n\n--------------\n");
-        for(ToolResult f:failed) {
-            sb.append(f.getItem() + ": " + f.getHumanlyReadableMessage() + "\n");
+        for (ToolResult f:failed) {
+            sb.append("FIXME: " + f.getHumanlyReadableMessage() + "\n");
         }
         sb.append("\n--------------\n");
         return sb.toString();

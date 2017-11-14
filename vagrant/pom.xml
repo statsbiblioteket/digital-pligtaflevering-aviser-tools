@@ -18,6 +18,7 @@
         <plugins>
             <!-- ensure that developer-config/ is present! -->
             <!-- http://maven.apache.org/enforcer/enforcer-rules/requireFilesExist.html -->
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -45,6 +46,7 @@
                 </executions>
 
             </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

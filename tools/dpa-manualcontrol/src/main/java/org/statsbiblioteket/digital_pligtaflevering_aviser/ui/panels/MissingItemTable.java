@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Table for viewing items which is missing.
- * This table it used in a dialog that gives the user the possibility of committing the validation-status of a title in a delivery
+ * Table for viewing items which is missing. This table it used in a dialog that gives the user the possibility of
+ * committing the validation-status of a title in a delivery
  */
 public class MissingItemTable extends VerticalLayout {
 
-    private BeanItemContainer beans=new BeanItemContainer(MissingItem.class);
+    private BeanItemContainer beans = new BeanItemContainer(MissingItem.class);
     private Table table;
     private List<MissingItem> missingItems = new ArrayList<MissingItem>();
 
@@ -47,7 +47,8 @@ public class MissingItemTable extends VerticalLayout {
                 beans.addBean(item);
                 missingItems.add(item);
 
-            }});
+            }
+        });
 
         hl.addComponent(add);
         hl.addComponent(type);
@@ -59,12 +60,11 @@ public class MissingItemTable extends VerticalLayout {
     public void setInfo(List<MissingItem> items) {
         beans.removeAllItems();
         missingItems.clear();
-        for(MissingItem o : items) {
+        for (MissingItem o : items) {
             missingItems.add(o);
             beans.addBean(o);
         }
     }
-
 
     public List<MissingItem> getInfo() {
         return missingItems;

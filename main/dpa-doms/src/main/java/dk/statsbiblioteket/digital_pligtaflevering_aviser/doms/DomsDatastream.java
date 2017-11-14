@@ -7,6 +7,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.structures.DatastreamP
  * DatastreamProfile, to avoid leakage.
  */
 public class DomsDatastream {
+
     private DatastreamProfile datastreamProfile;
     private DomsItem domsItem;
     private DomsRepository domsRepository;
@@ -15,6 +16,10 @@ public class DomsDatastream {
         this.datastreamProfile = datastreamProfile;
         this.domsItem = domsItem;
         this.domsRepository = domsRepository;
+    }
+
+    public DomsItem getDomsItem() {
+        return domsItem;
     }
 
     public String getMimeType() {

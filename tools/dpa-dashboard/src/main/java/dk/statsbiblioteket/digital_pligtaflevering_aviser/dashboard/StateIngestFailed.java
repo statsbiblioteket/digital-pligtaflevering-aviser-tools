@@ -42,7 +42,7 @@ public class StateIngestFailed extends HttpServlet {
             throws ServletException, IOException {
 
         if (repository == null) {
-            synchronized(this) {
+            synchronized (this) {
                 if (repository == null) {
                     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
                     //noinspection deprecation
@@ -96,6 +96,6 @@ public class StateIngestFailed extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    } // </editor-fold>
 
 }

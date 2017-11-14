@@ -13,9 +13,9 @@ import java.util.Date;
  */
 public class SearchPanel extends HorizontalLayout {
 
-    public final static String prepareButtonId ="PREPAREBUTTON";
-    public final static String startButtonId ="START";
-    public final static String linkButtonId ="LINK";
+    public static final String prepareButtonId = "PREPAREBUTTON";
+    public static final String startButtonId = "START";
+    public static final String linkButtonId = "LINK";
 
     private HorizontalLayout controlLayout = new HorizontalLayout();
 

@@ -32,7 +32,7 @@ public class ResultStorePanel extends VerticalLayout {
     public ResultStorePanel() {
         super();
         this.setSpacing(true);
-        pageBeans=new BeanItemContainer(Page.class);
+        pageBeans = new BeanItemContainer(Page.class);
         // Bind a table to it
         pageTable = new Table("checked pages", pageBeans);
         pageTable.setWidth("100%");
@@ -41,7 +41,7 @@ public class ResultStorePanel extends VerticalLayout {
         pageTable.setImmediate(true);
         this.addComponent(pageTable);
 
-        articleBeans=new BeanItemContainer(Article.class);
+        articleBeans = new BeanItemContainer(Article.class);
         // Bind a table to it
         articleTable = new Table("checked articles", articleBeans);
         articleTable.setWidth("100%");
@@ -80,16 +80,16 @@ public class ResultStorePanel extends VerticalLayout {
      */
     public void setValues(DeliveryTitleInfo item) {
 
-        if(item.getComment()!=null) {
+        if (item.getComment() != null) {
             area.setValue(item.getComment());
         }
-        if(item.getInitials()!=null) {
+        if (item.getInitials() != null) {
             initials.setValue(item.getInitials());
         }
-        for(Page o : item.getPages()) {
+        for (Page o : item.getPages()) {
             pageBeans.addBean(o);
         }
-        for(Article o : item.getArticles()) {
+        for (Article o : item.getArticles()) {
             articleBeans.addBean(o);
         }
         missingItemTable.setInfo(item.getMissingItems());

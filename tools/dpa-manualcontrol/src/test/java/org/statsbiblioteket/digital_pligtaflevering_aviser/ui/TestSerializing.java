@@ -63,7 +63,7 @@ public class TestSerializing {
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(is);
+        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(deserializedObject.getDeliveryName(), "dl_11111111");
         assertEquals(deserializedObject.getNewspaperTitle(), "test");
@@ -93,7 +93,7 @@ public class TestSerializing {
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(MissingItem.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        MissingItem deserializedObject = (MissingItem)jaxbUnmarshaller.unmarshal(is);
+        MissingItem deserializedObject = (MissingItem) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(deserializedObject.getType(), "t1");
         assertEquals(deserializedObject.getValue(), "t2");
@@ -113,9 +113,9 @@ public class TestSerializing {
         ds.addArticle(new Article("q"));
         ds.addArticle(new Article("a"));
         ds.addArticle(new Article("x"));
-        ds.addPages(new Page("p1","p2"));
-        ds.addPages(new Page("p3","p4"));
-        ds.addPages(new Page("p5","p777"));
+        ds.addPages(new Page("p1", "p2"));
+        ds.addPages(new Page("p3", "p4"));
+        ds.addPages(new Page("p5", "p777"));
 
         MissingItem mis1  = new MissingItem("t11", "t21");
         MissingItem mis2  = new MissingItem("t12", "t22");
@@ -155,7 +155,7 @@ public class TestSerializing {
 
         JAXBContext jaxbContext1 = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        TitleDeliveryHierarchy deserializedObject = (TitleDeliveryHierarchy)jaxbUnmarshaller.unmarshal(is);
+        TitleDeliveryHierarchy deserializedObject = (TitleDeliveryHierarchy) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(2, deserializedObject.getAllTitles().size());
         assertEquals(4, deserializedObject.getDeliverysFromTitle("JP").size());

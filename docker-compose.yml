@@ -1,0 +1,41 @@
+version: "3" # https://docs.docker.com/compose/compose-file/
+
+# See docker-settings.xml for build configuration instructions.
+
+services:
+  postgres: # https://hub.docker.com/_/postgres/
+    build:
+       context: doms-postgres
+    image: kb/doms-postgres
+    volumes:
+      - doms-postgres-volume:/var/lib/postgresql/data # So we can refer to it by name.
+
+#  bitrepository:
+#    build:
+#      context: .
+#      dockerfile: bitrepository/Dockerfile
+#    image: kb/bitrepository-reference
+
+  doms:
+    build:
+      context: doms
+      # dockerfile: doms/Dockerfile
+    image: kb/doms
+    expose:
+      - "7880"
+    ports:
+      - 7880:7880
+    volumes:
+      - fedora-data:/build/package/data/
+    depends_on:
+      - postgres
+      - zookeeper
+
+  zookeeper:
+    image: zookeeper:3.4
+
+
+volumes:
+  fedora-data:
+  doms-postgres-volume:
+

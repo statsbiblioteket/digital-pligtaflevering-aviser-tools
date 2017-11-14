@@ -34,11 +34,10 @@ public class DatePanel extends VerticalLayout {
     private Table table;
     private TextArea unmappable = new TextArea("");
 
-
     public DatePanel() {
         checkbox = new CheckBox("Visible", true);
         checkbox.setEnabled(false);
-        beans=new BeanItemContainer(java.time.DayOfWeek.class);
+        beans = new BeanItemContainer(java.time.DayOfWeek.class);
 
         // Bind a table to it
         table = new Table("", null);
@@ -47,7 +46,7 @@ public class DatePanel extends VerticalLayout {
         columns = new String[ds.length];
         int i = 0;
         table.addContainerProperty("Weekno", String.class, null);
-        for(DayOfWeek d : ds) {
+        for (DayOfWeek d : ds) {
             columns[i] = d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
             table.addContainerProperty(columns[i], String.class, null);
             table.addGeneratedColumn(columns[i], new DatePanel.FieldGenerator());
@@ -68,13 +67,14 @@ public class DatePanel extends VerticalLayout {
 
     /**
      * Set a list of DeliveryTitleInfo and deploy values into the relevant days in the currently viewed month
+     *
      * @param delStat
      */
     public void setInfo(List<DeliveryTitleInfo> delStat) {
         table.removeAllItems();
         Item newItemId = null;
         String unmappableValues = "";
-        for(DeliveryTitleInfo item : delStat) {
+        for (DeliveryTitleInfo item : delStat) {
             try {
                 Matcher matcher = UiDataConverter.getPatternMatcher(item.getDeliveryName());
                 if (matcher.matches()) {
@@ -83,13 +83,13 @@ public class DatePanel extends VerticalLayout {
                     String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(date);
                     String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(date);
 
-                    if(table.getItem(weekday_no)==null) {
+                    if (table.getItem(weekday_no) == null) {
                         newItemId = table.addItem(weekday_no);
                         newItemId.getItemProperty("Weekno").setValue(weekday_no);
                     }
                     Object oldCellValue = newItemId.getItemProperty(weekday_name).getValue();
                     Object newCellValue = roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles();
-                    if(oldCellValue!=null) {
+                    if (oldCellValue != null) {
                         newItemId.getItemProperty(weekday_name).setValue(oldCellValue + "\n" + newCellValue);
                     } else {
                         newItemId.getItemProperty(weekday_name).setValue(newCellValue);
@@ -111,6 +111,7 @@ public class DatePanel extends VerticalLayout {
 
     /**
      * Set the component to be vieved as enabled in the UI
+     *
      * @param enabled
      */
     @Override
@@ -121,6 +122,7 @@ public class DatePanel extends VerticalLayout {
 
     /**
      * Set a caption of the embedded Table
+     *
      * @param caption
      */
     @Override
@@ -137,7 +139,7 @@ public class DatePanel extends VerticalLayout {
         public Component generateCell(Table source, Object itemId, Object columnId) {
             Property prop = source.getItem(itemId).getItemProperty(columnId);
             TextArea area = new TextArea(null, prop);
-            if(prop.getValue() == null) {
+            if (prop.getValue() == null) {
                 area.setValue("");
             }
             area.setReadOnly(true);

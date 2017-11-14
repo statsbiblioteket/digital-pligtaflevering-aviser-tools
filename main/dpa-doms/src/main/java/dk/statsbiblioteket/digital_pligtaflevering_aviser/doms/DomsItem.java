@@ -166,8 +166,8 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     /**
      * append a PREMIS event on the current item
      */
-    public Date appendEvent(String agent, Date timestamp, String details, String eventType, boolean outcome) {
-        final Date date = domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
+    public Date appendEvent(DomsEvent event) {
+        final Date date = domsRepository.appendEventToItem(domsId, event);
         requireReload();
         return date;
     }

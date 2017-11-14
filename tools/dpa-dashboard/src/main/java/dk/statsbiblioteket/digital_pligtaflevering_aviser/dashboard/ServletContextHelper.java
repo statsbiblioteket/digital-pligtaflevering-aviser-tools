@@ -18,7 +18,7 @@ public class ServletContextHelper {
      */
     public static Map<String, String> getInitParameterMap(ServletContext servletContext) {
         Map<String, String> map = new HashMap<>();
-        for(String name : Collections.list(servletContext.getInitParameterNames())) {
+        for (String name : Collections.list(servletContext.getInitParameterNames())) {
             map.put(name, servletContext.getInitParameter(name));
         }
         return map;

@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.util.function.Function;
 
 /**
- *
+ * See http://docs.verapdf.org/develop/processor/ for official instructions.
  */
 public class VeraPDFValidator implements Function<InputStream, byte[]> {
     private String flavorId;

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DataModel has one initiated instance per browsersession.
- * The datamodel contains cashed information about the deliveries, which is currently beeing checked
+ * DataModel has one initiated instance per browsersession. The datamodel contains cashed information about the
+ * deliveries, which is currently beeing checked
  */
 public class DataModel {
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -64,6 +64,7 @@ public class DataModel {
 
     /**
      * Set initials of the person currently using the application in this browserinstance
+     *
      * @param initials
      */
     public void setInitials(String initials) {
@@ -74,9 +75,9 @@ public class DataModel {
         this.includeValidatedDeliveries = includeValidatedDeliveries;
     }
 
-
     /**
      * Get initials of the person currently using the application in this browserinstance
+     *
      * @return
      */
     public String getInitials() {
@@ -85,6 +86,7 @@ public class DataModel {
 
     /**
      * Get the name of the delivery which is currently in operation
+     *
      * @return
      */
     public String getSelectedDelivery() {
@@ -93,6 +95,7 @@ public class DataModel {
 
     /**
      * Set the name of the delivery which is currently in operation
+     *
      * @param selectedDelivery
      */
     public void setSelectedDelivery(String selectedDelivery) {
@@ -101,6 +104,7 @@ public class DataModel {
 
     /**
      * Get the name of the newspapertitle which is currently in operation
+     *
      * @return
      */
     public String getSelectedTitle() {
@@ -109,6 +113,7 @@ public class DataModel {
 
     /**
      * Get the name of the newspapersection which is currently in operation
+     *
      * @return
      */
     public String getSelectedSection() {
@@ -117,6 +122,7 @@ public class DataModel {
 
     /**
      * Set the name of the newspapersection which is currently in operation
+     *
      * @param selectedSection
      */
     public void setSelectedSection(String selectedSection) {
@@ -125,12 +131,12 @@ public class DataModel {
 
     /**
      * Set the name of the delivery which is currently in operation
+     *
      * @param selectedTitle
      */
     public void setSelectedTitle(String selectedTitle) {
         this.selectedTitle = selectedTitle;
     }
-
 
     public List<String> getTitlesFromFileSystem() throws Exception {
         initiateTitleHierachyFromFilesystem();
@@ -138,7 +144,8 @@ public class DataModel {
     }
 
     /**
-     * Select the TitleDeliveryItem for operation, selection is done with the local parameters of title and deliveryname
+     * Select the TitleDeliveryItem for operation, selection is done with the local parameters of title and
+     * deliveryname
      */
     public void selectTitleDelivery() {
         selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
@@ -146,6 +153,7 @@ public class DataModel {
 
     /**
      * Add information about a newspaperpage, which has been checked
+     *
      * @param page
      */
     public void addCheckedPage(Page page) {
@@ -154,6 +162,7 @@ public class DataModel {
 
     /**
      * Add information about a newspaperarticle, which has been checked
+     *
      * @param article
      */
     public void addCheckedArticle(Article article) {
@@ -162,6 +171,7 @@ public class DataModel {
 
     /**
      * Get the deliveryTitle which is currently selected for operation
+     *
      * @return
      */
     public DeliveryTitleInfo getCurrentDelItem() {
@@ -170,6 +180,7 @@ public class DataModel {
 
     /**
      * Get all deliverysTitles which contain the title-name in the parameter
+     *
      * @param title
      * @return
      */
@@ -179,6 +190,7 @@ public class DataModel {
 
     /**
      * Get all deliverysTitles, that is delivered in the currently selected delivery
+     *
      * @return
      */
     public List<DeliveryTitleInfo> getDeliveryTitleObjects() {
@@ -190,7 +202,7 @@ public class DataModel {
      */
     public void initiateDeliveries() {
         DeliveryFedoraCommunication.EventStatus evtStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
-        if(this.includeValidatedDeliveries) {
+        if (this.includeValidatedDeliveries) {
             evtStatus = DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK;
         }
         fedoraCommunication.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
@@ -198,6 +210,7 @@ public class DataModel {
 
     /**
      * Write information to the defined DeliveryTitleInfo
+     *
      * @param deliveryName
      * @param titleName
      * @param checked
@@ -219,6 +232,7 @@ public class DataModel {
 
     /**
      * Remove a specific cashed title in a delivery
+     *
      * @throws Exception
      */
     public void removeCurrentSelectedTitleInDelivery() throws Exception {
@@ -227,6 +241,7 @@ public class DataModel {
 
     /**
      * Get the Title object from fedora, constructed with the STATISTICS stream
+     *
      * @param selectedDelivery
      * @param selectedTitle
      * @return
@@ -237,6 +252,7 @@ public class DataModel {
 
     /**
      * Get the domsItem from the uuid. The Item is fetched directly from fedora
+     *
      * @param id
      * @return
      */
@@ -246,6 +262,7 @@ public class DataModel {
 
     /**
      * Initiate TitleDeliveryHierarchy from fedora, and cash it in the model
+     *
      * @throws Exception
      */
     public void initiateTitleHierachyFromFedora() throws Exception {
@@ -254,6 +271,7 @@ public class DataModel {
 
     /**
      * Initiate TitleDeliveryHierarchy from filesystem, and cash it in the model
+     *
      * @throws Exception
      */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
@@ -262,6 +280,7 @@ public class DataModel {
 
     /**
      * Set the month to the model, the month is used as basis of which deliveries that can currently get validated
+     *
      * @param selectedMonth
      */
     public void setSelectedMonth(Date selectedMonth) {
@@ -278,11 +297,13 @@ public class DataModel {
 
     /**
      * Get the currently selected month from the month as a String
+     *
      * @return
+     *
      * @throws ParseException
      */
     public Date getSelectedMonth() throws ParseException {
-        if(currentlySelectedMonth == null) {
+        if (currentlySelectedMonth == null) {
             return new Date();
         } else {
             return dateFormat.parse(currentlySelectedMonth);
@@ -291,6 +312,7 @@ public class DataModel {
 
     /**
      * Get the currently selected month as a string
+     *
      * @return
      */
     public String getSelectedMonthString() {
@@ -299,7 +321,9 @@ public class DataModel {
 
     /**
      * Save the hierachy of titles and deliveries to the filesystem
+     *
      * @return
+     *
      * @throws Exception
      */
     public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
@@ -308,6 +332,7 @@ public class DataModel {
 
     /**
      * Is the month been cashed ti the filesystem
+     *
      * @return
      */
     public boolean isMonthInitiated() {
@@ -316,6 +341,7 @@ public class DataModel {
 
     /**
      * Get the DomsItem from the name of the delivery, the domsItem can be used for reading and writing to doms
+     *
      * @param name
      * @return
      */
@@ -325,6 +351,7 @@ public class DataModel {
 
     /**
      * Get a list of alle deliveries, which is currently beeing operated
+     *
      * @return
      */
     public Set<String> getInitiatedDeliveries() {

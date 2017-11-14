@@ -11,15 +11,17 @@ import java.io.File;
 import java.io.StringReader;
 
 /**
- * MarshallerFunctions is a list of static functions which converts between objects that represents a newspaper structure and a xmp-representation
+ * MarshallerFunctions is a list of static functions which converts between objects that represents a newspaper
+ * structure and a xmp-representation
  */
 public class MarshallerFunctions {
 
-
     /**
      * Convert xml-string into a object of type DeliveryTitleInfo
+     *
      * @param deliverystring
      * @return
+     *
      * @throws JAXBException
      */
     public static DeliveryTitleInfo streamToDeliveryTitleInfo(String deliverystring) throws JAXBException {
@@ -27,27 +29,28 @@ public class MarshallerFunctions {
         InputSource inps = new InputSource(reader);
         JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(inps);
+        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo) jaxbUnmarshaller.unmarshal(inps);
         return deserializedObject;
     }
 
-
     /**
      * Convert xml-string into a object of type DeliveryTitleInfo
+     *
      * @param serializedDeliveryfile
      * @return
+     *
      * @throws JAXBException
      */
     public static DeliveryTitleInfo streamToDeliveryTitleInfo(File serializedDeliveryfile) throws JAXBException {
         JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo)jaxbUnmarshaller.unmarshal(serializedDeliveryfile);
+        DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo) jaxbUnmarshaller.unmarshal(serializedDeliveryfile);
         return deserializedObject;
     }
 
-
     /**
      * Stream a DeliveryTitleInfo into a file
+     *
      * @param deliId
      * @param fileForThisTitleDelivery
      * @throws JAXBException

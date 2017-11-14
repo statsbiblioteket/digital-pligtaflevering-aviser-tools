@@ -20,9 +20,8 @@ import java.util.stream.Collectors;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
- * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. The toString()
- * explicitly protects passwords from being printed.  FIXME:  Full technical
- * explanation pending.</p>
+ * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. The toString() explicitly
+ * protects passwords from being printed.  FIXME:  Full technical explanation pending.</p>
  */
 @Module
 public class ConfigurationMap {
@@ -65,8 +64,7 @@ public class ConfigurationMap {
     }
 
     /**
-     * Get configuration map as properties - this is currently for interfacing
-     * with legacy code.
+     * Get configuration map as properties - this is currently for interfacing with legacy code.
      */
 
     public Properties asProperties() {
@@ -170,8 +168,8 @@ public class ConfigurationMap {
     }
 
     /**
-     * getRequiredInt returns a configuration map entry as a string.  If the
-     * value stored for the key is not a valid integer, a meaningful message is returned.
+     * getRequiredInt returns a configuration map entry as a string.  If the value stored for the key is not a valid
+     * integer, a meaningful message is returned.
      *
      * @param key configuration key
      * @return value stored in map converted with Integer.parseInt()
@@ -187,21 +185,21 @@ public class ConfigurationMap {
     }
 
     /**
-     * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their
-     * actual value.  Adapted from the AbstractMap implementation.
+     * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their actual value.
+     * Adapted from the AbstractMap implementation.
      *
      * @return Normal Map toString() but with password values given as "***"
      */
     @Override
     public String toString() {
-        // Adapted from AbstractMap
+        // Adapted as closely as possible from AbstractMap
         Iterator<Map.Entry<String, String>> i = map.entrySet().iterator();
         if (!i.hasNext())
             return "{}";
 
         StringBuilder sb = new StringBuilder();
         sb.append('{');
-        for (; ; ) {
+        while (true) {
             Map.Entry<String, String> e = i.next();
             String key = e.getKey();
             String value = e.getValue();
