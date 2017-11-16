@@ -43,7 +43,7 @@ docker run -p 8081:8081 -\
             <id>local-nexus</id>
             <name>Local Nexus</name>
             <!-- Host external IP number -->
-            <url>http://172.18.95.105:8081/repository/sbforge_central/</url>
+            <url>http://172.17.0.1:8081/repository/sbforge_central/</url>
             <mirrorOf>central</mirrorOf>
         </mirror>
     </mirrors>
