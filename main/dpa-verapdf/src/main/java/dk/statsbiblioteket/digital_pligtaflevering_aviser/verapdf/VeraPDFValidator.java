@@ -63,8 +63,8 @@ public class VeraPDFValidator implements Function<InputStream, byte[]> {
         TRA 2017-01-23:  Froze pom.xml ranges at version 1.0.6
          */
         PDFAFlavour flavour = PDFAFlavour.byFlavourId(flavorId);
-        try (PDFAValidator validator = Foundries.defaultInstance().createValidator(flavour, false)) {
-            PDFAParser loader = Foundries.defaultInstance().createParser(inputStream, flavour);
+        PDFAValidator validator = Foundries.defaultInstance().createValidator(flavour, false);
+        try (PDFAParser loader = Foundries.defaultInstance().createParser(inputStream, flavour)) {
             ValidationResult result = validator.validate(loader);
 
             // do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
