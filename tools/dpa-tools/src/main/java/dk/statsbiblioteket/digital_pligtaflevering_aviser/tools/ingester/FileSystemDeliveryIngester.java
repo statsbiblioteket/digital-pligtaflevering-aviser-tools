@@ -2,12 +2,12 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.google.common.base.Joiner;
 import com.sun.jersey.api.client.WebResource;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.RelativePathToURLConverter;
@@ -19,6 +19,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.util.xml.DOM;
+import javaslang.control.Either;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
@@ -51,12 +52,12 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -80,9 +81,9 @@ import static java.nio.file.Files.walk;
  * id. This leads to duplications of relations. Therefore we treat a single relation as a special case. See ABR for
  * details. </p>
  *
- * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument
+ * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument, CdiInjectionPointsInspection
  */
-public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, String>, AutoCloseable {
+public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Either<Exception, ToolResult>>, AutoCloseable {
 
     private static final long DEFAULT_FILE_SIZE = 0;
     public static final String BITREPOSITORY_INGESTER_COLLECTIONID = "bitrepository.ingester.collectionid";
@@ -99,7 +100,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     private final String urlToBitmagBatchPath;
     private WebResource restApi;
     private EnhancedFedora efedora;
-    private final  List<String> collections;
+    private final List<String> collections;
     private Set<String> ignoredFilesSet;
     private final String gitId;
     private String domsCollection;
@@ -110,7 +111,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     protected final OutputHandler output = new DefaultOutputHandler(getClass());
     protected final Function<String, String> encodePublicURLForFileID;
     protected final Function<Path, Stream<Path>> deliveriesForPath;
-    private final Function<List<ToolResult>, String> eventMessageForToolResults;
     private final DefaultToolMXBean mxBean;
     private String status;
 
@@ -128,7 +128,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                       @Named(DOMS_COLLECTION) String domsCollection,
                                       @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
                                       Function<Path, Stream<Path>> deliveriesForPath,
-                                      Function<List<ToolResult>, String> eventMessageForToolResults,
                                       DefaultToolMXBean mxBean,
                                       Settings settings) {
         this.ignoredFiles = ignoredFiles;
@@ -146,7 +145,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         this.efedora = efedora;
         this.encodePublicURLForFileID = encodePublicURLForFileID;
         this.deliveriesForPath = deliveriesForPath;
-        this.eventMessageForToolResults = eventMessageForToolResults;
         this.mxBean = mxBean;
 
         //this.bitmagUrl = bitmagUrl;
@@ -161,33 +159,46 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
     }
 
     /**
-     * For a given domsId we first have to locate the physical location of the delivery.
-     * The convention is to get the Dublin Core identifiers and the one that starts with "path:" contains the path of
-     * the delivery directory relative to the passed in rootDir.
-     * Then we can create the objects in DOMS corresponding to the files in the delivery directory as follows:
-     * <ul> <li>Each directory becomes a DOMS object.</li> <li>A file group exist for all files with the same basename.
-     * For "a.pdf" and "a.xml" the file group is named "a" and the corresponding DOMS object will be named "A".</li>
-     * <li>Each directory DOMS object will have a "hasPart" RDF relation to the DOMS objects for the file groups and
-     * directories it contains.</li> <li>For binary files in a file group, the file will be ingested in the
-     * Bitrepository and a child DOMS object created with a CONTENTS datastream type "R" redirecting to the public URL
-     * for the file in the Bitrepository (which for the Statsbiblioteket pillar can be transformed to be resolved as a
-     * local file). A "hasFile" relation is created from the file group object to the child object.</li> <li>For
-     * non-binary metadatafiles they are stored as a managed Fedora datastream type "M" named with the extension for the
-     * file. ("a.xml" will be stored in the o.</li> </ul>
+     * For a given domsId we first have to locate the physical location of the delivery. The convention is to get the
+     * Dublin Core identifiers and the one that starts with "path:" contains the path of the delivery directory relative
+     * to the passed in rootDir. Then we can create the objects in DOMS corresponding to the files in the delivery
+     * directory as follows: <ul> <li>Each directory becomes a DOMS object.</li> <li>A file group exist for all files
+     * with the same basename. For "a.pdf" and "a.xml" the file group is named "a" and the corresponding DOMS object
+     * will be named "A".</li> <li>Each directory DOMS object will have a "hasPart" RDF relation to the DOMS objects for
+     * the file groups and directories it contains.</li> <li>For binary files in a file group, the file will be ingested
+     * in the Bitrepository and a child DOMS object created with a CONTENTS datastream type "R" redirecting to the
+     * public URL for the file in the Bitrepository (which for the Statsbiblioteket pillar can be transformed to be
+     * resolved as a local file). A "hasFile" relation is created from the file group object to the child object.</li>
+     * <li>For non-binary metadatafiles they are stored as a managed Fedora datastream type "M" named with the extension
+     * for the file. ("a.xml" will be stored in the o.</li> </ul>
      *
-     * @param domsItem item as queried in DOMS
-     * @param rootPath directory where to locate the delivery
+     * @param deliveryDomsItem item as queried in DOMS
+     * @param rootPath         directory where to locate the delivery
      * @return humanly readable string describing the outcome
      *
      * @noinspection Convert2MethodRef, PointlessBooleanExpression
      */
     @Override
-    public String apply(DomsItem domsItem, Path rootPath) {
+    public Either<Exception, ToolResult> apply(DomsItem deliveryDomsItem, Path rootPath) {
         long startTime = System.currentTimeMillis();
 
         // Collect all the indvidual toolResults.
-        List<ToolResult> toolResult = ingestDirectoryForDomsItem(domsItem, rootPath);
 
+        try {
+            List l = Stream.of(deliveryDomsItem)
+                    .map(DomsValue::create) // new DomsValue(deliveryDomsItem, rootPath) is apparently unchecked?!?
+                    .flatMap((c) -> c.flatMap((value) -> {
+                        try {
+                            return ingestDirectoryForDomsItem(value, rootPath).map(Either::right);
+                        } catch (Exception e) {
+                            return Stream.of(Either.left(e));
+                        }
+                    }))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {  // Outer fault barrier
+            return Either.left(e);
+        }
+/*
         // Construct message to be stored on event for human consumption.
         String deliveryEventMessage = eventMessageForToolResults.apply(toolResult);
 
@@ -196,14 +207,17 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         final String keyword = getClass().getSimpleName();
 
-
-        domsItem.appendEvent(new DomsEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome));
-        log.info("{} {} Took: {} ms", keyword, domsItem, System.currentTimeMillis() - startTime);
-        log.trace("{} message={}, outcome={}", domsItem, deliveryEventMessage, outcome);
-        return "item " + domsItem + " ingested. outcome = " + outcome;
+        deliveryDomsItem.appendEvent(new DomsEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome));
+        log.info("{} {} Took: {} ms", keyword, deliveryDomsItem, System.currentTimeMillis() - startTime);
+        log.trace("{} message={}, outcome={}", deliveryDomsItem, deliveryEventMessage, outcome);
+        */
+        return null; // "item " + deliveryDomsItem + " ingested. outcome = " + outcome;
     }
 
-    public List<ToolResult> ingestDirectoryForDomsItem(DomsItem domsItem, Path rootPath) {
+    /**
+     * @noinspection PointlessBooleanExpression
+     */
+    public Stream<ToolResult> ingestDirectoryForDomsItem(DomsItem deliveryDomsItem, Path rootPath) throws XPathExpressionException, IOException, NoSuchAlgorithmException {
 
         // First get identifiers from the Dublin Core XML data stream.
         //
@@ -217,15 +231,13 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
         xPath.setNamespaceContext(context);
 
-        String dcContent = restApi.path(domsItem.getDomsId().id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
+        String dcContent = restApi.path(deliveryDomsItem.getDomsId().id()).path("/datastreams/DC/content").queryParam("format", "xml").get(String.class);  // Ask directly for datastream?
         NodeList nodeList;
-        try {
-            nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(
-                    DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes(StandardCharsets.UTF_8)), true), XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            // FIXME: Rewrite using try instead of fail+exception.  It is an unexpected situation though.
-            return Arrays.asList(ToolResult.fail("Invalid XPath. This is a programming error."));
-        }
+
+        nodeList = (NodeList) xPath
+                .compile("//dc:identifier")
+                .evaluate(DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes(StandardCharsets.UTF_8)), true), XPathConstants.NODESET);
+
         List<String> textContent = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             textContent.add(nodeList.item(i).getTextContent());
@@ -234,18 +246,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // The one starting with "path:" is the one we need.  The rest of that string is the
         // filename in the local file system.
         // ["uuid:5a06c0ed-6324-4777-86b0-075fc972dcb4", "path:B20160811-RT1"]
-        Optional<String> relativeFilenameFromDublinCore = textContent.stream()
+
+        String batchName = textContent.stream()
                 .filter(s -> s.startsWith("path:"))
+                // "B20160811-RT1"
                 .map(s -> s.substring("path:".length()))
-                .findAny();
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Could not get 'path:...' identifier"));
 
-        // "B20160811-RT1"
-        //noinspection PointlessBooleanExpression
-        if (relativeFilenameFromDublinCore.isPresent() == false) {
-            throw new RuntimeException("Could not get 'path:...' identifier");
-        }
-
-        String batchName = relativeFilenameFromDublinCore.get();
         long startBatchIngestTime = System.currentTimeMillis();
         log.info(KibanaLoggingStrings.START_DELIVERY_INGEST, batchName);
 
@@ -261,19 +269,18 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
 
         // Original in DeliveryMD5Validation.readChecksums()
         // 8bd4797544edfba4f50c91c917a5fc81  verapdf/udgave1/pages/20160811-verapdf-udgave1-page001.pdf
-        mxBean.details = "Checking checksums for " + deliveryPath;
 
-        DeliveryMD5Validation md5validations;
-        try {
+        final DeliveryMD5Validation md5validations;
+        {
+            mxBean.details = "Checking checksums for " + deliveryPath;
+
             md5validations = new DeliveryMD5Validation(rootPath.toString(), "checksums.txt", md5Convert, ignoredFiles);
             md5validations.validation(batchName);
             List<String> validationResults = md5validations.getValidationResult();
             if (validationResults.size() > 0) {
                 String collectiveValidationString = Joiner.on("\n").join(validationResults);
-                return Arrays.asList(ToolResult.fail("Checksum validation failed:\n\n" + collectiveValidationString));
+                return Stream.of(ToolResult.fail("Checksum validation failed:\n\n" + collectiveValidationString));
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Could not process checksums.txt", e);
         }
 
         /* walk() guarantees that we have always seen the parent of a directory before we
@@ -287,14 +294,14 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         try {
             pathStream = walk(deliveryPath, FileVisitOption.FOLLOW_LINKS);
         } catch (IOException e) {
-            return Arrays.asList(ToolResult.fail("Could not walk " + deliveryPath));
+            throw new IOException("Could not walk " + deliveryPath.toAbsolutePath(), e);  // add path info.
         }
 
         // We got so far so now collect the combined results for each directory.
-        List<ToolResult> subDirectoryResults = pathStream
+        List subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms(domsItem, "path:" + rootPath.relativize(path), rootPath, path, md5validations))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms(deliveryDomsItem, "path:" + rootPath.relativize(path), rootPath, path, md5validations))
                 .collect(Collectors.toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
@@ -331,6 +338,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
      *
      * @param dcIdentifier DC identifier to look up object in DOMS with.
      * @param md5map       MD5 validation map.
+     * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable
      */
     protected Stream<ToolResult> createDirectoryWithDataStreamsInDoms(DomsItem rootDomsItem, String dcIdentifier, Path rootPath, Path absoluteFileSystemPath, DeliveryMD5Validation md5map) {
 
@@ -349,7 +357,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
          */
         Stream<Path> pathStream = deliveriesForPath.apply(absoluteFileSystemPath);
 
-        //noinspection PointlessBooleanExpression
         Map<String, List<Path>> pathsForPage = pathStream
                 .sorted()
                 .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
@@ -367,6 +374,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
         // create a DOMS object for the file, store the public URL for the bitrepository file in "CONTENTS" on the file object,
         // and create a "hasFile" relation from the file group object to the page object.
         // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
+
         List<ToolResult> toolResultsForThisDirectory = new ArrayList<>();
 
         List<ToolResult> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
@@ -377,7 +385,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                     mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
                     return filesForPage.stream()
                             .sorted()
-                            .map(path -> {
+                            .map(path -> {  // ToolResult for page
                                 log.trace("Page file {} for {}", path, id);
                                 mxBean.idsProcessed++;
                                 try {
@@ -385,34 +393,37 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                     Path filePath = deliveryPath.relativize(path);
                                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
                                     String expectedChecksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
+                                    // -- PDF
                                     if (path.toString().endsWith(".pdf")) {
-                                        //Save *.pdf files to bitrepository
+                                        // Save *.pdf files to bitrepository
                                         long startFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
                                         Path relativePath = rootPath.relativize(path);
 
-                                        //Construct a synchronous eventhandler
+                                        // Construct a synchronous eventhandler
                                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
 
                                         String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
 
+                                        // FIXME:  Externalize
                                         final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatch).apply(relativePath);
 
                                         // Use the PutClient to ingest the file into Bitrepository
                                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                                         // Checksum is not validated since the bitrepository return an error if the checksum is not validated
+
                                         putfileClient.putFile(bitrepositoryIngesterCollectionId,
                                                 urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
                                                 checkSum, null, eventHandler, null);
 
                                         OperationEvent finalEvent = eventHandler.getFinish();
+
                                         long finishedFileIngestTime = System.currentTimeMillis();
                                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-                                        //noinspection UnnecessaryLocalVariable
                                         ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, expectedChecksum);
                                         return toolResult;
+                                    } else if (path.toString().endsWith(".xml")) { // -- XML
 
-                                    } else if (path.toString().endsWith(".xml")) {
                                         // save physical bytes of XML file as "XML" data stream on page object.
 
                                         //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
@@ -425,23 +436,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
                                             efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, expectedChecksum, allBytes, null, mimeType, "From " + path, null);
                                             return ToolResult.ok("XML datastream added for " + path);
                                         } else {
-                                            return ToolResult.fail("checksum fail.  Expected " + expectedChecksum
-                                                    + ", found: " + calculatedChecksum + " for " + path);
-                                        }
-                                    } else if (path.toString().endsWith(".verapdf")) {
-                                        // VeraPDF is so slow that we accept an externally precomputed copy during ingest.  Not provided by infomedia.
-                                        // save physical bytes of VERAPDF file as "VERAPDF" data stream on PDF file object.
-                                        String thisDCIdentifier = "path:" + rootPath.relativize(path);
-                                        String fileDCIdentifier = thisDCIdentifier.replaceFirst("\\.verapdf", ".pdf");
-                                        String fileObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(fileDCIdentifier);
-
-                                        final String mimeType = "text/xml";
-                                        byte[] allBytes = Files.readAllBytes(path);
-                                        if (allBytes.length > 0) {
-                                            efedora.modifyDatastreamByValue(fileObjectId, "VERAPDF", null, null, allBytes, null, mimeType, "From " + path, null);
-                                            return ToolResult.ok("VERAPDF datastream added for " + path);
-                                        } else {
-                                            return ToolResult.ok("Skipped empty .verapdf file for " + path);
+                                            return ToolResult.fail("checksum fail.  Expected " + expectedChecksum + ", found: " + calculatedChecksum + " for " + path);
                                         }
                                     } else {
                                         return ToolResult.fail("path not pdf/xml: " + path);
@@ -460,6 +455,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, St
             log.trace("All successful.  Adding relations.");
         } else {
             // a failure has happened up til now, return now for cleanest error messages
+
+
+            FIXME FIXME FIXME  // SNAPSHOT TO HERE!
+
             return toolResultsForThisDirectory.stream();
         }
 
