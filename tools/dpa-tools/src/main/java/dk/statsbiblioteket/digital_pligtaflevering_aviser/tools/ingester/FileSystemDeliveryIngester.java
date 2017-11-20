@@ -378,84 +378,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         List<ToolResult> toolResultsForThisDirectory = new ArrayList<>();
 
         List<ToolResult> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
-                .flatMap(entry -> {
-                    final String id = entry.getKey();
-                    String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
-                    final List<Path> filesForPage = entry.getValue();
-                    mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
-                    return filesForPage.stream()
-                            .sorted()
-                            .map(path -> {  // ToolResult for page
-                                log.trace("Page file {} for {}", path, id);
-                                mxBean.idsProcessed++;
-                                try {
-                                    Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
-                                    Path filePath = deliveryPath.relativize(path);
-                                    ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
-                                    String expectedChecksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
-                                    // -- PDF
-                                    if (path.toString().endsWith(".pdf")) {
-                                        // Save *.pdf files to bitrepository
-                                        long startFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
-                                        Path relativePath = rootPath.relativize(path);
+                .flatMap(getXml(rootDomsItem, rootPath, md5map, deliveryName))
+                .collect(Collectors.toList());
 
-                                        // Construct a synchronous eventhandler
-                                        CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
-
-                                        String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
-
-                                        // FIXME:  Externalize
-                                        final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatch).apply(relativePath);
-
-                                        // Use the PutClient to ingest the file into Bitrepository
-                                        // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
-                                        // Checksum is not validated since the bitrepository return an error if the checksum is not validated
-
-                                        putfileClient.putFile(bitrepositoryIngesterCollectionId,
-                                                urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
-                                                checkSum, null, eventHandler, null);
-
-                                        OperationEvent finalEvent = eventHandler.getFinish();
-
-                                        long finishedFileIngestTime = System.currentTimeMillis();
-                                        log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
-                                        ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, expectedChecksum);
-                                        return toolResult;
-                                    } else if (path.toString().endsWith(".xml")) { // -- XML
-
-                                        // save physical bytes of XML file as "XML" data stream on page object.
-
-                                        //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
-                                        FileInputStream fis = new FileInputStream(path.toFile());
-                                        String calculatedChecksum = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-                                        fis.close();
-                                        if (calculatedChecksum.equals(expectedChecksum)) { //If checksum is validated start ingesting otherwise return fail
-                                            final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
-                                            byte[] allBytes = Files.readAllBytes(path);
-                                            efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, expectedChecksum, allBytes, null, mimeType, "From " + path, null);
-                                            return ToolResult.ok("XML datastream added for " + path);
-                                        } else {
-                                            return ToolResult.fail("checksum fail.  Expected " + expectedChecksum + ", found: " + calculatedChecksum + " for " + path);
-                                        }
-                                    } else {
-                                        return ToolResult.fail("path not pdf/xml: " + path);
-                                    }
-                                } catch (Exception e) {
-                                    log.error(e.getMessage(), e);
-                                    throw new RuntimeException(rootDomsItem + " Could not process " + path);
-                                }
-                            });
-                }).collect(Collectors.toList());
-
-        // All files now processed and created in DOMS.  If any failures so far, stop here.
+        // All files now processed and created in DOMS.
         toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
 
         if (toolResultsForThisDirectory.stream().allMatch(ToolResult::isSuccess)) {
             log.trace("All successful.  Adding relations.");
         } else {
             // a failure has happened up til now, return now for cleanest error messages
-
 
             FIXME FIXME FIXME  // SNAPSHOT TO HERE!
 
@@ -502,6 +434,82 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         log.trace("DC id: {}", dcIdentifier);
 
         return toolResultsForThisDirectory.stream();
+    }
+
+    private Function<Map.Entry<String, List<Path>>, Stream<? extends ToolResult>> getXml(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName) {
+        return entry -> {
+            final String id = entry.getKey();
+            String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
+            final List<Path> filesForPage = entry.getValue();
+            mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
+            return filesForPage.stream()
+                    .sorted()
+                    .map(path -> {  // ToolResult for page
+                        log.trace("Page file {} for {}", path, id);
+                        mxBean.idsProcessed++;
+                        try {
+                            return getToolResult(rootDomsItem, rootPath, md5map, deliveryName, pageObjectId, path);
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                            throw new RuntimeException(rootDomsItem + " Could not process " + path);
+                        }
+                    });
+        };
+    }
+
+    private ToolResult getToolResult(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName, String pageObjectId, Path path) throws IOException, BackendMethodFailedException, BackendInvalidCredsException, BackendInvalidResourceException {
+        Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
+        Path filePath = deliveryPath.relativize(path);
+        ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
+        String expectedChecksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
+        // -- PDF
+        if (path.toString().endsWith(".pdf")) {
+            // Save *.pdf files to bitrepository
+            long startFileIngestTime = System.currentTimeMillis();
+            log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
+            Path relativePath = rootPath.relativize(path);
+
+            // Construct a synchronous eventhandler
+            CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
+
+            String fileId = fileNameToFileIDConverter.apply(Paths.get(deliveryName, filePath.toString()));
+
+            // FIXME:  Externalize
+            final URL urlWhereBitrepositoryCanDownloadTheFile = new RelativePathToURLConverter(urlToBitmagBatch).apply(relativePath);
+
+            // Use the PutClient to ingest the file into Bitrepository
+            // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
+            // Checksum is not validated since the bitrepository return an error if the checksum is not validated
+
+            putfileClient.putFile(bitrepositoryIngesterCollectionId,
+                    urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
+                    checkSum, null, eventHandler, null);
+
+            OperationEvent finalEvent = eventHandler.getFinish();
+
+            long finishedFileIngestTime = System.currentTimeMillis();
+            log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
+            ToolResult toolResult = writeResultFromBitmagIngest(rootDomsItem, relativePath, finalEvent, pageObjectId, expectedChecksum);
+            return toolResult;
+        } else if (path.toString().endsWith(".xml")) { // -- XML
+
+            // save physical bytes of XML file as "XML" data stream on page object.
+
+            //Start reading md5 checksum from the file before stating the ingest, if the checksum is invalid the file must not be ingested
+            FileInputStream fis = new FileInputStream(path.toFile());
+            String calculatedChecksum = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+            fis.close();
+            if (calculatedChecksum.equals(expectedChecksum)) { //If checksum is validated start ingesting otherwise return fail
+                final String mimeType = "text/xml"; // http://stackoverflow.com/questions/51438/getting-a-files-mime-type-in-java
+                byte[] allBytes = Files.readAllBytes(path);
+                efedora.modifyDatastreamByValue(pageObjectId, "XML", ChecksumType.MD5, expectedChecksum, allBytes, null, mimeType, "From " + path, null);
+                return ToolResult.ok("XML datastream added for " + path);
+            } else {
+                return ToolResult.fail("checksum fail.  Expected " + expectedChecksum + ", found: " + calculatedChecksum + " for " + path);
+            }
+        } else {
+            return ToolResult.fail("path not pdf/xml: " + path);
+        }
     }
 
     /**
