@@ -1,12 +1,15 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
@@ -81,7 +84,8 @@ import static java.nio.file.Files.walk;
  * id. This leads to duplications of relations. Therefore we treat a single relation as a special case. See ABR for
  * details. </p>
  *
- * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument, CdiInjectionPointsInspection
+ * @noinspection WeakerAccess, ArraysAsListWithZeroOrOneArgument, CdiInjectionPointsInspection,
+ * UnnecessaryLocalVariable
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Either<Exception, ToolResult>>, AutoCloseable {
 
@@ -298,7 +302,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         }
 
         // We got so far so now collect the combined results for each directory.
-        List subDirectoryResults = pathStream
+        List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
                 .flatMap(path -> createDirectoryWithDataStreamsInDoms(deliveryDomsItem, "path:" + rootPath.relativize(path), rootPath, path, md5validations))
@@ -306,7 +310,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
 
         long finishedBatchIngestTime = System.currentTimeMillis();
         log.info(KibanaLoggingStrings.FINISHED_DELIVERY_INGEST, batchName, finishedBatchIngestTime - startBatchIngestTime);
-        return subDirectoryResults;
+        return subDirectoryResults.stream();
     }
 
     /**
@@ -375,39 +379,34 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // and create a "hasFile" relation from the file group object to the page object.
         // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
 
-        List<ToolResult> toolResultsForThisDirectory = new ArrayList<>();
+        List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResultsForThisDirectory = new ArrayList<>();
 
-        List<ToolResult> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
-                .flatMap(getXml(rootDomsItem, rootPath, md5map, deliveryName))
-                .collect(Collectors.toList());
+        {
+            List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
+                    .flatMap(getXml(rootDomsItem, rootPath, md5map, deliveryName))
+                    .collect(Collectors.toList());
 
-        // All files now processed and created in DOMS.
-        toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
-
-        if (toolResultsForThisDirectory.stream().allMatch(ToolResult::isSuccess)) {
-            log.trace("All successful.  Adding relations.");
-        } else {
-            // a failure has happened up til now, return now for cleanest error messages
-
-            FIXME FIXME FIXME  // SNAPSHOT TO HERE!
-
-            return toolResultsForThisDirectory.stream();
+            // Record the result for all individual files processed and created in DOMS.
+            toolResultsForThisDirectory.addAll(toolResultsForFilesInThisDirectory);
         }
 
         // Add "hasPart" relations to all domsIds on this page directory object.
-        List<String> domsIdsInThisDirectory = sortedPathsForPage.keySet().stream().map(id -> lookupObjectFromDCIdentifier(id).get(0)).collect(Collectors.toList());
-        try {
-            if (domsIdsInThisDirectory.size() != 1) { // avoid triggering bug in FedoraRest.addRelations
-                efedora.addRelations(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", domsIdsInThisDirectory, false, "comment");
-            } else {
-                efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", domsIdsInThisDirectory.get(0), false, "comment");
-            }
-            toolResultsForThisDirectory.add(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory));
-        } catch (Exception e) {
-            throw new RuntimeException(rootDomsItem + " Failed to add hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory, e);
-        }
 
-        log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
+        List<String> domsIdsInThisDirectory = Arrays.asList("(lookup failed");
+        try {
+            domsIdsInThisDirectory = sortedPathsForPage.keySet().stream().map(id -> lookupObjectFromDCIdentifier(id).get(0)).collect(Collectors.toList());
+            log.trace("directory {} pages {}", absoluteFileSystemPath, domsIdsInThisDirectory);
+
+            // Avoid triggering bug in FedoraRest.addRelations
+            if (domsIdsInThisDirectory.size() == 1) {
+                efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", domsIdsInThisDirectory.get(0), false, "comment");
+            } else {
+                efedora.addRelations(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", domsIdsInThisDirectory, false, "comment");
+            }
+            toolResultsForThisDirectory.add(Either.right(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory)));
+        } catch (Exception e) {
+            toolResultsForThisDirectory.add(Either.left(new RuntimeException(rootDomsItem + " Failed to add hasPart from " + currentDirectoryPid + " to " + domsIdsInThisDirectory, e)));
+        }
 
         // For each subdirectory in this directory, lookup the child DOMS id using its relative Path and create
         // a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the subdirectories are processed first.
@@ -425,18 +424,29 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
             } else {
                 efedora.addRelation(currentDirectoryPid, currentDirectoryPid, "info:fedora/fedora-system:def/relations-external#hasPart", childDirectoryObjectIds.get(0), false, "comment");
             }
-            toolResultsForThisDirectory.add(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds));
+            toolResultsForThisDirectory.add(Either.right(ToolResult.ok("Added hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds)));
         } catch (Exception e) {
-            throw new RuntimeException(rootDomsItem + " Could not add hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds);
+            toolResultsForThisDirectory.add(Either.left(new RuntimeException(rootDomsItem + " Could not add hasPart from " + currentDirectoryPid + " to " + childDirectoryObjectIds, e)));
         }
         log.trace("childDirectoryObjectIds {}", childDirectoryObjectIds);
 
         log.trace("DC id: {}", dcIdentifier);
 
-        return toolResultsForThisDirectory.stream();
+        // Now create a ToolResult containing the report.
+
+        log.trace("toolResultsForThisDirectory: {}", toolResultsForThisDirectory);
+
+        ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER,
+                (id, t) -> log.error("id: {}", id, t),
+                Throwables::getStackTraceAsString);
+
+        ToolResult result = trr.apply(rootDomsItem, toolResultsForThisDirectory);
+
+        return null; // result;
     }
 
-    private Function<Map.Entry<String, List<Path>>, Stream<? extends ToolResult>> getXml(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName) {
+    private Function<Map.Entry<String, List<Path>>, Stream<? extends IdValue<DomsItem, Either<Exception, ToolResult>>>>
+    getXml(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName) {
         return entry -> {
             final String id = entry.getKey();
             String pageObjectId = lookupObjectFromDCIdentifierAndCreateItIfNeeded(id);
@@ -444,17 +454,23 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
             mxBean.details = "Page " + id + " - " + filesForPage.size() + " files";
             return filesForPage.stream()
                     .sorted()
-                    .map(path -> {  // ToolResult for page
-                        log.trace("Page file {} for {}", path, id);
-                        mxBean.idsProcessed++;
-                        try {
-                            return getToolResult(rootDomsItem, rootPath, md5map, deliveryName, pageObjectId, path);
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                            throw new RuntimeException(rootDomsItem + " Could not process " + path);
-                        }
-                    });
+                    .map(getPathRFunction(rootDomsItem, rootPath, md5map, deliveryName, id, pageObjectId));
         };
+    }
+
+    private Function<Path, IdValue<DomsItem, Either<Exception, ToolResult>>> getPathRFunction(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName, String id, String pageObjectId) {
+        Function<Path, IdValue<DomsItem, Either<Exception, ToolResult>>> f = path -> {  // ToolResult for page
+            log.trace("Page file {} for {}", path, id);
+            mxBean.idsProcessed++;
+            try {
+                return new DomsValue(rootDomsItem, Either.right(getToolResult(rootDomsItem, rootPath, md5map, deliveryName, pageObjectId, path)));
+            } catch (Exception e) {
+                // Something unexpected happened on this item, log it, and pass it on.
+                log.error(e.getMessage(), e);
+                return Either.left(new RuntimeException(rootDomsItem + " Could not process " + path, e));
+            }
+        };
+        return f;
     }
 
     private ToolResult getToolResult(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName, String pageObjectId, Path path) throws IOException, BackendMethodFailedException, BackendInvalidCredsException, BackendInvalidResourceException {

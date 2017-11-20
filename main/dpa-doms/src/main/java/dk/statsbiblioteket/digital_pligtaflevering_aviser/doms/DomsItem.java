@@ -242,9 +242,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     @Override
     public String toString() {
-        return "DomsItem{" +
-                "domsId=" + domsId +
-                '}';
+        return domsId.id();
     }
 
     public String getDC() {
