@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -24,10 +25,10 @@ import static java.util.stream.Collectors.toList;
  *
  * @noinspection ALL
  */
-public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Object, Either<Exception, ToolResult>>>, ToolResult> {
-    private final BiFunction<List<IdValue<Object, ToolResult>>, List<IdValue<Object, ToolResult>>, String> renderResultFunction;
+public class ToolResultsReport<K> implements BiFunction<DomsItem, List<IdValue<K, Either<Exception, ToolResult>>>, ToolResult> {
+    private final BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
-    private final BiConsumer<Object, Exception> stackTraceLogger;
+    private final BiConsumer<K, Exception> stackTraceLogger;
 
     /**
      * <p>This is the method intended to be used in actual code.</p>
@@ -46,8 +47,8 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
      */
 
     @Inject
-    public ToolResultsReport(BiFunction<List<IdValue<Object, ToolResult>>, List<IdValue<Object, ToolResult>>, String> renderResultFunction,
-                             BiConsumer<Object, Exception> stackTraceLogger,
+    public ToolResultsReport(BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> renderResultFunction,
+                             BiConsumer<K, Exception> stackTraceLogger,
                              Function<Throwable, String> stackTraceRenderer
     ) {
         this.renderResultFunction = renderResultFunction;
@@ -56,26 +57,26 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
     }
 
     @Override
-    public ToolResult apply(DomsItem domsItem, List<IdValue<Object, Either<Exception, ToolResult>>> idValues) {
+    public ToolResult apply(DomsItem domsItem, List<IdValue<K, Either<Exception, ToolResult>>> idValues) {
 
         // These can probably be written smarter, but for now keep it simple.
 
         // find all that threw exception.
 
-        List<IdValue<Object, Exception>> threwException = idValues.stream()
+        List<IdValue<K, Exception>> threwException = idValues.stream()
                 .filter(c -> c.filter(Either::isLeft))
                 .map(c -> c.map(Either::getLeft))
                 .collect(toList());
 
         // find all that completed successfully
 
-        List<IdValue<Object, ToolResult>> ok = idValues.stream()
+        List<IdValue<K, ToolResult>> ok = idValues.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(ToolResult::isSuccess))
                 .collect(toList());
 
-        List<IdValue<Object, ToolResult>> failed = idValues.stream()
+        List<IdValue<K, ToolResult>> failed = idValues.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(t -> t.isSuccess() == false))
@@ -86,8 +87,11 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
         // key to collect all id's with that inner root cause.
 
         Map<String, List<String>> idsForRootCauseMap = threwException.stream()
-                .collect(groupingBy(c -> stackTraceRenderer.apply(Throwables.getRootCause(c.value())),
-                        mapping(c -> c.id().toString(), toList())));
+                .collect(
+                        groupingBy(c -> stackTraceRenderer.apply(Throwables.getRootCause(c.value())),
+                                TreeMap::new,  // sorted keys
+                                mapping(c -> c.id().toString(), toList()))
+                );
 
         // a, b, c:
         // ----
@@ -98,8 +102,8 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
                 .collect(joining("\n"));
 
         String renderedStacktraces = threwException.stream()
-                .sorted(Comparator.comparing(c -> c.id().toString())) // sort by DomsId.
-                .peek(c -> stackTraceLogger.accept(String.valueOf(c.id()), c.value()))
+                .sorted(Comparator.comparing(c -> c.id().toString())) // sort by string representation of id.
+                .peek(c -> stackTraceLogger.accept(c.id(), c.value()))
                 .map(c -> c.id() + ":\n" + stackTraceRenderer.apply(c.value()) + "\n")
                 .collect(joining("\n"));
 
@@ -131,8 +135,10 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
         }
     }
 
-    public static final BiFunction<List<IdValue<? extends Object, ToolResult>>, List<IdValue<Object, ToolResult>>, String> OK_COUNT_FAIL_LIST_RENDERER =
-            (ok, failed) -> ok.size() + " ok" +
+    public static class OK_COUNT_FAIL_LIST_RENDERER<K> implements BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> {
+        @Override
+        public String apply(List<IdValue<K, ToolResult>> ok, List<IdValue<K, ToolResult>> failed) {
+            return ok.size() + " ok" +
                     (failed.size() > 0
                             ? "\n\n" + failed.size() + " failed:\n---\n" +
                             failed.stream()
@@ -140,4 +146,6 @@ public class ToolResultsReport implements BiFunction<DomsItem, List<IdValue<Obje
                                     .collect(joining("\n"))
                             : ""
                     );
+        }
+    }
 }

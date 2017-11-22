@@ -49,6 +49,17 @@ public class ToolResult {
         return new ToolResult(Boolean.FALSE, message);
     }
 
+    /**
+     * hurl(message) is used when we want to provoke an exception but the program flow does not easily allow that.  hurl
+     * (as throw is a reserved word in Java) always throws a RuntimeException with the given message.
+     *
+     * @param message message to use in the exception.
+     * @return never, exception always thrown
+     */
+    public static ToolResult hurl(String message) {
+        throw new RuntimeException(message);
+    }
+
     @Override
     public String toString() {
         return "ToolResult{" +
