@@ -115,7 +115,7 @@ public class VeraPDFInvokeMain {
                     // Collect results for each domsId
                     .peek(c -> {
                         final DomsItem item = c.id();
-                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
+                        final Either<Exception, ToolResult> value = c.value();
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
                             item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));

@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @noinspection ALL
  */
-public class ToolResultsReport<K> implements BiFunction<DomsItem, List<IdValue<K, Either<Exception, ToolResult>>>, ToolResult> {
+public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Either<Exception, ToolResult>>>, ToolResult> {
     private final BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
     private final BiConsumer<K, Exception> stackTraceLogger;
@@ -57,7 +57,7 @@ public class ToolResultsReport<K> implements BiFunction<DomsItem, List<IdValue<K
     }
 
     @Override
-    public ToolResult apply(DomsItem domsItem, List<IdValue<K, Either<Exception, ToolResult>>> idValues) {
+    public ToolResult apply(K domsItem, List<IdValue<K, Either<Exception, ToolResult>>> idValues) {
 
         // These can probably be written smarter, but for now keep it simple.
 
@@ -127,7 +127,7 @@ public class ToolResultsReport<K> implements BiFunction<DomsItem, List<IdValue<K
      * @param item the Id to pass in that we are working on.  Captured in the failure.
      * @return
      */
-    public static Either<Exception, ToolResult> applyOn(DomsItem item, Function<DomsItem, ToolResult> mapping) {
+    public static <K> Either<Exception, ToolResult> applyOn(K item, Function<K, ToolResult> mapping) {
         try {
             return Either.right(mapping.apply(item));
         } catch (Exception e) {
