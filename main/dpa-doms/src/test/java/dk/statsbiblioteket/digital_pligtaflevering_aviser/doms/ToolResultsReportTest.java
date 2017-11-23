@@ -1,7 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Id;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
 import javaslang.control.Either;
 import org.junit.Test;
@@ -42,6 +41,11 @@ public class ToolResultsReportTest {
         // we do not want to actually log the captured exceptions
     };
 
+    /**
+     * We must test actual stack traces.  As code may be moving around, it is necessary to normalize line numbers and
+     * lambda expression names (which typically contain a counter.  Also we cut off at three lines to keep expected
+     * strings relatively small, and not dive into the JVM classes.
+     */
     protected Function<Throwable, String> twoLineAnonymousStackTraceRenderer = e -> {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -52,13 +56,11 @@ public class ToolResultsReportTest {
         // Package names are still present, so test will break if they are renamed (I could not get the regexp
         // to remove the package name to work).
         List<String> lines = new BufferedReader(new StringReader(st)).lines().limit(3).collect(toList());
-        // First line is the exception and message
         for (int i = 1; i < lines.size(); i++) {
             String line = lines.get(i);
             line = replaceNumbersWithZero(line);
             lines.set(i, line);
         }
-
         return String.join("\n", lines);
     };
 
@@ -84,7 +86,7 @@ public class ToolResultsReportTest {
     }
 
     @Test
-    public void doesRegexpsWork() {
+    public void testReplacementWithZeros() {
         assertEquals("null$0", replaceNumbersWithZero("null$1234"));
         assertEquals("(Foo.java:0)", replaceNumbersWithZero("(Foo.java:1234)"));
 
@@ -100,7 +102,7 @@ public class ToolResultsReportTest {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.<DomsItem>of()
                 .map(IdValue::create)
-                .map(c -> c.map(v -> either(() -> ToolResult.ok(String.valueOf(v)))))
+                .map(c -> c.map(v -> either(() -> ToolResult.ok("" + v))))
                 .collect(toList()));
 
         assertTrue("isSuccess()", report.isSuccess());
@@ -323,128 +325,8 @@ public class ToolResultsReportTest {
                 report.getHumanlyReadableMessage());
     }
 
-    // -- the below code is hard to read as Java 8 does not support multiline strings.  Note that IntelliJ allows for
-    // -- "Alt-Enter->Copy String concatenation text to clipboard" for string concatenations where it
-    // -- can be inspected easier.
-//    @Test
-//    public void singleSuccessful() {
-//        assertEquals("* true: 1 ok", tf.apply(singletonList(testTool.apply(i("1"), "x"))));
-//    }
-//
-//    @Test
-//    public void singleFailing() {
-//
-//        assertEquals("* false: 0 ok\n\n1 failed:\n---\n22: ", f.apply(singletonList(testTool.apply(i("22"), ""))));
-//    }
-//
-//    @Test
-//    public void oneFailingOneThrowing() {
-//
-//        assertEquals("* false: 0 ok\n\n1 failed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n\n\n---\nA:\nA: 'Amsg'\n",
-//                f.apply(asList(testTool.apply(i("22"), ""), testTool.apply(i("A"), "Amsg"))));
-//    }
-//
-//    @Test
-//    public void twoFailing() {
-//
-//        assertEquals("* false: 0 ok\n\n2 failed:\n---\n22: error 1\n44: error 4",
-//                f.apply(asList(testTool.apply(i("22"), "error 1"), testTool.apply(i("44"), "error 4"))));
-//    }
-//
-//    @Test
-//    public void oneFailingThreeThrowing() {
-//
-//        assertEquals("* false: 0 ok\n\n1 failed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "---\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "---\n" +
-//                        "C: 'Cmsg'\n\n\n---\nA:\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "C: 'Cmsg'\n",
-//                f.apply(asList(testTool.apply(i("22"), ""), testTool.apply(i("A"), "Amsg"),
-//                        testTool.apply(i("B"), "Bmsg"),
-//                        testTool.apply(i("C"), "Cmsg"))));
-//    }
-//
-//    @Test
-//    public void oneSuccessfulOneFailingThreeThrowing() {
-//
-//        assertEquals("* false: 1 ok\n\n1 failed:\n---\n22: \n\nA:\n---\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "---\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "---\n" +
-//                        "C: 'Cmsg'\n\n\n---\nA:\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "C: 'Cmsg'\n",
-//                f.apply(asList(testTool.apply(i("22"), ""),
-//                        testTool.apply(i("A"), "Amsg"),
-//                        testTool.apply(i("B"), "Bmsg"),
-//                        testTool.apply(i("123"), ""),
-//                        testTool.apply(i("C"), "Cmsg"))));
-//    }
-//
-//    @Test
-//    public void oneSuccessfulOneFailingSixThrowingSpreadOverThree() {
-//        assertEquals("* false: 1 ok\n\n1 failed:\n---\n22: \n\nA, A, A:\n---\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B, B:\n" +
-//                        "---\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "---\n" +
-//                        "C: 'Cmsg'\n\n\n---\nA:\nA: 'Amsg'\n\nA:\nA: 'Amsg'\n\nA:\nA: 'Amsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "B:\n" +
-//                        "B: 'Bmsg'\n" +
-//                        "\n" +
-//                        "C:\n" +
-//                        "C: 'Cmsg'\n",
-//                f.apply(asList(testTool.apply(i("22"), ""),
-//                        testTool.apply(i("A"), "Amsg"),
-//                        testTool.apply(i("B"), "Bmsg"),
-//                        testTool.apply(i("B"), "Bmsg"),
-//                        testTool.apply(i("123"), ""),
-//                        testTool.apply(i("A"), "Amsg"),
-//                        testTool.apply(i("A"), "Amsg"),
-//                        testTool.apply(i("C"), "Cmsg"))));
-//
-//    }
-
     private DomsItem i(String s) {
         return new DomsItem(new DomsId(s), null);
     }
 
-    public class TestId implements Id {
-
-        private final String id;
-
-        public TestId(String id) {
-            this.id = id;
-        }
-
-        @Override
-        public String id() {
-            return id;
-        }
-    }
 }

@@ -9,7 +9,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
@@ -379,10 +378,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // and create a "hasFile" relation from the file group object to the page object.
         // For each "PAGEOBJECT" create a RDF ("DIRECTORYOBJECT" "HasPart" "PAGEOBJECT")-relation on "DIRECTORYOBJECT"
 
-        List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResultsForThisDirectory = new ArrayList<>();
+        List<Either<Exception, ToolResult>> toolResultsForThisDirectory = new ArrayList<>();
 
         {
-            List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
+            List<Either<Exception, ToolResult>> toolResultsForFilesInThisDirectory = sortedPathsForPage.entrySet().stream()
                     .flatMap(getXml(rootDomsItem, rootPath, md5map, deliveryName))
                     .collect(Collectors.toList());
 
@@ -436,7 +435,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
 
         log.trace("toolResultsForThisDirectory: {}", toolResultsForThisDirectory);
 
-        ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER,
+        ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(),
                 (id, t) -> log.error("id: {}", id, t),
                 Throwables::getStackTraceAsString);
 
@@ -445,7 +444,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         return null; // result;
     }
 
-    private Function<Map.Entry<String, List<Path>>, Stream<? extends IdValue<DomsItem, Either<Exception, ToolResult>>>>
+    private Function<Map.Entry<String, List<Path>>, Stream<Either<Exception, ToolResult>>>
     getXml(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName) {
         return entry -> {
             final String id = entry.getKey();
@@ -458,12 +457,12 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         };
     }
 
-    private Function<Path, IdValue<DomsItem, Either<Exception, ToolResult>>> getPathRFunction(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName, String id, String pageObjectId) {
-        Function<Path, IdValue<DomsItem, Either<Exception, ToolResult>>> f = path -> {  // ToolResult for page
+    private Function<Path, Either<Exception, ToolResult>> getPathRFunction(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName, String id, String pageObjectId) {
+        Function<Path, Either<Exception, ToolResult>> f = path -> {  // ToolResult for page
             log.trace("Page file {} for {}", path, id);
             mxBean.idsProcessed++;
             try {
-                return new DomsValue(rootDomsItem, Either.right(getToolResult(rootDomsItem, rootPath, md5map, deliveryName, pageObjectId, path)));
+                return Either.right(getToolResult(rootDomsItem, rootPath, md5map, deliveryName, pageObjectId, path));
             } catch (Exception e) {
                 // Something unexpected happened on this item, log it, and pass it on.
                 log.error(e.getMessage(), e);

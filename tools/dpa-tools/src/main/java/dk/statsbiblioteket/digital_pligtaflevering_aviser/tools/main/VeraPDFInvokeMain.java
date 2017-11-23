@@ -150,7 +150,7 @@ public class VeraPDFInvokeMain {
                             .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
                             .collect(Collectors.toList());
 
-                    ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t), Throwables::getStackTraceAsString);
+                    ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(), (id, t) -> log.error("id: {}", id, t), Throwables::getStackTraceAsString);
 
                     ToolResult result = trr.apply(domsItem, toolResults);
 
