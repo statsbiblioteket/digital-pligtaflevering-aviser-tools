@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
+import com.google.common.base.Throwables;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -114,7 +115,7 @@ public class VeraPDFInvokeMain {
                     // Collect results for each domsId
                     .peek(c -> {
                         final DomsItem item = c.id();
-                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
+                        final Either<Exception, ToolResult> value = c.value();
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
                             item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
@@ -149,7 +150,7 @@ public class VeraPDFInvokeMain {
                             .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
                             .collect(Collectors.toList());
 
-                    ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
+                    ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(), (id, t) -> log.error("id: {}", id, t), Throwables::getStackTraceAsString);
 
                     ToolResult result = trr.apply(domsItem, toolResults);
 
