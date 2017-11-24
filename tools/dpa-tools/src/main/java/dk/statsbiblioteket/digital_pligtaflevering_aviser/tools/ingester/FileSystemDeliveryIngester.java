@@ -1,12 +1,16 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.sun.jersey.api.client.WebResource;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
@@ -91,6 +95,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
     public static final String BITREPOSITORY_INGESTER_COLLECTIONID = "bitrepository.ingester.collectionid";
     private static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     private static final String CONTENTS = "CONTENTS";
+    public static final String EVENT_TYPE = "ingester";
     private final URL urlToBitmagBatch;
 
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -189,35 +194,45 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // Collect all the indvidual toolResults.
 
         try {
-            List l = Stream.of(deliveryDomsItem)
-                    .map(DomsValue::create) // new DomsValue(deliveryDomsItem, rootPath) is apparently unchecked?!?
-                    .flatMap((c) -> c.flatMap((value) -> {
-                        try {
-                            return ingestDirectoryForDomsItem(value, rootPath).map(Either::right);
-                        } catch (Exception e) {
-                            log.error("Exception in ingesting " + value + " for " + deliveryDomsItem + " at " + rootPath, e);
-                            return Stream.of(Either.left(e));
-                        }
-                    }))
+            final Function<DomsValue<DomsItem>, Stream<IdValue<DomsItem, Either<Exception, ToolResult>>>> domsValueStreamFunction = c -> c.flatMap(value -> {
+                try {
+                    return ingestDirectoryForDomsItem(value, rootPath).map(Either::right);
+                } catch (Exception e) {
+                    log.error("Exception in ingesting " + value + " for " + deliveryDomsItem + " at " + rootPath, e);
+                    return Stream.of(Either.left(e));
+                }
+            });
+
+            List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = Stream.of(deliveryDomsItem)
+                    .map(DomsValue::create)
+                    .flatMap(domsValueStreamFunction)
+                    .peek(c -> log.trace("--- Ingested {}", c.id()))
                     .collect(toList());
+
+            ToolResultsReport trr = new ToolResultsReport(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(),
+                    (id, t) -> log.error("id: {}", id, t),
+                    t -> Throwables.getStackTraceAsString((Throwable) t));
+
+            ToolResult result = trr.apply(deliveryDomsItem, toolResults);
+
+            // Construct message to be stored on event for human consumption.
+            String deliveryEventMessage = result.getHumanlyReadableMessage();
+
+            // total outcome is successful only if all toolResults are.
+            boolean outcome = result.isSuccess();
+
+            final String linkingAgentIdentifierValue = getClass().getSimpleName();
+
+            deliveryDomsItem.appendEvent(new DomsEvent(linkingAgentIdentifierValue, new java.util.Date(), deliveryEventMessage, EVENT_TYPE, outcome));
+            log.info("{} {} Took: {} ms", linkingAgentIdentifierValue, deliveryDomsItem, System.currentTimeMillis() - startTime);
+            log.trace("{} message={}, outcome={}", deliveryDomsItem, deliveryEventMessage, outcome);
+
+            return Either.right(result);
+
         } catch (Exception e) {  // Outer fault barrier
             log.error("Uncaught exception in ingesting " + deliveryDomsItem + " at " + rootPath, e);
             return Either.left(e);
         }
-/*
-        // Construct message to be stored on event for human consumption.
-        String deliveryEventMessage = eventMessageForToolResults.apply(toolResult);
-
-        // total outcome is successful only if all toolResults are.
-        boolean outcome = toolResult.stream().allMatch(tr -> tr.isSuccess() == true);
-
-        final String keyword = getClass().getSimpleName();
-
-        deliveryDomsItem.appendEvent(new DomsEvent(keyword, new java.util.Date(), deliveryEventMessage, "Data_Archived", outcome));
-        log.info("{} {} Took: {} ms", keyword, deliveryDomsItem, System.currentTimeMillis() - startTime);
-        log.trace("{} message={}, outcome={}", deliveryDomsItem, deliveryEventMessage, outcome);
-        */
-        return null; // "item " + deliveryDomsItem + " ingested. outcome = " + outcome;
     }
 
     /**

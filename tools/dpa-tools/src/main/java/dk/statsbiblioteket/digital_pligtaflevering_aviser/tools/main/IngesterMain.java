@@ -59,6 +59,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -129,7 +130,7 @@ public class IngesterMain {
                                 }
                             }))
                             .peek(c -> {
-                                final DomsItem item = c.id();
+                                final DomsItem item = Objects.requireNonNull(c.id());
                                 final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
                                 if (value.isLeft()) {
                                     // Processing of _this_ domsItem threw unexpected exception
