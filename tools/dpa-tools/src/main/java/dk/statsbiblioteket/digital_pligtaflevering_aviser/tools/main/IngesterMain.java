@@ -124,19 +124,20 @@ public class IngesterMain {
                             .map(DomsValue::create)
                             .map(c -> c.map(domsItem -> {
                                 try {
-                                    return Either.right(ingester.apply(domsItem, normalizedDeliveriesFolder));
+                                    final Either<Exception, ToolResult> result = ingester.apply(domsItem, normalizedDeliveriesFolder);
+                                    return result;
                                 } catch (Exception e) {
                                     return Either.left(e);
                                 }
                             }))
                             .peek(c -> {
+                                // Set events on the delivery top item.
                                 final DomsItem item = Objects.requireNonNull(c.id());
-                                final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
-                                if (value.isLeft()) {
+                                if (c.value().isLeft()) {
                                     // Processing of _this_ domsItem threw unexpected exception
-                                    item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
+                                    item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(c.value().getLeft()), eventName, false));
                                 } else {
-                                    final ToolResult toolResult = (ToolResult) value.get();
+                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get();
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                                     if (toolResult.isSuccess() == false) {
                                         item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));

@@ -140,7 +140,7 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
         public String apply(List<IdValue<K, ToolResult>> ok, List<IdValue<K, ToolResult>> failed) {
             return ok.size() + " ok" +
                     (failed.size() > 0
-                            ? "\n\n" + failed.size() + " failed:\n---\n" +
+                            ? "\n\n" + failed.size() + " failed:\n=========\n" +
                             failed.stream()
                                     .map(c -> c.map((id, v) -> id + ": " + v.getHumanlyReadableMessage()).value())
                                     .collect(joining("\n"))

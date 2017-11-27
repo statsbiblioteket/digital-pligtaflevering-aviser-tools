@@ -209,6 +209,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                     .peek(c -> log.trace("--- Ingested {}", c.id()))
                     .collect(toList());
 
+            // Create report for delivery item
             ToolResultsReport trr = new ToolResultsReport(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(),
                     (id, t) -> log.error("id: {}", id, t),
                     t -> Throwables.getStackTraceAsString((Throwable) t));
@@ -460,14 +461,22 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         List<String> resultLines = new ArrayList<>();
         if (resultMap.containsKey(Boolean.TRUE)) {
             resultLines.add("Ok:");
+            resultLines.add("---");
             resultLines.addAll(resultMap.get(Boolean.TRUE).stream().map(ToolResult::getHumanlyReadableMessage).collect(toList()));
         }
         if (resultMap.containsKey(Boolean.FALSE)) {
             resultLines.add("Failed:");
+            resultLines.add("------");
             resultLines.addAll(resultMap.get(Boolean.FALSE).stream().map(ToolResult::getHumanlyReadableMessage).collect(toList()));
         }
 
-        final boolean success = resultMap.containsKey(Boolean.FALSE) == false;
+        final boolean success;
+        //noinspection RedundantIfStatement
+        if (resultMap.get(Boolean.FALSE).isEmpty()) { // breakpointable!
+            success = true;
+        } else {
+            success = false;
+        }
 
         final ToolResult result = new ToolResult(success, String.join("\n", resultLines));
 
