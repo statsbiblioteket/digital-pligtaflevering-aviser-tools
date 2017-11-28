@@ -210,9 +210,9 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                     .collect(toList());
 
             // Create report for delivery item
-            ToolResultsReport trr = new ToolResultsReport(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(),
+            ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
                     (id, t) -> log.error("id: {}", id, t),
-                    t -> Throwables.getStackTraceAsString((Throwable) t));
+                    t -> Throwables.getStackTraceAsString(t));
 
             ToolResult result = trr.apply(deliveryDomsItem, toolResults);
 

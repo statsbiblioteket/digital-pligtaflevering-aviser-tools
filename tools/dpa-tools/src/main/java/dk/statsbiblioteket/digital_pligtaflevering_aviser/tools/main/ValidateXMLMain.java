@@ -83,7 +83,7 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         /**
-         * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable
+         * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
          */
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
@@ -110,7 +110,7 @@ public class ValidateXMLMain {
                             // Processing of _this_ domsItem threw unexpected exception
                             item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
-                            final ToolResult toolResult = (ToolResult) value.get();
+                            final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                             if (toolResult.isSuccess() == false) {
                                 item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
@@ -159,9 +159,9 @@ public class ValidateXMLMain {
                         ))
                         .collect(Collectors.toList());
 
-                ToolResultsReport trr = new ToolResultsReport(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER(),
+                ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
                         (id, t) -> log.error("id: {}", id, t),
-                        t -> Throwables.getStackTraceAsString((Throwable) t));
+                        t -> Throwables.getStackTraceAsString(t));
 
                 ToolResult result = trr.apply(parentDomsItem, toolResults);
 

@@ -38,6 +38,7 @@ public class GenericListTable extends VerticalLayout {
      */
     public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String tableId, boolean initialVisible) {
         checkbox = new CheckBox("Visible", initialVisible);
+        //noinspection unchecked
         beans = new BeanItemContainer(c);
 
         // Bind a table to it
@@ -92,6 +93,7 @@ public class GenericListTable extends VerticalLayout {
      * @param value
      */
     public void checkSpecific(Object itemId, Object value) {
+        //noinspection unchecked
         table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
         table.refreshRowCache();
     }
@@ -141,6 +143,7 @@ public class GenericListTable extends VerticalLayout {
     public void setInfo(Collection dataCollection) {
         beans.removeAllItems();
         for (Object rowItem : dataCollection) {
+            //noinspection unchecked
             beans.addBean(rowItem);
         }
         if (sortColumnName != null) {
@@ -150,6 +153,7 @@ public class GenericListTable extends VerticalLayout {
     }
 
     public void setValToCheck(Object itemId, Object value) {
+        //noinspection unchecked
         table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
     }
 

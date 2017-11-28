@@ -103,6 +103,7 @@ public class IngesterMain {
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 
+        /** @noinspection unchecked*/
         @Produces
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
@@ -137,7 +138,7 @@ public class IngesterMain {
                                     // Processing of _this_ domsItem threw unexpected exception
                                     item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(c.value().getLeft()), eventName, false));
                                 } else {
-                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get();
+                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get(); // FIXME: Logic broken
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                                     if (toolResult.isSuccess() == false) {
                                         item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
