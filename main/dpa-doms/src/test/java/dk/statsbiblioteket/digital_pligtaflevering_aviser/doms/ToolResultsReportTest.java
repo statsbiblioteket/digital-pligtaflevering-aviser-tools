@@ -145,7 +145,7 @@ public class ToolResultsReportTest {
         assertEquals("getHumanlyReadableMessage()", "1 ok\n" +
                 "\n" +
                 "1 failed:\n" +
-                "---\n" +
+                "=========\n" +
                 "2*: FAIL:2*", report.getHumanlyReadableMessage());
     }
 
@@ -161,7 +161,7 @@ public class ToolResultsReportTest {
         assertEquals("getHumanlyReadableMessage()", "0 ok\n" +
                 "\n" +
                 "2 failed:\n" +
-                "---\n" +
+                "=========\n" +
                 "*1: FAIL:*1\n" +
                 "2*: FAIL:2*", report.getHumanlyReadableMessage());
     }
@@ -178,7 +178,7 @@ public class ToolResultsReportTest {
         assertEquals("getHumanlyReadableMessage()", "1 ok\n" +
                 "\n" +
                 "2 failed:\n" +
-                "---\n" +
+                "=========\n" +
                 "2*: FAIL:2*\n" +
                 "3: FAIL:3", report.getHumanlyReadableMessage());
     }
@@ -195,7 +195,7 @@ public class ToolResultsReportTest {
         assertEquals("getHumanlyReadableMessage()", "1 ok\n" +
                 "\n" +
                 "1 failed:\n" +
-                "---\n" +
+                "=========\n" +
                 "2*: FAIL:2*\n" +
                 "\n" +
                 "3:\n" +
