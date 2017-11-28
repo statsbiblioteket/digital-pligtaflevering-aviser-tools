@@ -1,3 +1,4 @@
+<%@page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
@@ -35,10 +36,11 @@
             int i = item.removeEvents(eventName);
 
             // FIXME:!!!
-            item.appendEvent("dashboard", new java.util.Date(),
+            DomsEvent domsEvent = new DomsEvent("dashboard", new java.util.Date(),
                     "Deleted " + i + " instances of " + eventName +
                     (message == null ? "" : "\n" +
                             "\nReason: " + message), "EVENT_DELETED_MANUALLY", outcome);
+            item.appendEvent(domsEvent);
 
         %>
         <c:url value="showItem.jsp" var="showItemUrl">

@@ -44,6 +44,7 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
 
     /**
      * This is to be used in unit tests, to control stack traces so they can be compared as strings
+     * @param renderResultFunction
      */
 
     @Inject
