@@ -31,6 +31,7 @@ public class NewspaperContextListener implements ServletContextListener {
 
         //ServletContext servletContext = contextEvent.getServletContext();
         Map<String, String> attributeMap = new HashMap<>();
+        //noinspection unchecked
         for (Object name : Collections.list(servletContext.getInitParameterNames())) {
             attributeMap.put(name.toString(), servletContext.getInitParameter(name.toString()));
         }

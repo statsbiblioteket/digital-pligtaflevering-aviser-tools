@@ -110,7 +110,7 @@ public class CreateDeliveryMain {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectoryName);
                         }
                     } else {
-                        log.debug("Skipping directory {}, since the delivery has not been completed", deliveryItemDirectoryPath);
+                        log.debug("Skipping directory {}, since the delivery has not been acknowledged", deliveryItemDirectoryPath);
                     }
                     return deliveryItemDirectoryPath.toString();
                 }).collect(Collectors.joining(" "));

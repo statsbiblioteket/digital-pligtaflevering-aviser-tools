@@ -273,7 +273,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
         Objects.requireNonNull(id, "id==null");
         String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);
-        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
+        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory<>(eventDataStreamName, Item::new)).get();
 
         PremisManipulator<Item> premisObject = Try.of(
                 () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes(StandardCharsets.UTF_8)))

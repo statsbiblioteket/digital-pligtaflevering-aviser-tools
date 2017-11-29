@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
+import com.google.common.base.Throwables;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -82,7 +83,7 @@ public class ValidateXMLMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         /**
-         * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable
+         * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
          */
         @Provides
         Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
@@ -109,7 +110,7 @@ public class ValidateXMLMain {
                             // Processing of _this_ domsItem threw unexpected exception
                             item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
-                            final ToolResult toolResult = (ToolResult) value.get();
+                            final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                             if (toolResult.isSuccess() == false) {
                                 item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
@@ -129,7 +130,7 @@ public class ValidateXMLMain {
          * @return function to apply on delivery DOMS items.
          */
         private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean, String eventName) {
-            return parentDomsItem -> {
+            return (DomsItem parentDomsItem) -> {
                 String deliveryName = parentDomsItem.getPath();
                 long startDeliveryIngestTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
@@ -158,7 +159,9 @@ public class ValidateXMLMain {
                         ))
                         .collect(Collectors.toList());
 
-                ToolResultsReport trr = new ToolResultsReport(ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER, (id, t) -> log.error("id: {}", id, t));
+                ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
+                        (id, t) -> log.error("id: {}", id, t),
+                        t -> Throwables.getStackTraceAsString(t));
 
                 ToolResult result = trr.apply(parentDomsItem, toolResults);
 
