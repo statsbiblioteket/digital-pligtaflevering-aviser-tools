@@ -36,7 +36,8 @@
             </snapshots>
             <id>vera-dev</id>
             <name>Vera development</name>
-            <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
+            <!--<url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>-->
+            <url>http://176.58.124.154/artifactory/vera-dev</url>
         </repository>
     </repositories>
 
