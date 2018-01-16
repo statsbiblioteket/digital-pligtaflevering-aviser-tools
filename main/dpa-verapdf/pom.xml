@@ -18,17 +18,18 @@
         <sonar.language>java</sonar.language>
         <maven.failsafe.version>2.18.1</maven.failsafe.version>
 
-        <!-- File leak claimed fixed: https://github.com/veraPDF/veraPDF-library/issues/882#issuecomment-340377150 -->
-        <!-- releases at https://github.com/veraPDF/veraPDF-validation/releases -->
-        <verapdf.validation.version>1.9.57</verapdf.validation.version>
+        <verapdf.validation.version>1.10.2</verapdf.validation.version>
     </properties>
 
     <!-- To get latest builds before they arrive on maven central. As the
     development team does not update the version in the public sources, we
-    cannot build them ourselves.
+    cannot build them ourselves.  When the desired artifact is present in
+    https://mvnrepository.com/artifact/org.verapdf/validation-model
+    we can remove the openpreservation repository.
     -->
     <!-- http://docs.verapdf.org/develop/ -->
 
+    <!-- Enable when needing newer versions than present on Maven Central
     <repositories>
         <repository>
             <snapshots>
@@ -36,10 +37,10 @@
             </snapshots>
             <id>vera-dev</id>
             <name>Vera development</name>
-            <!--<url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>-->
-            <url>http://176.58.124.154/artifactory/vera-dev</url>
+            <url>http://artifactory.openpreservation.org/artifactory/vera-dev</url>
         </repository>
     </repositories>
+    -->
 
     <dependencies>
         <dependency>
@@ -48,10 +49,15 @@
             <version>master-SNAPSHOT</version>
         </dependency>
 
+        <!-- File leak claimed fixed: https://github.com/veraPDF/veraPDF-library/issues/882#issuecomment-340377150 -->
+        <!-- releases at https://github.com/veraPDF/veraPDF-validation/releases -->
+
+        <!-- https://mvnrepository.com/artifact/org.verapdf/validation-model -->
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model</artifactId>
-            <version>${verapdf.validation.version}</version>
+            <!-- 2018-01-16 -->
+            <version>1.10.5</version>
         </dependency>
 
         <dependency>
@@ -67,20 +73,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.5.1</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

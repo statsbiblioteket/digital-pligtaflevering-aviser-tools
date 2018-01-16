@@ -80,7 +80,7 @@ public class ValidateXMLMain {
      */
     @Module
     protected static class ValidateXMLModule {
-        Logger log = LoggerFactory.getLogger(this.getClass());
+        Logger log = LoggerFactory.getLogger(ValidateXMLMain.class);  // short name
 
         /**
          * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
