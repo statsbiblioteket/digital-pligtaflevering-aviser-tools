@@ -459,15 +459,15 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         final Map<Boolean, List<ToolResult>> resultMap = toolResultsForThisDirectory.stream().collect(Collectors.partitioningBy(ToolResult::isSuccess));
 
         List<String> resultLines = new ArrayList<>();
-        if (resultMap.containsKey(Boolean.TRUE)) {
-            resultLines.add("Ok:");
-            resultLines.add("---");
-            resultLines.addAll(resultMap.get(Boolean.TRUE).stream().map(ToolResult::getHumanlyReadableMessage).collect(toList()));
-        }
         if (resultMap.containsKey(Boolean.FALSE)) {
             resultLines.add("Failed:");
             resultLines.add("------");
             resultLines.addAll(resultMap.get(Boolean.FALSE).stream().map(ToolResult::getHumanlyReadableMessage).collect(toList()));
+        }
+        if (resultMap.containsKey(Boolean.TRUE)) {
+            resultLines.add("Ok:");
+            resultLines.add("---");
+            resultLines.addAll(resultMap.get(Boolean.TRUE).stream().map(ToolResult::getHumanlyReadableMessage).collect(toList()));
         }
 
         final boolean success;
