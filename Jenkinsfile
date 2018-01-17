@@ -1,8 +1,9 @@
 #!/usr/bin/env groovy
 
 node {
+    stage 'Checkout'
+    checkout scm
+
+    stage 'Build'
     echo 'Hello World'
-}
-node {
-    echo 'Hello World and again!!'
 }
