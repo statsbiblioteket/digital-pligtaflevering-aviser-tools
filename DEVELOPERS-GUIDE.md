@@ -22,6 +22,9 @@ Java 8 is required, as stream is used regularily.  Development has
 been done primarily on OpenJDK 8/Oracle 8 JDK on Ubuntu 16.10.  It is
 intended to be platform agnostic, and considered a bug if not.
 
+Java 9 is *NOT* yet supported. 
+
+
 Maven 
 --
 
