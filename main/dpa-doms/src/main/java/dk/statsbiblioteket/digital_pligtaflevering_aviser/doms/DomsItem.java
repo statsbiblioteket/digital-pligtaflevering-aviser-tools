@@ -20,6 +20,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -165,8 +166,8 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     /**
      * append a PREMIS event on the current item
      */
-    public Date appendEvent(String agent, Date timestamp, String details, String eventType, boolean outcome) {
-        final Date date = domsRepository.appendEventToItem(domsId, agent, timestamp, details, eventType, outcome);
+    public Date appendEvent(DomsEvent event) {
+        final Date date = domsRepository.appendEventToItem(domsId, event);
         requireReload();
         return date;
     }
@@ -241,9 +242,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     @Override
     public String toString() {
-        return "DomsItem{" +
-                "domsId=" + domsId +
-                '}';
+        return domsId.id();
     }
 
     public String getDC() {
@@ -265,7 +264,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
         String dcContent = getDC();
         log.trace("DC={}", dcContent);
-        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes()), true);
+        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes(StandardCharsets.UTF_8)), true);
 
         NodeList nodeList;
         try {

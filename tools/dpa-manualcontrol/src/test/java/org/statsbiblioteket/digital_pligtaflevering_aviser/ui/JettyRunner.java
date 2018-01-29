@@ -15,14 +15,13 @@ import javax.xml.xpath.XPathFactory;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-
 
 /**
  * Runner for stating the application during development
  */
 public class JettyRunner {
-
 
     public static void main(String[] args) throws Exception {
 
@@ -33,7 +32,7 @@ public class JettyRunner {
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
         InputStream in = new FileInputStream(xmlPath.toFile());
-        InputSource inputSource = new InputSource(new InputStreamReader(in));
+        InputSource inputSource = new InputSource(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         WebAppContext webapp = new WebAppContext();
         webapp.setContextPath("/dpa-manualcontrol");
@@ -46,7 +45,7 @@ public class JettyRunner {
         XPathExpression expr = xpath.compile("//Parameter");
         NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-        for(int i = 0; i< nl.getLength(); i++) {
+        for (int i = 0; i < nl.getLength(); i++) {
             String paramName = nl.item(i).getAttributes().getNamedItem("name").getTextContent();
             String paramValue = nl.item(i).getAttributes().getNamedItem("value").getTextContent();
             webapp.setInitParameter(paramName, paramValue);

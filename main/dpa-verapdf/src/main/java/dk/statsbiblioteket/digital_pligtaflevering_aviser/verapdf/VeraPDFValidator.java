@@ -13,11 +13,12 @@ import org.verapdf.pdfa.results.ValidationResult;
 
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
 /**
- *
+ * See http://docs.verapdf.org/develop/processor/ for official instructions.
  */
 public class VeraPDFValidator implements Function<InputStream, byte[]> {
     private String flavorId;
@@ -44,12 +45,12 @@ public class VeraPDFValidator implements Function<InputStream, byte[]> {
             return apply0(inputStream);
         } catch (RuntimeException e) {
             throw e;
-        } catch (ModelParsingException | ValidationException | JAXBException | EncryptedPdfException e) {
+        } catch (ModelParsingException | ValidationException | JAXBException | EncryptedPdfException | IOException e) {
             throw new RuntimeException("invoking VeraPDF validation", e);
         }
     }
 
-    private byte[] apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException {
+    private byte[] apply0(InputStream inputStream) throws ModelParsingException, ValidationException, JAXBException, EncryptedPdfException, IOException {
         /*
         Carl Wilson 2016-12-29: The best place to look for an example is here:
 
@@ -63,15 +64,16 @@ public class VeraPDFValidator implements Function<InputStream, byte[]> {
          */
         PDFAFlavour flavour = PDFAFlavour.byFlavourId(flavorId);
         PDFAValidator validator = Foundries.defaultInstance().createValidator(flavour, false);
-        PDFAParser loader = Foundries.defaultInstance().createParser(inputStream, flavour);
-        ValidationResult result = validator.validate(loader);
+        try (PDFAParser loader = Foundries.defaultInstance().createParser(inputStream, flavour)) {
+            ValidationResult result = validator.validate(loader);
 
-        // do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
+            // do in-memory generation of XML byte array - as we need to pass it to Fedora we need it to fit in memory anyway.
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XmlSerialiser.toXml(result, baos, prettyXml, false);
-        final byte[] byteArray = baos.toByteArray();
-        return byteArray;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            XmlSerialiser.toXml(result, baos, prettyXml, false);
+            final byte[] byteArray = baos.toByteArray();
+            return byteArray;
+        }
     }
 }
 

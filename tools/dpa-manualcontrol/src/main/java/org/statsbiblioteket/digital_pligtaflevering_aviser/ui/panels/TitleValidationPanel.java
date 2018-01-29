@@ -57,12 +57,14 @@ public class TitleValidationPanel extends DeliveryPanel {
      * Insert titles into first table
      * @throws Exception
      */
+    @Override
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
 
+    @Override
     public void viewIsEntered() {
-        if(model.getSelectedTitle() != null) {
+        if (model.getSelectedTitle() != null) {
             List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(model.getSelectedTitle());
             deliveryPanel.setInfo(list);
         }

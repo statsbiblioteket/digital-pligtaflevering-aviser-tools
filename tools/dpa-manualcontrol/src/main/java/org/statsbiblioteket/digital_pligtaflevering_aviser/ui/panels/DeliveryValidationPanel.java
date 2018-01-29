@@ -5,6 +5,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
@@ -15,13 +16,11 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResul
 import java.util.List;
 
 /**
- * Panel for validation of titles, this panel lets the user select a newspaper-title and get a list of all deliveries where this title has been recieved.
- * The user can validate one delivery at a time until all deliveries of the newspaper has been approved
- * The information is viewed on this format
- * Delivery -> Title -> Section -> Pages&articles
+ * Panel for validation of titles, this panel lets the user select a newspaper-title and get a list of all deliveries
+ * where this title has been recieved. The user can validate one delivery at a time until all deliveries of the
+ * newspaper has been approved The information is viewed on this format Delivery -> Title -> Section -> Pages&articles
  */
 public class DeliveryValidationPanel extends DeliveryPanel {
-
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
     private Button doneDeliveryButton = new Button("Done del");
@@ -42,7 +41,6 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-
         deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"});
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
@@ -55,24 +53,26 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-
         tablesLayout.addComponent(deliveryListPanel);
         tablesLayout.setExpandRatio(deliveryListPanel, 0.2f);
         super.initialLayout();
 
         doneDeliveryButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 setDone();
-            }});
+            }
+        });
         buttonLayout.addComponent(doneDeliveryButton);
     }
 
-
     /**
      * Insert deliveries into first table
+     *
      * @throws Exception
      */
-    public void insertInitialTableValues()  {
+    @Override
+    public void insertInitialTableValues() {
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
 
@@ -81,7 +81,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
      */
     public void setDone() {
 
-        if(!deliveryPanel.isAllChecked()) {
+        if (!deliveryPanel.isAllChecked()) {
             Notification.show("The delivery can not be confirmed until all titles is confirmed");
             return;
         }
@@ -95,24 +95,28 @@ public class DeliveryValidationPanel extends DeliveryPanel {
 
         UI.getCurrent().addWindow(dialog);
         dialog.setListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 UI.getCurrent().removeWindow(dialog);
-                if("OKBUTTON".equals(event.getButton().getId())) {
+                if ("OKBUTTON".equals(event.getButton().getId())) {
                     DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
-                    item.appendEvent(NewspaperContextListener.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", NewspaperContextListener.manualCheckEventname, true);
+                    item.appendEvent(new DomsEvent(NewspaperContextListener.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", NewspaperContextListener.manualCheckEventname, true));
                 }
-            }});
+            }
+        });
 
         dialog.addCloseListener(new Window.CloseListener() {
             // inline close-listener
+            @Override
             public void windowClose(Window.CloseEvent e) {
                 UI.getCurrent().removeWindow(dialog);
             }
         });
     }
 
+    @Override
     public void viewIsEntered() {
-        if(model.getSelectedDelivery() != null) {
+        if (model.getSelectedDelivery() != null) {
             List<DeliveryTitleInfo> l = model.getDeliveryTitleObjects();
             deliveryPanel.setInfo(l);
         }

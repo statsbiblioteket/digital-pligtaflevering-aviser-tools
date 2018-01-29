@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -180,22 +181,32 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
+
+//    @Deprecated
+//    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
+//        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
+//        try {
+//            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
+//        } catch (RuntimeException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            throw new RuntimeException("appendEventToItem failed for " + domsId, e);
+//        }
+//    }
+
     /**
      * appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
      *
      * @param domsId    domsId to add event to
-     * @param agent     text string identifying this autonomous component
-     * @param timestamp timestamp being put into the event, usually "now".
-     * @param details   humanly readable string describing this event
-     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
-     * @param outcome   true=success, false=failure.
-     * @return
+     * @param event eventdata holder
+     * @return date returned from storage
      */
 
-    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
+    public Date appendEventToItem(DomsId domsId, DomsEvent event) {
         Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
         try {
-            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
+            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, event.getLinkingAgentIdentifierValue(),
+                    event.getTimestamp(), event.getEventOutcomeDetailNote(), event.getEventType(), event.getOutcome());
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -262,10 +273,10 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
         Objects.requireNonNull(id, "id==null");
         String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);
-        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
+        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory<>(eventDataStreamName, Item::new)).get();
 
         PremisManipulator<Item> premisObject = Try.of(
-                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes()))
+                () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes(StandardCharsets.UTF_8)))
         ).getOrElse(Try.of(
                 () -> factory.createInitialPremisBlob(/* we don't have item.getFullID() */ id)
                 ).get()

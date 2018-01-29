@@ -35,16 +35,17 @@ public class TryInStreamsTest {
         assertThat(Try.of(() -> 1 / zero).isSuccess(), is(false));
     }
 
+    /** @noinspection unchecked*/
     @Test
     public void basicExceptionsInStreams() {
         // basic skeleton for generating a list of results and compare each entry in the list.
         assertThat(Stream.of(0).map(l -> l).collect(toList()), hasItems(is(0)));
 
         // same with Try (split in two maps so the first return value is Try<...>.
-        assertThat(Stream.of(0).map(l -> Try.of(() -> l)).map(t -> t.get()).collect(toList()), hasItems(is(0)));
+        assertThat(Stream.of(0).map(l -> Try.of(() -> l)).map(Try::get).collect(toList()), hasItems(is(0)));
 
         // now cause an exception and filter it out
-        assertThat(Stream.of(0).map(l -> Try.of(() -> 1/l)).filter(Try::isSuccess).collect(toList()), hasItems());
+        assertThat(Stream.of(0).map(l -> Try.of(() -> 1 / l)).filter(Try::isSuccess).collect(toList()), hasItems());
 
         // result collector behavior
         Stream<Try<Integer>> s = Stream.of(-1, 0, 1).map(l -> Try.of(() -> 1 / l));

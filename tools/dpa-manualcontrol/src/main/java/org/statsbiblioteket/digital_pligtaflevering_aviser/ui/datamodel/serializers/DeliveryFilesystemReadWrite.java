@@ -5,7 +5,6 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDel
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.util.Iterator;
 
@@ -128,7 +127,7 @@ public class DeliveryFilesystemReadWrite {
      * @return
      */
     public File createCashingFile(String selectedMonth, String deliveryName, String titleName) {
-        File file = new File(cachingPath + selectedMonth +"/" + deliveryName + "_" + titleName + ".xml");
+        File file = new File(cachingPath + selectedMonth + "/" + deliveryName + "_" + titleName + ".xml");
         return file;
     }
 }

@@ -7,7 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 
 /**
- * ConfigPanel is used for administration of the system, currently it can be used for flearing files wich has been cashed on the servers filesystem
+ * ConfigPanel is used for administration of the system, currently it can be used for flearing files wich has been
+ * cashed on the servers filesystem
  */
 public class ConfigPanel extends DeliveryValidationPanel {
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -18,6 +19,7 @@ public class ConfigPanel extends DeliveryValidationPanel {
         super(model);
         super.initialLayout();
         clearDeliveryButton.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(Button.ClickEvent event) {
                 try {
                     model.removeCurrentSelectedTitleInDelivery();
@@ -25,7 +27,8 @@ public class ConfigPanel extends DeliveryValidationPanel {
                     Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                     log.error("Initialization of model during entering clearing of cashed data", e);
                 }
-            }});
+            }
+        });
         buttonLayout.addComponent(clearDeliveryButton);
     }
 }

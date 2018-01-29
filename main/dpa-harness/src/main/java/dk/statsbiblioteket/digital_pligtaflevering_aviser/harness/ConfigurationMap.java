@@ -20,12 +20,17 @@ import java.util.stream.Collectors;
 
 /**
  * <p> ConfigurationMap holds a map of string to string (i.e. the general form of java properties) and can be used
- * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. The toString()
- * explicitly protects passwords from being printed.  FIXME:  Full technical
- * explanation pending.</p>
+ * directly as a Dagger 2 module.  The toString() method list the keys in alphabetical order. The toString() explicitly
+ * protects passwords from being printed.  FIXME:  Full technical explanation pending.</p>
+ * @noinspection WeakerAccess, PointlessBooleanExpression
  */
 @Module
 public class ConfigurationMap {
+
+    /**
+     * Global flag to trigger extra code to help debug configuration maps.  Not a configuration parameter for now.
+     */
+    public static final boolean CONFIGURATION_MAP_DEVELOPMENT = false;
 
     final Logger log = LoggerFactory.getLogger(ConfigurationMap.class);
 
@@ -38,19 +43,20 @@ public class ConfigurationMap {
     public ConfigurationMap(Map<String, String> initialMap) {
         map.putAll(Objects.requireNonNull(initialMap, "initialMap == null"));
 
-        // During development this helps in slimming down configuration files.
-        Runtime.getRuntime().addShutdownHook(new Thread(
-                () -> {
-                    List<String> unused = map.keySet().stream()
-                            .filter(e -> everUsed.contains(e) == false)
-                            .sorted()
-                            .collect(Collectors.toList());
-                    if (unused.size() > 0) {
-                        System.err.println("Unused configuration keys: " + unused);
+        if (CONFIGURATION_MAP_DEVELOPMENT) {
+            // During development this helps in slimming down configuration files.
+            Runtime.getRuntime().addShutdownHook(new Thread(
+                    () -> {
+                        List<String> unused = map.keySet().stream()
+                                .filter(e -> everUsed.contains(e) == false)
+                                .sorted()
+                                .collect(Collectors.toList());
+                        if (unused.size() > 0) {
+                            System.err.println("Unused configuration keys: " + unused);
+                        }
                     }
-                }
-        ));
-
+            ));
+        }
     }
 
     /**
@@ -65,8 +71,7 @@ public class ConfigurationMap {
     }
 
     /**
-     * Get configuration map as properties - this is currently for interfacing
-     * with legacy code.
+     * Get configuration map as properties - this is currently for interfacing with legacy code.
      */
 
     public Properties asProperties() {
@@ -170,8 +175,8 @@ public class ConfigurationMap {
     }
 
     /**
-     * getRequiredInt returns a configuration map entry as a string.  If the
-     * value stored for the key is not a valid integer, a meaningful message is returned.
+     * getRequiredInt returns a configuration map entry as a string.  If the value stored for the key is not a valid
+     * integer, a meaningful message is returned.
      *
      * @param key configuration key
      * @return value stored in map converted with Integer.parseInt()
@@ -187,21 +192,21 @@ public class ConfigurationMap {
     }
 
     /**
-     * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their
-     * actual value.  Adapted from the AbstractMap implementation.
+     * toString() is overwritten to ensure that keys with "password" are shown as "***" instead of their actual value.
+     * Adapted from the AbstractMap implementation.
      *
      * @return Normal Map toString() but with password values given as "***"
      */
     @Override
     public String toString() {
-        // Adapted from AbstractMap
+        // Adapted as closely as possible from AbstractMap
         Iterator<Map.Entry<String, String>> i = map.entrySet().iterator();
         if (!i.hasNext())
             return "{}";
 
         StringBuilder sb = new StringBuilder();
         sb.append('{');
-        for (; ; ) {
+        while (true) {
             Map.Entry<String, String> e = i.next();
             String key = e.getKey();
             String value = e.getValue();

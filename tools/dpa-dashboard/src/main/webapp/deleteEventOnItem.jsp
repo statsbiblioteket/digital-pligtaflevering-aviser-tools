@@ -1,12 +1,12 @@
+<%@page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.RepositoryConfigurator" %>
+<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMapHelper" %>
-<%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard.ServletContextHelper" %>
-<h1>Set event ${param.id}</h1>
+<h1>Fjern event p&aring; ${param.id}</h1>
 <%
     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
@@ -35,10 +35,12 @@
             //
             int i = item.removeEvents(eventName);
 
-            item.appendEvent("dashboard", new java.util.Date(),
+            // FIXME:!!!
+            DomsEvent domsEvent = new DomsEvent("dashboard", new java.util.Date(),
                     "Deleted " + i + " instances of " + eventName +
                     (message == null ? "" : "\n" +
                             "\nReason: " + message), "EVENT_DELETED_MANUALLY", outcome);
+            item.appendEvent(domsEvent);
 
         %>
         <c:url value="showItem.jsp" var="showItemUrl">
@@ -47,12 +49,15 @@
         <c:redirect url="${showItemUrl}"/>
     </c:when>
     <c:otherwise>
-        Delete event "${param.e}" (timestamp ${param.time}) on ${param.id}?
+        <p>
+
+        Fjern event "${param.e}" for ${param.id}?
+        </p>
         <table border="1">
             <tr>
                 <td>
                     <form action='deleteEventOnItem.jsp'>
-                        <label>Give reason: <input type="text" name="message"/></label>
+                        <label>Begrundelse: <input type="text" name="message"/></label>
                         <input type="hidden" name="id" value="${param.id}"/>
                         <input type="hidden" name="e" value="${param.e}"/>
                         <input type="hidden" name="doIt" value="yes"/>
@@ -66,5 +71,4 @@
 
 <hr/>
 
-<%= request.getParameterMap() %>
 <%= new java.util.Date() %>

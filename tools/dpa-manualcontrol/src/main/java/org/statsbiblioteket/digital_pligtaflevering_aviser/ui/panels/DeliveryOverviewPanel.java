@@ -55,6 +55,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     /**
      * Initiate columnwith of the graphical components
      */
+    @Override
     public void initialLayout() {
     }
 
@@ -88,6 +89,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     }
 
 
+    @Override
     public void insertInitialTableValues() throws Exception {
         infoPanel.setTableContent(model.getTitlesFromFileSystem());
     }
@@ -102,6 +104,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
     /**
      * Dummy implementation
      */
+    @Override
     public void viewIsEntered() {
 
     }

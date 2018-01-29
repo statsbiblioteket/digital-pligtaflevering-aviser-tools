@@ -23,35 +23,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
 /**
  * Provide list of AD groups assigned to the session user.
  * <p/>
- * <p/>This class is intended for use in applications where the users are
- * authenticated by the CasClient filter.
- * GroupProvider is implemeted as a Filter. Implementation as a HttpSessionListener
- * was considered, but the session is created before the CAS filter has authenticated
- * the user.
+ * <p/>This class is intended for use in applications where the users are authenticated by the CasClient filter.
+ * GroupProvider is implemeted as a Filter. Implementation as a HttpSessionListener was considered, but the session is
+ * created before the CAS filter has authenticated the user.
  */
 
 public class GroupProvider implements Filter {
     private final Logger log = Logger.getLogger(GroupProvider.class);
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         //TODO make this a separate filter
 
         final HttpServletRequest httprequest = (HttpServletRequest) request;
         final HttpSession session = httprequest.getSession(false);
         final Assertion assertion = (Assertion) (session == null ? request.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION) : session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION));
-        assertion.getPrincipal().getAttributes().put("sbAdGroups",getGroups((HttpServletRequest) request));
+        assertion.getPrincipal().getAttributes().put("sbAdGroups", getGroups((HttpServletRequest) request));
         assertion.getAttributes().put("sbAppName", ((HttpServletRequest) request).getContextPath().replace("/", ""));
         chain.doFilter(request, response);
     }
 
+    @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         log.debug("init");
     }
 
+    @Override
     public void destroy() {
         log.debug("destroy");
     }
@@ -63,7 +63,7 @@ public class GroupProvider implements Filter {
         }
         @SuppressWarnings("unchecked")
         List<String> groups = (List<String>) s.getAttribute("sbAdGroups");
-        log.debug("Groups: "+ groups);
+        log.debug("Groups: " + groups);
         return groups;
     }
 
@@ -71,7 +71,7 @@ public class GroupProvider implements Filter {
         try {
             String user = getLoggedInUser(request);
             ActiveDirectory ad = getActiveDirectory(request);
-            log.debug("building group list for "+ user);
+            log.debug("building group list for " + user);
             List<String> myGroups = ad.getGroupNames(user);
             HttpSession s = request.getSession();
             s.setAttribute("sbAdGroups", myGroups);
@@ -85,10 +85,10 @@ public class GroupProvider implements Filter {
             }
             File groupFile = new File(application.getRealPath(groupFileName));
             if (!groupFile.exists()) {
-                log.error("Permission file does not exist: "+ groupFile);
+                log.error("Permission file does not exist: " + groupFile);
                 return;
             }
-            log.debug("get authorization data from "+ groupFile);
+            log.debug("get authorization data from " + groupFile);
 
             Properties p = new Properties();
             p.load(new FileInputStream(groupFile));
@@ -129,7 +129,7 @@ public class GroupProvider implements Filter {
 
     protected ActiveDirectory getActiveDirectory(HttpServletRequest request) throws ServletException {
         HttpSession session = request.getSession();
-        
+
         String casIdentifier = session.getServletContext().getInitParameter("casServerUrlPrefix");
         if (casIdentifier == null) {
             casIdentifier = session.getAttribute("edu.yale.its.tp.cas.client.filter.receipt").toString();
@@ -144,10 +144,10 @@ public class GroupProvider implements Filter {
         } else if (casIdentifier.contains("cassbext")) {
             adProperties = readProperties("ad.sbextern.properties");
         } else {
-            log.error("Unrecognized cas: "+ casIdentifier);
-            throw new ServletException("GroupProvider: No authorization configuration for cas "+ casIdentifier);
+            log.error("Unrecognized cas: " + casIdentifier);
+            throw new ServletException("GroupProvider: No authorization configuration for cas " + casIdentifier);
         }
-        return new ActiveDirectory(adProperties); 
+        return new ActiveDirectory(adProperties);
     }
 
     private Properties readProperties(String propertiesResource) throws ServletException {
@@ -161,7 +161,7 @@ public class GroupProvider implements Filter {
                 throw new ServletException("Property file not found: " + propertiesResource);
             }
         } catch (IOException e) {
-            log.error("Could not load "+ propertiesResource, e);
+            log.error("Could not load " + propertiesResource, e);
             throw new ServletException("Could not load " + propertiesResource, e);
         }
     }

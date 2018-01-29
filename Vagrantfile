@@ -56,7 +56,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # for jvisualvm
   config.ssh.forward_x11 = true
 
-  # Ubuntu box is by default without timezone which result in date strings which cause our parsing to fail.
+  # Ubuntu box is by default without timezone which success in date strings which cause our parsing to fail.
   # Work around by setting the timezone of the box.
   if Vagrant.has_plugin?("vagrant-timezone")
     config.timezone.value = :host

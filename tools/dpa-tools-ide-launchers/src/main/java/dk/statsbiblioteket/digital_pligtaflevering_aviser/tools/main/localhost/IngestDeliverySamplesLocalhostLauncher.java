@@ -12,7 +12,8 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.SETTINGS_DIR_PROPERTY;
 
 /**
- * Note:  May require a lot of memory.
+ * Launcher suitable for invoking IngesterMain from within an IDE using the delivery-samples folder.
+ *
  */
 public class IngestDeliverySamplesLocalhostLauncher {
 

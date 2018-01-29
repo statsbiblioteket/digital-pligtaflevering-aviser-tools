@@ -3,6 +3,7 @@
 
 Quicklinks:
 
+* <a href="http://localhost:7880/fedora/objects/?pid=true&title=true&identifier=true&terms=DPA+Roundtrip&query=&maxResults=80">80 first DPA roundtrips</a>
 * <a href="http://localhost:7880/fedora/objects?pid=true&title=true&identifier=true&terms=&query=&maxResults=80">80 first results in vagrant fedora</a>
 * <a href="http://localhost:7880/fedora/objects?pid=true&title=true&identifier=true&terms=*pdf&query=&maxResults=80">80 first PDF files</a>
 * <a href="http://localhost:58709/var/reference1pillar/dpaviser/folderDir/">Root of bitrepository quickstart pillar 1</a>
@@ -40,7 +41,7 @@ https://www.statsbiblioteket.dk/om-statsbiblioteket/udbud/levering-af-digitale-a
 
 The traditional mindset for digital preservation is to do all the work
 for a given item, collecting metadata, normalizing files, ensuring
-consistency and so on, and THEN store the result for eternity.  This
+consistency and so on, and THEN store the success for eternity.  This
 process is called "_ingestion_".  We have found that the amount of
 work necessary to properly handle a given collection from end to end
 is typically rather large, regardless of the size of the collection,
@@ -99,7 +100,7 @@ form of PREMIS events.
 
 Each step taken is implemented as a traditional stand-alone Java
 application which regularily asks DOMS through Summa if there is any
-PDF's ready to be worked on, and if any, work on those.  The result of
+PDF's ready to be worked on, and if any, work on those.  The success of
 the work is added as an event and/or a datastream if appropriate for
 later.
 

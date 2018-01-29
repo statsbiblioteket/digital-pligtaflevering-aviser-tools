@@ -27,7 +27,7 @@ public class TitleDeliveryHierarchy {
      * @param ds
      */
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
-        if(!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
+        if (!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
             deliveryStructure.add(ds);
         }
     }
@@ -101,7 +101,7 @@ public class TitleDeliveryHierarchy {
      * @return
      */
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
@@ -112,7 +112,7 @@ public class TitleDeliveryHierarchy {
      */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
         return deliveryStructure.stream()
-                .filter(delivery -> ( delivery.getNewspaperTitle().equals(title)))
+                .filter(delivery -> (delivery.getNewspaperTitle().equals(title)))
                 .collect(Collectors.toList());
     }
 

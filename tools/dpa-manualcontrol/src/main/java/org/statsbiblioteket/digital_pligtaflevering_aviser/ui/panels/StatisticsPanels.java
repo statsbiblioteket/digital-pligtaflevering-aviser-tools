@@ -1,24 +1,8 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.LayoutEvents;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.ResultStorePanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This interface is used to specify the interface that all the different statisticsPanels must comply to

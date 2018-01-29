@@ -36,7 +36,7 @@ public class ValidationResult {
      */
     public enum ValidationResultEnum {
         INVALID(0), UNKNOWN(10), MANUAL_INSPECTION(20), ACCEPTABLE(30);
-        private int validationLevel;
+        private final int validationLevel;
 
         ValidationResultEnum(int validationLevel) {
             this.validationLevel = validationLevel;
