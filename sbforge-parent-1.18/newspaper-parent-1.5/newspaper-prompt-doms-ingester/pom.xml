@@ -85,7 +85,6 @@
             <artifactId>newspaper-autonomous-component</artifactId>
             <version>2.10</version>
         </dependency>
-
     </dependencies>
 
     <build>

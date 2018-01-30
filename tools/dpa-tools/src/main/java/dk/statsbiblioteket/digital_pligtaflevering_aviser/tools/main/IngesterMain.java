@@ -141,7 +141,7 @@ public class IngesterMain {
                                     final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get(); // FIXME: Logic broken
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                                     if (toolResult.isSuccess() == false) {
-                                        item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                                        item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
                                     }
                                 }
                             })

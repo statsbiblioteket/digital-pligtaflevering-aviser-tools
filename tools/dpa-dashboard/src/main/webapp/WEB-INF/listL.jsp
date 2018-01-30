@@ -10,3 +10,5 @@
     <%@include file="/WEB-INF/listItemEvents.jsp" %>
 </c:forEach>
 
+<hr/>
+<%= new java.util.Date() %>

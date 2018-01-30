@@ -206,7 +206,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
             List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = Stream.of(deliveryDomsItem)
                     .map(DomsValue::create)
                     .flatMap(domsValueStreamFunction)
-                    .peek(c -> log.trace("--- Ingested {}", c.id()))
+                    .peek(c -> log.trace("--- Ingested {}", c.id())) // FIXME: id is for roundtrip, not individual paper.
                     .collect(toList());
 
             // Create report for delivery item

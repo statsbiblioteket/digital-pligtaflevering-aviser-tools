@@ -27,6 +27,6 @@ public class SBOIConstants {
      * query for those which has been put under manual_control.  This effectively stops every downstream processing.
      * 
      */
-    public static final String Q_MANUAL_CONTROL = " and +event:\"Manually_stopped\"";
+    public static final String Q_MANUAL_CONTROL = " and +success_event:\"Manually_stopped\"";
     
 }
