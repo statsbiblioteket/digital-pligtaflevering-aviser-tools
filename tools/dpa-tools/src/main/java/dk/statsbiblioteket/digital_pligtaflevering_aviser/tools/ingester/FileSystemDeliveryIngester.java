@@ -3,7 +3,6 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.sun.jersey.api.client.WebResource;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -224,7 +223,6 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
 
             final String linkingAgentIdentifierValue = getClass().getSimpleName();
 
-            deliveryDomsItem.appendEvent(new DomsEvent(linkingAgentIdentifierValue, new java.util.Date(), deliveryEventMessage, EVENT_TYPE, outcome));
             log.info("{} {} Took: {} ms", linkingAgentIdentifierValue, deliveryDomsItem, System.currentTimeMillis() - startTime);
             log.trace("{} message={}, outcome={}", deliveryDomsItem, deliveryEventMessage, outcome);
 
