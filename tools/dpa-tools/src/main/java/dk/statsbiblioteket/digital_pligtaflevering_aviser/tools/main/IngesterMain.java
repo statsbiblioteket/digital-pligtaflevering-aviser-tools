@@ -59,8 +59,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
@@ -118,7 +120,7 @@ public class IngesterMain {
 
             Tool f = () -> {
                 try (FileSystemDeliveryIngester autoCloseableIngester = ingester) { // shut down bitrepository resources completely when done
-                    String toolResults = Stream.of(workToDoQuery)
+                    List<String> toolResults = Stream.of(workToDoQuery)
                             .flatMap(repository::query)
                             .peek(domsItem -> log.trace("Processing: {}", domsItem))
                             .peek(domsItem -> mxBean.currentId = domsItem.toString())
@@ -141,12 +143,14 @@ public class IngesterMain {
                                     final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get(); // FIXME: Logic broken
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                                     if (toolResult.isSuccess() == false) {
-                                        item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
+                                        item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
                                     }
                                 }
                             })
-                            .count() + " items processed"; // FIXME:  Better message from list.
-                    return toolResults;
+                            .map(c -> c.id().getDomsId().id())
+                            .collect(Collectors.toList());
+
+                    return toolResults.size() + " processed:  " + toolResults;
                 }
             };
             return f;

@@ -11,6 +11,12 @@ on Ubuntu 16.04 LTS->16.10 with OpenJDK 8 as java.
 The version of Vagrant shipping with Ubuntu is too old. Install
 vagrant yourself from https://www.vagrantup.com/downloads.html.
 
+Note:   Use the following command to get X11 forwarding (for e.g.
+visualvm):
+
+    vagrant ssh -- -Y
+    
+
 
 Setting up the DOMS+Bitrepository vagrant box
 ===

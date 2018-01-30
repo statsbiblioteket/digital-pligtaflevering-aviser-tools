@@ -9,14 +9,15 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -50,7 +51,7 @@ public class StateManualControl extends HttpServlet {
                 }
             }
         }
-        List<DomsItem> l = repository.query(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_SUCCESSFUL))
+        List<DomsItem> l = repository.query(new SBOIQuerySpecification(SBOIConstants.Q_MANUAL_CONTROL))
                 .collect(Collectors.toList());
         
         request.setAttribute("l", l);
