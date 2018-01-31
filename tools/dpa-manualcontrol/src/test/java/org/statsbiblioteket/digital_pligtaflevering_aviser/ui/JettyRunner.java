@@ -19,11 +19,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
- * Runner for stating the application during development
+ * Runner for starting the application during development at http://localhost:8080/dpa-manualcontrol/
  */
 public class JettyRunner {
 
     public static void main(String[] args) throws Exception {
+
+        // Locate custom cacerts with LDAP server certificate - https://stackoverflow.com/a/38431439/53897
+
+        Path cacertPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "cacerts");
+        System.setProperty ("javax.net.ssl.trustStore", cacertPath.toFile().getAbsolutePath());
+        System.setProperty ("javax.net.ssl.trustStorePassword", "changeit");
 
         // Create Jetty Server
         Server server = new Server(8080);
@@ -31,6 +37,7 @@ public class JettyRunner {
         Path warPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.war");
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
+        // Read parameter name-value pairs from XML file and set them as init parameters.
         InputStream in = new FileInputStream(xmlPath.toFile());
         InputSource inputSource = new InputSource(new InputStreamReader(in, StandardCharsets.UTF_8));
 
@@ -50,6 +57,8 @@ public class JettyRunner {
             String paramValue = nl.item(i).getAttributes().getNamedItem("value").getTextContent();
             webapp.setInitParameter(paramName, paramValue);
         }
+
+        // Ready
 
         webapp.setWar(warPath.toString());
         server.setHandler(webapp);
