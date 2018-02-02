@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 
+# fail if any command fails - this is to avoid checking the return code of any curl call
+set -e
+
+VERBOSE=
+
+if [ "$1" == "-v" ]
+then
+  VERBOSE=$1
+  shift
+fi
+
 # Traverse DPA Roundtrip in DOMS.
 
 if [ -z $1 ]
 then
-    echo "usage:  $0 uuid:...dpa_roundtrip..."
+    echo "usage:  [P=\"-u user:pass\"] $0 [-v] uuid:...dpa_roundtrip..."
     exit 1
 fi
 
@@ -22,13 +33,21 @@ ROUNDTRIP_UUID=$1
 # curl -s -u fedoraAdmin:fedoraAdminPass 'http://localhost:7880/fedora/objects/uuid:627ef2a0-88d4-4423-8b15-6f37dc522e29/datastreams/RELS-EXT/content'
 # curl -s $P "$O/$UUID/datastreams/RELS-EXT/content"
 
-O="http://localhost:7880/fedora/objects"
-P="-u fedoraAdmin:fedoraAdminPass"
+O=${O:-http://${FEDORA_HOST:-localhost}:7880/fedora/objects}
+# For non-local servers use fedoraReadOnlyAdmin - find password in /home/doms/services/fedora/server/config/fedora-users.xml
+# xmlstarlet sel -t -m '//user[@name="fedoraReadOnlyAdmin"]' -v '@password' -n /tmp/fedora-users.xml
+P=${P:--u ${FEDORA_USER:-fedoraAdmin}:${FEDORA_PASSWORD:-fedoraAdminPass}}
 
 # ----------------------------------------------------------------------
 
 # http://localhost:7880/fedora/objects/uuid:a8072382-20db-4d48-aa3a-5ad1392a242f/datastreams/DC/content
 ROUNDTRIP_DC=$($CURL -s $P "$O/$ROUNDTRIP_UUID/datastreams/DC/content")
+ROUNDTRIP_CURL_EXIT_CODE=$?
+ if [  $ROUNDTRIP_CURL_EXIT_CODE -gt 0 ]
+ then
+    echo "curl error: $ROUNDTRIP_CURL_EXIT_CODE (No DOMS there?)"
+    exit 1
+ fi
 
 # <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
 #  <dc:title>DPA Roundtrip</dc:title>
@@ -79,11 +98,14 @@ for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora
         # path:dl_20180114_rt1/aarhusstiftstidende/pages
         PAPER_PART_IDENTIFIER=$(echo $PAPER_PART_DC | $XMLSTARLET sel $N -t -m '//dc:identifier[starts-with(text(), "path:")]' -v 'text()')
 
-        if [[ "$PAPER_PART_IDENTIFIER" = *pages ]]
-        then
+        case $PAPER_PART_IDENTIFIER in
+        *pagesDISABLED)
             # print out URL's for all PDF files and download them to see if pdfinfo likes them.
 
-            echo "$PAPER_PART_IDENTIFIER $PAPER_PART_UUID"
+            if [ -n "$VERBOSE" ]
+            then
+                echo "$PAPER_PART_IDENTIFIER $PAPER_PART_UUID"
+            fi
 
             PAGES_RELSEXT=$($CURL -s $P "$O/$PAPER_PART_UUID/datastreams/RELS-EXT/content")
             for PAGE_UUID in $(echo $PAGES_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora:hasPart[starts-with(@rdf:resource, "info:fedora/")] ' -v 'substring-after(@rdf:resource, "info:fedora/")' -n); do
@@ -91,21 +113,47 @@ for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora
                 PAGE_RELSEXT=$($CURL -s $P "$O/$PAGE_UUID/datastreams/RELS-EXT/content")
 
                 for PAGE_CONTENT_UUID in $(echo $PAGE_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora:hasPart[starts-with(@rdf:resource, "info:fedora/")] ' -v 'substring-after(@rdf:resource, "info:fedora/")' -n); do
-                    # Get redirect target - https://unix.stackexchange.com/a/157219/4869
+                    # Get redirect target as returned by Fedora - https://unix.stackexchange.com/a/157219/4869
                     REAL_URL=$($CURL -w "%{url_effective}\n" -I -L -S -s $P "$O/$PAGE_CONTENT_UUID/datastreams/CONTENTS/content" -o /dev/null)
                     # Optionally rewrite URL if not valid and the bitrepository is mounted locally (not relevant for vagrant images)
                     curl -s $REAL_URL | pdfinfo - >/dev/null
                     RESULT=$?
-                    # echo $RESULT
                     if [ $RESULT -eq 0 ]
                     then
-                        echo $REAL_URL ok
+                        if [ -n "$VERBOSE" ]
+                        then
+                            echo $REAL_URL ok
+                        fi
                     else
-                        echo $REAL_URL bad pdf
+                        echo "$REAL_URL bad pdf"
                     fi
                 done
             done
-        fi
+            ;;
+
+        *articles)
+            if [ -n "$VERBOSE" ]
+            then
+                echo "$PAPER_PART_IDENTIFIER $PAPER_PART_UUID"
+            fi
+
+            ARTICLES_RELSEXT=$($CURL -s $P "$O/$PAPER_PART_UUID/datastreams/RELS-EXT/content")
+            for ARTICLE_UUID in $(echo $ARTICLES_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora:hasPart[starts-with(@rdf:resource, "info:fedora/")] ' -v 'substring-after(@rdf:resource, "info:fedora/")' -n); do
+                # Article XML is in the "XML" datastream of the node.
+                ARTICLE_XML=$($CURL -s $P "$O/$ARTICLE_UUID/datastreams/DC/content")
+                # For now we are happy if xmlstarlet likes it (there is a single root node)
+                if echo $ARTICLE_XML | $XMLSTARLET -q sel -t -m '/' -v 'count(.)'
+                then
+                    if [ -n "$VERBOSE" ]
+                    then
+                        echo "$ARTICLE_UUID well-formed"
+                    fi
+                else
+                  echo "$ARTICLE_UUID bad xml"
+                fi
+            done
+            ;;
+        esac
 
 
         #for PDF_ARTICLE_UUID in $(echo $PAPER_PART_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora:hasPart[starts-with(@rdf:resource, "info:fedora/")] ' -v 'substring-after(@rdf:resource, "info:fedora/")' -n); do
