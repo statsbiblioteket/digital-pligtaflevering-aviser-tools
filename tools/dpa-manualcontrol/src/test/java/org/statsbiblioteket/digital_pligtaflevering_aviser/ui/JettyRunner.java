@@ -19,11 +19,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
- * Runner for starting the application during development at http://localhost:8080/dpa-manualcontrol/
+ * Runner for starting the application during development at http://localhost:8080/dpa-manualcontrol/?debug
  */
 public class JettyRunner {
 
     public static void main(String[] args) throws Exception {
+
+        // https://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.html
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "trace");
 
         // Locate custom cacerts with LDAP server certificate - https://stackoverflow.com/a/38431439/53897
 
