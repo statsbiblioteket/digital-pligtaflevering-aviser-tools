@@ -42,6 +42,7 @@ public class JettyRunner {
         InputSource inputSource = new InputSource(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         WebAppContext webapp = new WebAppContext();
+
         webapp.setContextPath("/dpa-manualcontrol");
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -61,7 +62,11 @@ public class JettyRunner {
         // Ready
 
         webapp.setWar(warPath.toString());
+
         server.setHandler(webapp);
+
+        server.setDumpAfterStart(true);
+        server.setDumpBeforeStop(true);
 
         server.start();
         server.join();
