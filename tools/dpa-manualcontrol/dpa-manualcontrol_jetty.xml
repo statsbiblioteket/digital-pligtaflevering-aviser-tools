@@ -23,5 +23,5 @@
   <Parameter name="casServerUrlPrefix" value="https://samling.statsbiblioteket.dk/casinternal/"/>
   <Parameter name="casServerLoginUrl" value="https://samling.statsbiblioteket.dk/casinternal/"/>
   <Parameter name="serverName" value="localhost"/>
-  <Parameter name="service" value="http://localhost:8080/dpa-manualcontrol/VAADIN;mode=manualvalidate"/>
+  <Parameter name="service" value="http://localhost:8080/dpa-manualcontrol/"/>
 </Context>
