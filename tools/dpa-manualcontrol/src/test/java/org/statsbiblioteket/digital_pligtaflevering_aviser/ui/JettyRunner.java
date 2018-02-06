@@ -37,7 +37,6 @@ public class JettyRunner {
         // Create Jetty Server
         Server server = new Server(8080);
 
-        Path warPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.war");
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
         // Read parameter name-value pairs from XML file and set them as init parameters.
@@ -64,12 +63,15 @@ public class JettyRunner {
 
         // Ready
 
-        webapp.setWar(warPath.toString());
+        Path webXmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "src/main/webapp/WEB-INF/web.xml");
+        webapp.setDescriptor(webXmlPath.toString());
+        webapp.setResourceBase(webXmlPath.getParent().getParent().toString());
+        webapp.setParentLoaderPriority(true);
 
         server.setHandler(webapp);
 
-        server.setDumpAfterStart(true);
-        server.setDumpBeforeStop(true);
+//        server.setDumpAfterStart(true);
+//        server.setDumpBeforeStop(true);
 
         server.start();
         server.join();
