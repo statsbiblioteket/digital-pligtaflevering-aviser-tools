@@ -67,7 +67,7 @@ public class GenerateStatisticsMain {
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     .map(DomsValue::create)
                     .map(c -> c.map(v -> processChildDomsId().apply(v)))
-                    .peek(c -> c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess())))
+                    .peek(c -> c.left().appendEvent(new DomsEvent(agent, new Date(), c.right().getHumanlyReadableMessage(), eventName, c.right().isSuccess())))
                     .count() + " items processed";
 
             return f;

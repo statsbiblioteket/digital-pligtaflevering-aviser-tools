@@ -15,7 +15,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.TupleElement;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -104,11 +104,11 @@ public class ValidateXMLMain {
                         }
                     }))
                     .peek(c -> {
-                        final DomsItem item = c.id();
-                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.value();  // FIXME:  Why is type information lost?
+                        final DomsItem item = c.left();
+                        final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.right();  // FIXME:  Why is type information lost?
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
-                            item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
+                            item.appendEvent(new DomsEvent(agent, new Date(), TupleElement.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
                             final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
@@ -138,7 +138,7 @@ public class ValidateXMLMain {
                 // Single doms item
                 final String agent = ValidateXMLMain.class.getSimpleName();
 
-                List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
+                List<TupleElement<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
                         .map(DomsValue::create)
                         .flatMap(c -> c.flatMap(item -> { // For an individual child, process XML datastream if present.
                                     try {

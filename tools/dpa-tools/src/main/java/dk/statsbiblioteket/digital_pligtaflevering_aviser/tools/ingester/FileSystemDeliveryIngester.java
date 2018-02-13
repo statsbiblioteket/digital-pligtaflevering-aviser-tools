@@ -9,7 +9,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.TupleElement;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
@@ -193,7 +193,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // Collect all the indvidual toolResults.
 
         try {
-            final Function<DomsValue<DomsItem>, Stream<IdValue<DomsItem, Either<Exception, ToolResult>>>> domsValueStreamFunction = c -> c.flatMap(value -> {
+            final Function<DomsValue<DomsItem>, Stream<TupleElement<DomsItem, Either<Exception, ToolResult>>>> domsValueStreamFunction = c -> c.flatMap(value -> {
                 try {
                     return ingestDirectoryForDomsItem(value, rootPath).map(Either::right);
                 } catch (Exception e) {
@@ -202,10 +202,10 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                 }
             });
 
-            List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = Stream.of(deliveryDomsItem)
+            List<TupleElement<DomsItem, Either<Exception, ToolResult>>> toolResults = Stream.of(deliveryDomsItem)
                     .map(DomsValue::create)
                     .flatMap(domsValueStreamFunction)
-                    .peek(c -> log.trace("--- Ingested {}", c.id())) // FIXME: id is for roundtrip, not individual paper.
+                    .peek(c -> log.trace("--- Ingested {}", c.left())) // FIXME: id is for roundtrip, not individual paper.
                     .collect(toList());
 
             // Create report for delivery item
