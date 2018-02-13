@@ -1,7 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.google.common.base.Throwables;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.TupleElement;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 import javaslang.control.Either;
 
 import javax.inject.Inject;
@@ -25,8 +25,8 @@ import static java.util.stream.Collectors.toList;
  *
  * @noinspection ALL
  */
-public class ToolResultsReport<K> implements BiFunction<K, List<TupleElement<K, Either<Exception, ToolResult>>>, ToolResult> {
-    private final BiFunction<List<TupleElement<K, ToolResult>>, List<TupleElement<K, ToolResult>>, String> renderResultFunction;
+public class ToolResultsReport<K> implements BiFunction<K, List<StreamTuple<K, Either<Exception, ToolResult>>>, ToolResult> {
+    private final BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
     private final BiConsumer<K, Exception> stackTraceLogger;
 
@@ -48,7 +48,7 @@ public class ToolResultsReport<K> implements BiFunction<K, List<TupleElement<K, 
      */
 
     @Inject
-    public ToolResultsReport(BiFunction<List<TupleElement<K, ToolResult>>, List<TupleElement<K, ToolResult>>, String> renderResultFunction,
+    public ToolResultsReport(BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> renderResultFunction,
                              BiConsumer<K, Exception> stackTraceLogger,
                              Function<Throwable, String> stackTraceRenderer
     ) {
@@ -58,26 +58,26 @@ public class ToolResultsReport<K> implements BiFunction<K, List<TupleElement<K, 
     }
 
     @Override
-    public ToolResult apply(K domsItem, List<TupleElement<K, Either<Exception, ToolResult>>> tupleElements) {
+    public ToolResult apply(K domsItem, List<StreamTuple<K, Either<Exception, ToolResult>>> streamTuples) {
 
         // These can probably be written smarter, but for now keep it simple.
 
         // find all that threw exception.
 
-        List<TupleElement<K, Exception>> threwException = tupleElements.stream()
+        List<StreamTuple<K, Exception>> threwException = streamTuples.stream()
                 .filter(c -> c.filter(Either::isLeft))
                 .map(c -> c.map(Either::getLeft))
                 .collect(toList());
 
         // find all that completed successfully
 
-        List<TupleElement<K, ToolResult>> ok = tupleElements.stream()
+        List<StreamTuple<K, ToolResult>> ok = streamTuples.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(ToolResult::isSuccess))
                 .collect(toList());
 
-        List<TupleElement<K, ToolResult>> failed = tupleElements.stream()
+        List<StreamTuple<K, ToolResult>> failed = streamTuples.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(t -> t.isSuccess() == false))
@@ -136,9 +136,9 @@ public class ToolResultsReport<K> implements BiFunction<K, List<TupleElement<K, 
         }
     }
 
-    public static class OK_COUNT_FAIL_LIST_RENDERER<K> implements BiFunction<List<TupleElement<K, ToolResult>>, List<TupleElement<K, ToolResult>>, String> {
+    public static class OK_COUNT_FAIL_LIST_RENDERER<K> implements BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> {
         @Override
-        public String apply(List<TupleElement<K, ToolResult>> ok, List<TupleElement<K, ToolResult>> failed) {
+        public String apply(List<StreamTuple<K, ToolResult>> ok, List<StreamTuple<K, ToolResult>> failed) {
             return ok.size() + " ok" +
                     (failed.size() > 0
                             ? "\n\n" + failed.size() + " failed:\n=========\n" +

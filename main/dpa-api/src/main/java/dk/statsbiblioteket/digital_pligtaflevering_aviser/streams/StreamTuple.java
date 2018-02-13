@@ -17,18 +17,18 @@ import java.util.stream.Stream;
  * much a pain.  This is an experiment to see if a helper class that
  * knows the original value plus some suitable helper methods can
  * replace these custom classes.</p>
+ *
  * <p>Due to the way Java works the general idea is that each Stream
  * method, like <code>filter(...)</code> has a corresponding helper
  * method here which returns what the outer method needs to do its
  * job. </p>
- * @noinspection WeakerAccess, Convert2MethodRef
  */
-public class TupleElement<L, R> {
+public class StreamTuple<L, R> {
 
     protected final L left;
     protected final R right;
 
-    public TupleElement(L left, R right) {
+    public StreamTuple(L left, R right) {
         this.left = left;
         this.right = right;
     }
@@ -37,8 +37,8 @@ public class TupleElement<L, R> {
      * Suitable for method::references.  Value is set to id.
      */
 
-    public static <L> TupleElement<L, L> create(L left) {
-        return new TupleElement<>(left, left);
+    public static <L> StreamTuple<L, L> create(L left) {
+        return new StreamTuple<>(left, left);
     }
 
     public L left() {
@@ -57,8 +57,8 @@ public class TupleElement<L, R> {
      * @param right value for new object.
      * @return IdValue with the same id and the new value.
      */
-    public <U> TupleElement<L, U> of(U right) {
-        return new TupleElement<>(left, right);
+    public <U> StreamTuple<L, U> of(U right) {
+        return new StreamTuple<>(left, right);
     }
 
     /**
@@ -68,7 +68,7 @@ public class TupleElement<L, R> {
      * @param f function to apply to the current value to get the new value.
      * @return new IdValue with the same id and the result of applying f to current value.
      */
-    public <U> TupleElement<L, U> map(Function<R, U> f) {
+    public <U> StreamTuple<L, U> map(Function<R, U> f) {
         return of(f.apply(right));
     }
 
@@ -81,7 +81,7 @@ public class TupleElement<L, R> {
      * @return new IdValue with the same id and the result of applying
      * f to current id and value.
      */
-    public <U> TupleElement<L, U> map(BiFunction<L, R, U> f) {
+    public <U> StreamTuple<L, U> map(BiFunction<L, R, U> f) {
         return of(f.apply(left, right));
     }
 
@@ -96,15 +96,15 @@ public class TupleElement<L, R> {
      * for <pre>.flatMap(c->c.flatMap(v -> ....))</pre>
      */
 
-    public <U> Stream<TupleElement<L, U>> flatMap(Function<R, Stream<U>> f) {
-        return f.apply(right).map(u -> of(u));
+    public <U> Stream<StreamTuple<L, U>> flatMap(Function<R, Stream<U>> f) {
+        return f.apply(right).map(this::of);
     }
 
     /**
      * for <pre>.flatMap(c->c.flatMap((id, v) -> ....))</pre>
      */
-    public <U> Stream<TupleElement<L, U>> flatMap(BiFunction<L, R, Stream<U>> f) {
-        return f.apply(left, right).map(u -> of(u));
+    public <U> Stream<StreamTuple<L, U>> flatMap(BiFunction<L, R, Stream<U>> f) {
+        return f.apply(left, right).map(this::of);
     }
 
     /**

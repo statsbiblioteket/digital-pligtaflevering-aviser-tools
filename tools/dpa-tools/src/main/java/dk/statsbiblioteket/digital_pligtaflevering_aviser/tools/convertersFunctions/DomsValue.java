@@ -1,12 +1,12 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.TupleElement;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 
 /**
  *
  */
-public class DomsValue<V> extends TupleElement<DomsItem, V> {
+public class DomsValue<V> extends StreamTuple<DomsItem, V> {
     public DomsValue(DomsItem domsItem, V value) {
         super(domsItem, value);
     }
