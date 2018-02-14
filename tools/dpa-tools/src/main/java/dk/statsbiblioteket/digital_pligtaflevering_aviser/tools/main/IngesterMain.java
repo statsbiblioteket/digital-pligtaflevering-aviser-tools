@@ -12,8 +12,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
@@ -124,7 +124,7 @@ public class IngesterMain {
                             .flatMap(repository::query)
                             .peek(domsItem -> log.trace("Processing: {}", domsItem))
                             .peek(domsItem -> mxBean.currentId = domsItem.toString())
-                            .map(DomsValue::create)
+                            .map(DomsIdTuple::create)
                             .map(c -> c.map(domsItem -> {
                                 try {
                                     final Either<Exception, ToolResult> result = ingester.apply(domsItem, normalizedDeliveriesFolder);
@@ -135,19 +135,19 @@ public class IngesterMain {
                             }))
                             .peek(c -> {
                                 // Set events on the delivery top item.
-                                final DomsItem item = Objects.requireNonNull(c.id());
-                                if (c.value().isLeft()) {
+                                final DomsItem item = Objects.requireNonNull(c.left());
+                                if (c.right().isLeft()) {
                                     // Processing of _this_ domsItem threw unexpected exception
-                                    item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(c.value().getLeft()), eventName, false));
+                                    item.appendEvent(new DomsEvent(agent, new Date(), StreamTuple.stacktraceFor(c.right().getLeft()), eventName, false));
                                 } else {
-                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.value()).get(); // FIXME: Logic broken
+                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.right()).get(); // FIXME: Logic broken
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                                     if (toolResult.isSuccess() == false) {
                                         item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
                                     }
                                 }
                             })
-                            .map(c -> c.id().getDomsId().id())
+                            .map(c -> c.left().getDomsId().id())
                             .collect(Collectors.toList());
 
                     return toolResults.size() + " processed:  " + toolResults;
