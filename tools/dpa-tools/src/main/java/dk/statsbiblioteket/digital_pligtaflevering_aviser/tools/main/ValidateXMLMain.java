@@ -16,7 +16,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -95,7 +95,7 @@ public class ValidateXMLMain {
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
-                    .map(DomsValue::create)
+                    .map(DomsIdTuple::create)
                     .map(c -> c.map(domsItem -> {
                         try {
                             return Either.right(processChildDomsId(mxBean, eventName).apply(domsItem));
@@ -139,7 +139,7 @@ public class ValidateXMLMain {
                 final String agent = ValidateXMLMain.class.getSimpleName();
 
                 List<StreamTuple<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
-                        .map(DomsValue::create)
+                        .map(DomsIdTuple::create)
                         .flatMap(c -> c.flatMap(item -> { // For an individual child, process XML datastream if present.
                                     try {
                                         return item.datastreams().stream()
@@ -149,7 +149,7 @@ public class ValidateXMLMain {
                                                 .map(datastream -> analyzeXML(datastream))
                                                 // Save individual result as event on node.
                                                 .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
-                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsValue.stacktraceFor(e), eventName, false)),
+                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(e), eventName, false)),
                                                         tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
                                                 );
                                     } catch (Exception e) {

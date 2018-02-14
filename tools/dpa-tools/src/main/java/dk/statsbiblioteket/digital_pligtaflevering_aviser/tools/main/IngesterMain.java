@@ -13,7 +13,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
@@ -124,7 +124,7 @@ public class IngesterMain {
                             .flatMap(repository::query)
                             .peek(domsItem -> log.trace("Processing: {}", domsItem))
                             .peek(domsItem -> mxBean.currentId = domsItem.toString())
-                            .map(DomsValue::create)
+                            .map(DomsIdTuple::create)
                             .map(c -> c.map(domsItem -> {
                                 try {
                                     final Either<Exception, ToolResult> result = ingester.apply(domsItem, normalizedDeliveriesFolder);

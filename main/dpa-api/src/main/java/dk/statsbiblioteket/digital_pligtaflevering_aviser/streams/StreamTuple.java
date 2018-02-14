@@ -10,13 +10,15 @@ import java.util.stream.Stream;
 /** <p>
  * One of the major problems with using streams in Java is that the
  * language does not support tuples (multiple return values from a
- * method) so you very frequently find that you need to pass _both_
+ * method) so you very frequently find that you need to pass <em>both</em>
  * the original value and the current result to the next step instead
  * of just the current result.  The current Word Of God is that you
  * create a custom class for each intermediate step, which is rather
  * much a pain.  This is an experiment to see if a helper class that
  * knows the original value plus some suitable helper methods can
- * replace these custom classes.</p>
+ * replace these custom classes.  As the JRE does only have two-argument
+ * but not three-argument definitions, this is for
+ * two-tuples only for now. </p>
  *
  * <p>Due to the way Java works the general idea is that each Stream
  * method, like <code>filter(...)</code> has a corresponding helper
@@ -28,23 +30,37 @@ public class StreamTuple<L, R> {
     protected final L left;
     protected final R right;
 
+    /** for <code> (l, r) -> new StreamTuple<>(l, r) </code>
+     *
+     * @param left
+     * @param right
+     */
+
     public StreamTuple(L left, R right) {
         this.left = left;
         this.right = right;
     }
 
     /**
-     * Suitable for method::references.  Value is set to id.
+     * Suitable for Stream::create.  Both left and right are set to the value passed in.
      */
 
     public static <L> StreamTuple<L, L> create(L left) {
         return new StreamTuple<>(left, left);
     }
 
+    /** Gets the left value.
+     *
+     * @return L left
+     */
     public L left() {
         return left;
     }
 
+    /** Gets the right value
+     *
+     * @return R right
+     */
     public R right() {
         return right;
     }
@@ -66,7 +82,7 @@ public class StreamTuple<L, R> {
      * object with the result (and same context).
      *
      * @param f function to apply to the current value to get the new value.
-     * @return new IdValue with the same id and the result of applying f to current value.
+     * @return new SteamTuple with the same id and the result of applying f to current value.
      */
     public <U> StreamTuple<L, U> map(Function<R, U> f) {
         return of(f.apply(right));
@@ -112,14 +128,14 @@ public class StreamTuple<L, R> {
      */
     @Override
     public String toString() {
-        return "TupleElement{" +
+        return "StreamTuple{" +
                 "left=" + left +
                 ", right=" + right +
                 '}';
     }
 
     /**
-     * Helper method to get the stacktrace of a throwable as a string.   Why is this not in the runtime library??
+     * Helper method put here for now to get the stacktrace of a throwable as a string.   Why is this not in the runtime library??
      */
 
     public static String stacktraceFor(Throwable t) {

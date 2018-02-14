@@ -6,12 +6,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 /**
  *
  */
-public class DomsValue<V> extends StreamTuple<DomsItem, V> {
-    public DomsValue(DomsItem domsItem, V value) {
+public class DomsIdTuple<V> extends StreamTuple<DomsItem, V> {
+    public DomsIdTuple(DomsItem domsItem, V value) {
         super(domsItem, value);
     }
 
-    public static DomsValue<DomsItem> create(DomsItem id) {
-        return new DomsValue<>(id, id);
+    public static DomsIdTuple<DomsItem> create(DomsItem id) {
+        return new DomsIdTuple<>(id, id);
     }
 }
