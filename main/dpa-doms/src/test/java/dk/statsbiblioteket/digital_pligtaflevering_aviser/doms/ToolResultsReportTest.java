@@ -1,7 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 import javaslang.control.Either;
 import org.junit.Test;
 
@@ -101,7 +101,7 @@ public class ToolResultsReportTest {
     public void noItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.<DomsItem>of()
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> ToolResult.ok("" + v))))
                 .collect(toList()));
 
@@ -113,7 +113,7 @@ public class ToolResultsReportTest {
     public void singleOkItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> ToolResult.ok("" + v))))
                 .collect(toList()));
 
@@ -125,7 +125,7 @@ public class ToolResultsReportTest {
     public void twoOKItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> ToolResult.ok("" + v))))
                 .collect(toList()));
 
@@ -137,7 +137,7 @@ public class ToolResultsReportTest {
     public void singleOKsingleFailItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> v.equals(id1) ? ToolResult.ok("OK:" + v) : ToolResult.fail("FAIL:" + v))))
                 .collect(toList()));
 
@@ -153,7 +153,7 @@ public class ToolResultsReportTest {
     public void twoFailItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> ToolResult.fail("FAIL:" + v))))
                 .collect(toList()));
 
@@ -170,7 +170,7 @@ public class ToolResultsReportTest {
     public void singleOKtwoFailItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2, id3)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> v.equals(id1) ? ToolResult.ok("OK:" + v) : ToolResult.fail("FAIL:" + v))))
                 .collect(toList()));
 
@@ -187,7 +187,7 @@ public class ToolResultsReportTest {
     public void singleOKsingleFailSingleExceptionItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2, id3)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> v.equals(id1) ? ToolResult.ok("OK:" + v) : v.equals(id2) ? ToolResult.fail("FAIL:" + v) : ToolResult.hurl("HURL:" + v))))
                 .collect(toList()));
 
@@ -212,7 +212,7 @@ public class ToolResultsReportTest {
     public void threeDifferentExceptionNoStacktracesItems() {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, Throwable::getMessage).apply(id0, Stream.of(id1, id2, id3)
-                .map(IdValue::create)
+                .map(StreamTuple::create)
                 .map(c -> c.map(v -> either(() -> ToolResult.hurl("HURL:" + v))))
                 .collect(toList()));
 
@@ -248,7 +248,7 @@ public class ToolResultsReportTest {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, twoLineAnonymousStackTraceRenderer)
                 .apply(id0, Stream.of(id1, id1, id1)
-                        .map(IdValue::create)
+                        .map(StreamTuple::create)
                         .map(c -> c.map(v -> either(() -> ToolResult.hurl("HURL:" + v))))
                         .collect(toList()));
 
@@ -286,7 +286,7 @@ public class ToolResultsReportTest {
 
         ToolResult report = new ToolResultsReport<>(new OK_COUNT_FAIL_LIST_RENDERER<>(), noLogging, twoLineAnonymousStackTraceRenderer)
                 .apply(id0, Stream.of(id1, id2, id1)
-                        .map(IdValue::create)
+                        .map(StreamTuple::create)
                         .map(c -> c.map(v -> either(() -> ToolResult.hurl("HURL:" + v))))
                         .collect(toList()));
 

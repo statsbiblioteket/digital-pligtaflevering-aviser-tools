@@ -17,8 +17,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -110,15 +110,15 @@ public class VeraPDFInvokeMain {
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
-                    .map(DomsValue::create)
+                    .map(DomsIdTuple::create)
                     .map(c -> c.map(item -> processChildDomsId(domsEventStorage, bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream, mxBean).apply(item)))
                     // Collect results for each domsId
                     .peek(c -> {
-                        final DomsItem item = c.id();
-                        final Either<Exception, ToolResult> value = c.value();
+                        final DomsItem item = c.left();
+                        final Either<Exception, ToolResult> value = c.right();
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
-                            item.appendEvent(new DomsEvent(agent, new Date(), IdValue.stacktraceFor(value.getLeft()), eventName, false));
+                            item.appendEvent(new DomsEvent(agent, new Date(), StreamTuple.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
                             final ToolResult toolResult = (ToolResult) value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
@@ -143,10 +143,10 @@ public class VeraPDFInvokeMain {
                 try {
                     long startTime = System.currentTimeMillis();
 
-                    List<IdValue<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
+                    List<StreamTuple<DomsItem, Either<Exception, ToolResult>>> toolResults = domsItem.allChildren()
                             .peek(i -> mxBean.currentId = String.valueOf(i))
                             .peek(i -> mxBean.idsProcessed++)
-                            .map(DomsValue::create)
+                            .map(DomsIdTuple::create)
                             .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
                             .collect(Collectors.toList());
 

@@ -12,7 +12,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsValue;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -65,9 +65,9 @@ public class GenerateStatisticsMain {
             Tool f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
-                    .map(DomsValue::create)
+                    .map(DomsIdTuple::create)
                     .map(c -> c.map(v -> processChildDomsId().apply(v)))
-                    .peek(c -> c.id().appendEvent(new DomsEvent(agent, new Date(), c.value().getHumanlyReadableMessage(), eventName, c.value().isSuccess())))
+                    .peek(c -> c.left().appendEvent(new DomsEvent(agent, new Date(), c.right().getHumanlyReadableMessage(), eventName, c.right().isSuccess())))
                     .count() + " items processed";
 
             return f;
