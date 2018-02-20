@@ -15,7 +15,11 @@ shell commands which can be fed directly into bash.
 
 Sample invocation:
 
-    sh bin/glassfish-set-web-context-params-from-properties.sh  < statistics-vagrant.properties | sh -
+    sh bin/glassfish-set-web-context-params-from-properties.sh  < tools/dpa-tools-ide-launchers/src/main/resources/statistics-vagrant.properties | sh -
+
+The glassfish "asadmin" command must be in PATH.  This can be added on the command line like
+
+    export PATH=$PATH:$HOME/Hentet/glassfish5/bin
 
 
 /tra 2018-02-15
