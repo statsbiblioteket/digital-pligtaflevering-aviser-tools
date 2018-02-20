@@ -24,6 +24,8 @@ import java.util.stream.Stream;
  * method, like <code>filter(...)</code> has a corresponding helper
  * method here which returns what the outer method needs to do its
  * job. </p>
+ * <p>Initial work on a standalone version for Maven central is taking place at
+ * https://sbprojects.statsbiblioteket.dk/stash/projects/ARK/repos/streamtuples/browse </p>
  */
 public class StreamTuple<L, R> {
 

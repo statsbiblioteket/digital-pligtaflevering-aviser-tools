@@ -32,7 +32,9 @@
             DomsItem item = repository.lookup(new DomsId(id));
             request.setAttribute("item", item);
 
-            item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
+            throw new UnsupportedOperationException("appendEvent not right");
+
+            // item.appendEvent("dashboard", new java.util.Date(), message == null ? "" : message, eventName, outcome);
 
         %>
         <c:url value="showItem.jsp" var="showItemUrl">
