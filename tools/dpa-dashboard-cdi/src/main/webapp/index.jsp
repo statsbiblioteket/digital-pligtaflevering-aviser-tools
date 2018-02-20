@@ -1,16 +1,4 @@
-<%-- 
-    Document   : index
-    Created on : 20-06-2017, 14:25:47
-    Author     : tra
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title></title>
-</head>
+<%@include file="WEB-INF/header.jsp"%>
 <body>
 <h1>Digital pligtaflevering af aviser</h1>
 
@@ -27,7 +15,7 @@ Denne brugerflade giver tilgang til deliveries, så man fx kan
 
 
 <a href="listStates.jsp">Oversigt over deliveries i forskellige tilstande</a>.
-<hr/>
-<%= new java.util.Date() %>
+<%@include file="WEB-INF/footer.jsp"%>
+
 </body>
 </html>

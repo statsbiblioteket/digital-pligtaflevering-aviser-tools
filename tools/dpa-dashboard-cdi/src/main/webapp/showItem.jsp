@@ -5,6 +5,7 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
+<%@include file="WEB-INF/header.jsp"%>
 <%
     {
         DomsItem item = (DomsItem) request.getAttribute("item");
@@ -38,3 +39,4 @@ Data streams:
     </c:forEach>
 </table>
 
+<%@include file="WEB-INF/footer.jsp"%>

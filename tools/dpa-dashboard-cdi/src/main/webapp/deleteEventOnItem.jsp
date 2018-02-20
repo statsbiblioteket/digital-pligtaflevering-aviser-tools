@@ -6,6 +6,8 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
+<%@include file="WEB-INF/header.jsp"%>
+
 <h1>Fjern event p&aring; ${param.id}</h1>
 <%
     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
@@ -69,6 +71,4 @@
     </c:otherwise>
 </c:choose>
 
-<hr/>
-
-<%= new java.util.Date() %>
+<%@include file="WEB-INF/footer.jsp"%>
