@@ -20,3 +20,4 @@ buildNumber.properties
 .project
 .factorypath
 
+/tools/dpa-dashboard-cdi/nb-configuration.xml

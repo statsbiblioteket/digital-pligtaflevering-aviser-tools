@@ -12,6 +12,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,8 +29,11 @@ public class StateIngested extends HttpServlet {
 
     //@Inject
     volatile DomsRepository repository;
-    
-            
+
+    @Inject
+    @Named("doms.username")
+    String domsUsername;
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -52,10 +57,10 @@ public class StateIngested extends HttpServlet {
         }
         List<DomsItem> l = repository.query(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_SUCCESSFUL))
                 .collect(Collectors.toList());
-        
+
         request.setAttribute("l", l);
-        request.setAttribute("h", "Successful Ingest");
-        
+        request.setAttribute("h", "Successful Ingest " + domsUsername);
+
         getServletContext().getRequestDispatcher("/WEB-INF/listL.jsp").forward(request, response);
     }
 

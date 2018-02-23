@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>dpa-dashboard-cdi</artifactId>
     <packaging>war</packaging>
-    <name>dpa-dashboard Maven Webapp</name>
+    <name>dpa-dashboard Java 7 EE WebProfile</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>
