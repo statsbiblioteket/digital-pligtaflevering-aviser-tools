@@ -5,9 +5,9 @@
  */
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.dashboard;
 
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 
 import javax.inject.Inject;
@@ -18,15 +18,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
  * @author tra
  */
-@WebServlet(name = "StateIngested", urlPatterns = {"/StateIngested"})
-public class StateIngested extends HttpServlet {
+@WebServlet(name = "ShowItem", urlPatterns = {"/ShowItem"})
+public class ShowItem extends HttpServlet {
 
     //@Inject
     volatile DomsRepository repository;
@@ -46,7 +44,21 @@ public class StateIngested extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+/*
+        {
+            DomsItem item = (DomsItem) request.getAttribute("item");
+            if (item == null) {
+                item = (DomsItem) pageContext.getAttribute("item");  // c:forEach var="item"
+            }
+            if (item == null) {
+                ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
+                DomsRepository repository = new RepositoryConfigurator().apply(map);
+                item = repository.lookup(new DomsId(request.getParameter("id")));
+                request.setAttribute("item", item);
+            }
+        }
+*/
         if (repository == null) {
             synchronized (this) {
                 if (repository == null) {
@@ -56,14 +68,13 @@ public class StateIngested extends HttpServlet {
                 }
             }
         }
-        List<DomsItem> l = repository.query(new SBOIQuerySpecification(SBOIConstants.Q_INGEST_SUCCESSFUL))
-                .collect(Collectors.toList());
 
-        request.setAttribute("l", l);
-        request.setAttribute("h", "Successful Ingest " + domsUrl);
-        request.setAttribute( "domsUrl", domsUrl);
+        DomsItem item = repository.lookup(new DomsId(request.getParameter("id")));
+        request.setAttribute("item", item);
 
-        getServletContext().getRequestDispatcher("/WEB-INF/listL.jsp").forward(request, response);
+        request.setAttribute( "fedoraUrl", domsUrl + "/objects/" + item.getDomsId().id());
+
+        getServletContext().getRequestDispatcher("/WEB-INF/showItem.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
