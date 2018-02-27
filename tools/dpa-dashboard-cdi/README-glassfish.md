@@ -8,7 +8,11 @@ There are two approaches:
 * `default-web.xml` for the domain
 * `asadmin set-web-context-param`
 
-The easiest long-term solution is to create a Glassfish domain for each deployment and set the default context parameters in each.  
+The easiest long-term solution is to create a Glassfish domain for each deployment and then add the default context parameters to each.
+
+    asadmin create-domain dpa-stage
+    asadmin create-domain dpa-prod
+  
 For ad-hoc modifications use asadmin.
 
 
@@ -20,13 +24,18 @@ default web configuration for the domain.  This includes context parameters.
 
 Use 
 
-    bin/glassfish-default-web-xml-snippet-from-properties.pl < ~/DOMAIN.config
+    bin/glassfish-default-web-xml-snippet-from-properties.pl < ~/DOMAIN.config  
     
 to generate a XML snippet of `<context-param>` tags to copy into the default-web.xml file 
 under the `<web-app>` tag.   Restart the container for the changes to
 apply.
 
+For Ubuntu with xclip installed a sample command could be:
 
+    bin/glassfish-default-web-xml-snippet-from-properties.pl < ~/dpa-stage.conf | xclip -f -sel clip
+    
+The snippet is now on the clipboard and can be easily pasted into default-web.xml right after the
+`<web-app>` opening tag.
 
 
 asadmin set-web-context-param
