@@ -153,12 +153,14 @@
                     -->
                     <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
+                        $${ENABLE_GC_LOG:+
                         -Ddpa.git.id=${git.branch}_${git.commit.id.abbrev}
                         -verbose:gc
                         -XX:+PrintGCDetails
                         -XX:+PrintGCDateStamps
                         -XX:+PrintGCTimeStamps
                         -Xloggc:gc-$(date '+%Y-%m-%d-%H-%M-%S')-$$$$.log
+                        }
                         -XX:+HeapDumpOnOutOfMemoryError
                     </extraJvmArguments>
                 </configuration>
