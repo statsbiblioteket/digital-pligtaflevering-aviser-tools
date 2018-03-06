@@ -19,22 +19,32 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
- * Runner for stating the application during development
+ * Runner for starting the application during development at http://localhost:8080/dpa-manualcontrol/?debug
  */
 public class JettyRunner {
 
     public static void main(String[] args) throws Exception {
 
+        // https://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.html
+        System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "trace");
+
+        // Locate custom cacerts with LDAP server certificate - https://stackoverflow.com/a/38431439/53897
+
+        Path cacertPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "cacerts");
+        System.setProperty ("javax.net.ssl.trustStore", cacertPath.toFile().getAbsolutePath());
+        System.setProperty ("javax.net.ssl.trustStorePassword", "changeit");
+
         // Create Jetty Server
         Server server = new Server(8080);
 
-        Path warPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol.war");
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
+        // Read parameter name-value pairs from XML file and set them as init parameters.
         InputStream in = new FileInputStream(xmlPath.toFile());
         InputSource inputSource = new InputSource(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         WebAppContext webapp = new WebAppContext();
+
         webapp.setContextPath("/dpa-manualcontrol");
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -51,8 +61,17 @@ public class JettyRunner {
             webapp.setInitParameter(paramName, paramValue);
         }
 
-        webapp.setWar(warPath.toString());
+        // Ready
+
+        Path webXmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "src/main/webapp/WEB-INF/web.xml");
+        webapp.setDescriptor(webXmlPath.toString());
+        webapp.setResourceBase(webXmlPath.getParent().getParent().toString());
+        webapp.setParentLoaderPriority(true);
+
         server.setHandler(webapp);
+
+//        server.setDumpAfterStart(true);
+//        server.setDumpBeforeStop(true);
 
         server.start();
         server.join();
