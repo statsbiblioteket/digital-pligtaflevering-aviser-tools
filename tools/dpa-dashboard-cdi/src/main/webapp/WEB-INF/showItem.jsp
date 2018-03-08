@@ -1,9 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@include file="header.jsp"%>
-
-
 <h2><a href="listStates.jsp"><c:out value="${item.path}"/></a></h2>
-<a href="<c:url value="${fedoraUrl}"/>">${item.domsId.id()}</a>
+Fedora: <a href="<c:url value="${fedoraUrl}"/>">${item.domsId.id()}</a>
 
 <p/>
 <%@include file="listItemEvents.jsp" %>
@@ -18,5 +16,7 @@ Data streams:
         </tr>
     </c:forEach>
 </table>
+
+
 
 <%@include file="footer.jsp"%>

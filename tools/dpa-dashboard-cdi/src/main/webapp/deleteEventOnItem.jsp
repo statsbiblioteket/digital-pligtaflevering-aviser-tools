@@ -8,7 +8,7 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
 <%@include file="WEB-INF/header.jsp"%>
 
-<h1>Fjern event p&aring; ${param.id}</h1>
+<h1>Remove event for ${param.id}</h1>
 <%
     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
@@ -45,15 +45,15 @@
             item.appendEvent(domsEvent);
 
         %>
-        <c:url value="showItem.jsp" var="showItemUrl">
+        <c:url value="/ShowItem" var="showItemUrl">
             <c:param name="id" value="${param.id}"/>
         </c:url>
-        <c:redirect url="${showItemUrl}"/>
+
+        <!--c:redirect url="${showItemUrl}"/-->
     </c:when>
     <c:otherwise>
         <p>
-
-        Fjern event "${param.e}" for ${param.id}?
+        Remove event "${param.e}" for ${param.id}?
         </p>
         <table border="1">
             <tr>

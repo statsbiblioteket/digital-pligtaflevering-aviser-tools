@@ -66,7 +66,7 @@ public class StateIngested extends HttpServlet {
         request.setAttribute("h", "Successful Ingest " + domsUrl);
         request.setAttribute( "domsUrl", domsUrl);
 
-        getServletContext().getRequestDispatcher("/WEB-INF/listL.jsp").forward(request, response);
+        getServletContext().getRequestDispatcher("/WEB-INF/listDeliveriesWithLatestEvent.jsp").forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
