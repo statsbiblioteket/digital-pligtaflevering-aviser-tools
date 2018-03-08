@@ -63,6 +63,7 @@ public class GenericListTable extends VerticalLayout {
         }
         table.setId(tableId);
         table.setColumnExpandRatio(checkedColumn, 0.3f);
+        table.setColumnWidth(checkedColumn, 20);
         table.setVisible(initialVisible);
     }
 
@@ -172,6 +173,7 @@ public class GenericListTable extends VerticalLayout {
             }
             c.setReadOnly(true);
             c.setHeight("13px");
+            c.setWidth("20px");
             return c;
         }
     }

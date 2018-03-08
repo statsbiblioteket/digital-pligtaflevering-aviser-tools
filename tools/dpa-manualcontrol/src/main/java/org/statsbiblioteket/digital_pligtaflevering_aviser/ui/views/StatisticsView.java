@@ -81,6 +81,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         pdfComponent.setMimeType("application/pdf");
         //noinspection deprecation
+        pdfComponent.setVisible(false);
         pdfComponent.setType(Embedded.TYPE_BROWSER);
         metadatalink.setTargetName("_blank");
 
@@ -302,7 +303,6 @@ public class StatisticsView extends VerticalLayout implements View {
      * @param prepare
      */
     private void panelPrepare(boolean prepare) {
-        pdfComponent.setVisible(prepare);
         metadatalink.setVisible(prepare);
         tabelsLayout.setVisible(prepare);
     }
