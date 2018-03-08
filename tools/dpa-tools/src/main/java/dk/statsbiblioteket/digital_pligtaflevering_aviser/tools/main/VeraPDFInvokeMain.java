@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.kb.streams.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
@@ -17,7 +18,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
@@ -91,7 +91,9 @@ public class VeraPDFInvokeMain {
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
-        /** @noinspection PointlessBooleanExpression*/
+        /**
+         * @noinspection PointlessBooleanExpression
+         */
         @Provides
 //        Runnable provideRunnable(Modified_SBOIEventIndex index, DomsEventStorage<Item> domsEventStorage, Stream<EventTrigger.Query> queryStream, Task task) {
         protected Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
@@ -118,9 +120,9 @@ public class VeraPDFInvokeMain {
                         final Either<Exception, ToolResult> value = c.right();
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
-                            item.appendEvent(new DomsEvent(agent, new Date(), StreamTuple.stacktraceFor(value.getLeft()), eventName, false));
+                            item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
-                            final ToolResult toolResult = (ToolResult) value.get();
+                            final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
                             if (toolResult.isSuccess() == false) {
                                 item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, false));
