@@ -102,7 +102,7 @@ for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora
         PAPER_PART_IDENTIFIER=$(echo $PAPER_PART_DC | $XMLSTARLET sel $N -t -m '//dc:identifier[starts-with(text(), "path:")]' -v 'text()')
 
         case $PAPER_PART_IDENTIFIER in
-        *pagesDISABLED)
+        *pages)
             # print out URL's for all PDF files and download them to see if pdfinfo likes them.
 
             if [ -n "$VERBOSE" ]
