@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
-import dk.kb.streams.StreamTuple;
+import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 
 import java.io.PrintWriter;

@@ -3,7 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.sun.jersey.api.client.WebResource;
-import dk.kb.streams.StreamTuple;
+import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
