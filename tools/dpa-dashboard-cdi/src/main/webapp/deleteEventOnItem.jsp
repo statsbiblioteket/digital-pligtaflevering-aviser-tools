@@ -45,11 +45,9 @@
             item.appendEvent(domsEvent);
 
         %>
-        <c:url value="/ShowItem" var="showItemUrl">
+        <c:redirect url="/ShowItem">
             <c:param name="id" value="${param.id}"/>
-        </c:url>
-
-        <!--c:redirect url="${showItemUrl}"/-->
+        </c:redirect>
     </c:when>
     <c:otherwise>
         <p>
