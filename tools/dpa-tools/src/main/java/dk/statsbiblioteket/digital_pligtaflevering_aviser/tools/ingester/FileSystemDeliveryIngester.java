@@ -321,7 +321,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         List<ToolResult> subDirectoryResults = pathStream
                 .filter(Files::isDirectory)
                 .sorted(Comparator.reverseOrder()) // ensure children processed before parents
-                .flatMap(path -> createDirectoryWithDataStreamsInDoms(deliveryDomsItem, "path:" + rootPath.relativize(path), rootPath, path, md5validations))
+                .flatMap(path -> createDirectoryWithDataStreamsInDoms(deliveryDomsItem, getDCIdentifierFor(rootPath, path), rootPath, path, md5validations))
                 .collect(toList());
 
         long finishedBatchIngestTime = System.currentTimeMillis();
@@ -381,7 +381,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                 .sorted()
                 .filter(path -> ignoredFilesSet.contains(path.getFileName().toString()) == false)
                 .peek(path -> log.trace("discovered regular file {}", path.getFileName()))
-                .collect(Collectors.groupingBy(path -> "path:" + basenameOfPath(rootPath.relativize(path))));
+                .collect(Collectors.groupingBy(path -> "path:" + basenameOfPath(relativize(rootPath, path))));
 
         Map<String, List<Path>> sortedPathsForPage = new TreeMap<>(pathsForPage);
         log.trace("pathsForPage {}", pathsForPage);
@@ -434,7 +434,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                     .filter(Files::isDirectory)
                     .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
                     .sorted() // Unscramble order
-                    .flatMap(path -> lookupObjectFromDCIdentifier("path:" + rootPath.relativize(path)).stream().limit(1)) // zero or one id returned
+                    .flatMap(path -> lookupObjectFromDCIdentifier(getDCIdentifierFor(rootPath, path)).stream().limit(1)) // zero or one id returned
                     .collect(toList());
 
             if (childDirectoryObjectIds.size() != 1) { // avoid triggering bug in FedoraRest.addRelations
@@ -481,6 +481,16 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         return Stream.of(result);
     }
 
+    private String getDCIdentifierFor(Path rootPath, Path path) {
+        return "path:" + relativize(rootPath, path);
+    }
+
+    protected Path relativize(Path rootPath, Path path) {
+        final Path relativePath = rootPath.relativize(path);
+        log.trace("relativize: {} -> {} -> {}", rootPath, path, relativePath);
+        return relativePath;
+    }
+
     private Function<Map.Entry<String, List<Path>>, Stream<ToolResult>>
     getXml(DomsItem rootDomsItem, Path rootPath, DeliveryMD5Validation md5map, String deliveryName) {
         return entry -> {
@@ -495,7 +505,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                 try {
                     ToolResult result;
                     Path deliveryPath = Paths.get(rootPath.toString(), deliveryName);
-                    Path filePath = deliveryPath.relativize(path);
+                    Path filePath = relativize(deliveryPath, path);
                     ChecksumDataForFileTYPE checkSum = getChecksum(md5map.getChecksum(path.getFileName().toString()));
                     String expectedChecksum = Base16Utils.decodeBase16(checkSum.getChecksumValue());
                     // -- PDF
@@ -503,7 +513,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                         // Save *.pdf files to bitrepository
                         long startFileIngestTime = System.currentTimeMillis();
                         log.info(KibanaLoggingStrings.START_PDF_FILE_INGEST, path);
-                        Path relativePath = rootPath.relativize(path);
+                        Path relativePath = relativize(rootPath, path);
 
                         // Construct a synchronous eventhandler
                         CompleteEventAwaiter eventHandler = new PutFileEventHandler(settings, output, false);
