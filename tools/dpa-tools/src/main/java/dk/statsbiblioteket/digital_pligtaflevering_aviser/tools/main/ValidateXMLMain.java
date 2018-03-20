@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -15,7 +16,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -92,6 +92,7 @@ public class ValidateXMLMain {
                          DefaultToolMXBean mxBean) {
             final String agent = ValidateXMLMain.class.getSimpleName();
 
+            // Rewrite using ToolResultReport
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
@@ -108,7 +109,7 @@ public class ValidateXMLMain {
                         final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.right();  // FIXME:  Why is type information lost?
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
-                            item.appendEvent(new DomsEvent(agent, new Date(), StreamTuple.stacktraceFor(value.getLeft()), eventName, false));
+                            item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
                             final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));

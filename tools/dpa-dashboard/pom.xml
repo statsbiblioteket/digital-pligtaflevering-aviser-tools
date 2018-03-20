@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>dpa-dashboard</artifactId>
     <packaging>war</packaging>
-    <name>dpa-dashboard Maven Webapp</name>
+    <name>dpa-dashboard Tomcat</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>

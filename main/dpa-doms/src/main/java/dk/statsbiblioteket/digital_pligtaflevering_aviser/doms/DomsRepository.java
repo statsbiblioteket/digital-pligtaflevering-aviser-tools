@@ -101,12 +101,13 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         try {
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
-            List<DomsItem> domsItemList = new ArrayList<>();
-
             Iterator<Item> searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
-            searchIterator.forEachRemaining(item -> domsItemList.add(new DomsItem(new DomsId(item.getDomsID()), this)));
+            List<String> resultIds = new ArrayList<>();
+            searchIterator.forEachRemaining(item -> resultIds.add(item.getDomsID()));
 
-            return domsItemList.stream();
+            return resultIds.stream()
+                    .map(DomsId::new)
+                    .map(this::lookup);
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -157,6 +158,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             throw new RuntimeException("q=" + q, e);
         }
     }
+
 
     @Override
     public DomsItem lookup(DomsId id) {

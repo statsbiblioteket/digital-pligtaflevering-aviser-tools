@@ -1,7 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.google.common.base.Throwables;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.StreamTuple;
+import dk.kb.stream.StreamTuple;
 import javaslang.control.Either;
 
 import javax.inject.Inject;

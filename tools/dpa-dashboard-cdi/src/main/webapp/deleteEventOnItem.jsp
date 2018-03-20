@@ -6,7 +6,9 @@
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository" %>
 <%@ page import="dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap" %>
-<h1>Fjern event p&aring; ${param.id}</h1>
+<%@include file="WEB-INF/header.jsp"%>
+
+<h1>Remove event for ${param.id}</h1>
 <%
     ConfigurationMap map = new ConfigurationMap(ServletContextHelper.getInitParameterMap(request.getServletContext()));
 
@@ -43,15 +45,13 @@
             item.appendEvent(domsEvent);
 
         %>
-        <c:url value="showItem.jsp" var="showItemUrl">
+        <c:redirect url="/ShowItem">
             <c:param name="id" value="${param.id}"/>
-        </c:url>
-        <c:redirect url="${showItemUrl}"/>
+        </c:redirect>
     </c:when>
     <c:otherwise>
         <p>
-
-        Fjern event "${param.e}" for ${param.id}?
+        Remove event "${param.e}" for ${param.id}?
         </p>
         <table border="1">
             <tr>
@@ -69,6 +69,4 @@
     </c:otherwise>
 </c:choose>
 
-<hr/>
-
-<%= new java.util.Date() %>
+<%@include file="WEB-INF/footer.jsp"%>

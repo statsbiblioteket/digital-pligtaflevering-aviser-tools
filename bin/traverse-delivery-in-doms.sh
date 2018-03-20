@@ -79,7 +79,10 @@ ROUNDTRIP_RELSEXT=$($CURL -s $P "$O/$ROUNDTRIP_UUID/datastreams/RELS-EXT/content
 #  </rdf:Description>
 # </rdf:RDF>
 
+PAPER_UUID_SEEN=no
+
 for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora:hasPart[starts-with(@rdf:resource, "info:fedora/")] ' -v 'substring-after(@rdf:resource, "info:fedora/")' -n); do
+    PAPER_UUID_SEEN=yes
     # uuid:4170dbda-f215-495f-937d-52977b87fc01
     PAPER_RELSEXT=$($CURL -s $P "$O/$PAPER_UUID/datastreams/RELS-EXT/content")
 
@@ -99,7 +102,7 @@ for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora
         PAPER_PART_IDENTIFIER=$(echo $PAPER_PART_DC | $XMLSTARLET sel $N -t -m '//dc:identifier[starts-with(text(), "path:")]' -v 'text()')
 
         case $PAPER_PART_IDENTIFIER in
-        *pagesDISABLED)
+        *pages)
             # print out URL's for all PDF files and download them to see if pdfinfo likes them.
 
             if [ -n "$VERBOSE" ]
@@ -162,6 +165,10 @@ for PAPER_UUID in $(echo $ROUNDTRIP_RELSEXT | $XMLSTARLET sel $N -t -m '//fedora
     done
 done
 
+if [  "$PAPER_UUID_SEEN" = "no" ]
+then
+    echo "No newspapers stored for delivery round trip"
+fi
 
 
 
