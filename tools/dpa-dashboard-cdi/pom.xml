@@ -93,6 +93,27 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+	    <!-- http://leonardehrenfried.github.io/jspc-maven-plugin/compile-mojo.html -->
+            <plugin>
+                <groupId>io.leonard.maven.plugins</groupId>
+                <artifactId>jspc-maven-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <id>jspc</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+			<configuration>
+			  <keepSources>true</keepSources>
+			  <stopAtFirstError>false</stopAtFirstError>
+			  <verbose>true</verbose>
+			  <suppressSmap>false</suppressSmap>
+			</configuration>
+                    </execution>
+                </executions>
+		
+            </plugin>
         </plugins>
     </build>
 </project>
