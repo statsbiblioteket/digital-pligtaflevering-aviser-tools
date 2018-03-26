@@ -21,7 +21,7 @@ for (@ARGV) {
     print "env FEDORA_USER=" . $cfg->param('default.doms.username');
     print " FEDORA_PASSWORD=" . $cfg->param('default.doms.password');
     print "  O=" . $cfg->param('default.doms.url') . "/objects";
-    print " ./traverse-delivery-in-doms.sh -v $_";
+    print " ./validate-delivery-in-doms.sh -v $_";
     print " \n";
 }
 
