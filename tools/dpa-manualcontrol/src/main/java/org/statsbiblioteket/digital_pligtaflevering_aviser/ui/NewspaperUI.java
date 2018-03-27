@@ -6,6 +6,7 @@ import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
 
 /**
@@ -39,6 +40,10 @@ public class NewspaperUI extends UI {
             model.setInitials(initials);
         }
 
+        String screenwidth = request.getParameter("screenwidth");
+        if(screenwidth!=null) {
+            Settings.screenwidth = Integer.parseInt(screenwidth);
+        }
         //These parameters can be used to construct a link to information without performing the search in the UI
         String month = request.getParameter("month");
         String del = request.getParameter("del");
