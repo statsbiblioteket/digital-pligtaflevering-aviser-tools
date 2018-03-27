@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" type="image/x-icon" href="http://www.statsbiblioteket.dk/favicon.ico" />
+    <link rel="apple-touch-icon" href="http://www.statsbiblioteket.dk/touch_icon.png" />
     <style>
         body {
             color: #333333;
