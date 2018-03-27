@@ -34,7 +34,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"};
+    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"};
     private static String[] sectionColumns = new String[]{"sectionName", "sectionNumber", "pageCount"};
     private static String[] fileColumns = new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"};
     private static String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
