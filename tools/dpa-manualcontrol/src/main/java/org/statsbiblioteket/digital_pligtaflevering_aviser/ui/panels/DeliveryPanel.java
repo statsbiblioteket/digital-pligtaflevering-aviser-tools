@@ -68,8 +68,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             }
         });
         deliveryPanel.setSortParam("newspaperTitle");
-        fileSelectionPanel.setSortParam("sectionName");
-        articleSelectionPanel.setSortParam("sectionName");
+        fileSelectionPanel.setSortParam("pageName");
+        articleSelectionPanel.setSortParam("articleName");
     }
 
     /**
