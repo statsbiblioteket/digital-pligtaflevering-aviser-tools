@@ -223,7 +223,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
 
             final String linkingAgentIdentifierValue = getClass().getSimpleName();
 
-            log.info("{} {} Took: {} ms", linkingAgentIdentifierValue, deliveryDomsItem, System.currentTimeMillis() - startTime);
+            log.info("{} {} outcome={} Took: {} ms", linkingAgentIdentifierValue, deliveryDomsItem, outcome, System.currentTimeMillis() - startTime);
             log.trace("{} message={}, outcome={}", deliveryDomsItem, deliveryEventMessage, outcome);
 
             return Either.right(result);
