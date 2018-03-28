@@ -21,7 +21,7 @@ public class TitleValidationPanel extends DeliveryPanel {
     public TitleValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(true);
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfArticles", "noOfPages"});
+        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfPages", "noOfArticles"});
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {

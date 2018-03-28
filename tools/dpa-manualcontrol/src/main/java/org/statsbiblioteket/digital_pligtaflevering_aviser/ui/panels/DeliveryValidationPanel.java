@@ -41,7 +41,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"});
+        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"});
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
