@@ -115,7 +115,7 @@
             <dependency>
                 <groupId>dk.kb.stream</groupId>
                 <artifactId>streamtuples</artifactId>
-                <version>0.5-SNAPSHOT</version>
+                <version>0.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

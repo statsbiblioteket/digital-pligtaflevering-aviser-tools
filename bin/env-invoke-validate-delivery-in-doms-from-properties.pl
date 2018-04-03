@@ -8,7 +8,7 @@ use warnings FATAL => 'all';
 # For ubuntu:   apt install libconfig-simple-perl
 #
 # Sample invocation:
-# cat  ~/stage-uuids.txt |xargs ./env-invoke-traverse-delivery-in-doms-from-properties.pl ~/dpa-mirzam.conf | sh -xv -
+# cat  ~/stage-uuids.txt |xargs ./env-invoke-validate-delivery-in-doms-from-properties.pl ~/dpa-mirzam.conf | sh -xv -
 
 use Config::Simple;
 
@@ -21,7 +21,7 @@ for (@ARGV) {
     print "env FEDORA_USER=" . $cfg->param('default.doms.username');
     print " FEDORA_PASSWORD=" . $cfg->param('default.doms.password');
     print "  O=" . $cfg->param('default.doms.url') . "/objects";
-    print " ./traverse-delivery-in-doms.sh -v $_";
+    print " ./validate-delivery-files-in-doms.sh -v $_";
     print " \n";
 }
 
