@@ -83,6 +83,7 @@ public class IngesterMain {
     public static final String DPA_DELIVERIES_FOLDER = "dpa.deliveries.folder";
     public static final String DPA_TEST_MODE = "dpa.testmode";
     public static final String DPA_PUTFILE_DESTINATION = "dpa.putfile.destinationpath";
+    public static final String BITREPOSITORY_INGESTER_MAX_RETRIES = "bitrepository.ingester.maxPutRetries";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -356,6 +357,15 @@ public class IngesterMain {
             return settings;
         }
 
+        /** Get maximum number of retries when putting a file to the bit repository (which is known to lose messages).
+         *
+         */
+        @Provides
+        @Produces
+        @Named(BITREPOSITORY_INGESTER_MAX_RETRIES)
+        int provideBitrepositoryMaxRetries(ConfigurationMap configurationMap) {
+            return Integer.valueOf(configurationMap.getRequired(BITREPOSITORY_INGESTER_MAX_RETRIES)).intValue();
+        }
         /**
          * Provide Function for converting filePath into an ID which is suitable for bitRepository
          *

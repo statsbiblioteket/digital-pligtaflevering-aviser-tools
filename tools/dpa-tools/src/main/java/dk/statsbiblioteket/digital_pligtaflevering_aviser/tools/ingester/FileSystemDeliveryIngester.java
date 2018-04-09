@@ -70,12 +70,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper.DPA_GIT_ID;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.BITREPOSITORY_INGESTER_MAX_RETRIES;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_IGNOREDFILES;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 import static java.nio.file.Files.walk;
 import static java.util.stream.Collectors.toList;
+import static org.bitrepository.client.eventhandler.OperationEvent.OperationEventType.FAILED;
 
 /**
  * <p> FileSystemIngester takes a given directory and creates a corresponding set of DOMS objects. One object for each
@@ -90,8 +92,10 @@ import static java.util.stream.Collectors.toList;
  */
 public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Either<Exception, ToolResult>>, AutoCloseable {
 
-    private static final long DEFAULT_FILE_SIZE = 0;
     public static final String BITREPOSITORY_INGESTER_COLLECTIONID = "bitrepository.ingester.collectionid";
+
+    private static final long DEFAULT_FILE_SIZE = 0;
+
     private static final String RELATION_PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#hasMD5";
     private static final String CONTENTS = "CONTENTS";
     public static final String EVENT_TYPE = "ingester";
@@ -119,6 +123,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
     protected final Function<Path, Stream<Path>> deliveriesForPath;
     private final DefaultToolMXBean mxBean;
     private String status;
+    private int maxPutFileAttempts;
 
     @Inject
     public FileSystemDeliveryIngester(DomsRepository repository,
@@ -133,6 +138,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                                       @Named(DPA_GIT_ID) String gitId,
                                       @Named(DOMS_COLLECTION) String domsCollection,
                                       @Named(PROVIDE_ENCODE_PUBLIC_URL_FOR_FILEID) Function<String, String> encodePublicURLForFileID,
+                                      @Named(BITREPOSITORY_INGESTER_MAX_RETRIES) int maxPutFileAttempts,
                                       Function<Path, Stream<Path>> deliveriesForPath,
                                       DefaultToolMXBean mxBean,
                                       Settings settings) {
@@ -141,6 +147,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         this.fileNameToFileIDConverter = fileNameToFileIDConverter;
         this.md5Convert = md5Convert;
         this.urlToBitmagBatchPath = urlToBitmagBatchPath; // file:///delivery-samples/
+        this.maxPutFileAttempts = maxPutFileAttempts;
         try {
             this.urlToBitmagBatch = new URL(urlToBitmagBatchPath);
         } catch (MalformedURLException e) {
@@ -527,11 +534,20 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
                         // The [referenceben] does not support '/' in fileid, this mean that in development, we can only run with a teststub af putFileClient
                         // Checksum is not validated since the bitrepository return an error if the checksum is not validated
 
-                        putfileClient.putFile(bitrepositoryIngesterCollectionId,
-                                urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
-                                checkSum, null, eventHandler, null);
+                        OperationEvent finalEvent;
+                        int currentPutFileAttempt = 0;
+                        do {
+                            currentPutFileAttempt = currentPutFileAttempt + 1;
+                            if (currentPutFileAttempt > 1) {
+                                log.warn("Attempt {} out of {} to PutFile {} ({}) to bit repository.",
+                                        currentPutFileAttempt, maxPutFileAttempts, fileId, urlWhereBitrepositoryCanDownloadTheFile);
+                            }
+                            putfileClient.putFile(bitrepositoryIngesterCollectionId,
+                                    urlWhereBitrepositoryCanDownloadTheFile, fileId, DEFAULT_FILE_SIZE,
+                                    checkSum, null, eventHandler, null);
 
-                        OperationEvent finalEvent = eventHandler.getFinish();
+                            finalEvent = eventHandler.getFinish();
+                        } while (currentPutFileAttempt < maxPutFileAttempts && finalEvent.getEventType() == FAILED);
 
                         long finishedFileIngestTime = System.currentTimeMillis();
                         log.info(KibanaLoggingStrings.FINISHED_PDF_FILE_INGEST, path, finishedFileIngestTime - startFileIngestTime);
