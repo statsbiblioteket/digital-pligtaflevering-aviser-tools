@@ -1,7 +1,8 @@
-The binary tarball sent to drift will have this structure:
+The binary tarball sent to IT-Drift will have this structure:
 
     bin/
     conf/
+    java-wrappers/
     libs/
     tomcat-apps/
     
@@ -9,10 +10,10 @@ The binary tarball sent to drift will have this structure:
 The file layout in devel (dpaviser@achernar)/stage/production 
 will be similar to:
 
-    bin/
     logs/
     services/bin
     services/conf
+    services/java-wrappers/
     services/libs
     services/tomcat-apps
     services/webapps
@@ -20,9 +21,6 @@ will be similar to:
 
 The individual folders contain the following:
 
-bin/
----
-Shell scripts for invoking the wrapper scripts in `services/bin` with the correct arguments.
  
 logs/
 ---
@@ -35,15 +33,21 @@ drift cleans old files from this folder on a regular basis.
 
 services/bin
 ---
-The contents of `bin/` from the binary tarball.
+Handwritten shell scripts invoking the java wrappers including the necessary flock's.
 
 services/conf
 ---
 The contents of `conf/` from the binary tarball, modified by drift as necessary.
 
+services/java-wrappers
+---
+
+The generated java-wrappers responsible for invoking the main methods with
+the appropriate arguments.  Untouched by man.
+
 services/libs
 ---
-The contents of `libs/` from the binary tarball.
+The Maven artifacts needed to run the main methods.
 
 services/webapps
 ---
@@ -88,6 +92,3 @@ So something like:
 
 
 /tra 2016-08-26
-
-
-
