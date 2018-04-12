@@ -7,15 +7,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- *
+ *  Helper class to keep generics a bit simpler using StreamTuple if we _know_ the left side is a DomsItem of some sort.  Also
+ *  has a stacktrace renderer (which for some reason is not in Java 10 yet).
  */
-public class DomsIdTuple<V> extends StreamTuple<DomsItem, V> {
-    public DomsIdTuple(DomsItem domsItem, V value) {
+public class DomsItemTuple<V> extends StreamTuple<DomsItem, V> {
+    public DomsItemTuple(DomsItem domsItem, V value) {
         super(domsItem, value);
     }
 
-    public static DomsIdTuple<DomsItem> create(DomsItem id) {
-        return new DomsIdTuple<>(id, id);
+    public static DomsItemTuple<DomsItem> create(DomsItem id) {
+        return new DomsItemTuple<>(id, id);
     }
 
     public static String stacktraceFor(Exception e) {

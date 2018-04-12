@@ -66,6 +66,7 @@
         </init-param>
     </filter>
 
+    <!-- CAS temporarily disabled
     <filter-mapping>
         <filter-name>CAS Single Sign Out Filter</filter-name>
         <url-pattern>/*</url-pattern>
@@ -85,6 +86,7 @@
         <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    -->
 
     <!-- Jetty: java 8 in jsp, please - doesn't work though so no lambdas for now -->
     <servlet id="jsp">

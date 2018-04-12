@@ -19,8 +19,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -81,7 +82,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     }
 
     /**
-     * Retrieve a list of data streams for further processing.
+     * Retrieve a list of data streams for further processing.  Should return a Stream.
      * <p>
      * FIXME:  Currently the underlying DatastreamProfile class leaks through.  When we know what we need, hide it.
      */
@@ -91,6 +92,20 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return objectProfile.getDatastreams().stream()
                 .map(ds -> new DomsDatastream(ds, this, domsRepository))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieve the specific datastream for further processing.
+     * <p>
+     * FIXME:  Currently the underlying DatastreamProfile class leaks through.  When we know what we need, hide it.
+     */
+    public DomsDatastream datastream(String datastreamId) {
+        reloadIfNeeded();
+        //noinspection ConstantConditions
+        return objectProfile.getDatastreams().stream()
+                .filter(datastream -> datastream.getID().equals(datastreamId))
+                .map(datastream -> new DomsDatastream(datastream, this,domsRepository))
+                .findAny().get();
     }
 
     /**
@@ -245,10 +260,9 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return domsId.id();
     }
 
-    public String getDC() {
-        return domsRepository.getDC(domsId);
+    public InputStream getDataStreamInputStream(String datastreamId) {
+        return domsRepository.getDataStreamInputStream(domsId, datastreamId);
     }
-
     /**
      * Returns the path identifier inserted by the ingester for a given node.  Throws a runtime exception
      * if the XPath extraction failed.  Throws NoSuchElementException if no "path:" identifier is present for the
@@ -262,26 +276,28 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         context.startPrefixMapping("dc", "http://purl.org/dc/elements/1.1/");
         xPath.setNamespaceContext(context);
 
-        String dcContent = getDC();
-        log.trace("DC={}", dcContent);
-        final Document dom = DOM.streamToDOM(new ByteArrayInputStream(dcContent.getBytes(StandardCharsets.UTF_8)), true);
+        try(InputStream is = getDataStreamInputStream("DC")) {
+            final Document dom = DOM.streamToDOM(new BufferedInputStream(is), true);
 
-        NodeList nodeList;
-        try {
-            nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(dom, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            throw new RuntimeException("//dc:identifier failed in DC for " + this, e);
-        }
-        List<String> textContent = new ArrayList<>();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            textContent.add(nodeList.item(i).getTextContent());
-        }
-        Optional<String> relativeFilenameFromDublinCore = textContent.stream()
-                .filter(s -> s.startsWith("path:"))
-                .map(s -> s.substring("path:".length()))
-                .findAny();
+            NodeList nodeList;
+            try {
+                nodeList = (NodeList) xPath.compile("//dc:identifier").evaluate(dom, XPathConstants.NODESET);
+            } catch (XPathExpressionException e) {
+                throw new RuntimeException("//dc:identifier failed in DC for " + this, e);
+            }
+            List<String> textContent = new ArrayList<>();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                textContent.add(nodeList.item(i).getTextContent());
+            }
+            Optional<String> relativeFilenameFromDublinCore = textContent.stream()
+                    .filter(s -> s.startsWith("path:"))
+                    .map(s -> s.substring("path:".length()))
+                    .findAny();
 
-        return relativeFilenameFromDublinCore.orElseGet(() -> "BROKEN VALUE!!");
+            return relativeFilenameFromDublinCore.orElseGet(() -> "BROKEN VALUE!!");
+        } catch (IOException e) {
+            throw new RuntimeException("getPath", e);
+        }
     }
 
     // BACKPORT - DomsEventStorage.getPremisForItem() is private so adapted from that.

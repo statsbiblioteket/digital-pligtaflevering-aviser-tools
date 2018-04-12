@@ -79,17 +79,17 @@ public class AutonomousPreservationToolHelper {
 
         log.info("*** Started at {} - {} ms since JVM start. git: {} ", now(), getRuntimeMXBean().getUptime(), gitId);
         log.debug("configuration: {}", map);
-        log.trace("------------------------------------------------------------------------------");
+        log.info("------------------------------------------------------------------------------");
 
         Runtime.getRuntime().addShutdownHook(new Thread(
                 () -> {
-                    log.trace("------------------------------------------------------------------------------");
+                    log.info("------------------------------------------------------------------------------");
                     log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
                 }));
 
         try {
             String result = toolFunction.apply(map).call();
-            log.trace("Result: {}", result);
+            log.info("Result: {}", result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);
         }

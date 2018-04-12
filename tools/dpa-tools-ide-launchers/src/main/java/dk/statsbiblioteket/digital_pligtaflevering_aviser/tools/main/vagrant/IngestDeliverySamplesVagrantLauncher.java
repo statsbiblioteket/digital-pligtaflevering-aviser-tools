@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.localhost;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.vagrant;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
@@ -15,22 +15,22 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
  * Launcher suitable for invoking IngesterMain from within an IDE using the delivery-samples folder.
  *
  */
-public class IngestDeliverySamplesLocalhostLauncher {
+public class IngestDeliverySamplesVagrantLauncher {
 
     public static void main(String[] args) throws Exception {
 
-        Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLocalhostLauncher.class, "delivery-samples");
-        Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLocalhostLauncher.class, "bitrepositorystub-storage");
+        Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesVagrantLauncher.class, "delivery-samples");
+        Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesVagrantLauncher.class, "bitrepositorystub-storage");
 
         // http://stackoverflow.com/a/320595/53897
-        URI l = IngestDeliverySamplesLocalhostLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+        URI l = IngestDeliverySamplesVagrantLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         Path startDir = Paths.get(l);
 
         IngesterMain.main(new String[]{
-                "localhost/ingester.properties",
+                "vagrant/ingester.properties",
                 IngesterMain.DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
-                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/file1pillar/files/dpaviser/folderDir/",
+                BITMAG_BASEURL_PROPERTY + "=http://vagrant:58709/var/file1pillar/files/dpaviser/folderDir/",
                 SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),  // where "resources" end up compiled.
         });
     }
