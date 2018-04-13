@@ -228,8 +228,10 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      * <p>
      * Logic lifted from https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/master/newspaper-batch-event-framework/tree-processor/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/iterator/fedora3/IteratorForFedora3.java#L146
      *
+     * Deprecated because ABR points out this needs to come from the datastream on the doms item.  partsForStream()
      * @return
      */
+    @Deprecated
     public Stream<DomsItem> children() {
         log.trace("childrenFor: {}", this);
         final WebResource wr;
@@ -264,9 +266,12 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return domsRepository.getDataStreamInputStream(domsId, datastreamId);
     }
     /**
+     * <p>
      * Returns the path identifier inserted by the ingester for a given node.  Throws a runtime exception
      * if the XPath extraction failed.  Throws NoSuchElementException if no "path:" identifier is present for the
-     * object.
+     * object.</p>
+     *
+     * <p>NOTE:  ABR points out that DOM.createXPathSelector(...) does much of this and might be used instead.</p>
      *
      * @return
      */

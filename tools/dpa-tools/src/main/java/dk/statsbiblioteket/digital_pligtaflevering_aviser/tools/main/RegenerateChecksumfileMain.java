@@ -1,23 +1,19 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import com.google.common.base.Throwables;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.kb.stream.StreamTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPreservationToolHelper;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.Eithers;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
@@ -34,13 +30,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -55,6 +50,9 @@ import static java.util.stream.Collectors.toList;
  * <li>#3 Article XML files - zero or more for each paper organized under "articles" </li>
  * </ol>
  * </p>
+ * <p>The roundtripItem is traversed and exceptions+resultvalues captured in an Either which is then used to determine
+ * if the roundtrip is successful or not (with the appropriate events saved on the item)</p>
+ *
  * <p>Important:  Until the underlying efedora is ensured threadsafe do <it>not</it> attempt to parallize the
  * stream.</p>
  *
@@ -94,66 +92,75 @@ public class RegenerateChecksumfileMain {
             final String agent = RegenerateChecksumfileMain.class.getSimpleName();
 
             //
-            Tool f = () -> Stream.of(workToDoQuery)
+            Tool tool = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
                     // roundtrip node for a day delivery and we need to process all the children to get the combined md5sum.
-                    .map(DomsItemTuple::create)
-                    .map(st0 -> st0.map(roundtripItem -> roundtripItem.children()
-                                    .flatMap((DomsItem paperItem) -> Stream.concat(
+                    .map(StreamTuple::create)
+                    .map(st0 -> st0.map(roundtripItem -> Eithers.tryCatch(
+                            () -> roundtripItem.children()
+                                    .flatMap(paperItem -> Stream.concat(
                                             // each paper has "pages" and "articles" subnodes.  concat the processing of both, until a nice way of splitting a stream is found.
                                             paperItem.children()
                                                     .filter(paperPartItem -> paperPartItem.getPath().endsWith("pages"))
-                                                    .flatMap((DomsItem pagesItem) -> pagesItem.children()
-                                                            // each page has XML datastream and a subnode with an external link to bit repo to the PDF file
-                                                            .flatMap((DomsItem pageItem) -> Stream.concat(
-                                                                    // #1
-                                                                    Stream.of(pageItem)
-                                                                            .map(DomsItemTuple::create)
-                                                                            .map(st2 -> st2.map(xmlItem -> xmlItem.getDataStreamInputStream("XML")))
-                                                                            .map(st2 -> st2.map((xmlItem, is) -> md5ForClosableInputStream(is) + "  " + checksumFilePathFor(xmlItem) + ".xml"))
-                                                                    ,
-                                                                    // #2
-                                                                    pageItem.children()
-                                                                            .map(DomsItemTuple::create)
-                                                                            .map(st2 -> st2.map(pdfItem -> pdfItem.getDataStreamInputStream("CONTENTS")))
-                                                                            .map(st2 -> st2.map((pdfItem, is) -> md5ForClosableInputStream(is) + "  " + checksumFilePathFor(pdfItem)))
-                                                            )))
-                                            , paperItem.children()
+                                                    // each page has XML datastream and a subnode with an external link to bit repo to the PDF file
+                                                    .flatMap(pagesItem -> pagesItem.children()
+                                                            .flatMap(pageItem ->
+                                                                    Stream.concat( // #1
+                                                                            Stream.of(md5sumTupleForDataStream(pageItem, "XML", md5sumFilePathFor(pageItem) + ".xml"))
+                                                                            ,
+                                                                            pageItem.children() // #2
+                                                                                    .map(pdfItem -> md5sumTupleForDataStream(pdfItem, "CONTENTS", md5sumFilePathFor(pdfItem)))
+                                                                    )
+                                                            )
+                                                    )
+                                            ,
+                                            paperItem.children() // #3
                                                     .filter(paperPartItem -> paperPartItem.getPath().endsWith("articles"))
-                                                    .flatMap((DomsItem articlesItem) -> articlesItem.children()
-                                                            .map(DomsItemTuple::create)
-                                                            .map(st -> st.map(articleItem -> articleItem.getDataStreamInputStream("XML")))
-                                                            // #3
-                                                            .map(st -> st.map((articleItem, is) -> md5ForClosableInputStream(is) + "  " + checksumFilePathFor(articleItem) + ".xml"))
+                                                    .flatMap(articlesItem -> articlesItem.children()
+                                                            .map(articleItem -> md5sumTupleForDataStream(articleItem, "XML", md5sumFilePathFor(articleItem) + ".xml"))
                                                     )
                                             )
                                     )
                                     .peek(st -> st.peek((checksummedItem, md5sumLine) -> log.trace("{}->{}", checksummedItem, md5sumLine)))
                                     .map(st -> st.right())
+                                    .peek(md5sumLine -> mxBean.currentId = md5sumLine)
+                                    .peek(md5sumLine -> mxBean.idsProcessed++)
+                                    .collect(Collectors.joining("\n")) // collect all generated md5sum lines into a checksums.txt compatible "file"
+                            )
+                    ))
+                    // stream:  DomsItem -> md5sumLines
+                    .peek((StreamTuple<DomsItem, Either<Exception, String>> i) -> log.trace("{}", i))
 
-                                    .peek(s -> mxBean.currentId = s)
-                                    .peek(s -> mxBean.idsProcessed++)
-                                    .collect(Collectors.joining("\n")) + "\n" // collect all generated md5sum lines into a checksums.txt compatible "file"
+                    .map(st -> st.map((either) -> either.map((String md5sumLines) -> md5sumLines + "\n")))  // we need a trailing newline to be compatible with md5sum output
+
+                    .map(st -> st.map((roundtripItem, either) ->
+                                    "outcome=" + either.fold(
+                                            (Exception exception) -> {
+                                                log.error("{}: {}", roundtripItem.getPath(), roundtripItem.toString(), exception);
+                                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(exception), eventName, false));
+                                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
+
+                                                return false;
+                                            },
+                                            (String md5sumFile) -> {
+                                                byte[] bytes = md5sumFile.getBytes(StandardCharsets.UTF_8);
+                                                roundtripItem.modifyDatastreamByValue("MD5SUMS", null, null, bytes, null, "text/plain", null, null);
+
+                                                // int newlines = md5sumFile.replaceAll("[^\n]*","").length();
+                                                int newlines = md5sumFile.length() - md5sumFile.replace("\n", "").length();
+                                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), newlines + " files checksummed", eventName, true));
+                                                return true;
+                                            }
+                                    )
                             )
                     )
-                    // log the result (and document what the stream currently contains)
-                    .peek((StreamTuple<DomsItem, String> st) -> log.info("{}", st))
-
-                    // store md5sums "file" in MD5SUMS datastream on roundtrip item.
-                    .peek(st -> st.peek((roundtripItem, md5sum) -> roundtripItem.modifyDatastreamByValue(
-                            "MD5SUMS", null, null, md5sum.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, null)
-                    ))
-                    .peek(c -> c.left().appendEvent(new DomsEvent(agent, new Date(),
-                            (c.right().length() - c.right().replace("\n", "").length()) + " files checksummed", eventName, true))
-                    )
-                    // now render the processed paths as a list to present at the end of the job
-                    .map(st -> st.left().getPath())
+                    .peek((StreamTuple<DomsItem, String> st) -> log.trace("{}", st))
                     .sorted()
                     .collect(toList())
                     .toString();
 
-            return f;
+            return tool;
         }
 
         /**
@@ -163,15 +170,19 @@ public class RegenerateChecksumfileMain {
          * @param domsItem doms item to extract one-level-down-path from
          * @return relative path
          */
-        public String checksumFilePathFor(DomsItem domsItem) {
+        public String md5sumFilePathFor(DomsItem domsItem) {
             String pathInDoms = domsItem.getPath();
             return pathInDoms.substring(pathInDoms.indexOf('/') + 1);
+        }
+
+        public static DomsItemTuple<String> md5sumTupleForDataStream(DomsItem item, String datastreamName, String filename) {
+            return new DomsItemTuple<>(item, md5ForClosableInputStream(item.getDataStreamInputStream(datastreamName), filename) + "  " + filename);
         }
 
         /**
          * @noinspection unused, StatementWithEmptyBody
          */
-        public static String md5ForClosableInputStream(InputStream originalInputStream) {
+        public static String md5ForClosableInputStream(InputStream originalInputStream, String id) {
             try {
                 MessageDigest digest = MessageDigest.getInstance("md5");
                 try (DigestInputStream inputStream = new DigestInputStream(new BufferedInputStream(originalInputStream), digest)) {
@@ -184,93 +195,8 @@ public class RegenerateChecksumfileMain {
                     return DatatypeConverter.printHexBinary(digest.digest()).toLowerCase(Locale.ROOT);
                 }
             } catch (Exception e) {
-                throw new RuntimeException("md5ForInputStream()", e);
+                throw new RuntimeException("md5ForInputStream() id=" + id, e);
             }
-        }
-
-        /**
-         * Validate all xml-contents located as child under the delivery
-         *
-         * @param mxBean    JMX bean to update statistics in
-         * @param eventName event name to use for events stored in DOMS.
-         * @return function to apply on delivery DOMS items.
-         */
-        private Function<DomsItem, ToolResult> processChildDomsId(DefaultToolMXBean mxBean, String eventName) {
-            return (DomsItem parentDomsItem) -> {
-                String deliveryName = parentDomsItem.getPath();
-                long startDeliveryIngestTime = System.currentTimeMillis();
-                log.info(KibanaLoggingStrings.START_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName);
-
-                // Single doms item
-                final String agent = RegenerateChecksumfileMain.class.getSimpleName();
-
-                List<StreamTuple<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
-                        .map(DomsItemTuple::create)
-                        .flatMap(c -> c.flatMap(item -> { // For an individual child, process XML datastream if present.
-                                    try {
-                                        return item.datastreams().stream()
-                                                .filter(datastream -> datastream.getId().equals("XML"))
-                                                .peek(datastream -> mxBean.idsProcessed++)
-                                                .peek(datastream -> mxBean.currentId = c.toString())
-                                                .map(datastream -> analyzeXML(datastream))
-                                                // Save individual result as event on node.
-                                                .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
-                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(e), eventName, false)),
-                                                        tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
-                                                );
-                                    } catch (Exception e) {
-                                        return Stream.of(Either.left(e));
-                                    }
-                                }
-                        ))
-                        .collect(toList());
-
-                ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
-                        (id, t) -> log.error("id: {}", id, t),
-                        t -> Throwables.getStackTraceAsString(t));
-
-                ToolResult result = trr.apply(parentDomsItem, toolResults);
-
-                long finishedDeliveryIngestTime = System.currentTimeMillis();
-                log.info(KibanaLoggingStrings.FINISHED_DELIVERY_XML_VALIDATION_AGAINST_XSD, deliveryName, finishedDeliveryIngestTime - startDeliveryIngestTime);
-
-                return result;
-            };
-        }
-
-        /**
-         * Start validating xml-content in fedora and return results
-         *
-         * @param ds DomsDatastream containing the XML file to validate.
-         * @return a ToolResult indicating if it went well or not (wrapped in an Either to hold any exception).
-         */
-        protected Either<Exception, ToolResult> analyzeXML(DomsDatastream ds) {
-            throw new RuntimeException();
-//            Map<String, String> xsdMap = provideXsdRootMap();
-//            // Note:  We ignore character set problems for now.
-//            final String datastreamAsString = ds.getDatastreamAsString();
-//
-//            try {
-//                final ToolResult toolResult;
-//
-//                String rootnameInCurrentXmlFile = getRootTagName(new InputSource(new StringReader(datastreamAsString)));
-//                String xsdFile = xsdMap.get(rootnameInCurrentXmlFile);
-//                if (xsdFile == null) {
-//                    toolResult = ToolResult.fail("Unknown root:" + rootnameInCurrentXmlFile);
-//                } else {
-//                    URL url = Objects.requireNonNull(getClass().getClassLoader().getResource(xsdFile), "xsdFile not found: " + xsdFile);
-//
-//                    Validator validator = getValidatorFor(url);
-//
-//                    final StreamSource source = new StreamSource(new StringReader(datastreamAsString));
-//                    validator.validate(source); // throws exception if invalid.
-//                    log.trace("{}: XML valid", ds.getDomsItem().getDomsId().id());
-//                    toolResult = ToolResult.ok(""); // Empty message if ok.  Makes GUI presentation smaller.
-//                }
-//                return Either.right(toolResult);
-//            } catch (Exception e) {
-//                return Either.left(e);
-//            }
         }
 
         @Provides
