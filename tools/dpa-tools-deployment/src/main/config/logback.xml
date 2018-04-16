@@ -2,6 +2,8 @@
 
     Current copy adapted from Avisprojektet.  Write log for each invocation to a unique file name.
     (We expect deletion of old log files to be done externally)
+
+    https://logback.qos.ch/manual/configuration.html
 -->
 <configuration debug="false" packagingData="true">
     <timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss.SSS"/>
@@ -13,16 +15,13 @@
             <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg\(%file:%line\)%n</pattern>
         </encoder>
     </appender>
-<!--
-    <logger name="dk.statsbiblioteket" level="DEBUG"/>
-    <root level="INFO">
-        <appender-ref ref="LOG-FILE"/>
-    </root>
-    -->
-    <logger name="dk.statsbiblioteket" level="TRACE"/>
-    <root level="TRACE">
-        <appender-ref ref="LOG-FILE"/>
-    </root>
+
     <logger name="org.apache.zookeeper.ZooKeeper" level="WARN"/>
+    <logger name="org.bitrepository" level="WARN"/>
+
+    <logger name="dk.statsbiblioteket" level="${LOGBACK_APP_LEVEL:-INFO}"/>
+    <root level="${LOGBACK_ROOT_LEVEL:-INFO}">
+        <appender-ref ref="LOG-FILE"/>
+    </root>
 
 </configuration>

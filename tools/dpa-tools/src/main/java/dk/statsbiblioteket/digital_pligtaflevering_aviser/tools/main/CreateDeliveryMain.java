@@ -34,12 +34,23 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 
 /**
- * Unfinished create batch trigger main.
+ * @noinspection WeakerAccess
  */
 public class CreateDeliveryMain {
 
-    public static final String TRANSFER_COMPLETE = "transfer_complete";
+    /**
+     * Where to store the markers that a delivery has already been processed?
+     */
     public static final String AUTONOMOUS_DONEDIR = "autonomous.filesystem.processed.deliverys";
+    /**
+     * How should this agent report itself?
+     */
+    public static final String AUTONOMOUS_AGENT = "autonomous.agent";
+    /**
+     * The parameter for the name of the file that MUST be present in the delivery tree root for
+     * this delivery to be processed.
+     */
+    public static final String DELIVERY_READY_FILENAME = "delivery.ready.filename";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -55,8 +66,6 @@ public class CreateDeliveryMain {
 
     @Module
     static class CreateDeliveryModule {
-        public static final String AUTONOMOUS_AGENT = "autonomous.agent";
-
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
@@ -66,7 +75,8 @@ public class CreateDeliveryMain {
                          @Named(DOMS_PASSWORD) String domsPass,
                          @Named(DOMS_PIDGENERATOR_URL) String urlToPidGen,
                          Provider<Stream<Path>> deliveriesToCreateProvider,
-                         @Named(AUTONOMOUS_DONEDIR) String doneDir) {
+                         @Named(AUTONOMOUS_DONEDIR) String doneDir,
+                         @Named(DELIVERY_READY_FILENAME) String deliveryReadyFilename) {
 
             // sanity check
             File doneDirFile = new File(doneDir);
@@ -79,16 +89,16 @@ public class CreateDeliveryMain {
             }
 
             return () -> {
-                //Expected folderFormat
+                // Expected folderFormat
                 Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                 // Iterate through the deliveries on disk
                 final Stream<Path> paths = deliveriesToCreateProvider.get();
                 String joinedString = paths.map(deliveryItemDirectoryPath -> {
-                    // Files.exists(p.resolve(TRANSFER_COMPLETE))?
                     File deliveryItemDirectory = deliveryItemDirectoryPath.toFile();
-                    final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, TRANSFER_COMPLETE);
-                    if (doneDeliveryIndicatorFile.exists()) {
-                        //Split into a part with deliveryname and one with mutation
+
+                    final File deliveryReadyIndicatorFile = new File(deliveryItemDirectory, deliveryReadyFilename);
+                    if (deliveryReadyIndicatorFile.exists()) {
+                        // Split into a part with deliveryname and one with mutation
                         // Std. Delivery: dl_########_rt#
                         // Mutation: mt_########_no#
                         String deliveryItemDirectoryName = deliveryItemDirectory.getName();
@@ -110,7 +120,8 @@ public class CreateDeliveryMain {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectoryName);
                         }
                     } else {
-                        log.debug("Skipping directory {}, since the delivery does not have '" + TRANSFER_COMPLETE +"'", deliveryItemDirectoryPath);
+                        log.debug("Skipping directory {}, since the delivery does not have '{}'",
+                                deliveryItemDirectoryPath, deliveryReadyFilename);
                     }
                     return deliveryItemDirectoryPath.toString();
                 }).collect(Collectors.joining(" "));
@@ -131,6 +142,12 @@ public class CreateDeliveryMain {
             return map.getRequired(AUTONOMOUS_DONEDIR);
         }
 
+        @Provides
+        @Named(DELIVERY_READY_FILENAME)
+        String provideTransferAcknowledgedFilename(ConfigurationMap map) {
+            return map.getRequired(DELIVERY_READY_FILENAME);
+        }
+
         /**
          * <p> Locate deliveries in the current folder and below in reverse order (by looking for the transfer completed
          * file). </p> <p> Reversing them mean that "A_rt2" will be processed before "A_rt1" so when "A_rt1" is
@@ -141,11 +158,12 @@ public class CreateDeliveryMain {
          * @return Reverse sorted stream of paths of deliveries.
          */
         @Provides
-        Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName) {
+        Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
+                                               @Named(DELIVERY_READY_FILENAME) String deliveryReadyFilename) {
             return Try.of(() -> Files.walk(Paths.get(deliveryFolderName), 1)
                     .filter(Files::isDirectory)
                     // FIXME: Log those that failed.
-                    .filter(p -> Files.exists(p.resolve(TRANSFER_COMPLETE)))
+                    .filter(p -> Files.exists(p.resolve(deliveryReadyFilename)))
                     .sorted(Comparator.reverseOrder())
             ).get();
         }

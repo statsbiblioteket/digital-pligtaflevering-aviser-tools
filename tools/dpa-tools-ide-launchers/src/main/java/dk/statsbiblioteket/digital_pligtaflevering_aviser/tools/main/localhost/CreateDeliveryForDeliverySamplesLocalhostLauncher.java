@@ -21,6 +21,9 @@ public class CreateDeliveryForDeliverySamplesLocalhostLauncher {
                 "localhost/create-delivery.properties",
                 "autonomous.agent=register-batch-trigger",
                 ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + deliveryPath.toString(),
-                CreateDeliveryMain.AUTONOMOUS_DONEDIR + "=" + doneDirPath.toString()});
+                CreateDeliveryMain.AUTONOMOUS_DONEDIR + "=" + doneDirPath.toString(),
+                CreateDeliveryMain.DELIVERY_READY_FILENAME + "=transfer_acknowledged"
+        });
     }
 }
+
