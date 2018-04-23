@@ -47,7 +47,7 @@
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>
-                <version>2.0.5</version>
+                <version>2.0.6</version>
             </dependency>
 
             <dependency>
@@ -115,7 +115,7 @@
             <dependency>
                 <groupId>dk.kb.stream</groupId>
                 <artifactId>streamtuples</artifactId>
-                <version>0.5</version>
+                <version>0.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

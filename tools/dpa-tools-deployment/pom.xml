@@ -189,7 +189,7 @@
                                 </program>
                                 <!--
                                 <program>
-                                    <mainCldk.statsbiblioteket.digital_pligtaflevering_aviser.tools.localhost.mainmain.VeraPDFInvokeMain
+                                    <mainCldk.statsbiblioteket.digital_pligtaflevering_aviser.tools.vagrant.mainmain.VeraPDFInvokeMain
                                     </mainClass>
                                     <id>dpa-verapdf-apply</id>
                                 </program>
