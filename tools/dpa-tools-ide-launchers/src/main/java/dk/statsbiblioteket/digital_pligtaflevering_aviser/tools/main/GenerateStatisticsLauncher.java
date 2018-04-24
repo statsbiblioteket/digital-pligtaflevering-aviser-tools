@@ -9,7 +9,7 @@ public class GenerateStatisticsLauncher {
     public static void main(String[] args) throws Exception {
 
         GenerateStatisticsMain.main(new String[]{
-                "statistics-vagrant.properties",
+                "generate-statistics.properties",
         });
     }
 }
