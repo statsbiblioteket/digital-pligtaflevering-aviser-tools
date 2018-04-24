@@ -34,8 +34,8 @@ public class ConfigurationMapHelper {
      * <li>If the system property DPA_DEFAULT_CONFIGURATION is provided, it contains a property filename (either
      * absolute or relative to the users home directory) which is loaded into the map if found (if not, an
      * IllegalArgumentException is thrown).  Put user names and passwords here for public code! </li>
-     * <li>First consider the configurationLocation as a property file name and add its contents to the map if found,
-     * and return.</li>
+     * <li>First consider the configurationLocation as a file name for a property file and add its contents to the map
+     * if found, and return.</li>
      * <li>Then consider the configurationLocation as a resource on the classpath containing properties.  If present,
      * add its contents to the map and return.</li>
      * <li>Otherwise an exception is thrown.</li> </ul>
@@ -56,6 +56,7 @@ public class ConfigurationMapHelper {
         if (defaultConfigurationFileName != null && defaultConfigurationFileName.length() > 0) {
             File defaultConfigurationFile = new File(System.getProperty("user.home", "."), defaultConfigurationFileName);
             if (defaultConfigurationFile.exists()) {
+                LOGGER.trace("read default configuration file: {}", defaultConfigurationFile.getAbsolutePath());
                 try (Reader reader = Files.newBufferedReader(defaultConfigurationFile.toPath(), StandardCharsets.UTF_8)) {
                     map.addPropertyFile(reader);
                 } catch (IOException e) {
@@ -87,10 +88,8 @@ public class ConfigurationMapHelper {
         InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(configurationLocation);
         Objects.requireNonNull(stream, configurationLocation + " is not a valid file nor a valid resource");
 
-        try {
-            InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8);
+        try (InputStreamReader inputStreamReader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
             map.addPropertyFile(inputStreamReader);
-            inputStreamReader.close();
             LOGGER.trace("read resource {}: {}", configurationLocation, map);
             return map;
         } catch (IOException e) {

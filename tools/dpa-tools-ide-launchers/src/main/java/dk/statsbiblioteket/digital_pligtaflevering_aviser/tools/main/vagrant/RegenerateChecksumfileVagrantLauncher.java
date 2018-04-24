@@ -21,12 +21,8 @@ public class RegenerateChecksumfileVagrantLauncher {
         URI l = RegenerateChecksumfileVagrantLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
         Path startDir = Paths.get(l);
 
-
-
         RegenerateChecksumfileMain.main(new String[]{
-                "vagrant/regenerate-checksumfile.properties",
-                // FIXME: For now just a hardcoded roundtrip uuid.
-                "uuid:2501557e-1583-4efc-9947-6328c2385f26"
+                "vagrant/regenerate-checksumfile.properties"
         });
     }
 }

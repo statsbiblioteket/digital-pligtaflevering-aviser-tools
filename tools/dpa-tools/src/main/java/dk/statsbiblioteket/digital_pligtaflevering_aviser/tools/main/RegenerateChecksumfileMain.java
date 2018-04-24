@@ -94,7 +94,7 @@ public class RegenerateChecksumfileMain {
             //
             Tool tool = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
-                    .peek(domsItem -> log.trace("Processing: {}", domsItem))
+                    .peek(domsItem -> log.info("Regenerating checksums for: {}", domsItem))
                     .peek(domsItem -> mxBean.currentId = domsItem.getPath() + " " + domsItem.getDomsId().id())
 
                     // roundtrip node for a day delivery and we need to process all the children to get the combined md5sum.
@@ -136,6 +136,7 @@ public class RegenerateChecksumfileMain {
 
                     .map(st -> st.map((either) -> either.map((String md5sumLines) -> md5sumLines + "\n")))  // we need a trailing newline to be compatible with md5sum output
 
+                    // Process result and generate "outcome=true" or "outcome=false" (if an error happened)
                     .map(st -> st.map((roundtripItem, either) ->
                                     "outcome=" + either.fold(
                                             (Exception exception) -> {
@@ -157,6 +158,7 @@ public class RegenerateChecksumfileMain {
                                     )
                             )
                     )
+                    // stream:  DomsItem -> "outcome=X"
                     .peek((StreamTuple<DomsItem, String> st) -> log.trace("{}", st))
                     .map(st -> st.map((roundtripItem, outcomeString) -> roundtripItem.getPath() + " " + roundtripItem.getDomsId().id() + " " + outcomeString))
                     .sorted()
