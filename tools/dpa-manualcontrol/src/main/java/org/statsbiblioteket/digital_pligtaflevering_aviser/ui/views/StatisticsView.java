@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
@@ -81,6 +82,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         pdfComponent.setMimeType("application/pdf");
         //noinspection deprecation
+        pdfComponent.setVisible(false);
         pdfComponent.setType(Embedded.TYPE_BROWSER);
         metadatalink.setTargetName("_blank");
 
@@ -134,13 +136,17 @@ public class StatisticsView extends VerticalLayout implements View {
                 tabelsLayout = new DeliveryValidationPanel(model);
         }
 
-
         int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
+        if(Settings.screenwidth != null) {
+            browserWidth = Settings.screenwidth;
+        }
+
+
         // The UI is optimized to run on either a small or large screen.
         // A limit of browserscreenwidth 1800 pixels is used.
         // If the browserscreenwidth is large pdfComponent is shown at the right side of the tables, otherwise below.
         // If the browserscreenwidth is large pdfComponent is 900px" X "1200px" otherwise 500px" X "7500px"
-        if(browserWidth>1800) {
+        if (browserWidth > 1800) {
             mainhlayout = new HorizontalLayout();
             pdfComponent.setWidth("900px");
             pdfComponent.setHeight("1200px");
@@ -165,7 +171,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
         try {
             searchPanel.setSelectedMonth(model.getSelectedMonth());
-        } catch(ParseException e) {
+        } catch (ParseException e) {
             Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
             log.error("MONTH PARSER ERROR", e);
         }
@@ -182,7 +188,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         panelPrepare(true);
                     } else if (SearchPanel.startButtonId.equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        if(!model.isMonthInitiated()) {
+                        if (!model.isMonthInitiated()) {
                             Notification.show("This month is not prepared", Notification.Type.ERROR_MESSAGE);
                             tabelsLayout.insertInitialTableValues();
                             panelPrepare(false);
@@ -192,7 +198,7 @@ public class StatisticsView extends VerticalLayout implements View {
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
                         panelPrepare(true);
-                    } else if(SearchPanel.linkButtonId.equals(event.getButton().getId())) {
+                    } else if (SearchPanel.linkButtonId.equals(event.getButton().getId())) {
 
                         URI oldUri = UI.getCurrent().getPage().getLocation();
 
@@ -249,12 +255,12 @@ public class StatisticsView extends VerticalLayout implements View {
             @Override
             public void buttonClick(Button.ClickEvent event) {
 
-                if(currentSelectedPage!=null) {
+                if (currentSelectedPage != null) {
                     currentSelectedPage.setCheckedState(ConfirmationState.CHECKED);
                     model.addCheckedPage(currentSelectedPage);
                     tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.CHECKED);
                 }
-                if(currentSelectedArticle!=null) {
+                if (currentSelectedArticle != null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.CHECKED);
                     model.addCheckedArticle(currentSelectedArticle);
                     tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.CHECKED);
@@ -267,12 +273,12 @@ public class StatisticsView extends VerticalLayout implements View {
             @Override
             public void buttonClick(Button.ClickEvent event) {
 
-                if(currentSelectedPage!=null) {
+                if (currentSelectedPage != null) {
                     currentSelectedPage.setCheckedState(ConfirmationState.REJECTED);
                     model.addCheckedPage(currentSelectedPage);
                     tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.REJECTED);
                 }
-                if(currentSelectedArticle!=null) {
+                if (currentSelectedArticle != null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.REJECTED);
                     model.addCheckedArticle(currentSelectedArticle);
                     tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.REJECTED);
@@ -302,7 +308,6 @@ public class StatisticsView extends VerticalLayout implements View {
      * @param prepare
      */
     private void panelPrepare(boolean prepare) {
-        pdfComponent.setVisible(prepare);
         metadatalink.setVisible(prepare);
         tabelsLayout.setVisible(prepare);
     }
@@ -354,7 +359,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     return null;
 
             }
-        }, "pages.pdf"  );// Short pagename is needed
+        }, "pages.pdf"); // Short pagename is needed
         resource.setMIMEType("application/pdf");
         resource.setCacheTime(1000);
         return resource;
@@ -369,7 +374,7 @@ public class StatisticsView extends VerticalLayout implements View {
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         try {
             searchPanel.setSelectedMonth(model.getSelectedMonth());
-            if(model.getSelectedDelivery()!=null && model.getSelectedTitle()!=null) {
+            if (model.getSelectedDelivery() != null && model.getSelectedTitle() != null) {
                 model.initiateDeliveries();
                 model.initiateTitleHierachyFromFilesystem();
                 tabelsLayout.insertInitialTableValues();

@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Generic table for viewing a table in the table-bean form.
- * This component contains a table and a checkbox which makes it possible to make the table visible/invisible
+ * Generic table for viewing a table in the table-bean form. This component contains a table and a checkbox which makes
+ * it possible to make the table visible/invisible
  */
 public class GenericListTable extends VerticalLayout {
 
@@ -28,6 +28,7 @@ public class GenericListTable extends VerticalLayout {
 
     /**
      * Construct the TableViewing-component with specific parameters about layout
+     *
      * @param c
      * @param checkedColumn
      * @param checkedDefaultValue
@@ -37,7 +38,8 @@ public class GenericListTable extends VerticalLayout {
      */
     public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String tableId, boolean initialVisible) {
         checkbox = new CheckBox("Visible", initialVisible);
-        beans=new BeanItemContainer(c);
+        //noinspection unchecked
+        beans = new BeanItemContainer(c);
 
         // Bind a table to it
         table = new Table(c.getSimpleName(), beans);
@@ -47,35 +49,38 @@ public class GenericListTable extends VerticalLayout {
         table.setImmediate(true);
         this.addComponent(checkbox);
         checkbox.addValueChangeListener(event ->
-                table.setVisible((Boolean)event.getProperty().getValue())
+                table.setVisible((Boolean) event.getProperty().getValue())
         );
         this.addComponent(table);
         checkedColumnName = checkedColumn;
         checkedColumnDefaultValue = checkedDefaultValue;
-        if(checkedColumnName!=null) {
+        if (checkedColumnName != null) {
             table.addGeneratedColumn(checkedColumnName, new GenericListTable.CheckBoxColumnGenerator());
         }
 
-        if(visibleColumns!=null) {
+        if (visibleColumns != null) {
             table.setVisibleColumns(visibleColumns);
         }
         table.setId(tableId);
         table.setColumnExpandRatio(checkedColumn, 0.3f);
+        table.setColumnWidth(checkedColumn, 20);
         table.setVisible(initialVisible);
     }
 
     /**
      * Set a list of which columns in the table to make visible
+     *
      * @param visibleColumns
      */
     public void setVisibleColumns(String[] visibleColumns) {
-        if(visibleColumns!=null) {
+        if (visibleColumns != null) {
             table.setVisibleColumns(visibleColumns);
         }
     }
 
     /**
      * Set the name of the column in the table to sort the rows with
+     *
      * @param param
      */
     public void setSortParam(String param) {
@@ -84,24 +89,27 @@ public class GenericListTable extends VerticalLayout {
 
     /**
      * Check the specified row in the table
+     *
      * @param itemId
      * @param value
      */
     public void checkSpecific(Object itemId, Object value) {
+        //noinspection unchecked
         table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
         table.refreshRowCache();
     }
 
     /**
      * Iterate through all rows and find out if all checkboxes is selected
+     *
      * @return
      */
     public boolean isAllChecked() {
 
         Collection i = table.getContainerDataSource().getItemIds();
-        Iterator<?> walker=i.iterator();
-        while(walker.hasNext()) {
-            if(!(Boolean)table.getItem(walker.next()).getItemProperty(checkedColumnName).getValue()) {
+        Iterator<?> walker = i.iterator();
+        while (walker.hasNext()) {
+            if (!(Boolean) table.getItem(walker.next()).getItemProperty(checkedColumnName).getValue()) {
                 return false;
             }
         }
@@ -110,6 +118,7 @@ public class GenericListTable extends VerticalLayout {
 
     /**
      * Set the component to be vieved as enabled in the UI
+     *
      * @param enabled
      */
     @Override
@@ -129,23 +138,25 @@ public class GenericListTable extends VerticalLayout {
 
     /**
      * Set data to the embedded table
+     *
      * @param dataCollection
      */
     public void setInfo(Collection dataCollection) {
         beans.removeAllItems();
-        for(Object rowItem : dataCollection) {
+        for (Object rowItem : dataCollection) {
+            //noinspection unchecked
             beans.addBean(rowItem);
         }
-        if(sortColumnName!= null) {
+        if (sortColumnName != null) {
             table.setSortContainerPropertyId(sortColumnName);
             table.sort();
         }
     }
 
     public void setValToCheck(Object itemId, Object value) {
+        //noinspection unchecked
         table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
     }
-
 
     class CheckBoxColumnGenerator implements Table.ColumnGenerator {
 
@@ -153,8 +164,8 @@ public class GenericListTable extends VerticalLayout {
         public Component generateCell(Table source, Object itemId, Object columnId) {
             Property prop = source.getItem(itemId).getItemProperty(checkedColumnName);
             CheckBox c;
-            if(checkedColumnDefaultValue!= null) {
-                ConfirmationState oo = (ConfirmationState)prop.getValue();
+            if (checkedColumnDefaultValue != null) {
+                ConfirmationState oo = (ConfirmationState) prop.getValue();
                 boolean checkValue = !checkedColumnDefaultValue.equals(oo);
                 c = new CheckBox(null, checkValue);
             } else {
@@ -162,10 +173,10 @@ public class GenericListTable extends VerticalLayout {
             }
             c.setReadOnly(true);
             c.setHeight("13px");
+            c.setWidth("20px");
             return c;
         }
     }
-
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);

@@ -27,8 +27,7 @@ public class AutonomousPreservationToolHelper {
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from the
      * configuration file/resource denoted by args[0], plus the remaining arguments interpreted as "key=value" lines,
-     * and pass it into the given function returning a Tool, which is then executed.  It is not
-     * expected to return.
+     * and pass it into the given function returning a Tool, which is then executed.  It is not expected to return.
      *
      * @param args     like passed in to "main(String[] args)"
      * @param function function creating a populated Tool from a configuration map.
@@ -67,8 +66,7 @@ public class AutonomousPreservationToolHelper {
 
     /**
      * Expect a argument array (like passed in to "main(String[] args)"), create a configuration map from args[0], and
-     * pass it into the given function returning a Tool, which is then executed.  It is not
-     * expected to return.
+     * pass it into the given function returning a Tool, which is then executed.  It is not expected to return.
      *
      * @param map          configuration map to pass into <code>function</code>
      * @param toolFunction function creating a populated Tool from a configuration map.
@@ -81,20 +79,19 @@ public class AutonomousPreservationToolHelper {
 
         log.info("*** Started at {} - {} ms since JVM start. git: {} ", now(), getRuntimeMXBean().getUptime(), gitId);
         log.debug("configuration: {}", map);
-        log.trace("------------------------------------------------------------------------------");
+        log.info("------------------------------------------------------------------------------");
 
         Runtime.getRuntime().addShutdownHook(new Thread(
                 () -> {
-                    log.trace("------------------------------------------------------------------------------");
+                    log.info("------------------------------------------------------------------------------");
                     log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
                 }));
 
         try {
             String result = toolFunction.apply(map).call();
-            log.trace("Result: {}", result);
+            log.info("Result: {}", result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);
         }
     }
-
 }

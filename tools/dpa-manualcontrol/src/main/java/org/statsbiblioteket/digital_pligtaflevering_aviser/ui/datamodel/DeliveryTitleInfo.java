@@ -153,7 +153,7 @@ public class DeliveryTitleInfo implements java.io.Serializable {
 
     @XmlElement
     public void setMissingItems(List<MissingItem> missingItems) {
-        this.missingItems =missingItems;
+        this.missingItems = missingItems;
     }
 
     public List<MissingItem> getMissingItems() {

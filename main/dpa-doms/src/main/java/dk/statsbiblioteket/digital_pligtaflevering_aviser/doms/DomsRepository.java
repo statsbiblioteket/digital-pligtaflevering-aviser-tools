@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Repository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTON
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 
 /**
- *
+ * @noinspection WeakerAccess, UnnecessaryLocalVariable
  */
 public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecification, DomsItem> {
     private final HttpSolrServer summaSearch;
@@ -101,12 +103,13 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         try {
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
-            List<DomsItem> domsItemList = new ArrayList<>();
-
             Iterator<Item> searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
-            searchIterator.forEachRemaining(item -> domsItemList.add(new DomsItem(new DomsId(item.getDomsID()), this)));
+            List<String> resultIds = new ArrayList<>();
+            searchIterator.forEachRemaining(item -> resultIds.add(item.getDomsID()));
 
-            return domsItemList.stream();
+            return resultIds.stream()
+                    .map(DomsId::new)
+                    .map(this::lookup);
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -181,22 +184,31 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         }
     }
 
+//    @Deprecated
+//    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
+//        Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
+//        try {
+//            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
+//        } catch (RuntimeException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            throw new RuntimeException("appendEventToItem failed for " + domsId, e);
+//        }
+//    }
+
     /**
      * appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
      *
-     * @param domsId    domsId to add event to
-     * @param agent     text string identifying this autonomous component
-     * @param timestamp timestamp being put into the event, usually "now".
-     * @param details   humanly readable string describing this event
-     * @param eventType String identifying what event this is, examples  "Data_Archived", "Data_Received"
-     * @param outcome   true=success, false=failure.
-     * @return
+     * @param domsId domsId to add event to
+     * @param event  eventdata holder
+     * @return date returned from storage
      */
 
-    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
+    public Date appendEventToItem(DomsId domsId, DomsEvent event) {
         Item fakeItemToGetThroughAPI = new Item(domsId.id()); //
         try {
-            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, agent, timestamp, details, eventType, outcome);
+            return domsEventStorage.appendEventToItem(fakeItemToGetThroughAPI, event.getLinkingAgentIdentifierValue(),
+                    event.getTimestamp(), event.getEventOutcomeDetailNote(), event.getEventType(), event.getOutcome());
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -237,19 +249,28 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     /**
-     * get the content of the DC datastream on XML form parsed into a W3C DOM structur so we can post-process it easily.
-     * EnhancedFedora does not expose the "get DC explicitly as xml" functionality directly.  Note that
-     * we work with Strings, which may result in encoding problems if ever the response includes non-ASCII characters!
+     * get the content of the datastream on XML form as raw bytes.  This is easy to parse into a W3C DOM structure so we
+     * can post-process it easily. The input stream must be closed by the caller.
      *
      * @param domsId id of doms object to retrieve DC datastream from.
-     * @return DC on XML form.
+     *
+     * @return inputstream of the actual bytes.
      */
-    public String getDC(DomsId domsId) {
-        final String id = domsId.id();
-        final String p = "/datastreams/DC/content";
+    public InputStream getDataStreamInputStream(DomsId domsId, String datastreamId) {
+        if (Objects.requireNonNull(datastreamId, "datastreamId").contains("/")) {
+            throw new IllegalArgumentException("datastreamId contains /: " + datastreamId);
+        }
 
-        String dcContent = webResource.path(id).path(p).queryParam("format", "xml").get(String.class);
-        return dcContent;
+        // https://wiki.duraspace.org/display/FEDORA38/REST+API#RESTAPI-getDatastreamDissemination
+        final String id = domsId.id();
+        final String p = "/datastreams/" + datastreamId + "/content";
+
+        ClientResponse cr = webResource.path(id).path(p).queryParam("format", "xml").get(ClientResponse.class);
+        if (cr.getStatus() < 300) {
+            return cr.getEntityInputStream();
+        } else {
+            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId+ ": status= " + cr. getStatus());
+        }
     }
 
     /**
@@ -263,7 +284,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     public PremisManipulator<Item> getPremisFor(String id, String eventDataStreamName) {
         Objects.requireNonNull(id, "id==null");
         String premisPreBlob = getDataStreamAsString(id, eventDataStreamName);
-        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory(eventDataStreamName, i -> new Item(i))).get();
+        PremisManipulatorFactory<Item> factory = Try.of(() -> new PremisManipulatorFactory<>(eventDataStreamName, Item::new)).get();
 
         PremisManipulator<Item> premisObject = Try.of(
                 () -> factory.createFromBlob(new ByteArrayInputStream(premisPreBlob.getBytes(StandardCharsets.UTF_8)))

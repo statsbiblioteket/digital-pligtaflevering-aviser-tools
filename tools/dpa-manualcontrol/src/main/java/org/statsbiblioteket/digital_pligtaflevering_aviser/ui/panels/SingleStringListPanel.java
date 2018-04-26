@@ -36,7 +36,7 @@ public class SingleStringListPanel extends VerticalLayout {
      */
     public void setTableContent(Collection<String> list) {
         table.removeAllItems();
-        for(String item : list) {
+        for (String item : list) {
             Object newItemId = table.addItem();
             com.vaadin.data.Item row1 = table.getItem(newItemId);
             row1.getItemProperty(this.columnName).setValue(item);

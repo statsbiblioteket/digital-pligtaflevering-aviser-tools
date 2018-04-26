@@ -27,10 +27,10 @@ import java.util.function.BiFunction;
 public class DeliveryMD5Validation {
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    final private String deliveryFolder;
+    private final  String deliveryFolder;
     private String checksumFileName;
     private BiFunction<Path, String, String> md5Convert;
-    final private HashSet<String> ignoredFiles = new HashSet<String>();
+    private final  HashSet<String> ignoredFiles = new HashSet<String>();
     private Map<String, String> cachedFileListMap = new HashMap<String, String>();
     private List<String> validationResult = new ArrayList<String>();
     private int pageCount = 0;

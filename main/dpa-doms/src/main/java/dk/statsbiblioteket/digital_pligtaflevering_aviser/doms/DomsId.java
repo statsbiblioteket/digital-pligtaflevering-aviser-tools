@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public class DomsId implements Id {
 
-    public final static String DPA_WEBRESOURCE = "dpa.webresource";
+    public static final  String DPA_WEBRESOURCE = "dpa.webresource";
 
     private String id;
 

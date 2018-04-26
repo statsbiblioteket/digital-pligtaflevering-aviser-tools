@@ -4,9 +4,12 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -14,6 +17,8 @@ import java.util.List;
  * The full panel for showing all selection details of deliveries
  */
 public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsPanels {
+
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     private DataModel model;
     private HorizontalLayout tablesLayout = new HorizontalLayout();
@@ -38,6 +43,11 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
                 model.setSelectedSection(null);
                 List<DeliveryTitleInfo> list = model.getDeliverysFromTitle(selectedTitle);
 
+                try {
+                    datePanel.setMonth(model.getSelectedMonth());
+                } catch (ParseException e) {
+                    log.error("Date could not get parsed", e);
+                }
                 datePanel.setInfo(list);
             }
         });

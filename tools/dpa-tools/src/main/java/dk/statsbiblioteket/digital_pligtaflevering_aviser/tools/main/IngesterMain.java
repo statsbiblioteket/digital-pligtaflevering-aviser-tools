@@ -3,6 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
@@ -10,13 +12,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.reports.ToolResultReport;
 import dk.statsbiblioteket.doms.central.connectors.fedora.fedoraDBsearch.DBSearchRest;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
@@ -24,6 +26,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.Inges
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
+import javaslang.control.Either;
 import javaslang.control.Try;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
@@ -54,11 +57,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
@@ -89,38 +96,67 @@ public class IngesterMain {
         Tool getTool();
     }
 
+    /**
+     * @noinspection PointlessBooleanExpression
+     */
     @Module
     public static class IngesterModule {
 
         Logger log = LoggerFactory.getLogger(this.getClass());
 
+        /** @noinspection unchecked*/
         @Produces
         @Provides
         Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                QuerySpecification workToDoQuery,
-                DomsRepository repository,
-                FileSystemDeliveryIngester ingester,
-                DefaultToolMXBean mxBean
+                         @Named(AUTONOMOUS_THIS_EVENT) String eventName,
+                         QuerySpecification workToDoQuery,
+                         DomsRepository repository,
+                         FileSystemDeliveryIngester ingester,
+                         DefaultToolMXBean mxBean
         ) {
+            final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
+            final String agent = IngesterMain.class.getSimpleName();
 
-            return () -> {
-                final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
+            Tool f = () -> {
+                try (FileSystemDeliveryIngester autoCloseableIngester = ingester) { // shut down bitrepository resources completely when done
+                    List<String> toolResults = Stream.of(workToDoQuery)
+                            .flatMap(repository::query)
+                            .peek(domsItem -> log.trace("Processing: {}", domsItem))
+                            .peek(domsItem -> mxBean.currentId = domsItem.toString())
+                            .map(DomsItemTuple::create)
+                            .map(c -> c.map(domsItem -> {
+                                try {
+                                    final Either<Exception, ToolResult> result = ingester.apply(domsItem, normalizedDeliveriesFolder);
+                                    return result;
+                                } catch (Exception e) {
+                                    return Either.left(e);
+                                }
+                            }))
+                            .peek(c -> {
+                                // Set events on the delivery top item.
+                                final DomsItem item = Objects.requireNonNull(c.left());
+                                if (c.right().isLeft()) {
+                                    // Processing of _this_ domsItem threw unexpected exception
+                                    item.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(c.right().getLeft()), eventName, false));
+                                } else {
+                                    final ToolResult toolResult = ((Either<Exception, ToolResult>) c.right()).get(); // FIXME: Logic broken
+                                    item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
+                                    if (toolResult.isSuccess() == false) {
+                                        item.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
+                                    }
+                                }
+                            })
+                            .map(c -> c.left().getDomsId().id())
+                            .collect(Collectors.toList());
 
-                List<String> toolResults = repository.query(workToDoQuery)
-                        .peek(domsItem -> log.info("Procesing {}", domsItem))
-                        .peek(domsItem -> mxBean.currentId = domsItem.toString())
-                        .map(domsItem -> ingester.apply(domsItem, normalizedDeliveriesFolder))
-                        .collect(Collectors.toList());
-
-                ingester.close(); // shut down bitrepository resources completely.
-
-                return String.valueOf(toolResults); // FIXME: Formalize output
+                    return toolResults.size() + " processed:  " + toolResults;
+                }
             };
+            return f;
         }
 
         /**
-         * This is the folder have been put so we can locate the files
-         * corresponding to the trigger.
+         * This is the folder have been put so we can locate the files corresponding to the trigger.
          *
          * @param map configuration map
          * @return
@@ -133,8 +169,8 @@ public class IngesterMain {
         }
 
         /**
-         * The path where PutfileClientStub places files This path is only used
-         * by the stub and not the real bitrepositoryIngester
+         * The path where PutfileClientStub places files This path is only used by the stub and not the real
+         * bitrepositoryIngester
          *
          * @param map
          * @return
@@ -160,8 +196,7 @@ public class IngesterMain {
         }
 
         /**
-         * The ID of this collection, the ID has to match the id of the
-         * collection created in fedora
+         * The ID of this collection, the ID has to match the id of the collection created in fedora
          *
          * @param map
          * @return
@@ -174,8 +209,7 @@ public class IngesterMain {
         }
 
         /**
-         * 'base' path to where batch/deliverable can be found by
-         * bitrepositoryClient
+         * 'base' path to where batch/deliverable can be found by bitrepositoryClient
          *
          * @param map
          * @return
@@ -220,9 +254,8 @@ public class IngesterMain {
         }
 
         /**
-         * returns a comma-separated set of filenames (without path) to ignore
-         * when traversing the file tree. Naming is kept the same as in
-         * Avisprojektet to keep configuration files similar
+         * returns a comma-separated set of filenames (without path) to ignore when traversing the file tree. Naming is
+         * kept the same as in Avisprojektet to keep configuration files similar
          *
          * @param map configuration map
          * @return string with comma separated file names.
@@ -237,8 +270,8 @@ public class IngesterMain {
         @Produces
         @Provides
         DBSearchRest provideDBSearchRest(@Named(DOMS_URL) String domsUrl,
-                @Named(DOMS_USERNAME) String domsUsername,
-                @Named(DOMS_PASSWORD) String domsPassword) {
+                                         @Named(DOMS_USERNAME) String domsUsername,
+                                         @Named(DOMS_PASSWORD) String domsPassword) {
             try {
                 return new DBSearchRest(new Credentials(domsUsername, domsPassword), domsUrl);
             } catch (MalformedURLException e) {
@@ -249,24 +282,22 @@ public class IngesterMain {
         /**
          * Provides PutClient for interfacing to bitrepository
          *
-         * @param testMode If true a testclient is returned
-         * @param dpaIngesterId The ID of the collection, the ID has to match
-         * the id of the collection created in fedora
-         * @param destination The destination where the client places the files
-         * @param settingDir The folder where settings for bitrepositoryClient
-         * is placed
-         * @param certificateProperty The name of the certificate-file bor
-         * bitrepositoryClient
+         * @param testMode            If true a testclient is returned
+         * @param dpaIngesterId       The ID of the collection, the ID has to match the id of the collection created in
+         *                            fedora
+         * @param destination         The destination where the client places the files
+         * @param settingDir          The folder where settings for bitrepositoryClient is placed
+         * @param certificateProperty The name of the certificate-file bor bitrepositoryClient
          * @return PutFileClient
          */
         @Produces
         @Provides
         AutoCloseablePutFileClient providePutFileClient(@Named(DPA_TEST_MODE) String testMode,
-                @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
-                @Named(DPA_PUTFILE_DESTINATION) String destination,
-                @Named(SETTINGS_DIR_PROPERTY) String settingDir,
-                @Named(CERTIFICATE_PROPERTY) String certificateProperty,
-                Settings settings) {
+                                                        @Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
+                                                        @Named(DPA_PUTFILE_DESTINATION) String destination,
+                                                        @Named(SETTINGS_DIR_PROPERTY) String settingDir,
+                                                        @Named(CERTIFICATE_PROPERTY) String certificateProperty,
+                                                        Settings settings) {
 
             final AutoCloseablePutFileClient putClient;
             if (Boolean.parseBoolean(testMode)) {
@@ -308,26 +339,24 @@ public class IngesterMain {
         }
 
         /**
-         * Provide settings for PutfileClient and for EventHandler listening for
-         * the events from ingesting
+         * Provide settings for PutfileClient and for EventHandler listening for the events from ingesting
          *
          * @param dpaIngesterId The ID of the collection
-         * @param settingDir The directory where the collection is located seen
-         * from the putFileClient
+         * @param settingDir    The directory where the collection is located seen from the putFileClient
          * @return Settings for putfile PutfileClient and EventHandler
          */
         @Produces
         @Provides
-        Settings provideSettings(@Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String dpaIngesterId,
-                @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
+        Settings provideSettings(@Named(FileSystemDeliveryIngester.BITREPOSITORY_INGESTER_COLLECTIONID) String
+                                         dpaIngesterId,
+                                 @Named(SETTINGS_DIR_PROPERTY) String settingDir) {
             SettingsProvider settingsLoader = new SettingsProvider(new XMLFileSettingsLoader(settingDir), dpaIngesterId);
             final Settings settings = settingsLoader.getSettings();
             return settings;
         }
 
         /**
-         * Provide Function for converting filePath into an ID which is suitable
-         * for bitRepository
+         * Provide Function for converting filePath into an ID which is suitable for bitRepository
          *
          * @return and ID for the fileContent
          */
@@ -342,8 +371,7 @@ public class IngesterMain {
         }
 
         /**
-         * Provide Function for converting filePath to the path relative to
-         * where the delivery is located
+         * Provide Function for converting filePath to the path relative to where the delivery is located
          *
          * @return and ID for the fileContent
          */
@@ -359,15 +387,9 @@ public class IngesterMain {
         public Function<Path, Stream<Path>> provideDeliveriesForAbsolutePath() {
             return absolutePath -> Try.of(()
                     -> Files.walk(absolutePath, 1)
-                            .filter(Files::isRegularFile)
-                            .sorted()
+                    .filter(Files::isRegularFile)
+                    .sorted()
             ).get();
-        }
-
-        @Produces
-        @Provides
-        Function<List<ToolResult>, String> provideEventMessageForToolResults() {
-            return toolResults -> new ToolResultReport().apply(toolResults.stream());
         }
     }
 }

@@ -58,7 +58,7 @@ public class DeliveryListPanel extends VerticalLayout {
         itemList.clear();
         table.removeAllItems();
 
-        for(String item : list) {
+        for (String item : list) {
             Object newItemId = table.addItem();
             Item row1 = table.getItem(newItemId);
             try {

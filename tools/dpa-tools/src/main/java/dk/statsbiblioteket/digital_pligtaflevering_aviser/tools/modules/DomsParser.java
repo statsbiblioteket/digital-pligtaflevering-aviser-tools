@@ -40,7 +40,7 @@ public class DomsParser {
      */
     public Function<DomsItem, Iterator<DomsItem>> processChildDomsId() {
         return domsItem -> {
-            Stream<DomsItem> domsChildren =domsItem.children();
+            Stream<DomsItem> domsChildren = domsItem.children();
             Iterator<DomsItem> itemIterator = domsChildren.iterator();
             return itemIterator;
         };

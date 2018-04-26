@@ -29,7 +29,7 @@ ln -s /vagrant/nohup.out /home/vagrant/nohup.out
 
 
 apt-get update > /dev/null
-apt-get install -y zip unzip openjdk-7-jdk zookeeperd git xmlstarlet
+apt-get install -y zip unzip openjdk-7-jdk zookeeperd git xmlstarlet xauth
 
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 

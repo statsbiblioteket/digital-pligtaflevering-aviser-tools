@@ -1,5 +1,6 @@
 <configuration>
 
+    <!-- https://logback.qos.ch/manual/configuration.html -->
     <timestamp key="myTimestamp" datePattern="yyyy-MM-dd'_'HH-mm-ss.SSS"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -7,7 +8,8 @@
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
             <!-- http://stackoverflow.com/q/7930844/53897 -->
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg\(%file:%line\)%n</pattern>
+            <!-- https://logback.qos.ch/manual/layouts.html#ClassicPatternLayout -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg\(%file:%line\)%n</pattern>
         </encoder>
     </appender>
 
@@ -20,7 +22,7 @@
         </encoder>
     </appender>
 
-    <logger name="dk.statsbiblioteket" level="trace" />
+    <logger name="dk.statsbiblioteket" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

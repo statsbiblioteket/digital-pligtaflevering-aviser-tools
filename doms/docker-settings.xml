@@ -1,0 +1,51 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <!-- 2017-10-30 version /tra
+
+    Efficient usage of Maven is hard with Docker as the local repository does not provide the
+    normal caching benefits.  Hence we need a local cache.  Sonatype has a nexus3 image that works
+    right out of the box as a Maven Central cache.  Unfortunately this goes in ~/.m2/settings.xml
+    that is outside the Docker context so we pass in this file instead.
+
+    I have not found a good way to integrate this into a docker-compose environment, so it must be
+    manually started with (strange formatting to avoid a double dash inside an XML comment)
+
+docker run -p 8081:8081 -\
+-name nexus sonatype/nexus3
+
+    Cold start takes about a minute.
+
+    Unfortunately we also have needed artifacts in our sbprojects nexus which again makes problems
+    with the Nexus mirror proxy.  I found the following steps work with OSS 3.6.0-02:
+
+    * Open http://localhost:8081
+    * Sign into the nexus docker web interface as admin/admin123  (upper right corner)
+    * Click on cog wheel in top bar (Server administration and configuration)
+    * Select Repositories in left sidebar.
+    * Click "Create Repository"
+    * Choose "maven2 (proxy)" template.
+    * Provide "sbforge" as the Name and "https://sbforge.org/nexus/content/repositories/releases/" as the Remote storage location, and click "Create Repository".
+    * Note: The repository list now lists "sbforge" too.
+    * Click "Create repository".
+    * Choose "maven2 (group)" template.
+    * Use "sbforge_central" as the name, and add "maven-central" and "sbforge" to the Members pane, and click "Create Repository".
+    * Note:  The repository list now lists "sbforge_central" too.
+
+    Note that my external IP-number is currently hardcoded below.  Replace it with your own external IP-number.
+
+    FIXME:  Automate all of the above.
+    -->
+    <mirrors>
+        <mirror>
+            <id>local-nexus</id>
+            <name>Local Nexus</name>
+            <!-- Host external IP number -->
+            <url>http://172.18.95.105:8081/repository/sbforge_central/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+    <localRepository>/usr/share/maven/ref/repository</localRepository>
+</settings>
