@@ -241,7 +241,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
-                                    <artifactId>dpa-tools-configuration-files</artifactId>
+                                    <artifactId>configuration-files</artifactId>
                                     <version>master-SNAPSHOT</version>
                                     <type>jar</type>
                                     <overWrite>false</overWrite>

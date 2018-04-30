@@ -6,11 +6,11 @@
         <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
         <artifactId>dpa-root</artifactId>
         <version>master-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
-    <artifactId>dpa-tools-configuration-files</artifactId>
+    <artifactId>configuration-files</artifactId>
     <packaging>jar</packaging>
 
     <properties>

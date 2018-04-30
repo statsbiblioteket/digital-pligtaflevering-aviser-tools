@@ -121,6 +121,9 @@
     </dependencyManagement>
 
     <modules>
+        <!-- configuration files for launchers and deployments -->
+        <module>configuration-files</module>
+
         <module>main/dpa-api</module>
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
@@ -142,7 +145,6 @@
 
         <!-- command line launchers -->
         <module>tools/dpa-tools</module>
-        <module>tools/dpa-tools-configuration-files</module>
         <module>tools/dpa-tools-ide-launchers</module>
         <!-- deployment creation module -->
         <module>tools/dpa-tools-deployment</module>

@@ -33,7 +33,11 @@ public class CommonModule {
     }
 
     /**
-     * Return the ObjectName identifier for the JMX MXBean if required by the Tool.
+     * <p>
+     * Return the ObjectName identifier for the JMX MXBean if required by the Tool.  A typical value is
+     * <code>dk.kb.dpaviser:type=Ingester</code>.</p>
+     * <p>See <a href="http://www.oracle.com/technetwork/java/javase/tech/best-practices-jsp-136021.html?ssSourceSiteId=ocomen#mozTocId509360">
+     * http://www.oracle.com/technetwork/java/javase/tech/best-practices-jsp-136021.html?ssSourceSiteId=ocomen#mozTocId509360</a> for details.</p>
      *
      * @param map configuration map
      * @return the ObjectName string to use.
@@ -45,8 +49,10 @@ public class CommonModule {
         return map.getRequired(JMX_OBJECT_NAME);
     }
 
-    /** Return the event name to be used to register the outcome of this autonomous component on each DomsItem as indicated by
+    /**
+     * Return the event name to be used to register the outcome of this autonomous component on each DomsItem as indicated by
      * the work query
+     *
      * @param map configuration map
      * @return the event name to store in DOMS for this item.
      */

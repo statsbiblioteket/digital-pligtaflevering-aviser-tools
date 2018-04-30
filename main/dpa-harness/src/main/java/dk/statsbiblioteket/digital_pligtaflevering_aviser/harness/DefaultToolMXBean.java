@@ -1,17 +1,20 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
-import javaslang.control.Try;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 
 /**
- *  This bean have public fields for easy manipulation, with getters to be exposed as MXBean fields in jconsole/visualvm.
- *  It autoregisters itself with JMX (this may or may not be a good idea - time will tell).
+ * <p>This bean have public fields for easy manipulation, with getters to be exposed as MXBean fields in jconsole/visualvm.
+ * It autoregisters itself with JMX (this may or may not be a good idea - time will tell).
+ * </p>
+ * <p>See <a href="http://www.oracle.com/technetwork/java/javase/tech/best-practices-jsp-136021.html">http://www.oracle.com/technetwork/java/javase/tech/best-practices-jsp-136021.html</a>
+ * for details</p>
+ *
  */
 public class DefaultToolMXBean implements ToolMXBean {
 
@@ -21,11 +24,13 @@ public class DefaultToolMXBean implements ToolMXBean {
     @Singleton
     public DefaultToolMXBean(@Named(JMX_OBJECT_NAME) String jmxObjectName) {
         this.startTime = System.currentTimeMillis();
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        Try.run(() -> {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName name = new ObjectName(jmxObjectName);
             mbs.registerMBean(this, name);
-        });
+        } catch (JMException e) {
+            throw new RuntimeException("jmxObjectName=" + jmxObjectName, e);
+        }
     }
 
     public String details;
