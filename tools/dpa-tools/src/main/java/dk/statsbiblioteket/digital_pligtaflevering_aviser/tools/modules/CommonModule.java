@@ -3,6 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ToolMXBean;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -63,4 +65,10 @@ public class CommonModule {
         return map.getRequired(AUTONOMOUS_THIS_EVENT);
     }
 
+
+    @Produces
+    @Provides
+    ToolMXBean provideToolMXBean(DefaultToolMXBean defaultToolMXBean) {
+        return defaultToolMXBean;
+    }
 }

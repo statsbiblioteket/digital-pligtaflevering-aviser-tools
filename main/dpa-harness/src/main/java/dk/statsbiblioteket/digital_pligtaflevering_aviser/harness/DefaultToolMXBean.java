@@ -2,11 +2,11 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>This bean have public fields for easy manipulation, with getters to be exposed as MXBean fields in jconsole/visualvm.
@@ -18,15 +18,19 @@ import java.lang.management.ManagementFactory;
  */
 public class DefaultToolMXBean implements ToolMXBean {
 
+    // FIXME:  @Singletons are hard in dagger, for now add a unique identifier to the objectName
+    static AtomicLong instanceCounter = new AtomicLong(0);
+
     private final long startTime;
 
+
     @Inject
-    @Singleton
+    //@Singleton
     public DefaultToolMXBean(@Named(JMX_OBJECT_NAME) String jmxObjectName) {
         this.startTime = System.currentTimeMillis();
         try {
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName(jmxObjectName);
+            ObjectName name = new ObjectName(jmxObjectName + ",name=" + instanceCounter.addAndGet(1));
             mbs.registerMBean(this, name);
         } catch (JMException e) {
             throw new RuntimeException("jmxObjectName=" + jmxObjectName, e);
