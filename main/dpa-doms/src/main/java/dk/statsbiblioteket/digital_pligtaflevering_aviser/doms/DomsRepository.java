@@ -17,6 +17,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.PassQThrough_Query;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import dk.statsbiblioteket.medieplatform.autonomous.SolrJConnector;
 import javaslang.control.Try;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -50,7 +51,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecification, DomsItem> {
     private final HttpSolrServer summaSearch;
     private final String recordBase;
-    private SBOIEventIndex<Item> sboiEventIndex;
+    private SBOIEventIndex_DigitalPligtafleveringAviser<Item> sboiEventIndex;
     private WebResource webResource;
     private EnhancedFedora efedora;
     private DomsEventStorage<Item> domsEventStorage;
@@ -62,7 +63,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
+    public DomsRepository(SBOIEventIndex_DigitalPligtafleveringAviser<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
                           EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                           @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
                           @Named(DOMS_COLLECTION) String recordBase) {
@@ -82,28 +83,45 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
         final EventTrigger.Query<Item> eventTriggerQuery;
         final boolean details;
+        final Iterator<Item> searchIterator;
 
-        if (querySpecification instanceof EventQuerySpecification) {
-            EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
-
-            eventTriggerQuery = new EventTrigger.Query<>();
-            eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
-            eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
-            eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
-            eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
-
-            details = eventQuerySpecification.getDetails();
-        } else if (querySpecification instanceof SBOIQuerySpecification) {
-            SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
-            eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
-            details = false;
-        } else {
-            throw new UnsupportedOperationException("Bad query specification instance");
-        }
         try {
+            if (querySpecification instanceof EventQuerySpecification) {
+                EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
+
+                eventTriggerQuery = new EventTrigger.Query<>();
+                eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
+                eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
+                eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
+                eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
+
+                details = true; // we must get details from DOMS; SBOI is not enough. // eventQuerySpecification.getDetails();
+
+                // Inlined getTriggeredItems to be able to log those not considered anyway.
+                // https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/ef9a2b7d204a70b3056ddd8d9e7a614c1c013dfc/item-event-framework/sboi-doms-event-framework/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/SBOIEventIndex.java#L43
+                Iterator<Item> sboiItems = sboiEventIndex.search(details, eventTriggerQuery);
+                ArrayList<Item> result = new ArrayList<>();
+                while (sboiItems.hasNext()) {
+                    Item next = sboiItems.next();
+                    if (sboiEventIndex.match(next, eventTriggerQuery)) {
+                        result.add(next);
+                    } else {
+                        log.info("SBIO index not current - Skipping item " + next);
+                    }
+                }
+                searchIterator = result.iterator();
+                // End of inlining
+
+            } else if (querySpecification instanceof SBOIQuerySpecification) {
+                SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
+                eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
+                details = false;
+                searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
+            } else {
+                throw new UnsupportedOperationException("Bad query specification instance");
+            }
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
-            Iterator<Item> searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
             List<String> resultIds = new ArrayList<>();
             searchIterator.forEachRemaining(item -> resultIds.add(item.getDomsID()));
 
@@ -253,7 +271,6 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
      * can post-process it easily. The input stream must be closed by the caller.
      *
      * @param domsId id of doms object to retrieve DC datastream from.
-     *
      * @return inputstream of the actual bytes.
      */
     public InputStream getDataStreamInputStream(DomsId domsId, String datastreamId) {
@@ -269,7 +286,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         if (cr.getStatus() < 300) {
             return cr.getEntityInputStream();
         } else {
-            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId+ ": status= " + cr. getStatus());
+            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ": status= " + cr.getStatus());
         }
     }
 

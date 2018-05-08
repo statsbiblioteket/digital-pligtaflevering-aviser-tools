@@ -5,6 +5,7 @@ Changelog:
 
 * New autonomous component: Regenerate checksums.txt file for ingested delivery.
 * New autonomous component: Check regenerated checksums.txt file contain same lines as the one delivered by Infomedia.
+* Autonomous components now verify that items fitting the events as reported by SBOI actually do and skip them if not. 
 
 2018-04-23:  version 2
 

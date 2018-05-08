@@ -17,10 +17,10 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorageFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 
+import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.xml.bind.JAXBException;
 import java.net.MalformedURLException;
@@ -40,7 +40,6 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.FEDOR
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.SBOI_PAGESIZE;
 import static java.util.Arrays.asList;
-import javax.enterprise.inject.Produces;
 
 /**
  * DOMS configuration string lookup providers.
@@ -154,7 +153,7 @@ public class DomsModule {
      */
     @Produces
     @Provides
-    public SBOIEventIndex<Item> provideSBOIEventIndex(
+    public SBOIEventIndex_DigitalPligtafleveringAviser<Item> provideSBOIEventIndex(
             @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
             PremisManipulatorFactory<Item> premisManipulatorFactory,
             DomsEventStorage<Item> domsEventStorage,
