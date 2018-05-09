@@ -1,12 +1,17 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Serialize objects into files on the local filesystem.
@@ -51,7 +56,10 @@ public class DeliveryFilesystemReadWrite {
         File[] listOfFiles = folderForThis.listFiles();
 
         for (File titleFolder : listOfFiles) {
-            currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
+            //TODO:MMJ CHECK THIS
+            if(titleFolder.isFile()) {
+                currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
+            }
         }
         return currentlySelectedTitleHiearachy;
     }
@@ -88,6 +96,53 @@ public class DeliveryFilesystemReadWrite {
         }
         return true;
     }
+
+    //TODO:MMJ CHECK THIS
+    public synchronized void initiateThumbnailFolders(String currentlySelectedMonth) throws Exception {
+        FrontpageReadWrite.mountpoint = NewspaperContextListener.configurationmap.getRequired("bitrepository.sbpillar.mountpoint");
+
+        String thumbnailsPath = cachingPath + currentlySelectedMonth + "/thumbnails";
+        File thumbnailsFolder = new File(thumbnailsPath);
+
+        if (!thumbnailsFolder.exists()) {
+            thumbnailsFolder.mkdir();
+        }
+
+        FrontpageReadWrite.writeTitlesOfFirst(currentlySelectedMonth);
+    }
+
+    //TODO:MMJ CHECK THIS
+    public synchronized boolean saveIcons(String currentlySelectedMonth, String currentlySelectedTitle) throws Exception {
+        initiateThumbnailFolders(currentlySelectedMonth);
+        String thumbnailsPath = cachingPath + currentlySelectedMonth + "/thumbnails";
+        String currentFolder = thumbnailsPath + "/" + currentlySelectedTitle;
+        File folderForThis = new File(currentFolder);
+
+        if (!folderForThis.exists()) {
+            folderForThis.mkdir();
+        }
+        if(folderForThis.listFiles().length>2) {
+            return true;//Seems like it has allready been initialized
+        }
+
+        List<File> filePath = new ArrayList<File>();
+
+        List<Path> deliveryList = FrontpageReadWrite.folderFinder("dl_"+currentlySelectedMonth+"+(.*?)_rt+(.*?)");
+
+        for(Path o : deliveryList) {
+            Path subPath = Paths.get(o.toString(), currentlySelectedTitle + "/pages");
+            //pageFolderList.add(subPath);
+            File frontpageFile = FrontpageReadWrite.findFrontpages(subPath);
+            if(frontpageFile!=null) {
+                filePath.add(frontpageFile);
+            }
+        }
+
+        FrontpageReadWrite.writeImages(filePath, currentFolder);
+        return true;
+    }
+
+
 
     /**
      * Write the specific title in the delivery to the filesystem

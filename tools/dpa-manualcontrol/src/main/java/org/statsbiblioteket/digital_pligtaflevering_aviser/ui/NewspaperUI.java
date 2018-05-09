@@ -23,6 +23,7 @@ public class NewspaperUI extends UI {
     public static final String CONFIGPANEL = "CONFIGPANEL";
     public static final String DELIVERYPANEL = "DELIVERYPANEL";
     public static final String OVERVIEW = "OVERVIEW";
+    public static final String FRONTPAGE = "FRONTPAGE";
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
 
     private DataModel model = new DataModel();
@@ -69,6 +70,7 @@ public class NewspaperUI extends UI {
         navigator.addView(DELIVERYPANEL, deliveryPanel);
         navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(model, TITLEVALIDATIONPANEL));
         navigator.addView(OVERVIEW, new StatisticsView(model, OVERVIEW));
+        navigator.addView(FRONTPAGE, new StatisticsView(model, FRONTPAGE));
     }
 
 }

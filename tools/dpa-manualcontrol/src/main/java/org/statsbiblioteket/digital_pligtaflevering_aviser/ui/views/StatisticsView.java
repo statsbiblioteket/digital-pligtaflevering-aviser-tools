@@ -33,6 +33,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryValidationPanel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.FrontpageOverviewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.StatisticsPanels;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.TitleValidationPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
@@ -114,10 +115,20 @@ public class StatisticsView extends VerticalLayout implements View {
             }
         };
 
+        MenuBar.Command otherCommand4 = new MenuBar.Command() {
+            @Override
+            public void menuSelected(MenuBar.MenuItem selectedItem) {
+                getUI().getNavigator().navigateTo(NewspaperUI.FRONTPAGE);
+            }
+        };
+
+
+
         header.addItem("config", configCommand);
         header.addItem("Delivery validation", otherCommand1);
         header.addItem("TitleValidation", otherCommand2);
         header.addItem("Overview", otherCommand3);
+        header.addItem("Frontpage", otherCommand4);
 
         switch (type) {
             case NewspaperUI.DELIVERYPANEL:
@@ -131,6 +142,9 @@ public class StatisticsView extends VerticalLayout implements View {
                 break;
             case NewspaperUI.CONFIGPANEL:
                 tabelsLayout = new ConfigPanel(model);
+                break;
+            case NewspaperUI.FRONTPAGE:
+                tabelsLayout = new FrontpageOverviewPanel(model);
                 break;
             default:
                 tabelsLayout = new DeliveryValidationPanel(model);
@@ -309,7 +323,7 @@ public class StatisticsView extends VerticalLayout implements View {
      */
     private void panelPrepare(boolean prepare) {
         metadatalink.setVisible(prepare);
-        tabelsLayout.setVisible(prepare);
+        tabelsLayout.setVisible(true);
     }
 
     /**
