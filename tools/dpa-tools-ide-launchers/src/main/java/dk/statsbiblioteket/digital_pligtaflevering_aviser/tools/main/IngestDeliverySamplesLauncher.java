@@ -29,7 +29,7 @@ public class IngestDeliverySamplesLauncher {
                 "ingest-deliveries.properties",
                 IngesterMain.DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
-                BITMAG_BASEURL_PROPERTY + "=http://vagrant:58709/var/file1pillar/files/dpaviser/folderDir/",
+                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/file1pillar/files/dpaviser/folderDir/",
                 SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),  // where "resources" end up compiled.
         });
     }
