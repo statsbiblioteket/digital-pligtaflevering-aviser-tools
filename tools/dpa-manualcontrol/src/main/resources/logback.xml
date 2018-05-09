@@ -1,0 +1,4 @@
+<configuration>
+	<insertFromJNDI env-entry-name="java:comp/env/echo-soap/logback" as="logbackConfiguration"/>
+	<include url="${logbackConfiguration}"/>
+</configuration>
