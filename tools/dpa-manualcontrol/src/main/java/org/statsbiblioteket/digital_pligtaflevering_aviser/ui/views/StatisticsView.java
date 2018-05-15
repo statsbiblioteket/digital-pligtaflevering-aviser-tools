@@ -206,9 +206,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     if ("ARTICLE".equals(itemClickEvent.getComponent().getId())) {
                         currentSelectedArticle = (Article) itemClickEvent.getItemId();
                         currentSelectedPage.clear();
-
                         pdfComponent.setVisible(false);
-
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
                         metadatalink.setResource(resource);
                         metadatalink.setDescription("Link to Second Page");
@@ -261,7 +259,9 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.CHECKED);
                         model.addCheckedPage(page);
-                        //tabelsLayout.checkThePage(page, ConfirmationState.CHECKED);
+                        if(!tabelsLayout.checkThePage(page, ConfirmationState.CHECKED)) {
+                            tabelsLayout.reloadTables();
+                        }
                     }
                 }
                 if (currentSelectedArticle != null) {
@@ -281,7 +281,9 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.REJECTED);
                         model.addCheckedPage(page);
-                        //tabelsLayout.checkThePage(page, ConfirmationState.REJECTED);
+                        if(!tabelsLayout.checkThePage(page, ConfirmationState.REJECTED)) {
+                            tabelsLayout.reloadTables();
+                        }
                     }
                 }
                 if (currentSelectedArticle != null) {
