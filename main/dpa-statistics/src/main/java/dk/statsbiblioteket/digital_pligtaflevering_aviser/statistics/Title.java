@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Title in a newspaper, Serializable to make it convertible between a stream of xml and an objectmodel
@@ -53,6 +54,10 @@ public class Title implements java.io.Serializable {
 
     public List<Page> getPage() {
         return this.pages.getPages();
+    }
+
+    public List<Page> getFrontpages() {
+        return pages.getPages().stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
     }
 
 

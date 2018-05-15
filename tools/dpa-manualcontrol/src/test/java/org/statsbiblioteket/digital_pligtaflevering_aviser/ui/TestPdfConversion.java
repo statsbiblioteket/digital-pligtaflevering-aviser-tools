@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-//TODO:MMJ CHECK THIS
 
 /**
  * Simple unittest for validation of the datamodel
@@ -80,7 +79,5 @@ public class TestPdfConversion {
 
         FrontpageReadWrite.writeImages(frontPageList, destinationFolder.toFile().getAbsolutePath());
         assertEquals(2, Files.walk(destinationFolder).count());//validate that actual frontpage and ".." exists
-
     }
-
 }

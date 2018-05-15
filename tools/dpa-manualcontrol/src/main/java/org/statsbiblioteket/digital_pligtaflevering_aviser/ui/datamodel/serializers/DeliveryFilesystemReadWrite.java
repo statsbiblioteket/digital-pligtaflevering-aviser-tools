@@ -56,7 +56,6 @@ public class DeliveryFilesystemReadWrite {
         File[] listOfFiles = folderForThis.listFiles();
 
         for (File titleFolder : listOfFiles) {
-            //TODO:MMJ CHECK THIS
             if(titleFolder.isFile()) {
                 currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
             }
@@ -96,53 +95,6 @@ public class DeliveryFilesystemReadWrite {
         }
         return true;
     }
-
-    //TODO:MMJ CHECK THIS
-    public synchronized void initiateThumbnailFolders(String currentlySelectedMonth) throws Exception {
-        FrontpageReadWrite.mountpoint = NewspaperContextListener.configurationmap.getRequired("bitrepository.sbpillar.mountpoint");
-
-        String thumbnailsPath = cachingPath + currentlySelectedMonth + "/thumbnails";
-        File thumbnailsFolder = new File(thumbnailsPath);
-
-        if (!thumbnailsFolder.exists()) {
-            thumbnailsFolder.mkdir();
-        }
-
-        FrontpageReadWrite.writeTitlesOfFirst(currentlySelectedMonth);
-    }
-
-    //TODO:MMJ CHECK THIS
-    public synchronized boolean saveIcons(String currentlySelectedMonth, String currentlySelectedTitle) throws Exception {
-        initiateThumbnailFolders(currentlySelectedMonth);
-        String thumbnailsPath = cachingPath + currentlySelectedMonth + "/thumbnails";
-        String currentFolder = thumbnailsPath + "/" + currentlySelectedTitle;
-        File folderForThis = new File(currentFolder);
-
-        if (!folderForThis.exists()) {
-            folderForThis.mkdir();
-        }
-        if(folderForThis.listFiles().length>2) {
-            return true;//Seems like it has allready been initialized
-        }
-
-        List<File> filePath = new ArrayList<File>();
-
-        List<Path> deliveryList = FrontpageReadWrite.folderFinder("dl_"+currentlySelectedMonth+"+(.*?)_rt+(.*?)");
-
-        for(Path o : deliveryList) {
-            Path subPath = Paths.get(o.toString(), currentlySelectedTitle + "/pages");
-            //pageFolderList.add(subPath);
-            File frontpageFile = FrontpageReadWrite.findFrontpages(subPath);
-            if(frontpageFile!=null) {
-                filePath.add(frontpageFile);
-            }
-        }
-
-        FrontpageReadWrite.writeImages(filePath, currentFolder);
-        return true;
-    }
-
-
 
     /**
      * Write the specific title in the delivery to the filesystem

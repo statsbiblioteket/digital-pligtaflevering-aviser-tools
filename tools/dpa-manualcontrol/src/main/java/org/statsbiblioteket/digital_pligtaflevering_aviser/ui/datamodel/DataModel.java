@@ -330,16 +330,6 @@ public class DataModel {
         return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
     }
 
-    //TODO:MMJ CHECK THIS
-    public void initiateThumbnailFolders() throws Exception {
-        filesystemReadWrite.initiateThumbnailFolders(currentlySelectedMonth);
-    }
-
-    //TODO:MMJ CHECK THIS
-    public boolean saveThumbnailsToFilesystem() throws Exception {
-        return filesystemReadWrite.saveIcons(currentlySelectedMonth, selectedTitle);
-    }
-
     /**
      * Is the month been cashed ti the filesystem
      *
