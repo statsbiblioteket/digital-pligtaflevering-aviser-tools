@@ -1,8 +1,8 @@
 <configuration>
-    <contextName>echo-soap</contextName>
+    <contextName>dpa-manualcontrol</contextName>
 
     <appender name="R" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>${basedir}/target/${CONTEXT_NAME}.log</File>
+        <File>${project.build.directory}/${CONTEXT_NAME}.log</File>
 
         <encoder>
             <pattern>%d [%t] %-5p %c - %m%n</pattern>
@@ -10,7 +10,7 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <maxIndex>10</maxIndex>
-            <FileNamePattern>${basedir}/target/${CONTEXT_NAME}.log.%i</FileNamePattern>
+            <FileNamePattern>${project.build.directory}/${CONTEXT_NAME}.log.%i</FileNamePattern>
         </rollingPolicy>
 
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
@@ -18,7 +18,14 @@
         </triggeringPolicy>
     </appender>
 
+    <appender name="C" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d [%t] %-5p %c - %m%n</pattern>
+        </encoder>
+    </appender>
+
     <root level="debug">
-        <appender-ref ref="R"/>
+        <appender-ref ref="R" />
+        <appender-ref ref="C" />
     </root>
 </configuration>

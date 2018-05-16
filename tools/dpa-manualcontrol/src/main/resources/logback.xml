@@ -1,4 +1,5 @@
-<configuration>
-	<insertFromJNDI env-entry-name="java:comp/env/echo-soap/logback" as="logbackConfiguration"/>
-	<include url="${logbackConfiguration}"/>
+<configuration scan="true" scanPeriod="5 minutes">
+	<insertFromJNDI env-entry-name="java:comp/env/dpa-manualcontrol/logback" as="logbackConfiguration" />
+
+	<include url="${logbackConfiguration}" />
 </configuration>
