@@ -19,7 +19,7 @@ public interface StatisticsPanels extends Component {
      * @param itemId
      * @param checkedState
      */
-    public void checkThePage(Object itemId, ConfirmationState checkedState);
+    public boolean checkThePage(Object itemId, ConfirmationState checkedState);
 
     /**
      * Set the checkmark in the articleTable
@@ -29,6 +29,7 @@ public interface StatisticsPanels extends Component {
     public void checkTheArticle(Object itemId, ConfirmationState checkedState);
 
 
+    public void reloadTables();
 
     /**
      * Add selectionListener to fileSelectionTable

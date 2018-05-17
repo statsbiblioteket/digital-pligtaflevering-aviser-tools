@@ -75,8 +75,8 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
      * @param checkedState
      */
     @Override
-    public void checkThePage(Object itemId, ConfirmationState checkedState) {
-
+    public boolean checkThePage(Object itemId, ConfirmationState checkedState) {
+        return false;
     }
 
     /**
@@ -86,6 +86,11 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
      */
     @Override
     public void checkTheArticle(Object itemId, ConfirmationState checkedState) {
+
+    }
+
+    @Override
+    public void reloadTables() {
 
     }
 
