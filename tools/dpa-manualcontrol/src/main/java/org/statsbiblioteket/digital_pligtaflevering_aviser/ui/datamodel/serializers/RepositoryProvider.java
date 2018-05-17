@@ -9,7 +9,6 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
-import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import javaslang.control.Try;
 
@@ -53,7 +52,7 @@ public class RepositoryProvider implements Function<ConfigurationMap, DomsReposi
 
         final String recordBase = domsModule.provideDomsCollection(map);
 
-        SBOIEventIndex sboiEventIndex = Try.of(
+        SBOIEventIndex_DigitalPligtafleveringAviser sboiEventIndex = Try.of(
                 () -> new SBOIEventIndex_DigitalPligtafleveringAviser(summaLocation, premisManipulatorFactory, domsEventStorage, pageSize, recordBase)
         ).get();
         WebResource webResource = domsModule.provideConfiguredFedoraWebResource(domsURL, domsUserName, domsPassword);

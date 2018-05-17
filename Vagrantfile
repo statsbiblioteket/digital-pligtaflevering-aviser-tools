@@ -51,6 +51,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # https://stackoverflow.com/a/27878224/53897
     v.customize ["createhd",  "--filename", "m4_disk0", "--size", "1048576"] # 1 TB
     v.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd", "--medium", "m4_disk0.vdi"]
+    # https://github.com/hashicorp/vagrant/issues/9524
+
   end
 
   # for jvisualvm
