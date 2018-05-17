@@ -22,9 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_PASSWORD;
@@ -32,6 +32,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_URL;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_USERNAME;
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Unfinished create batch trigger main.
@@ -50,7 +51,7 @@ public class CreateDeliveryMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CreateDeliveryModule.class})
     interface CreateDeliveryComponent {
-        Tool getTool();
+        Tool<String> getTool();
     }
 
     @Module
@@ -60,7 +61,7 @@ public class CreateDeliveryMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_AGENT) String premisAgent,
+        Tool<String> provideTool(@Named(AUTONOMOUS_AGENT) String premisAgent,
                          @Named(DOMS_URL) String domsUrl,
                          @Named(DOMS_USERNAME) String domsUser,
                          @Named(DOMS_PASSWORD) String domsPass,
@@ -83,7 +84,7 @@ public class CreateDeliveryMain {
                 Pattern pattern = Pattern.compile("^(.*)_rt([0-9]+)$");
                 // Iterate through the deliveries on disk
                 final Stream<Path> paths = deliveriesToCreateProvider.get();
-                String joinedString = paths.map(deliveryItemDirectoryPath -> {
+                List<String> result = paths.map(deliveryItemDirectoryPath -> {
                     // Files.exists(p.resolve(TRANSFER_COMPLETE))?
                     File deliveryItemDirectory = deliveryItemDirectoryPath.toFile();
                     final File doneDeliveryIndicatorFile = new File(deliveryItemDirectory, TRANSFER_COMPLETE);
@@ -110,12 +111,13 @@ public class CreateDeliveryMain {
                             log.trace("file name did not match, skipping {}", deliveryItemDirectoryName);
                         }
                     } else {
-                        log.debug("Skipping directory {}, since the delivery does not have '" + TRANSFER_COMPLETE +"'", deliveryItemDirectoryPath);
+                        log.debug("Skipping directory {}, since the delivery does not have '" + TRANSFER_COMPLETE + "'", deliveryItemDirectoryPath);
                     }
                     return deliveryItemDirectoryPath.toString();
-                }).collect(Collectors.joining(" "));
-
-                return "processed CreateDelivery for " + joinedString;
+                })
+                        .peek((String o) -> log.trace("Processed: {}", o))
+                        .collect(toList());
+                return result;
             };
         }
 
@@ -132,7 +134,8 @@ public class CreateDeliveryMain {
         }
 
         /**
-         * <p> Locate deliveries in the current folder and below in reverse order (by looking for the transfer completed
+         * <p> Locate deliveries in the current folder and below in reverse order (by looking for the transfer
+         * completed
          * file). </p> <p> Reversing them mean that "A_rt2" will be processed before "A_rt1" so when "A_rt1" is
          * considered there is already "A_rt2" present for delivery "A". (This only works properly up to 9 roundtrips,
          * but that should hopefully be rare). </p>

@@ -93,7 +93,7 @@ public class IngesterMain {
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, IngesterModule.class, BitRepositoryModule.class})
     protected interface DomsIngesterComponent {
 
-        Tool getTool();
+        Tool<String> getTool();
     }
 
     /**
@@ -107,7 +107,7 @@ public class IngesterMain {
         /** @noinspection unchecked*/
         @Produces
         @Provides
-        Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
+        Tool<String> provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          @Named(AUTONOMOUS_THIS_EVENT) String eventName,
                          QuerySpecification workToDoQuery,
                          DomsRepository repository,
@@ -117,7 +117,7 @@ public class IngesterMain {
             final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
             final String agent = IngesterMain.class.getSimpleName();
 
-            Tool f = () -> {
+            Tool<String> f = () -> {
                 try (FileSystemDeliveryIngester autoCloseableIngester = ingester) { // shut down bitrepository resources completely when done
                     List<String> toolResults = Stream.of(workToDoQuery)
                             .flatMap(repository::query)
@@ -149,7 +149,7 @@ public class IngesterMain {
                             .map(c -> c.left().getDomsId().id())
                             .collect(Collectors.toList());
 
-                    return toolResults.size() + " processed:  " + toolResults;
+                    return toolResults;
                 }
             };
             return f;

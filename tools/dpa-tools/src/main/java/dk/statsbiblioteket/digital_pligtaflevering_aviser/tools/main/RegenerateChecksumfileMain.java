@@ -73,7 +73,7 @@ public class RegenerateChecksumfileMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, RegenerateChecksumfileModule.class})
     interface RegenerateChecksumfileComponent {
-        Tool getTool();
+        Tool<StreamTuple<DomsItem, String>> getTool();
     }
 
     /**
@@ -87,16 +87,16 @@ public class RegenerateChecksumfileMain {
          * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
          */
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
+        Tool<StreamTuple<DomsItem, String>> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
                          DefaultToolMXBean mxBean) {
             final String agent = RegenerateChecksumfileMain.class.getSimpleName();
 
             //
-            Tool tool = () -> Stream.of(workToDoQuery)
+            Tool<StreamTuple<DomsItem, String>> tool = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
-                    .peek(domsItem -> log.info("Regenerating checksums for: {}", domsItem))
+                    .peek(domsItem -> log.info("Regenerating checksums for: {} {}", domsItem, domsItem.getPath()))
                     .peek(domsItem -> mxBean.currentId = domsItem.getPath() + " " + domsItem.getDomsId().id())
 
                     // roundtrip node for a day delivery and we need to process all the children to get the combined md5sum.
@@ -164,9 +164,7 @@ public class RegenerateChecksumfileMain {
                     .peek((StreamTuple<DomsItem, String> st) -> log.trace("{}", st))
                     .map(st -> st.map((roundtripItem, outcomeString) -> roundtripItem.getPath() + " " + roundtripItem.getDomsId().id() + " " + outcomeString))
                     .sorted()
-                    .collect(toList())
-                    .toString();
-
+                    .collect(toList());
             return tool;
         }
 

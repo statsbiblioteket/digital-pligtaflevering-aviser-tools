@@ -77,7 +77,7 @@ public class CheckRegeneratedChecksumfileMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, CheckRegeneratedChecksumfileModule.class})
     interface CheckRegeneratedChecksumfileComponent {
-        Tool getTool();
+        Tool<StreamTuple<DomsItem, String>> getTool();
     }
 
     /**
@@ -91,7 +91,7 @@ public class CheckRegeneratedChecksumfileMain {
          * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
          */
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
+        Tool<StreamTuple<DomsItem, String>> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                          @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
@@ -99,7 +99,7 @@ public class CheckRegeneratedChecksumfileMain {
             final String agent = CheckRegeneratedChecksumfileMain.class.getSimpleName();
 
             //
-            Tool tool = () -> Stream.of(workToDoQuery)
+            Tool<StreamTuple<DomsItem, String>> tool = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(roundtripItem -> log.info("Checking regenerated checksums for: {}", roundtripItem))
                     .peek(roundtripItem -> mxBean.currentId = roundtripItem.getPath() + " " + roundtripItem.getDomsId().id())
@@ -166,8 +166,7 @@ public class CheckRegeneratedChecksumfileMain {
                     .peek((StreamTuple<DomsItem, String> st) -> log.trace("{}", st))
                     .map(st -> st.map((roundtripItem, outcomeString) -> roundtripItem.getPath() + " " + roundtripItem.getDomsId().id() + " " + outcomeString))
                     .sorted()
-                    .collect(toList())
-                    .toString();
+                    .collect(toList());
 
             return tool;
         }
