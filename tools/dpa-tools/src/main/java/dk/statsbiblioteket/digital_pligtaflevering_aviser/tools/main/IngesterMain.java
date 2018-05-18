@@ -26,8 +26,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.Inges
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
-import javaslang.control.Either;
-import javaslang.control.Try;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.client.eventhandler.EventHandler;

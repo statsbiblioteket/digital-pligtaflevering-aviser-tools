@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
-import javaslang.control.Either;
+import io.vavr.control.Either;
 
 import java.util.concurrent.Callable;
 
@@ -11,6 +11,7 @@ public class Eithers {
      * thrown returns an Either.left with the exception.   This is needed because the expression is too complex for
      * <code>javac</code> to figure out the appropriate return type of the expression without some help.
      */
+    @Deprecated
     public static <R> Either<Exception, R> tryCatch(Callable<R> callable) {
         try {
             return Either.right(callable.call());
