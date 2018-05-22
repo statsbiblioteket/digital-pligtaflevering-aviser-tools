@@ -107,8 +107,12 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * @param checkedState
      */
     @Override
-    public void checkThePage(Object itemId, ConfirmationState checkedState) {
-        fileSelectionPanel.checkSpecific(itemId, checkedState);
+    public boolean checkThePage(Object itemId, ConfirmationState checkedState) {
+        return fileSelectionPanel.checkSpecific(itemId, checkedState);
+    }
+
+    public void reloadTables() {
+        showTheSelectedTitle(true);
     }
 
     /**
