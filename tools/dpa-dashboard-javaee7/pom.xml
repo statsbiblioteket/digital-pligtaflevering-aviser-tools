@@ -7,7 +7,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>dpa-dashboard-cdi</artifactId>
+    <artifactId>dpa-dashboard-javaee7</artifactId>
     <packaging>war</packaging>
     <name>dpa-dashboard Java 7 EE WebProfile</name>
     <url>http://maven.apache.org</url>
