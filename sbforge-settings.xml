@@ -1,0 +1,60 @@
+<settings>
+  <profiles>
+    <profile>
+      <id>sbprojects-nexus</id>
+
+      <!--Enable snapshots for the built in central repo to direct -->
+      <!--all requests to nexus via the mirror -->
+      <repositories>
+	<repository>
+	  <id>sbprojects-nexus</id>
+	  <url>https://sbprojects.statsbiblioteket.dk/nexus/content/groups/public</url>
+	  <releases><enabled>true</enabled></releases>
+	  <snapshots><enabled>true</enabled></snapshots>
+	</repository>
+      </repositories>
+      <pluginRepositories>
+	<pluginRepository>
+	  <id>sbprojects-nexus</id>
+	  <url>https://sbprojects.statsbiblioteket.dk/nexus/content/groups/public</url>
+	  <releases><enabled>true</enabled></releases>
+	  <snapshots><enabled>true</enabled></snapshots>
+	</pluginRepository>
+      </pluginRepositories>
+
+
+    </profile>
+    <profile>
+      <id>sbforge-nexus</id>
+
+      <!--Enable snapshots for the built in central repo to direct -->
+      <!--all requests to nexus via the mirror -->
+      <repositories>
+	<repository>
+	  <id>sbforge-nexus</id>
+	  <url>https://sbforge.org/nexus/content/groups/public</url>
+	  <releases><enabled>true</enabled></releases>
+	  <snapshots><enabled>true</enabled></snapshots>
+	</repository>
+      </repositories>
+      <pluginRepositories>
+	<pluginRepository>
+	  <id>sbforge-nexus</id>
+	  <url>https://sbforge.org/nexus/content/groups/public</url>
+	  <releases><enabled>true</enabled></releases>
+	  <snapshots><enabled>true</enabled></snapshots>
+	</pluginRepository>
+      </pluginRepositories>
+
+
+    </profile>
+  </profiles>
+
+  <!--make the profile active all the time
+  -->
+  <activeProfiles>
+    <activeProfile>sbprojects-nexus</activeProfile>
+    <activeProfile>sbforge-nexus</activeProfile>
+  </activeProfiles>
+</settings>
+

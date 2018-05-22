@@ -1,10 +1,6 @@
 # digital-pligtaflevering-aviser-tools
 
-**VERY IMPORTANT:  NEWER VERSIONS OF VIRTUALBOX DISLIKES THE NAMES CHOSEN BY VAGRANT
-IF THE DIRECTORY CONTAINING THE VAGRANTFILE IS TOO LONG.  THE
-DEFAULT NAME FOR THIS PROJECT WHEN CLONING TRIGGERS THIS!  USE "dpa" INSTEAD.**
-
-
+[![wercker status](https://app.wercker.com/status/8696b835217d47b14f71175a72ad818c/s/ "wercker status")](https://app.wercker.com/project/byKey/8696b835217d47b14f71175a72ad818c)
 
 Quicklinks:
 

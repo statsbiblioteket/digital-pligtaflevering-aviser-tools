@@ -231,7 +231,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
      * Deprecated because ABR points out this needs to come from the datastream on the doms item.  partsForStream()
      * @return
      */
-    @Deprecated
+    //@Deprecated FIXME
     public Stream<DomsItem> children() {
         log.trace("childrenFor: {}", this);
         final WebResource wr;

@@ -22,7 +22,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonMo
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -47,11 +47,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Main class for starting autonomous component This component is used for validation of XML data in one or more
@@ -106,6 +106,7 @@ public class ValidateXMLMain {
                     }))
                     .peek(c -> {
                         final DomsItem item = c.left();
+                        // FIXME:  Rewrite with Either.fold
                         final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.right();  // FIXME:  Why is type information lost?
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
@@ -118,7 +119,8 @@ public class ValidateXMLMain {
                             }
                         }
                     })
-                    .count() + " items processed"; // FIXME:  Better message from list.
+                    .peek((StreamTuple<DomsItem, Either<? extends Object, ? extends Object>> o) -> log.trace("Processed: {}", o))
+                    .collect(toList());
 
             return f;
         }
@@ -158,7 +160,7 @@ public class ValidateXMLMain {
                                     }
                                 }
                         ))
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                 ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
                         (id, t) -> log.error("id: {}", id, t),

@@ -3,6 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Main class for starting autonomous component This component is used for validation of metadata from newspaper
@@ -48,7 +50,7 @@ public class GenerateStatisticsMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, GenerateStatisticsModule.class})
     interface GenerateStatisticsComponent {
-        Tool getTool();
+        Tool<StreamTuple<DomsItem, String>> getTool();
     }
 
     /**
@@ -59,17 +61,18 @@ public class GenerateStatisticsMain {
         Logger log = LoggerFactory.getLogger(this.getClass());
 
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification query, DomsRepository domsRepository) {
+        Tool<StreamTuple<DomsItem, String>> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName, QuerySpecification query, DomsRepository domsRepository) {
             final String agent = GenerateStatisticsModule.class.getSimpleName();
 
-            Tool f = () -> Stream.of(query)
+            Tool<StreamTuple<DomsItem, String>> f = () -> Stream.of(query)
                     .flatMap(domsRepository::query)
-                    .peek(domsItem -> log.trace("Processing: {}", domsItem))
+                    .peek((DomsItem deliveryItem) -> log.trace("Processing: {}", deliveryItem))
                     .map(DomsItemTuple::create)
                     .map(c -> c.map(v -> processChildDomsId().apply(v)))
                     .peek(c -> c.left().appendEvent(new DomsEvent(agent, new Date(), c.right().getHumanlyReadableMessage(), eventName, c.right().isSuccess())))
-                    .count() + " items processed";
-
+                    .map(c -> c.map(toolResult -> "outcome=" + toolResult.isSuccess()))
+                    .peek((StreamTuple<DomsItem, String> o) -> log.trace("Processed: {}", o))
+                    .collect(toList());
             return f;
         }
 

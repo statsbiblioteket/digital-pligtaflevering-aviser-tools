@@ -22,7 +22,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.util.xml.DOM;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;

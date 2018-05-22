@@ -31,7 +31,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,12 +54,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Unfinished
@@ -129,9 +129,9 @@ public class VeraPDFInvokeMain {
                             }
                         }
                     })
-                    .peek(o -> log.trace("Result: {}", o))
-                    .count() + " items processed";  // FIXME:  Better message from list.
-
+                    // FIXME
+                    .peek((StreamTuple<DomsItem, Either<Exception, ToolResult>> o) -> log.trace("Result: {}", o))
+                    .collect(toList());
             return f;
         }
 
@@ -150,7 +150,7 @@ public class VeraPDFInvokeMain {
                             .peek(i -> mxBean.idsProcessed++)
                             .map(DomsItemTuple::create)
                             .flatMap((c) -> c.flatMap(invokeVeraPDFOnPhysicalFiles0(bitrepositoryUrlPrefix, bitrepositoryMountpoint, veraPdfInvokerProvider, reuseExistingDatastream)))
-                            .collect(Collectors.toList());
+                            .collect(toList());
 
                     ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(
                             new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
