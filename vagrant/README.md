@@ -42,7 +42,6 @@ Now download Zulu OpenJDK 8, install Bit Repository and DOMS and run a
 tiny web server on top of the Bit Repository file system so we can
 retrieve the files stored:
 
-    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
 
 
 Note that DOMS will take a while to initialize (SBOI and DOMS Wui Solr

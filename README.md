@@ -1,7 +1,6 @@
 # digital-pligtaflevering-aviser-tools
 
-[![wercker status](https://app.wercker.com/status/8696b835217d47b14f71175a72ad818c/s/master "wercker status")](https://app.wercker.com/project/byKey/8696b835217d47b14f71175a72ad818c)
-
+[![wercker status](https://app.wercker.com/status/8696b835217d47b14f71175a72ad818c/s/ "wercker status")](https://app.wercker.com/project/byKey/8696b835217d47b14f71175a72ad818c)
 
 Quicklinks:
 

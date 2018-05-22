@@ -19,7 +19,7 @@ public class DomsItemTuple<V> extends StreamTuple<DomsItem, V> {
         return new DomsItemTuple<>(id, id);
     }
 
-    public static String stacktraceFor(Exception e) {
+    public static String stacktraceFor(Throwable e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);

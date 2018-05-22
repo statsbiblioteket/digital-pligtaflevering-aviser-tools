@@ -13,12 +13,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.Eithers;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,10 +92,10 @@ public class CheckRegeneratedChecksumfileMain {
          */
         @Provides
         Tool<StreamTuple<DomsItem, String>> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
-                         @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
-                         QuerySpecification workToDoQuery,
-                         DomsRepository domsRepository,
-                         DefaultToolMXBean mxBean) {
+                                                        @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
+                                                        QuerySpecification workToDoQuery,
+                                                        DomsRepository domsRepository,
+                                                        DefaultToolMXBean mxBean) {
             final String agent = CheckRegeneratedChecksumfileMain.class.getSimpleName();
 
             //
@@ -107,7 +107,7 @@ public class CheckRegeneratedChecksumfileMain {
 
                     // roundtrip node for a day delivery and we need to process all the children to get the combined md5sum.
                     .map(StreamTuple::create)
-                    .map(st0 -> st0.map(roundtripItem -> Eithers.tryCatch(() -> {
+                    .map(st0 -> st0.map(roundtripItem -> Try.of(() -> {
                                 Thread.sleep(10000);
                                 String datastream = roundtripItem.datastream(RegenerateChecksumfileMain.MD5SUMS_DATASTREAM).getDatastreamAsString();
                                 List<String> datastreamLines = Arrays.asList(datastream.split("\\r?\\n")); // https://stackoverflow.com/a/454913/53897
@@ -134,15 +134,15 @@ public class CheckRegeneratedChecksumfileMain {
 
                                 return onlyInOneSet;
                             }
-                    )))
+                    ).toEither()))
                     // stream:  RoundtripItem -> Either.right(Set<String> not common)
-                    .peek((StreamTuple<DomsItem, Either<Exception, Set<String>>> st) -> log.trace("{}", st))
+                    .peek((StreamTuple<DomsItem, Either<Throwable, Set<String>>> st) -> log.trace("{}", st))
                     .peek(st -> mxBean.details = st.right().toString())
 
                     // Process result and generate "outcome=true" or "outcome=false" (if an error happened)
                     .map(st -> st.map((roundtripItem, either) ->
                                     "outcome=" + either.fold(
-                                            (Exception exception) -> {
+                                            (Throwable exception) -> {
                                                 log.error("{}: {}", roundtripItem.getPath(), roundtripItem.toString(), exception);
                                                 roundtripItem.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(exception), eventName, false));
                                                 roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
