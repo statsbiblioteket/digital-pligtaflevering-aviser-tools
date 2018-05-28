@@ -20,7 +20,7 @@ public class CreateDeliveryForDeliverySamplesLauncher {
         Path doneDirPath = MavenProjectsHelper.getRequiredPathTowardsRoot(CreateDeliveryForDeliverySamplesLauncher.class, "delivery-samples-done-dir");
 
         CreateDeliveryMain.main(new String[]{
-                "create-delivery.properties",
+                "create-deliveries.properties",
                 ITERATOR_FILESYSTEM_BATCHES_FOLDER + "=" + deliveryPath.toString(),
                 CreateDeliveryMain.AUTONOMOUS_DONEDIR + "=" + doneDirPath.toString()});
     }

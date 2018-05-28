@@ -1,6 +1,14 @@
 Changelog:
 ===
 
+2018-22-05: version3-release:
+
+* Ingest validation by regenerating checksums.txt for an ingested delivery and comparing it with the
+checksums.txt present on disk (after removing \r's and sorting they should be identical).  This
+allows for later automatically finding deliveries that can be removed from disk,
+* Manual control web app fixes.
+* command line programs now report items processed in the log.
+
 2018-05-03:
 
 * New autonomous component: Regenerate checksums.txt file for ingested delivery.
