@@ -2,7 +2,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -77,6 +77,7 @@ public class ToolResultsReportTest {
      * exception as Either.left if not successful.
      */
 
+    @Deprecated
     public static <C> Either<Exception, C> either(Callable<C> c) {
         try {
             return Either.right(c.call());

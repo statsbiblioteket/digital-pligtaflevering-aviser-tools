@@ -13,12 +13,12 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.Eithers;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import javaslang.control.Either;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,6 @@ import static java.util.stream.Collectors.toList;
  * </p>
  * <p>The roundtripItem is traversed and exceptions+resultvalues captured in an Either which is then used to determine
  * if the roundtrip is successful or not (with the appropriate events saved on the item)</p>
- *
  * <p>Important:  Until the underlying efedora is ensured threadsafe do <it>not</it> attempt to parallize the
  * stream.</p>
  *
@@ -60,6 +59,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class RegenerateChecksumfileMain {
     protected static final Logger log = LoggerFactory.getLogger(RegenerateChecksumfileMain.class);
+
+    public static final String MD5SUMS_DATASTREAM = "MD5SUMS";
 
     public static void main(String[] args) {
 
@@ -71,7 +72,7 @@ public class RegenerateChecksumfileMain {
 
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, RegenerateChecksumfileModule.class})
     interface RegenerateChecksumfileComponent {
-        Tool getTool();
+        Tool<StreamTuple<DomsItem, String>> getTool();
     }
 
     /**
@@ -85,21 +86,21 @@ public class RegenerateChecksumfileMain {
          * @noinspection PointlessBooleanExpression, UnnecessaryLocalVariable, unchecked
          */
         @Provides
-        Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
-                         QuerySpecification workToDoQuery,
-                         DomsRepository domsRepository,
-                         DefaultToolMXBean mxBean) {
+        Tool<StreamTuple<DomsItem, String>> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
+                                                        QuerySpecification workToDoQuery,
+                                                        DomsRepository domsRepository,
+                                                        DefaultToolMXBean mxBean) {
             final String agent = RegenerateChecksumfileMain.class.getSimpleName();
 
             //
-            Tool tool = () -> Stream.of(workToDoQuery)
+            Tool<StreamTuple<DomsItem, String>> tool = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
-                    .peek(domsItem -> log.info("Regenerating checksums for: {}", domsItem))
+                    .peek(domsItem -> log.info("Regenerating checksums for: {} {}", domsItem, domsItem.getPath()))
                     .peek(domsItem -> mxBean.currentId = domsItem.getPath() + " " + domsItem.getDomsId().id())
 
                     // roundtrip node for a day delivery and we need to process all the children to get the combined md5sum.
                     .map(StreamTuple::create)
-                    .map(st0 -> st0.map(roundtripItem -> Eithers.tryCatch(
+                    .map(st0 -> st0.map(roundtripItem -> Try.of(
                             () -> roundtripItem.children()
                                     .flatMap(paperItem -> Stream.concat(
                                             // each paper has "pages" and "articles" subnodes.  concat the processing of both, until a nice way of splitting a stream is found.
@@ -129,17 +130,17 @@ public class RegenerateChecksumfileMain {
                                     .peek(md5sumLine -> mxBean.details = md5sumLine)
                                     .peek(md5sumLine -> mxBean.idsProcessed++)
                                     .collect(Collectors.joining("\n")) // collect all generated md5sum lines into a checksums.txt compatible "file"
-                            )
+                            ).toEither()
                     ))
                     // stream:  DomsItem -> md5sumLines
-                    .peek((StreamTuple<DomsItem, Either<Exception, String>> i) -> log.trace("{}", i))
+                    .peek((StreamTuple<DomsItem, Either<Throwable, String>> i) -> log.trace("{}", i))
 
                     .map(st -> st.map((either) -> either.map((String md5sumLines) -> md5sumLines + "\n")))  // we need a trailing newline to be compatible with md5sum output
 
                     // Process result and generate "outcome=true" or "outcome=false" (if an error happened)
                     .map(st -> st.map((roundtripItem, either) ->
                                     "outcome=" + either.fold(
-                                            (Exception exception) -> {
+                                            (Throwable exception) -> {
                                                 log.error("{}: {}", roundtripItem.getPath(), roundtripItem.toString(), exception);
                                                 roundtripItem.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(exception), eventName, false));
                                                 roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "autonomous component failed", STOPPED_STATE, true));
@@ -148,7 +149,7 @@ public class RegenerateChecksumfileMain {
                                             },
                                             (String md5sumFile) -> {
                                                 byte[] bytes = md5sumFile.getBytes(StandardCharsets.UTF_8);
-                                                roundtripItem.modifyDatastreamByValue("MD5SUMS", null, null, bytes, null, "text/plain", null, null);
+                                                roundtripItem.modifyDatastreamByValue(MD5SUMS_DATASTREAM, null, null, bytes, null, "text/plain", null, null);
 
                                                 // int newlines = md5sumFile.replaceAll("[^\n]*","").length();
                                                 int newlines = md5sumFile.length() - md5sumFile.replace("\n", "").length();
@@ -162,9 +163,7 @@ public class RegenerateChecksumfileMain {
                     .peek((StreamTuple<DomsItem, String> st) -> log.trace("{}", st))
                     .map(st -> st.map((roundtripItem, outcomeString) -> roundtripItem.getPath() + " " + roundtripItem.getDomsId().id() + " " + outcomeString))
                     .sorted()
-                    .collect(toList())
-                    .toString();
-
+                    .collect(toList());
             return tool;
         }
 

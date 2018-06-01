@@ -18,6 +18,9 @@ public class IngestDeliverySamplesLauncher {
 
     public static void main(String[] args) throws Exception {
 
+        // for jaxb-impl 2.3.0 under Java 10 - https://github.com/javaee/jaxb-v2/issues/1197
+        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
+
         Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLauncher.class, "delivery-samples");
         Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(IngestDeliverySamplesLauncher.class, "bitrepositorystub-storage");
 
@@ -29,7 +32,7 @@ public class IngestDeliverySamplesLauncher {
                 "ingest-deliveries.properties",
                 IngesterMain.DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
-                BITMAG_BASEURL_PROPERTY + "=http://vagrant:58709/var/file1pillar/files/dpaviser/folderDir/",
+                BITMAG_BASEURL_PROPERTY + "=http://localhost:58709/var/file1pillar/files/dpaviser/folderDir/",
                 SETTINGS_DIR_PROPERTY + "=" + startDir.toAbsolutePath(),  // where "resources" end up compiled.
         });
     }

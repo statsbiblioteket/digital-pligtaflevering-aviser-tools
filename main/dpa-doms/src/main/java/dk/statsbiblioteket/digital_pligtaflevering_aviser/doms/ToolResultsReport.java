@@ -2,7 +2,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.google.common.base.Throwables;
 import dk.kb.stream.StreamTuple;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 
 import javax.inject.Inject;
 import java.util.Comparator;

@@ -3,7 +3,12 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                       https://maven.apache.org/xsd/settings-1.0.0.xsd">
 
-    <!-- 2017-10-30 version /tra
+    <!-- 2018-05-01 /tra
+
+    FIXME: The description only works for non-SNAPSHOT artifacts in sbforge.  For the dashboard
+    development we need backend changes so this will not work for that.
+
+    2017-10-30 version /tra
 
     Efficient usage of Maven is hard with Docker as the local repository does not provide the
     normal caching benefits.  Hence we need a local cache.  Sonatype has a nexus3 image that works

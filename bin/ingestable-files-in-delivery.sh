@@ -13,4 +13,4 @@ then
    exit 1
 fi
 
-find $1 -type f | grep -E -v '/(transfer_acknowledged|transfer_complete|checksums.txt)$'|LC_ALL=C sort
+find $1 -type f | grep -E -v '/(transfer_acknowledged[^ ]*|transfer_complete|checksums.txt)$'|LC_ALL=C sort
