@@ -184,3 +184,102 @@ https://www.vagrantup.com/downloads.html - the version coming with
 Ubuntu was too old when the project began.
 
 See [vagrant/README.md](vagrant/README.md) for further information.
+
+
+
+ABR
+---
+
+* Branch per issue
+* First commit on branch is empty (`--allow-empty`) but with issue description as message
+* Issues on <https://sbprojects.statsbiblioteket.dk/jira/projects/DPA/summary>
+* Docs not on confluence, we use markdown files in this repo for docs
+* Projektleder: Niels Bønding <nba@kb.dk>
+
+* vagrant is used for doms/bitrepo
+* docker for doms is still under development
+
+* release is not based on mvn release plugin
+* Instead, branch name and git commit is used in tarball name
+* This tarball `tools/dpa-tools-deployment/target/dpa_master_20af068.tar.gz` is 
+copied to `dpaviser@achernar`
+This is the only thing that is shipped to Drift. If anything needs to be changed, it
+should be changed in the orig. files.
+
+
+Maven versions are "master-SNAPSHOT" for everything here.  
+
+Make _branch_ from master named from milestone/release. 
+
+Note, git commit id is not only in tarball name. It is also shown in log messages, 
+so a logfile automatically identifies the the version of code it is from.
+
+This is done via. tools/dpa-tools-deployment/pom.xml, which uses appassembler to make
+the java wrappers, with the git info, which maven gets from the `git-commit-id-plugin`
+
+
+Milestones
+1. ?
+2. ?
+3. ?
+4. Verapdf
+
+```
+. Master
+|
+*
+|
+*------>* release4
+|       |
+|       * hotfix 
+*<-----/    Merge fix back if relevant
+|
+*
+```
+
+Do NOT merge master (or even other branches ) to released branch. If change is minor, 
+do hotfix, otherwise work on master (actually issue branch from master) and make
+new release branch afterwards.
+  
+
+#### Autonomous Components. 
+
+ \* is already done
+ 
+ \+ is in the current release and being worked on
+
+ \! Next priority for TRA
+ 
+ \% Last priority for TRA
+
+1. \* Create delivery/ initiator osv component
+2. \* Doms Ingester + bit repo component: one component ingests in both. Waits for bitrepo to finish. Can do 10 deliveries per day. 
+
+3. \+ Checksum regenerator: Iterates doms and bitrepo for the ingested files (xml and data) and recalcs checksum.
+
+    Checksum regen to ensure ingest is correct. Ensures more than checksums. Ensures that the doms tree structure and 
+    bitrepo links encompass the whole delivery. 
+4. \+ Validate checksum/file list from checksum regenerator
+
+Now use three components concurrently
+
+1. \! Mark as deleted on disk (jhlj)
+2. \% xml validator
+3. \% PDF:
+    1. PDF renderer: Render the pdf to thumbnail to "ensure" that the pdf is valid
+    2. VeraPDF metadata: Extract pdf-a condition violations
+    3. VeraPDF reporter: Check pdf-a condition violations against rules from KFC. 
+
+If anything fails, a MANUAL_CONTROL event is set on the delivery and further processing (of this) is stopped.  
+
+
+#### Webinterfaces
+
+Vaadin interface for quality control, MMJ
+
+##### TRA: Dashboard.
+
+Still needs work: Java EE 7 app due to needing Glassfish (module 'dpa-dashboard-javaee7')
+
+Mostly done: Wrapping/deployment to allow running in Tomcat 8 (module 'dpa-dashboard')
+
