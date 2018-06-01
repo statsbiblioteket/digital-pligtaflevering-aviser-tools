@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Used to ensure that doms and sboi can be reached under the hostname localhost, even if they run on another machine.
+# This ensures that config files do not need to be fixed.
+
 # Create ssh connection with port forwardings for DOMS and Summa.
 # Provide [user@]machine as argument if not tra.
 HOST=${1:-pc591.sb}
