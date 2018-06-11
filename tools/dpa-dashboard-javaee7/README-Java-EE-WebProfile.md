@@ -12,7 +12,7 @@ application.  Default is http://localhost:8080/
 
 For Tomcat 8.5 deployments it is necessary to enclose Weld (the
 reference CDI engine) in the WAR file.  This is being done in the
-dpa-manualcontrol module using a Maven overlay, to keep this simple.
+dpa-dashboard module using a Maven overlay, to keep this simple.
 
 /tra 2018-02-11
 

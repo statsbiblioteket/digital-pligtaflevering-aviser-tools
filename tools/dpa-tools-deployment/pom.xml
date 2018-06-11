@@ -220,6 +220,12 @@
                                     </mainClass>
                                     <id>dpa-check-regenerated-checksumfile</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ListDeletableDeliveriesMain
+                                    </mainClass>
+                                    <id>list-deletable-deliveries</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
