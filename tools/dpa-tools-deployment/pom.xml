@@ -155,8 +155,8 @@
                     -->
                     <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
-                        $${ENABLE_GC_LOG:+
                         -Ddpa.git.id=${git.branch}_${git.commit.id.abbrev}
+                        $${ENABLE_GC_LOG:+
                         -verbose:gc
                         -XX:+PrintGCDetails
                         -XX:+PrintGCDateStamps
