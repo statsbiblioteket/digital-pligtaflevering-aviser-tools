@@ -226,6 +226,12 @@
                                     </mainClass>
                                     <id>list-deletable-deliveries</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.SetEventOnUuidMain
+                                    </mainClass>
+                                    <id>set-event-on-uuid</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>

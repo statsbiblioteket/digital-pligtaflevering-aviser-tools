@@ -20,7 +20,6 @@ import javax.inject.Named;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
-import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.ITERATOR_FILESYSTEM_BATCHES_FOLDER;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -57,7 +56,6 @@ public class ListDeletableDeliveriesMain {
          */
         @Provides
         Tool<String> provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
-                                                        @Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName,
                                                         QuerySpecification workToDoQuery,
                                                         DomsRepository domsRepository,
                                                         DefaultToolMXBean mxBean) {
