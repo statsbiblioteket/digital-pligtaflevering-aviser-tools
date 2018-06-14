@@ -4,7 +4,9 @@ crontab and runs the jobs in cron.
 
 It is expected that the host provides suitable services (or port
 forwarding) to DOMS.  It is also expected that external links to
-bitrepository files are functional without file mapping.
+bitrepository files are functional _without_ file mapping (the URL
+in DOMS must point to the file).  This is valid for the Vagrant image.
+
 
 Run
 

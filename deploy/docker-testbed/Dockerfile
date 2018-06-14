@@ -1,8 +1,17 @@
 FROM openjdk:8-jdk-alpine
 
-# $HOME for root
+RUN ln -s /bin/ash /bin/bash
+
+# $HOME for root is /root
+
+
+
+ADD crontab.running /root
+ADD .bash_profile /root
 ADD target/for-docker /root
 
-RUN (echo "*/14 * * * * run-parts /etc/periodic/14min"; crontab -l ) | crontab -
+
+RUN chmod +x /root/services/bin/*.sh
+RUN crontab - < /root/crontab.running
 
 CMD [ "crond", "-f", "-d", "0" ]

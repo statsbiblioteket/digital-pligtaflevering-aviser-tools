@@ -14,12 +14,10 @@ public class SetEventOnUuidLauncher {
 
         SetEventOnUuidMain.main(new String[]{
                 "set-event-on-uuid.properties",
-                /*
                 "event=Delivery_deleted_from_disk",
                 "message=Deleted by launcher",
                 "outcome=true",
                 "item_uuid=uuid:b19ed3de-1fff-4500-93a5-154ba98349d8" // Replace with actual uuid as found in current DOMS.
-                */
         });
     }
 }

@@ -1,0 +1,10 @@
+version: "3" # https://docs.docker.com/compose/compose-file/
+
+# See docker-settings.xml for build configuration instructions.
+
+services:
+  dpa-cron:
+    build:
+      context:  .
+    image: kb/dpa-cron
+
