@@ -34,17 +34,17 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"};
-    private static String[] sectionColumns = new String[]{"sectionName", "sectionNumber", "pageCount"};
-    private static String[] fileColumns = new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"};
-    private static String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
+    protected static final String[] deliveryColumns = new String[]{"chk", "initials", "title", "pages", "articles"};
+    private static final String[] sectionColumns = new String[]{"sectionName", "nr", "pages"};
+    private static final String[] fileColumns = new String[]{"chk", "pageName", "page", "sectionName", "section"};
+    private static final String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
 
     protected DataModel model;
 
     protected HorizontalLayout tablesLayout = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "chk", null, deliveryColumns, "DELIVERY", true);
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true); //
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true); //
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
@@ -67,7 +67,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 showTheSelectedTitle(false);
             }
         });
-        deliveryPanel.setSortParam("newspaperTitle");
+        deliveryPanel.setSortParam(deliveryColumns[2]);
         fileSelectionPanel.setSortParam("pageName");
         articleSelectionPanel.setSortParam("articleName");
     }
@@ -162,20 +162,20 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
         }
 
         List<Page> pageList = new ArrayList<Page>();
-        pageList.addAll(item.getPages());
+        pageList.addAll(item.getPageList());
         pageList.addAll(pages);
 
         List<Page> filteredPages = pageList.stream()
                 .filter(p ->
                         model.getSelectedSection() == null ||
-                                p.getSectionNumber().equals(model.getSelectedSection()))
+                                p.getSection().equals(model.getSelectedSection()))
                 .filter(distinctByKey(page -> page.getId()))
                 .collect(Collectors.toList());
 
         fileSelectionPanel.setInfo(filteredPages);
 
         List<Article> articleList = new ArrayList<Article>();
-        articleList.addAll(item.getArticles());
+        articleList.addAll(item.getArticleList());
         articleList.addAll(articles);
         List<Article> filteredArticles = articleList.stream()
                 .filter(p ->
@@ -218,7 +218,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
         storePanel.setInitials(model.getInitials());
         dialog.setDialogContent(storePanel);
         storePanel.setValues(item);
-        dialog.setReady(!item.isChecked());
+        dialog.setReady(!item.isChk());
         dialog.setModal(true);
 
         UI.getCurrent().addWindow(dialog);

@@ -55,9 +55,9 @@ public class TestSerializing {
         jaxbMarshaller.marshal(deliveryTitleInfo, tempFile);
 
         assertEquals(deliveryTitleInfo.getDeliveryName(), "dl_11111111");
-        assertEquals(deliveryTitleInfo.getNewspaperTitle(), "test");
-        assertEquals(deliveryTitleInfo.getNoOfArticles(), 5);
-        assertEquals(deliveryTitleInfo.getNoOfPages(), 7);
+        assertEquals(deliveryTitleInfo.getTitle(), "test");
+        assertEquals(deliveryTitleInfo.getArticles(), 5);
+        assertEquals(deliveryTitleInfo.getPages(), 7);
 
         InputStream is = new FileInputStream(tempFile);
 
@@ -66,9 +66,9 @@ public class TestSerializing {
         DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(deserializedObject.getDeliveryName(), "dl_11111111");
-        assertEquals(deserializedObject.getNewspaperTitle(), "test");
-        assertEquals(deserializedObject.getNoOfArticles(), 5);
-        assertEquals(deserializedObject.getNoOfPages(), 7);
+        assertEquals(deserializedObject.getTitle(), "test");
+        assertEquals(deserializedObject.getArticles(), 5);
+        assertEquals(deserializedObject.getPages(), 7);
     }
 
     /**

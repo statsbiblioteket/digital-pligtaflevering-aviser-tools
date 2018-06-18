@@ -16,8 +16,6 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataCo
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
-import java.time.Month;
-import java.time.format.TextStyle;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -122,7 +120,7 @@ public class DatePanel extends VerticalLayout {
                         newItemId.getItemProperty("Weekno").setValue(weekday_no);
                     }
                     Object oldCellValue = tableCell.getValue();
-                    Object newCellValue = roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles();
+                    Object newCellValue = roundtripValue + " - " + item.getPages() + " - " + item.getArticles();
 
                     if (oldCellValue != null) {
                         tableCell.setValue(oldCellValue + "\n" + newCellValue);

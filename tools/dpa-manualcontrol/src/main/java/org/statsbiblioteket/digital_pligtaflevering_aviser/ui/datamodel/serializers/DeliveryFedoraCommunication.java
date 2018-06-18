@@ -278,7 +278,7 @@ public class DeliveryFedoraCommunication {
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deli, os);
-        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
+        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getTitle(), os.toByteArray());
     }
 
     /**

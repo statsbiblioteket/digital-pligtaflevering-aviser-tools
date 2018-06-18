@@ -21,7 +21,7 @@ public class TitleValidationPanel extends DeliveryPanel {
     public TitleValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(true);
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfPages", "noOfArticles"});
+        deliveryPanel.setVisibleColumns(deliveryColumns);
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -40,7 +40,7 @@ public class TitleValidationPanel extends DeliveryPanel {
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
-                Object page = itemClickEvent.getItem().getItemProperty("deliveryName").getValue();
+                Object page = itemClickEvent.getItem().getItemProperty("title").getValue();
                 model.setSelectedDelivery(page.toString());
                 model.setSelectedSection(null);
                 showTheSelectedTitle(true);

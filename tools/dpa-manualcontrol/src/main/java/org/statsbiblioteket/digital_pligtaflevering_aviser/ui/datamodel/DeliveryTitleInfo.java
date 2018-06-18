@@ -19,22 +19,23 @@ public class DeliveryTitleInfo implements java.io.Serializable {
     private String deliveryName;
 
     // The newspapertitle Berligske, Information etc.
-    private String newspaperTitle;
+    private String title;
 
-    // A list of articles contained in the delivery and title
-    private List<Article> articles = new ArrayList<Article>();
+    // A list of articleList contained in the delivery and title
+    
+    private List<Article> articleList = new ArrayList<Article>();
 
-    // A list of pages contained in the delivery and title
-    private List<Page> pages = new ArrayList<Page>();
+    // A list of pageList contained in the delivery and title
+    private List<Page> pageList = new ArrayList<Page>();
 
-    // The number of articles in the delivery and title (As a performance optimization the lists is not allways initialized)
-    private int noOfArticles;
+    // The number of articleList in the delivery and title (As a performance optimization the lists is not allways initialized)
+    private int articles;
 
-    // The number of pages in the delivery and title (As a performance optimization the lists is not allways initialized)
-    private int noOfPages;
+    // The number of pageList in the delivery and title (As a performance optimization the lists is not allways initialized)
+    private int pages;
 
     // Has manual check been performed
-    private boolean checked = false;
+    private boolean chk = false;
 
     // Comment by the user if extra textual description about the check is relevant
     private String comment;
@@ -49,17 +50,17 @@ public class DeliveryTitleInfo implements java.io.Serializable {
     }
 
     /**
-     * construct the title with a titleName and an empty list of pages and articles
+     * construct the title with a titleName and an empty list of pageList and articleList
      * @param deliveryName
-     * @param newspaperTitle
-     * @param noOfArticles
-     * @param noOfPages
+     * @param title
+     * @param articles
+     * @param pages
      */
-    public DeliveryTitleInfo(String deliveryName, String newspaperTitle, int noOfArticles, int noOfPages) {
+    public DeliveryTitleInfo(String deliveryName, String title, int articles, int pages) {
         this.deliveryName = deliveryName;
-        this.newspaperTitle = newspaperTitle;
-        this.noOfArticles = noOfArticles;
-        this.noOfPages = noOfPages;
+        this.title = title;
+        this.articles = articles;
+        this.pages = pages;
     }
 
     @XmlAttribute
@@ -71,66 +72,66 @@ public class DeliveryTitleInfo implements java.io.Serializable {
         return this.deliveryName;
     }
 
-    @XmlAttribute
-    public void setNewspaperTitle(String newspaperTitle) {
-        this.newspaperTitle = newspaperTitle;
+    @XmlAttribute(name = "newspaperTitle")
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getNewspaperTitle() {
-        return this.newspaperTitle;
+    public String getTitle() {
+        return this.title;
     }
 
     public void addPages(Page fileName) {
-        pages.add(fileName);
+        pageList.add(fileName);
     }
 
-    @XmlElement
-    public void setPages(List<Page> pages) {
-        this.pages = pages;
+    @XmlElement(name = "pages")
+    public void setPageList(List<Page> pageList) {
+        this.pageList = pageList;
     }
 
-    public List<Page> getPages() {
-        return this.pages;
+    public List<Page> getPageList() {
+        return this.pageList;
     }
 
     public void addArticle(Article fileName) {
-        articles.add(fileName);
+        articleList.add(fileName);
     }
 
-    @XmlElement
-    public void setArticles(List<Article> articles) {
+    @XmlElement(name = "articles")
+    public void setArticleList(List<Article> articleList) {
+        this.articleList = articleList;
+    }
+
+    public List<Article> getArticleList() {
+        return this.articleList;
+    }
+    
+    @XmlAttribute(name="noOfArticles")
+    public void setArticles(int articles) {
         this.articles = articles;
     }
 
-    public List<Article> getArticles() {
-        return this.articles;
+    public int getArticles() {
+        return articles;
     }
 
-    @XmlAttribute
-    public void setNoOfArticles(int noOfArticles) {
-        this.noOfArticles = noOfArticles;
+    @XmlAttribute(name="noOfPages")
+    public void setPages(int pages) {
+        this.pages = pages;
     }
 
-    public int getNoOfArticles() {
-        return noOfArticles;
+    public int getPages() {
+        return pages;
     }
 
-    @XmlAttribute
-    public void setNoOfPages(int noOfPages) {
-        this.noOfPages = noOfPages;
+    @XmlAttribute(name="checked")
+    public void setChk(boolean chk) {
+        this.chk = chk;
     }
 
-    public int getNoOfPages() {
-        return noOfPages;
-    }
-
-    @XmlAttribute
-    public void setChecked(boolean checked) {
-        this.checked = checked;
-    }
-
-    public boolean isChecked() {
-        return checked;
+    public boolean isChk() {
+        return chk;
     }
 
     @XmlAttribute

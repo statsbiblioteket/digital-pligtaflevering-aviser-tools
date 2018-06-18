@@ -1,17 +1,12 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Serialize objects into files on the local filesystem.
@@ -86,7 +81,7 @@ public class DeliveryFilesystemReadWrite {
             DeliveryTitleInfo deliId = keyIterator.next();
 
             String deliName = deliId.getDeliveryName();
-            String deliTitle = deliId.getNewspaperTitle();
+            String deliTitle = deliId.getTitle();
             File fileForThisTitleDelivery = createCashingFile(currentlySelectedMonth, deliName, deliTitle);
 
             if (!fileForThisTitleDelivery.exists()) {
@@ -104,7 +99,7 @@ public class DeliveryFilesystemReadWrite {
      */
     public void saveDeliveryToFilesystem(String folderForThisXml, DeliveryTitleInfo currentlySelectedTitleHiearachy) throws Exception {
 
-        File fileForThisTitleDelivery = createCashingFile(folderForThisXml, currentlySelectedTitleHiearachy.getDeliveryName(), currentlySelectedTitleHiearachy.getNewspaperTitle());
+        File fileForThisTitleDelivery = createCashingFile(folderForThisXml, currentlySelectedTitleHiearachy.getDeliveryName(), currentlySelectedTitleHiearachy.getTitle());
 
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

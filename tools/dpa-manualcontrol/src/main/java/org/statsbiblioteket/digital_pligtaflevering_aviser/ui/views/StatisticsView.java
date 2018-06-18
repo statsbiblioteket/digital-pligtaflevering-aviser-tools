@@ -237,7 +237,7 @@ public class StatisticsView extends VerticalLayout implements View {
                 if (selectedDelivery == null || selectedTitle == null) {
                     return;
                 }
-                currentSelectedPage = model.getTitleObj(selectedDelivery, selectedTitle).getFrontpages().stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
+                currentSelectedPage = model.getTitleObj(selectedDelivery, selectedTitle).getFrontpages().stream().filter(f -> f.getPage().equals("1")).collect(Collectors.toList());
                 ArrayList<String> pageList = new ArrayList<String>();
 
                 for(Page page : currentSelectedPage) {
@@ -257,7 +257,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 if (currentSelectedPage != null && currentSelectedPage.size()>0) {
                     for(Page page : currentSelectedPage) {
-                        page.setCheckedState(ConfirmationState.CHECKED);
+                        page.setChk(ConfirmationState.CHECKED);
                         model.addCheckedPage(page);
                         if(!tabelsLayout.checkThePage(page, ConfirmationState.CHECKED)) {
                             tabelsLayout.reloadTables();
@@ -279,7 +279,7 @@ public class StatisticsView extends VerticalLayout implements View {
 
                 if (currentSelectedPage != null && currentSelectedPage.size()>0) {
                     for(Page page : currentSelectedPage) {
-                        page.setCheckedState(ConfirmationState.REJECTED);
+                        page.setChk(ConfirmationState.REJECTED);
                         model.addCheckedPage(page);
                         if(!tabelsLayout.checkThePage(page, ConfirmationState.REJECTED)) {
                             tabelsLayout.reloadTables();
@@ -296,7 +296,6 @@ public class StatisticsView extends VerticalLayout implements View {
 
         layout.addComponent(header);
         layout.addComponent(searchPanel);
-        mainhlayout.addComponent(tabelsLayout);
         viewControlLayout.addComponent(frontpageViewButton);
         viewControlLayout.addComponent(confirmViewButton);
         viewControlLayout.addComponent(rejectViewButton);
@@ -305,6 +304,8 @@ public class StatisticsView extends VerticalLayout implements View {
         viewLayout.addComponent(pdfComponent);
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
+        layout.addComponent(tabelsLayout);
+        layout.addComponent(new HorizontalLayout(pdfComponent));
         panelPrepare(false);
     }
 

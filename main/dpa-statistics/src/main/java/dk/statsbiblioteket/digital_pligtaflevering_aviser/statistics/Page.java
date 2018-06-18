@@ -13,9 +13,9 @@ public class Page implements java.io.Serializable {
     //The name of the article is really just the name of tne metadata file
     private String pageName;
     private String sectionName;
-    private String sectionNumber;
-    private String pageNumber;
-    private ConfirmationState checkedState = ConfirmationState.UNCHECKED;
+    private String section;
+    private String page;
+    private ConfirmationState chk = ConfirmationState.UNCHECKED;
 
     public Page() {
     }
@@ -25,12 +25,12 @@ public class Page implements java.io.Serializable {
         this.sectionName = sectionName;
     }
 
-    public Page(String id, String pageName, String sectionName, String sectionNumber, String pageNumber) {
+    public Page(String id, String pageName, String sectionName, String section, String page) {
         this.id = id;
         this.pageName = pageName;
         this.sectionName = sectionName;
-        this.sectionNumber = sectionNumber;
-        this.pageNumber = pageNumber;
+        this.section = section;
+        this.page = page;
     }
 
     @XmlAttribute
@@ -61,30 +61,30 @@ public class Page implements java.io.Serializable {
     }
 
 
-    public String getSectionNumber() {
-        return sectionNumber;
+    public String getSection() {
+        return section;
     }
 
-    @XmlAttribute
-    public void setSectionNumber(String sectionNumber) {
-        this.sectionNumber = sectionNumber;
+    @XmlAttribute(name = "sectionNumber")
+    public void setSection(String section) {
+        this.section = section;
     }
 
-    public String getPageNumber() {
-        return pageNumber;
+    public String getPage() {
+        return page;
     }
 
-    @XmlAttribute
-    public void setPageNumber(String pageNumber) {
-        this.pageNumber = pageNumber;
+    @XmlAttribute(name = "pageNumber")
+    public void setPage(String page) {
+        this.page = page;
     }
 
-    public ConfirmationState getCheckedState() {
-        return checkedState;
+    public ConfirmationState getChk() {
+        return chk;
     }
 
-    @XmlAttribute
-    public void setCheckedState(ConfirmationState checkedState) {
-        this.checkedState = checkedState;
+    @XmlAttribute(name="checkedState")
+    public void setChk(ConfirmationState chk) {
+        this.chk = chk;
     }
 }

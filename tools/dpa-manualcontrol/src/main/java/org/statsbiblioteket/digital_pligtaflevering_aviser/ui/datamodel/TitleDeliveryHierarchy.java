@@ -27,7 +27,7 @@ public class TitleDeliveryHierarchy {
      * @param ds
      */
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
-        if (!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
+        if (!hasDeliveryTitleCheckStatus(ds.getTitle(), ds.getDeliveryName())) {
             deliveryStructure.add(ds);
         }
     }
@@ -53,7 +53,7 @@ public class TitleDeliveryHierarchy {
      */
     public DeliveryTitleInfo setDeliveryTitleCheckStatus(String title, String delivery, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
         DeliveryTitleInfo delId = getDeliveryTitleCheckStatus(title, delivery);
-        delId.setChecked(checked);
+        delId.setChk(checked);
         delId.setInitials(initials);
         delId.setComment(comment);
         delId.setMissingItems(missingItems);
@@ -68,7 +68,7 @@ public class TitleDeliveryHierarchy {
      */
     public boolean hasDeliveryTitleCheckStatus(String title, String delivery) {
         return deliveryStructure.stream()
-                .filter(deliveryTitleInfo -> (deliveryTitleInfo.getDeliveryName().equals(delivery) && deliveryTitleInfo.getNewspaperTitle().equals(title))).count() > 0;
+                                .filter(deliveryTitleInfo -> (deliveryTitleInfo.getDeliveryName().equals(delivery) && deliveryTitleInfo.getTitle().equals(title))).count() > 0;
     }
 
     /**
@@ -79,7 +79,7 @@ public class TitleDeliveryHierarchy {
      */
     public DeliveryTitleInfo getDeliveryTitleCheckStatus(String title, String delivery) {
         return deliveryStructure.stream()
-                .filter(deliveryTitleInfo -> (deliveryTitleInfo.getDeliveryName().equals(delivery) && deliveryTitleInfo.getNewspaperTitle().equals(title))).findFirst().get();
+                                .filter(deliveryTitleInfo -> (deliveryTitleInfo.getDeliveryName().equals(delivery) && deliveryTitleInfo.getTitle().equals(title))).findFirst().get();
     }
 
     /**
@@ -88,7 +88,7 @@ public class TitleDeliveryHierarchy {
      */
     public List<String> getAllTitles() {
         List<String> deliveryTitleList = deliveryStructure.stream()
-                .map(deliveryTitleInfo -> deliveryTitleInfo.getNewspaperTitle())
+                .map(deliveryTitleInfo -> deliveryTitleInfo.getTitle())
                 .distinct()
                 .collect(Collectors.toList());
         return deliveryTitleList;
@@ -112,7 +112,7 @@ public class TitleDeliveryHierarchy {
      */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
         return deliveryStructure.stream()
-                .filter(delivery -> (delivery.getNewspaperTitle().equals(title)))
+                .filter(delivery -> (delivery.getTitle().equals(title)))
                 .collect(Collectors.toList());
     }
 

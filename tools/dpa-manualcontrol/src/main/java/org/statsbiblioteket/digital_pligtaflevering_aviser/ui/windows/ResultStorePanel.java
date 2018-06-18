@@ -86,10 +86,10 @@ public class ResultStorePanel extends VerticalLayout {
         if (item.getInitials() != null) {
             initials.setValue(item.getInitials());
         }
-        for (Page o : item.getPages()) {
+        for (Page o : item.getPageList()) {
             pageBeans.addBean(o);
         }
-        for (Article o : item.getArticles()) {
+        for (Article o : item.getArticleList()) {
             articleBeans.addBean(o);
         }
         missingItemTable.setInfo(item.getMissingItems());

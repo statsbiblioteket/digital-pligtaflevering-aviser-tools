@@ -57,7 +57,7 @@ public class Title implements java.io.Serializable {
     }
 
     public List<Page> getFrontpages() {
-        return pages.getPages().stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
+        return pages.getPages().stream().filter(f -> f.getPage().equals("1")).collect(Collectors.toList());
     }
 
 

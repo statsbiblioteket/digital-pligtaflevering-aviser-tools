@@ -41,12 +41,12 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"});
+        deliveryPanel.setVisibleColumns(deliveryColumns);
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
 
-                Object titleSelect = itemClickEvent.getItem().getItemProperty("newspaperTitle").getValue();
+                Object titleSelect = itemClickEvent.getItem().getItemProperty("title").getValue();
                 model.setSelectedTitle(titleSelect.toString());
 
                 showTheSelectedTitle(true);
