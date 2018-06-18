@@ -60,7 +60,8 @@ public class DatePanel extends VerticalLayout {
         unmappable.setEnabled(false);
 
         table.setWidth("100%");
-        table.setHeight("100%");
+        table.setHeightUndefined();
+        table.setPageLength(0);
         table.setSelectable(true);
         table.setImmediate(true);
         this.addComponent(checkbox);

@@ -54,7 +54,7 @@
     <MessageBusConfiguration>
       <Name>Local ActiveMQ</Name>
       <!-- http://activemq.apache.org/tcp-transport-reference.html -->
-      <URL>failover:(tcp://localhost:61616?keepAlive=true&amp;daemon=true)</URL>
+      <URL>failover:(tcp://pc596:61616?keepAlive=true&amp;daemon=true)</URL>
     </MessageBusConfiguration>
   </ProtocolSettings>
   <ClientSettings>
