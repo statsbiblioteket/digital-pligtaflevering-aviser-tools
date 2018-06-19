@@ -2,12 +2,12 @@ FROM openjdk:8-jdk-alpine
 
 # $HOME for root is /root
 
-RUN mkdir -p /root/logs /root/var/locks
+RUN mkdir -p /root/logs /root/var/locks /delivery-samples /delivery-samples-done-dir
 
-ADD crontab.running /root
-ADD .bash_profile /root
+ADD crontab.running .bash_profile configure.sh dpa-cron.properties /root/
 ADD target/for-docker /root
 
+RUN ash /root/configure.sh < /root/dpa-cron.properties
 RUN chmod +x /root/services/bin/*.sh
 RUN crontab - < /root/crontab.running
 

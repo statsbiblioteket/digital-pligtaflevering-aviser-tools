@@ -4,6 +4,6 @@
 #SHELL=/bin/false
 # delete logfiles older than 30 dayes
 0 18 * * * find ~/logs -type f -mtime +30 -delete
-* * * * * cd /root ; pwd ; . /root/.bash_profile ; services/bin/create-deliveries.sh
+#* * * * * cd /root ; pwd ; . /root/.bash_profile ; services/bin/create-deliveries.sh
 * * * * * cd /root ; pwd ; . /root/.bash_profile ; services/bin/ingest-deliveries.sh
-* * * * * cd /root ; pwd ; . /root/.bash_profile ; services/bin/generate-statistics.sh
+#* * * * * cd /root ; pwd ; . /root/.bash_profile ; services/bin/generate-statistics.sh
