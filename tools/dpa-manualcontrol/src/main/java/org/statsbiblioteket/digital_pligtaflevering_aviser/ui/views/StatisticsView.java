@@ -265,7 +265,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     }
                 }
                 if (currentSelectedArticle != null) {
-                    currentSelectedArticle.setCheckedState(ConfirmationState.CHECKED);
+                    currentSelectedArticle.setChk(ConfirmationState.CHECKED);
                     model.addCheckedArticle(currentSelectedArticle);
                     tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.CHECKED);
                 }
@@ -287,7 +287,7 @@ public class StatisticsView extends VerticalLayout implements View {
                     }
                 }
                 if (currentSelectedArticle != null) {
-                    currentSelectedArticle.setCheckedState(ConfirmationState.REJECTED);
+                    currentSelectedArticle.setChk(ConfirmationState.REJECTED);
                     model.addCheckedArticle(currentSelectedArticle);
                     tabelsLayout.checkTheArticle(currentSelectedArticle, ConfirmationState.REJECTED);
                 }

@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Notification;
@@ -11,10 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
+import javax.naming.Name;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Panel for the viewing of newspaper-deliveries on the delivery format.
@@ -34,7 +38,9 @@ public class DeliveryListPanel extends VerticalLayout {
         // Bind a table to it
         table = new Table("Unconfirmed deliveries");
 
-        table.addContainerProperty("Date", Date.class, null);
+        //TODO strip time from date
+        
+        table.addContainerProperty("Date", String.class, null);
         table.addContainerProperty("Name", String.class, null);
         table.setWidth("100%");
         table.setHeight("100%");
@@ -43,8 +49,8 @@ public class DeliveryListPanel extends VerticalLayout {
 
         table.setVisibleColumns(new String[]{"Date", "Name"});
 
-        table.setColumnExpandRatio("Date", 0.5f);
-        table.setColumnExpandRatio("Name", 0.5f);
+        table.setColumnExpandRatio("Name", 1f);
+
         this.addComponent(checkbox);
         this.addComponent(table);
     }
@@ -57,12 +63,13 @@ public class DeliveryListPanel extends VerticalLayout {
     public void setValues(Collection<String> list) {
         itemList.clear();
         table.removeAllItems();
-
+    
+        SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
         for (String item : list) {
             Object newItemId = table.addItem();
             Item row1 = table.getItem(newItemId);
             try {
-                row1.getItemProperty("Date").setValue(UiDataConverter.getDateFromDeliveryItemDirectoryName(item));
+                row1.getItemProperty("Date").setValue(dateFormat.format(UiDataConverter.getDateFromDeliveryItemDirectoryName(item)));
             } catch (ParseException e) {
                 Notification.show("The application could not parse the datestring, please contact support", Notification.Type.ERROR_MESSAGE);
                 log.error("The date could not be parsed in the DatePanel", e);

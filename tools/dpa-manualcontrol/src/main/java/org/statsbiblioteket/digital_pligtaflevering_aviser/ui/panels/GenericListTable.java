@@ -65,6 +65,7 @@ public class GenericListTable extends VerticalLayout {
         table.setId(tableId);
         table.setColumnExpandRatio(checkedColumn, 0.3f);
         table.setColumnWidth(checkedColumn, 20);
+      
         table.setVisible(initialVisible);
     }
 
@@ -79,6 +80,10 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    
+    public void setColumnWidth(String name, int width){
+        table.setColumnWidth(name,width);
+    }
     /**
      * Set the name of the column in the table to sort the rows with
      *

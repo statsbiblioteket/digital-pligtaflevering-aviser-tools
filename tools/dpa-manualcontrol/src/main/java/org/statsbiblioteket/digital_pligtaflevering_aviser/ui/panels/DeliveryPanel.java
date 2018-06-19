@@ -37,7 +37,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     protected static final String[] deliveryColumns = new String[]{"chk", "initials", "title", "pages", "articles"};
     private static final String[] sectionColumns = new String[]{"sectionName", "nr", "pages"};
     private static final String[] fileColumns = new String[]{"chk", "pageName", "page", "sectionName", "section"};
-    private static final String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
+    private static final String[] articleColumns = new String[]{"chk", "articleName", "page", "sectionName", "section"};
 
     protected DataModel model;
 
@@ -46,8 +46,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "chk", null, deliveryColumns, "DELIVERY", true);
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true); //
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true); //
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "chk", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true); //
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "chk", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
 
     /**
@@ -82,10 +82,26 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
         tablesLayout.addComponent(fileSelectionPanel);
         tablesLayout.addComponent(articleSelectionPanel);
 
-        tablesLayout.setExpandRatio(deliveryPanel, 0.2f);
-        tablesLayout.setExpandRatio(sectionSectionTable, 0.2f);
+        //DeliveryTitleInfo
+        tablesLayout.setExpandRatio(deliveryPanel, 0.15f);
+        deliveryPanel.setColumnWidth("initials",55);
+        deliveryPanel.setColumnWidth("pages",35);
+        deliveryPanel.setColumnWidth("articles",45);
+        
+        //Not visible on the DeliveryValidation Panel, only on the TitleValidationPanel
+        tablesLayout.setExpandRatio(sectionSectionTable, 0.1f);
+        
+        
+        //Page table
         tablesLayout.setExpandRatio(fileSelectionPanel, 0.4f);
-        tablesLayout.setExpandRatio(articleSelectionPanel, 0.1f);
+        fileSelectionPanel.setColumnWidth("page",30);
+        fileSelectionPanel.setColumnWidth("section",45);
+        
+        //Article table
+        tablesLayout.setExpandRatio(articleSelectionPanel, 0.35f);
+        articleSelectionPanel.setColumnWidth("page",30);
+        articleSelectionPanel.setColumnWidth("section",45);
+        
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
             @Override
@@ -180,7 +196,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
         List<Article> filteredArticles = articleList.stream()
                 .filter(p ->
                         model.getSelectedSection() == null ||
-                                p.getSectionNumber().equals(model.getSelectedSection()))
+                                p.getSection().equals(model.getSelectedSection()))
                 .filter(distinctByKey(article -> article.getId()))
                 .collect(Collectors.toList());
 

@@ -28,7 +28,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
     public DeliveryValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(false);
-        fileSelectionPanel.setEnabled(false);
+        fileSelectionPanel.setVisible(false);
 
         deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
@@ -54,7 +54,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
         });
 
         tablesLayout.addComponent(deliveryListPanel);
-        tablesLayout.setExpandRatio(deliveryListPanel, 0.2f);
+        tablesLayout.setExpandRatio(deliveryListPanel, 0.1f);
         super.initialLayout();
 
         doneDeliveryButton.addClickListener(new Button.ClickListener() {

@@ -18,14 +18,14 @@ public class Article implements java.io.Serializable {
     //Sectionname is the readable name of the section, it is the same as the one delivered in metada delivered by Infomadia
     private String sectionName;
 
-    //The sectionNumber is the number of the section, it is the same as the one delivered in metada delivered by Infomadia
-    private String sectionNumber;
+    //The section is the number of the section, it is the same as the one delivered in metada delivered by Infomadia
+    private String section;
 
-    //The pageNumber is the number of the page, it is the same as the one delivered in metada delivered by Infomadia
-    private String pageNumber;
+    //The page is the number of the page, it is the same as the one delivered in metada delivered by Infomadia
+    private String page;
 
-    //checkedState indicates if a manual check of the delivered information has been performed
-    private ConfirmationState checkedState = ConfirmationState.UNCHECKED;
+    //chk indicates if a manual check of the delivered information has been performed
+    private ConfirmationState chk = ConfirmationState.UNCHECKED;
 
     public Article() {
     }
@@ -34,12 +34,12 @@ public class Article implements java.io.Serializable {
         this.articleName = articleName;
     }
 
-    public Article(String id, String articleName, String sectionName, String sectionNumber, String pageNumber) {
+    public Article(String id, String articleName, String sectionName, String section, String page) {
         this.id = id;
         this.articleName = articleName;
         this.sectionName = sectionName;
-        this.sectionNumber = sectionNumber;
-        this.pageNumber = pageNumber;
+        this.section = section;
+        this.page = page;
     }
 
     @XmlAttribute
@@ -71,31 +71,31 @@ public class Article implements java.io.Serializable {
     }
 
 
-    @XmlAttribute
-    public void setSectionNumber(String sectionNumber) {
-        this.sectionNumber = sectionNumber;
+    @XmlAttribute(name = "sectionNumber")
+    public void setSection(String section) {
+        this.section = section;
     }
 
-    public String getSectionNumber() {
-        return sectionNumber;
+    public String getSection() {
+        return section;
     }
 
-    @XmlAttribute
-    public void setPageNumber(String pageNumber) {
-        this.pageNumber = pageNumber;
+    @XmlAttribute(name = "pageNumber")
+    public void setPage(String page) {
+        this.page = page;
     }
 
-    public String getPageNumber() {
-        return pageNumber;
+    public String getPage() {
+        return page;
     }
 
-    @XmlAttribute
-    public void setCheckedState(ConfirmationState checkedState) {
-        this.checkedState = checkedState;
+    @XmlAttribute(name = "checkedState")
+    public void setChk(ConfirmationState chk) {
+        this.chk = chk;
     }
 
-    public ConfirmationState getCheckedState() {
-        return checkedState;
+    public ConfirmationState getChk() {
+        return chk;
     }
 }
 
