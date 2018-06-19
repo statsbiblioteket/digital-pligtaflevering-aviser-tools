@@ -121,8 +121,6 @@ public class DatePanel extends VerticalLayout {
                 newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
             }
             newItemId.getItemProperty(weekday_name).setValue(i+"");
-            
-            //calendar.add(Calendar.DAY_OF_MONTH,1);
         }
 
         for (DeliveryTitleInfo item : delStat) {
@@ -131,10 +129,9 @@ public class DatePanel extends VerticalLayout {
                 if (matcher.matches()) {
                     String roundtripValue = matcher.group(2);
     
-                    Date date = UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName());
                     Calendar day = Calendar.getInstance();
-                    calendar.setFirstDayOfWeek(Calendar.MONDAY);
-                    day.setTime(date);
+                    day.setFirstDayOfWeek(Calendar.MONDAY);
+                    day.setTime(UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName()));
     
                     String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
                     String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
