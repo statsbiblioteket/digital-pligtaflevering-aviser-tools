@@ -13,16 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
-import java.text.DateFormatSymbols;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 /**
@@ -30,7 +27,7 @@ import java.util.regex.Matcher;
  */
 public class DatePanel extends VerticalLayout {
     public static final String WEEKNO = "Weekno";
-    private final HashMap<Integer, String> dayMap;
+    private final Map<Integer, String> dayMap;
     private Logger log = LoggerFactory.getLogger(getClass());
 
     //TODO show year/month in a header
@@ -41,7 +38,7 @@ public class DatePanel extends VerticalLayout {
     private TextArea unmappable = new TextArea("");
 
     public DatePanel() {
-        dayMap = new HashMap<Integer, String>();
+        dayMap = new LinkedHashMap<>(); //LinkedHashMap to keep insertion order
         dayMap.put(Calendar.MONDAY,"Mon");
         dayMap.put(Calendar.TUESDAY,"Tue");
         dayMap.put(Calendar.WEDNESDAY,"Wed");
@@ -63,11 +60,10 @@ public class DatePanel extends VerticalLayout {
         //columns = new String[ds.length];
         int i = 0;
         table.addContainerProperty(WEEKNO, String.class, null);
-
-        for (DayOfWeek d : ds) {
-            //columns[i] = d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            table.addContainerProperty(dayMap.get(Calendar.MONDAY+1), String.class, null);
-            table.addGeneratedColumn(dayMap.get(Calendar.MONDAY+1), new DatePanel.FieldGenerator());
+    
+        for (String day : dayMap.values()) {
+            table.addContainerProperty(day, String.class, null);
+            table.addGeneratedColumn(day, new DatePanel.FieldGenerator());
             i++;
         }
         table.setSortContainerPropertyId(WEEKNO);
@@ -139,10 +135,6 @@ public class DatePanel extends VerticalLayout {
                     Item tableRow = table.getItem(weekday_no);
                     Property tableCell = tableRow.getItemProperty(weekday_name);
 
-                    if (table.getItem(weekday_no) == null) {
-                        newItemId = table.addItem(weekday_no);
-                        newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
-                    }
                     Object oldCellValue = tableCell.getValue();
                     Object newCellValue = "rt-"+roundtripValue + ": pages=" + item.getPages() + ", articles=" + item.getArticles();
 
