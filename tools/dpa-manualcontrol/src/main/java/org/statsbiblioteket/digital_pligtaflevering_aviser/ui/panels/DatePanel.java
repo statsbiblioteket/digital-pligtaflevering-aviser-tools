@@ -13,11 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -26,15 +29,29 @@ import java.util.regex.Matcher;
  * DatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
  */
 public class DatePanel extends VerticalLayout {
+    public static final String WEEKNO = "Weekno";
+    private final HashMap<Integer, String> dayMap;
     private Logger log = LoggerFactory.getLogger(getClass());
 
-    private String[] columns = {"Sun", "Mon","Tue", "Wed", "Thu", "Fri", "Sat"};
+    //TODO show year/month in a header
+    
     private CheckBox checkbox;
     private BeanItemContainer beans;
     private Table table;
     private TextArea unmappable = new TextArea("");
 
     public DatePanel() {
+        dayMap = new HashMap<Integer, String>();
+        dayMap.put(Calendar.MONDAY,"Mon");
+        dayMap.put(Calendar.TUESDAY,"Tue");
+        dayMap.put(Calendar.WEDNESDAY,"Wed");
+        dayMap.put(Calendar.THURSDAY,"Thu");
+        dayMap.put(Calendar.FRIDAY,"Fri");
+        dayMap.put(Calendar.SATURDAY,"Sat");
+        dayMap.put(Calendar.SUNDAY,"Sun");
+    
+    
+    
         checkbox = new CheckBox("Visible", true);
         checkbox.setEnabled(false);
         beans = new BeanItemContainer(java.time.DayOfWeek.class);
@@ -45,15 +62,15 @@ public class DatePanel extends VerticalLayout {
         DayOfWeek[] ds = java.time.DayOfWeek.values();
         //columns = new String[ds.length];
         int i = 0;
-        table.addContainerProperty("Weekno", String.class, null);
+        table.addContainerProperty(WEEKNO, String.class, null);
 
         for (DayOfWeek d : ds) {
             //columns[i] = d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            table.addContainerProperty(columns[i], String.class, null);
-            table.addGeneratedColumn(columns[i], new DatePanel.FieldGenerator());
+            table.addContainerProperty(dayMap.get(Calendar.MONDAY+1), String.class, null);
+            table.addGeneratedColumn(dayMap.get(Calendar.MONDAY+1), new DatePanel.FieldGenerator());
             i++;
         }
-        table.setSortContainerPropertyId("Weekno");
+        table.setSortContainerPropertyId(WEEKNO);
 
         unmappable.setEnabled(false);
 
@@ -88,19 +105,24 @@ public class DatePanel extends VerticalLayout {
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
         int lowerDatelimit = calendar.getActualMinimum(Calendar.DAY_OF_MONTH);
         int higherDatelimit = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-        for(int i=lowerDatelimit; i<=higherDatelimit; i++) {
-
-            Date dateIterationObject = new Date(calendar.get(Calendar.YEAR)-1900, calendar.get(Calendar.MONTH), i);
-
-            String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(dateIterationObject);
-            String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(dateIterationObject);
+    
+    
+        for(int i = lowerDatelimit; i <= higherDatelimit; i++) {
+            Calendar day = Calendar.getInstance();
+            day.setFirstDayOfWeek(Calendar.MONDAY);
+            day.setTime(calendar.getTime());
+            day.add(Calendar.DAY_OF_YEAR,i-1);
+    
+            String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
+            String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
 
             if (table.getItem(weekday_no) == null) {
                 newItemId = table.addItem(weekday_no);
-                newItemId.getItemProperty("Weekno").setValue(weekday_no);
+                newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
             }
             newItemId.getItemProperty(weekday_name).setValue(i+"");
+            
+            //calendar.add(Calendar.DAY_OF_MONTH,1);
         }
 
         for (DeliveryTitleInfo item : delStat) {
@@ -108,19 +130,24 @@ public class DatePanel extends VerticalLayout {
                 Matcher matcher = UiDataConverter.getPatternMatcher(item.getDeliveryName());
                 if (matcher.matches()) {
                     String roundtripValue = matcher.group(2);
+    
                     Date date = UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName());
-                    String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(date);
-                    String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(date);
+                    Calendar day = Calendar.getInstance();
+                    calendar.setFirstDayOfWeek(Calendar.MONDAY);
+                    day.setTime(date);
+    
+                    String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
+                    String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
 
                     Item tableRow = table.getItem(weekday_no);
                     Property tableCell = tableRow.getItemProperty(weekday_name);
 
                     if (table.getItem(weekday_no) == null) {
                         newItemId = table.addItem(weekday_no);
-                        newItemId.getItemProperty("Weekno").setValue(weekday_no);
+                        newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
                     }
                     Object oldCellValue = tableCell.getValue();
-                    Object newCellValue = roundtripValue + " - " + item.getPages() + " - " + item.getArticles();
+                    Object newCellValue = "rt-"+roundtripValue + ": pages=" + item.getPages() + ", articles=" + item.getArticles();
 
                     if (oldCellValue != null) {
                         tableCell.setValue(oldCellValue + "\n" + newCellValue);
