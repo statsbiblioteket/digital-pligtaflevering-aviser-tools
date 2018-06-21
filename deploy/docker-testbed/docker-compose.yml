@@ -9,9 +9,10 @@ services:
     image: kb/dpa-cron
     volumes:
       - ../../delivery-samples:/delivery-samples:ro
-    ports:
-    # talk to DOMS+Bitrepository running in virtualbox on host (or port forwarded to)
-      - 127.0.0.1:7880:7880
-      - 127.0.0.1:58608:58608
-      - 127.0.0.1:58709:58709
+    network_mode: host
+#    ports:
+#    # talk to DOMS+Bitrepository running in virtualbox on host (or port forwarded to)
+#      - 127.0.0.1:7880:7880
+#      - 127.0.0.1:58608:58608
+#      - 127.0.0.1:58709:58709
 

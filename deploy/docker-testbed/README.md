@@ -34,6 +34,11 @@ Run
     
 to launch cron.
 
+Note:  To get telnet (busybox applet) and possibly others in the docker image, exec into it and run
 
-/tra 2018-06-18
+    apk add busybox-extras
+
+
+
+/tra 2018-06-21
 
