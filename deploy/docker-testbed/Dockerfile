@@ -1,7 +1,8 @@
 FROM openjdk:8-jdk-alpine
 
-# $HOME for root is /root
+RUN apk --update add tzdata
 
+# $HOME for root is /root
 RUN mkdir -p /root/logs /root/var/locks /delivery-samples /delivery-samples-done-dir
 
 ADD crontab.running .bash_profile configure.sh dpa-cron.properties /root/

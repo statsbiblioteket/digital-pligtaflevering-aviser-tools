@@ -32,7 +32,18 @@ Run
 
     docker-compose up --build
     
-to launch cron.
+to launch cron which then runs the autonomous components once every minute.  
+
+As of 2018-06-22 each invocation of an autonomous component writes its own log file 
+to /root/logs.   A quick overview of how things go can be monitored in a separate 
+shell with
+
+    docker-compose exec dpa-cron watch grep 'Result: ' '/root/logs/*'
+
+A small font will be useful.
+
+
+## Helpful tips
 
 Note:  To get telnet (busybox applet) and possibly others in the docker image, exec into it and run
 
