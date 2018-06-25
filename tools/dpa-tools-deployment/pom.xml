@@ -155,8 +155,8 @@
                     -->
                     <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
-                        $${ENABLE_GC_LOG:+
                         -Ddpa.git.id=${git.branch}_${git.commit.id.abbrev}
+                        $${ENABLE_GC_LOG:+
                         -verbose:gc
                         -XX:+PrintGCDetails
                         -XX:+PrintGCDateStamps
@@ -219,6 +219,18 @@
                                         dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CheckRegeneratedChecksumfileMain
                                     </mainClass>
                                     <id>dpa-check-regenerated-checksumfile</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ListDeletableDeliveriesMain
+                                    </mainClass>
+                                    <id>list-deletable-deliveries</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.SetEventOnUuidMain
+                                    </mainClass>
+                                    <id>set-event-on-uuid</id>
                                 </program>
                             </programs>
                         </configuration>

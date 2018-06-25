@@ -152,7 +152,7 @@
 
         <!-- dashboard web interface -->
         <module>tools/dpa-dashboard</module>
-        <module>tools/dpa-dashboard-cdi</module>
+        <module>tools/dpa-dashboard-javaee7</module>
 
         <!-- manual control web interface -->
         <module>tools/dpa-manualcontrol</module>

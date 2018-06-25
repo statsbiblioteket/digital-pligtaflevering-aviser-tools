@@ -65,6 +65,14 @@ Running programs and file system mappings are not properly handled.
 Either use the VirtualBox GUI or the VBoxManage command to revert to
 earlier snapshots.
 
+Using the vagrant box from another machine:
+===
+
+* Ensure that the virtualbox instance uses bridged networking.
+* Use the `bin/ssh-with-vagrant-port-forwarding.sh` script as inspiration for 
+port forwarding from the development machine to the machine running the vagrant instance. 
+
+
 Ingesting deliveries:
 ===
 

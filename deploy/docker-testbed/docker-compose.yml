@@ -1,0 +1,21 @@
+version: "3" # https://docs.docker.com/compose/compose-file/
+
+# See docker-settings.xml for build configuration instructions.
+
+services:
+  dpa-cron:
+    build:
+      context:  .
+    image: kb/dpa-cron
+    volumes:
+      - ../../delivery-samples:/delivery-samples:ro
+    network_mode: host
+    environment:
+      - TZ=Europe/Copenhagen  # FIXME:  Use host value.
+
+#    ports:
+#    # talk to DOMS+Bitrepository running in virtualbox on host (or port forwarded to)
+#      - 127.0.0.1:7880:7880
+#      - 127.0.0.1:58608:58608
+#      - 127.0.0.1:58709:58709
+
