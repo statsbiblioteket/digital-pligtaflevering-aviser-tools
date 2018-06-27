@@ -1,6 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.junit.Test;
 
 import java.util.Collections;

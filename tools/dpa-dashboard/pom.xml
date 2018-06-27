@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-            <artifactId>dpa-dashboard-cdi</artifactId>
+            <artifactId>dpa-dashboard-javaee7</artifactId>
             <version>master-SNAPSHOT</version>
             <type>war</type>
         </dependency>
@@ -56,7 +56,7 @@
                     <overlays>
                         <overlay>
                             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-                            <artifactId>dpa-dashboard-cdi</artifactId>
+                            <artifactId>dpa-dashboard-javaee7</artifactId>
                         </overlay>
                         <overlay>
                             <!-- empty groupId/artifactId represents the current build -->

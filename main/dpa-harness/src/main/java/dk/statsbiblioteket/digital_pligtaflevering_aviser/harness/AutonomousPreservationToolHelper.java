@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -33,7 +34,7 @@ public class AutonomousPreservationToolHelper {
      * @param function function creating a populated Tool from a configuration map.
      */
 
-    public static void execute(String[] args, Function<ConfigurationMap, Tool> function) {
+    public static <E> void execute(String[] args, Function<ConfigurationMap, Tool<E>> function) {
         Objects.requireNonNull(args, "args == null");
         // args: ["config.properties",  "a=1", "b=2", "c=3"]
         if (args.length < 1 || "-h".equals(args[0]) || "--help".equals(args[0])) {
@@ -71,7 +72,7 @@ public class AutonomousPreservationToolHelper {
      * @param map          configuration map to pass into <code>function</code>
      * @param toolFunction function creating a populated Tool from a configuration map.
      */
-    public static void execute(ConfigurationMap map, Function<ConfigurationMap, Tool> toolFunction) {
+    public static <E> void execute(ConfigurationMap map, Function<ConfigurationMap, Tool<E>> toolFunction) {
         Objects.requireNonNull(map, "map == null");
         final Logger log = LoggerFactory.getLogger(AutonomousPreservationToolHelper.class);
 
@@ -79,17 +80,17 @@ public class AutonomousPreservationToolHelper {
 
         log.info("*** Started at {} - {} ms since JVM start. git: {} ", now(), getRuntimeMXBean().getUptime(), gitId);
         log.debug("configuration: {}", map);
-        log.trace("------------------------------------------------------------------------------");
+        log.info("------------------------------------------------------------------------------");
 
         Runtime.getRuntime().addShutdownHook(new Thread(
                 () -> {
-                    log.trace("------------------------------------------------------------------------------");
+                    log.info("------------------------------------------------------------------------------");
                     log.info("*** Stopped at {} - {} ms since JVM start.", now(), getRuntimeMXBean().getUptime());
                 }));
 
         try {
-            String result = toolFunction.apply(map).call();
-            log.trace("Result: {}", result);
+            List<?> result = Objects.requireNonNull(toolFunction.apply(map).call());
+            log.info("Result: {} {}", result.size(), result);
         } catch (Throwable e) {
             log.error("Runnable threw exception:", e);
         }

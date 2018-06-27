@@ -47,12 +47,6 @@
             <version>master-SNAPSHOT</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>io.javaslang</groupId>
-            <artifactId>javaslang</artifactId>
-        </dependency>
-
         <dependency>
             <!-- use simple logging for IDE use but not for deployment -->
             <artifactId>slf4j-simple</artifactId>
@@ -94,6 +88,10 @@
             <artifactId>cdi-api</artifactId>
             <version>2.0</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>one.util</groupId>
+            <artifactId>streamex</artifactId>
         </dependency>
     </dependencies>
 

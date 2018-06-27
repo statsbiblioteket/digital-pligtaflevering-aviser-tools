@@ -12,7 +12,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.FileSystemDeliveryIngester;
@@ -26,8 +26,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.Inges
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.BitrepositoryPutFileClientStub;
 import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
-import javaslang.control.Either;
-import javaslang.control.Try;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
 import org.bitrepository.bitrepositoryelements.ChecksumSpecTYPE;
 import org.bitrepository.client.eventhandler.EventHandler;
@@ -93,7 +93,7 @@ public class IngesterMain {
     @Component(modules = {ConfigurationMap.class, CommonModule.class, DomsModule.class, IngesterModule.class, BitRepositoryModule.class})
     protected interface DomsIngesterComponent {
 
-        Tool getTool();
+        Tool<String> getTool();
     }
 
     /**
@@ -107,7 +107,7 @@ public class IngesterMain {
         /** @noinspection unchecked*/
         @Produces
         @Provides
-        Tool provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
+        Tool<String> provideTool(@Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
                          @Named(AUTONOMOUS_THIS_EVENT) String eventName,
                          QuerySpecification workToDoQuery,
                          DomsRepository repository,
@@ -117,13 +117,13 @@ public class IngesterMain {
             final Path normalizedDeliveriesFolder = Paths.get(deliveriesFolder).normalize();
             final String agent = IngesterMain.class.getSimpleName();
 
-            Tool f = () -> {
+            Tool<String> f = () -> {
                 try (FileSystemDeliveryIngester autoCloseableIngester = ingester) { // shut down bitrepository resources completely when done
                     List<String> toolResults = Stream.of(workToDoQuery)
                             .flatMap(repository::query)
                             .peek(domsItem -> log.trace("Processing: {}", domsItem))
                             .peek(domsItem -> mxBean.currentId = domsItem.toString())
-                            .map(DomsIdTuple::create)
+                            .map(DomsItemTuple::create)
                             .map(c -> c.map(domsItem -> {
                                 try {
                                     final Either<Exception, ToolResult> result = ingester.apply(domsItem, normalizedDeliveriesFolder);
@@ -137,7 +137,7 @@ public class IngesterMain {
                                 final DomsItem item = Objects.requireNonNull(c.left());
                                 if (c.right().isLeft()) {
                                     // Processing of _this_ domsItem threw unexpected exception
-                                    item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(c.right().getLeft()), eventName, false));
+                                    item.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(c.right().getLeft()), eventName, false));
                                 } else {
                                     final ToolResult toolResult = ((Either<Exception, ToolResult>) c.right()).get(); // FIXME: Logic broken
                                     item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
@@ -149,7 +149,7 @@ public class IngesterMain {
                             .map(c -> c.left().getDomsId().id())
                             .collect(Collectors.toList());
 
-                    return toolResults.size() + " processed:  " + toolResults;
+                    return toolResults;
                 }
             };
             return f;

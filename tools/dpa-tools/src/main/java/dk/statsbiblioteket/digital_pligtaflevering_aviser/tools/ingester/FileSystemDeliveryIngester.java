@@ -10,7 +10,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.ToolResultsReport;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FileNameToFileIDConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.FilePathToChecksumPathConverter;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.RelativePathToURLConverter;
@@ -22,7 +22,7 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.ChecksumType;
 import dk.statsbiblioteket.doms.central.connectors.fedora.pidGenerator.PIDGeneratorException;
 import dk.statsbiblioteket.newspaper.bitrepository.ingester.utils.AutoCloseablePutFileClient;
 import dk.statsbiblioteket.util.xml.DOM;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.bitrepository.bitrepositoryelements.ChecksumDataForFileTYPE;
@@ -193,7 +193,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // Collect all the indvidual toolResults.
 
         try {
-            final Function<DomsIdTuple<DomsItem>, Stream<StreamTuple<DomsItem, Either<Exception, ToolResult>>>> domsValueStreamFunction = c -> c.flatMap(value -> {
+            final Function<DomsItemTuple<DomsItem>, Stream<StreamTuple<DomsItem, Either<Exception, ToolResult>>>> domsValueStreamFunction = c -> c.flatMap(value -> {
                 try {
                     return ingestDirectoryForDomsItem(value, rootPath).map(Either::right);
                 } catch (Exception e) {
@@ -203,7 +203,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
             });
 
             List<StreamTuple<DomsItem, Either<Exception, ToolResult>>> toolResults = Stream.of(deliveryDomsItem)
-                    .map(DomsIdTuple::create)
+                    .map(DomsItemTuple::create)
                     .flatMap(domsValueStreamFunction)
                     .peek(c -> log.trace("--- Ingested {}", c.left())) // FIXME: id is for roundtrip, not individual paper.
                     .collect(toList());

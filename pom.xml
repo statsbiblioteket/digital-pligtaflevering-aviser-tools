@@ -43,11 +43,18 @@
     </build>
     <dependencyManagement>
         <dependencies>
-            <!-- to get Either -->
+            <!-- to get Either
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang</artifactId>
-                <version>2.0.5</version>
+                <version>2.0.6</version>
+            </dependency>
+             -->
+            <!-- to get Either and Try(...).toEither() -->
+            <dependency>
+                <groupId>io.vavr</groupId>
+                <artifactId>vavr</artifactId>
+                <version>0.9.2</version>
             </dependency>
 
             <dependency>
@@ -100,7 +107,7 @@
             <dependency>
                 <groupId>dk.statsbiblioteket.doms.installer</groupId>
                 <artifactId>doms-installer</artifactId>
-                <version>1.26</version>
+                <version>1.27-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>provided</scope>
             </dependency>
@@ -115,12 +122,22 @@
             <dependency>
                 <groupId>dk.kb.stream</groupId>
                 <artifactId>streamtuples</artifactId>
-                <version>0.5</version>
+                <version>0.6</version>
             </dependency>
+
+            <dependency>
+                <groupId>one.util</groupId>
+                <artifactId>streamex</artifactId>
+                <version>0.6.2</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <modules>
+        <!-- configuration files for launchers and deployments -->
+        <module>configuration-files</module>
+
         <module>main/dpa-api</module>
         <module>main/dpa-harness</module>
         <module>main/dpa-doms</module>
@@ -135,7 +152,7 @@
 
         <!-- dashboard web interface -->
         <module>tools/dpa-dashboard</module>
-        <module>tools/dpa-dashboard-cdi</module>
+        <module>tools/dpa-dashboard-javaee7</module>
 
         <!-- manual control web interface -->
         <module>tools/dpa-manualcontrol</module>

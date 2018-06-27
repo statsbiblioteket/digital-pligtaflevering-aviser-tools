@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -92,11 +93,17 @@ public class GenericListTable extends VerticalLayout {
      *
      * @param itemId
      * @param value
+     * @return returns true if the item could be found
      */
-    public void checkSpecific(Object itemId, Object value) {
+    public boolean checkSpecific(Object itemId, Object value) {
         //noinspection unchecked
-        table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
-        table.refreshRowCache();
+        Item itm = table.getItem(itemId);
+        if(itm!=null) {
+            itm.getItemProperty(checkedColumnName).setValue(value);
+            table.refreshRowCache();
+            return true;
+        }
+        return false;
     }
 
     /**

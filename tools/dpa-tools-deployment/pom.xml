@@ -41,7 +41,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.7.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -84,7 +84,8 @@
                         </goals>
                         <configuration>
                             <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                            <generateGitPropertiesFilename>target/appassembler/services/META-INF/git.properties</generateGitPropertiesFilename>
+                            <generateGitPropertiesFilename>target/appassembler/services/META-INF/git.properties
+                            </generateGitPropertiesFilename>
                         </configuration>
                     </execution>
                 </executions>
@@ -118,7 +119,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
-                <!-- FIXME: Upgrade to 2.0.0 -->
+                <!-- FIXME: Upgrade to 3.1.0 -->
                 <version>1.10</version>
                 <configuration>
                     <!--
@@ -129,6 +130,7 @@
                         <platform>unix</platform>
                     </platforms>
                     <binFolder>java-wrappers</binFolder>
+                    <!-- also used below when unpacking configuration files artifact! -->
                     <configurationDirectory>conf</configurationDirectory>
                     <copyConfigurationDirectory>true</copyConfigurationDirectory>
                     <filterConfigurationDirectory>false</filterConfigurationDirectory>
@@ -153,8 +155,8 @@
                     -->
                     <!--suppress MavenModelInspection -->
                     <extraJvmArguments>
-                        $${ENABLE_GC_LOG:+
                         -Ddpa.git.id=${git.branch}_${git.commit.id.abbrev}
+                        $${ENABLE_GC_LOG:+
                         -verbose:gc
                         -XX:+PrintGCDetails
                         -XX:+PrintGCDateStamps
@@ -189,7 +191,7 @@
                                 </program>
                                 <!--
                                 <program>
-                                    <mainCldk.statsbiblioteket.digital_pligtaflevering_aviser.tools.localhost.mainmain.VeraPDFInvokeMain
+                                    <mainCldk.statsbiblioteket.digital_pligtaflevering_aviser.tools.vagrant.mainmain.VeraPDFInvokeMain
                                     </mainClass>
                                     <id>dpa-verapdf-apply</id>
                                 </program>
@@ -206,6 +208,30 @@
                                     </mainClass>
                                     <id>dpa-generate-statistics</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.RegenerateChecksumfileMain
+                                    </mainClass>
+                                    <id>dpa-regenerate-checksumfile</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.CheckRegeneratedChecksumfileMain
+                                    </mainClass>
+                                    <id>dpa-check-regenerated-checksumfile</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ListDeletableDeliveriesMain
+                                    </mainClass>
+                                    <id>list-deletable-deliveries</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.SetEventOnUuidMain
+                                    </mainClass>
+                                    <id>set-event-on-uuid</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
@@ -220,6 +246,36 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
+                    <!-- unpack the property files (instead of having them in the class path) so their contents
+                    can be modified as part of the deployment mechanism.  This is a workaround because tra could not
+                    figure out how to get the appassembler to do it. -->
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser.tools</groupId>
+                                    <artifactId>configuration-files</artifactId>
+                                    <version>master-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <!-- also used above when creating distribution layout -->
+                                    <outputDirectory>${project.build.directory}/appassembler/services/conf
+                                    </outputDirectory>
+                                    <excludes>META-INF/**</excludes>
+                                    <!--
+                                    <destFileName>optional-new-name.jar</destFileName>
+                                    <includes>**/*.class,**/*.xml</includes>
+                                    -->
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+
                     <!-- http://stackoverflow.com/a/11729432/53897 - create classes/META-INF/maven/dependency-tree.txt -->
                     <execution>
                         <id>dependency-tree</id>

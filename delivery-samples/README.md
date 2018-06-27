@@ -1,6 +1,7 @@
 These are delivery samples for easy usage during
 development.
 
+If you need more, ask Jens Henrik for where to find more on isilon.
 
 
 

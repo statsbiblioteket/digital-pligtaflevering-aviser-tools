@@ -16,13 +16,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsIdTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import javaslang.control.Either;
+import io.vavr.control.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -47,11 +47,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Main class for starting autonomous component This component is used for validation of XML data in one or more
@@ -96,7 +96,7 @@ public class ValidateXMLMain {
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(domsItem -> log.trace("Processing: {}", domsItem))
-                    .map(DomsIdTuple::create)
+                    .map(DomsItemTuple::create)
                     .map(c -> c.map(domsItem -> {
                         try {
                             return Either.right(processChildDomsId(mxBean, eventName).apply(domsItem));
@@ -106,10 +106,11 @@ public class ValidateXMLMain {
                     }))
                     .peek(c -> {
                         final DomsItem item = c.left();
+                        // FIXME:  Rewrite with Either.fold
                         final Either<Exception, ToolResult> value = (Either<Exception, ToolResult>) c.right();  // FIXME:  Why is type information lost?
                         if (value.isLeft()) {
                             // Processing of _this_ domsItem threw unexpected exception
-                            item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(value.getLeft()), eventName, false));
+                            item.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(value.getLeft()), eventName, false));
                         } else {
                             final ToolResult toolResult = value.get();
                             item.appendEvent(new DomsEvent(agent, new Date(), toolResult.getHumanlyReadableMessage(), eventName, toolResult.isSuccess()));
@@ -118,7 +119,8 @@ public class ValidateXMLMain {
                             }
                         }
                     })
-                    .count() + " items processed"; // FIXME:  Better message from list.
+                    .peek((StreamTuple<DomsItem, Either<? extends Object, ? extends Object>> o) -> log.trace("Processed: {}", o))
+                    .collect(toList());
 
             return f;
         }
@@ -140,7 +142,7 @@ public class ValidateXMLMain {
                 final String agent = ValidateXMLMain.class.getSimpleName();
 
                 List<StreamTuple<DomsItem, Either<Exception, ToolResult>>> toolResults = parentDomsItem.allChildren()
-                        .map(DomsIdTuple::create)
+                        .map(DomsItemTuple::create)
                         .flatMap(c -> c.flatMap(item -> { // For an individual child, process XML datastream if present.
                                     try {
                                         return item.datastreams().stream()
@@ -150,7 +152,7 @@ public class ValidateXMLMain {
                                                 .map(datastream -> analyzeXML(datastream))
                                                 // Save individual result as event on node.
                                                 .peek(eitherExceptionToolResult -> eitherExceptionToolResult.bimap(
-                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsIdTuple.stacktraceFor(e), eventName, false)),
+                                                        e -> item.appendEvent(new DomsEvent(agent, new Date(), DomsItemTuple.stacktraceFor(e), eventName, false)),
                                                         tr -> item.appendEvent(new DomsEvent(agent, new Date(), tr.getHumanlyReadableMessage(), eventName, tr.isSuccess())))
                                                 );
                                     } catch (Exception e) {
@@ -158,7 +160,7 @@ public class ValidateXMLMain {
                                     }
                                 }
                         ))
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
                 ToolResultsReport<DomsItem> trr = new ToolResultsReport<>(new ToolResultsReport.OK_COUNT_FAIL_LIST_RENDERER<>(),
                         (id, t) -> log.error("id: {}", id, t),

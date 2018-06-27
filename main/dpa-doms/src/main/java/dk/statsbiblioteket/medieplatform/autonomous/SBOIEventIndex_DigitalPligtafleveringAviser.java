@@ -42,4 +42,9 @@ public class SBOIEventIndex_DigitalPligtafleveringAviser<T extends Item> extends
         log.trace("q={}", finalQuery);
         return finalQuery;
     }
+
+    @Override // super method is protected, not public.
+    public boolean match(T item, Query<T> query) {
+        return super.match(item, query);
+    }
 }
