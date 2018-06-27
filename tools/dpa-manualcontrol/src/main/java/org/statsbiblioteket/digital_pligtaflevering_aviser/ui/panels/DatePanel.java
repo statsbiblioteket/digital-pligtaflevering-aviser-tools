@@ -2,7 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
@@ -10,57 +10,58 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryPattern;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.time.Month;
-import java.time.format.TextStyle;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 /**
  * DatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
  */
 public class DatePanel extends VerticalLayout {
+    public static final String WEEKNO = "Weekno";
+    private final Map<Integer, String> dayMap;
     private Logger log = LoggerFactory.getLogger(getClass());
-
-    private String[] columns = {"Sun", "Mon","Tue", "Wed", "Thu", "Fri", "Sat"};
     private CheckBox checkbox;
-    private BeanItemContainer beans;
     private Table table;
     private TextArea unmappable = new TextArea("");
 
+    private Integer[] deliveryPattern = null;
+
     public DatePanel() {
+        dayMap = new LinkedHashMap<Integer, String>();//LinkedHashMap to keep insertion order
+        dayMap.put(Calendar.MONDAY,"Mon");
+        dayMap.put(Calendar.TUESDAY,"Tue");
+        dayMap.put(Calendar.WEDNESDAY,"Wed");
+        dayMap.put(Calendar.THURSDAY,"Thu");
+        dayMap.put(Calendar.FRIDAY,"Fri");
+        dayMap.put(Calendar.SATURDAY,"Sat");
+        dayMap.put(Calendar.SUNDAY,"Sun");
         checkbox = new CheckBox("Visible", true);
         checkbox.setEnabled(false);
-        beans = new BeanItemContainer(java.time.DayOfWeek.class);
 
         // Bind a table to it
         table = new Table("", null);
+        table.addContainerProperty(WEEKNO, String.class, null);
 
-        DayOfWeek[] ds = java.time.DayOfWeek.values();
-        //columns = new String[ds.length];
-        int i = 0;
-        table.addContainerProperty("Weekno", String.class, null);
-
-        for (DayOfWeek d : ds) {
-            //columns[i] = d.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            table.addContainerProperty(columns[i], String.class, null);
-            table.addGeneratedColumn(columns[i], new DatePanel.FieldGenerator());
-            i++;
+        for (String day : dayMap.values()) {
+            table.addContainerProperty(day, String.class, null);
+            table.addGeneratedColumn(day, new DatePanel.FieldGenerator());
         }
-        table.setSortContainerPropertyId("Weekno");
+        table.setSortContainerPropertyId(WEEKNO);
 
         unmappable.setEnabled(false);
 
         table.setWidth("100%");
-        table.setHeight("100%");
+        table.setHeightUndefined();
+        table.setPageLength(0);
         table.setSelectable(true);
         table.setImmediate(true);
         this.addComponent(checkbox);
@@ -79,8 +80,16 @@ public class DatePanel extends VerticalLayout {
      *
      * @param delStat
      */
-    public void setInfo(List<DeliveryTitleInfo> delStat) {
+    public void setInfo(List<DeliveryTitleInfo> delStat, String selectedTitle) {
         table.removeAllItems();
+
+
+        for(String header : table.getColumnHeaders()) {
+            FieldGenerator oo = (FieldGenerator)table.getColumnGenerator(header);
+            if(oo!=null) {
+                oo.setPattern(DeliveryPattern.deliveryPatterns.get(selectedTitle));
+            }
+        }
         Item newItemId = null;
         String unmappableValues = "";
 
@@ -91,15 +100,17 @@ public class DatePanel extends VerticalLayout {
         int higherDatelimit = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 
         for(int i=lowerDatelimit; i<=higherDatelimit; i++) {
+            Calendar day = Calendar.getInstance();
+            day.setFirstDayOfWeek(Calendar.MONDAY);
+            day.setTime(calendar.getTime());
+            day.add(Calendar.DAY_OF_YEAR,i-1);
 
-            Date dateIterationObject = new Date(calendar.get(Calendar.YEAR)-1900, calendar.get(Calendar.MONTH), i);
-
-            String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(dateIterationObject);
-            String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(dateIterationObject);
+            String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
+            String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
 
             if (table.getItem(weekday_no) == null) {
                 newItemId = table.addItem(weekday_no);
-                newItemId.getItemProperty("Weekno").setValue(weekday_no);
+                newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
             }
             newItemId.getItemProperty(weekday_name).setValue(i+"");
         }
@@ -109,19 +120,26 @@ public class DatePanel extends VerticalLayout {
                 Matcher matcher = UiDataConverter.getPatternMatcher(item.getDeliveryName());
                 if (matcher.matches()) {
                     String roundtripValue = matcher.group(2);
-                    Date date = UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName());
-                    String weekday_name = new SimpleDateFormat("EEE", Locale.ENGLISH).format(date);
-                    String weekday_no = new SimpleDateFormat("w", Locale.ENGLISH).format(date);
+
+                    Calendar day = Calendar.getInstance();
+                    day.setFirstDayOfWeek(Calendar.MONDAY);
+                    day.setTime(UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName()));
+
+                    String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
+                    String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
+
+                    System.out.println(weekday_name);
 
                     Item tableRow = table.getItem(weekday_no);
                     Property tableCell = tableRow.getItemProperty(weekday_name);
 
-                    if (table.getItem(weekday_no) == null) {
-                        newItemId = table.addItem(weekday_no);
-                        newItemId.getItemProperty("Weekno").setValue(weekday_no);
-                    }
                     Object oldCellValue = tableCell.getValue();
-                    Object newCellValue = roundtripValue + " - " + item.getNoOfPages() + " - " + item.getNoOfArticles();
+                    Object newCellValue = "";
+                    if(item.getNoOfPages()==0 ) {
+                        newCellValue = "NO PAGES";
+                    } else {
+                        newCellValue = "rt-"+roundtripValue + ": pages=" + item.getNoOfPages() + ", articles=" + item.getNoOfArticles();
+                    }
 
                     if (oldCellValue != null) {
                         tableCell.setValue(oldCellValue + "\n" + newCellValue);
@@ -150,7 +168,6 @@ public class DatePanel extends VerticalLayout {
      */
     @Override
     public void setEnabled(boolean enabled) {
-        beans.removeAllItems();
         super.setEnabled(enabled);
     }
 
@@ -168,16 +185,32 @@ public class DatePanel extends VerticalLayout {
      * Generate textareas as cells in the table
      */
     static class FieldGenerator implements Table.ColumnGenerator {
+        private LinkedHashMap<String, Boolean> expected;
+
+
+        public void setPattern(LinkedHashMap<String, Boolean> expected) {
+            this.expected = expected;
+        }
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {
+            VerticalLayout vl = new VerticalLayout();
             Property prop = source.getItem(itemId).getItemProperty(columnId);
             TextArea area = new TextArea(null, prop);
             if (prop.getValue() == null) {
                 area.setValue("");
             }
             area.setReadOnly(true);
-            return area;
+            vl.addComponent(area);
+
+            Button expectationButton = null;
+
+            if(!Boolean.TRUE.equals(expected.get(columnId))) {
+                expectationButton = new Button("Not expected ");
+                vl.addComponent(expectationButton);
+            }
+
+            return vl;
         }
     }
 }
