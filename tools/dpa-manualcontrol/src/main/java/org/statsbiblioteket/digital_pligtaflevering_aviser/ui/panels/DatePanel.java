@@ -33,8 +33,6 @@ public class DatePanel extends VerticalLayout {
     private Table table;
     private TextArea unmappable = new TextArea("");
 
-    private Integer[] deliveryPattern = null;
-
     public DatePanel() {
         dayMap = new LinkedHashMap<Integer, String>();//LinkedHashMap to keep insertion order
         dayMap.put(Calendar.MONDAY,"Mon");
@@ -112,7 +110,7 @@ public class DatePanel extends VerticalLayout {
                 newItemId = table.addItem(weekday_no);
                 newItemId.getItemProperty(WEEKNO).setValue(weekday_no);
             }
-            newItemId.getItemProperty(weekday_name).setValue(i+"");
+            newItemId.getItemProperty(weekday_name).setValue(i+ "\n"+"NO DELIVERY");
         }
 
         for (DeliveryTitleInfo item : delStat) {
@@ -128,23 +126,21 @@ public class DatePanel extends VerticalLayout {
                     String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
                     String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
 
-                    System.out.println(weekday_name);
-
                     Item tableRow = table.getItem(weekday_no);
                     Property tableCell = tableRow.getItemProperty(weekday_name);
 
                     Object oldCellValue = tableCell.getValue();
-                    Object newCellValue = "";
+                    String newCellValue = "";
                     if(item.getNoOfPages()==0 ) {
                         newCellValue = "NO PAGES";
                     } else {
                         newCellValue = "rt-"+roundtripValue + ": pages=" + item.getNoOfPages() + ", articles=" + item.getNoOfArticles();
                     }
 
-                    if (oldCellValue != null) {
-                        tableCell.setValue(oldCellValue + "\n" + newCellValue);
+                    if (oldCellValue.toString().contains("NO DELIVERY")) {
+                        tableCell.setValue(oldCellValue.toString().replace("NO DELIVERY", newCellValue));
                     } else {
-                        tableCell.setValue(newCellValue);
+                        tableCell.setValue(oldCellValue + "\n" + newCellValue);
                     }
 
                 } else {
@@ -205,7 +201,9 @@ public class DatePanel extends VerticalLayout {
 
             Button expectationButton = null;
 
-            if(!Boolean.TRUE.equals(expected.get(columnId))) {
+            if(expected==null) {
+                //Add nothing extra
+            } else if(!Boolean.TRUE.equals(expected.get(columnId))) {
                 expectationButton = new Button("Not expected ");
                 vl.addComponent(expectationButton);
             }
