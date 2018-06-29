@@ -31,7 +31,7 @@ public class DataModel {
 
     //Formatter for naming the cashing folder by the date
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
-    private boolean includeValidatedDeliveries = false;
+    private DeliveryFedoraCommunication.EventStatus eventStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
     private String initials;
     private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
@@ -71,8 +71,12 @@ public class DataModel {
         this.initials = initials;
     }
 
-    public void setIncludeValidatedDeliveries(boolean includeValidatedDeliveries) {
-        this.includeValidatedDeliveries = includeValidatedDeliveries;
+    public void setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+    }
+
+    public DeliveryFedoraCommunication.EventStatus getIncludeValidatedDeliveries() {
+        return this.eventStatus;
     }
 
     /**
@@ -201,11 +205,7 @@ public class DataModel {
      * Initiate the list of deliveries which is currently beeing in operation
      */
     public void initiateDeliveries() {
-        DeliveryFedoraCommunication.EventStatus evtStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
-        if (this.includeValidatedDeliveries) {
-            evtStatus = DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK;
-        }
-        fedoraCommunication.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
+        fedoraCommunication.initiateDeliveries(eventStatus, "dl_" + currentlySelectedMonth);
     }
 
     /**

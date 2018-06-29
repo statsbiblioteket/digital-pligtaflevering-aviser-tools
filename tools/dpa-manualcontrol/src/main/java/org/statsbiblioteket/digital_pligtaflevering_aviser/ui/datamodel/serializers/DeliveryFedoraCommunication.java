@@ -1,13 +1,16 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
+import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
@@ -28,12 +31,14 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -80,6 +85,10 @@ public class DeliveryFedoraCommunication {
             case DONEMANUALCHECK:
                 items = getDoneManual(deliveryFilter);
                 break;
+            case CREATEDONLY:
+                items = getCreatedOnly(deliveryFilter);
+                break;
+
         }
 
         items.forEach(new Consumer<DomsItem>() {
@@ -101,6 +110,14 @@ public class DeliveryFedoraCommunication {
                 pastEvents, thisEvent, "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
+
+
+    public Stream<DomsItem> getCreatedOnly(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                "Data_Received", "", "", itemType))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
+    }
+
 
     /**
      * Get a list of deliveries, which is has already added an event that manual inspections has been done
@@ -342,6 +359,8 @@ public class DeliveryFedoraCommunication {
         /**
          * Get deliveries including deliveries where the manual check is done
          */
-        DONEMANUALCHECK;
+        DONEMANUALCHECK,
+
+        CREATEDONLY;
     }
 }

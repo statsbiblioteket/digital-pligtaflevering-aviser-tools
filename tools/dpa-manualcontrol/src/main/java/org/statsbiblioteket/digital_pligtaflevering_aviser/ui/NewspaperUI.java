@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraCommunication;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.EventsView;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views.StatisticsView;
-
+import java.util.Optional;
 /**
  * The Application's "main" class
  */
@@ -23,6 +25,7 @@ public class NewspaperUI extends UI {
     public static final String CONFIGPANEL = "CONFIGPANEL";
     public static final String DELIVERYPANEL = "DELIVERYPANEL";
     public static final String OVERVIEW = "OVERVIEW";
+    public static final String EVENTOVERVIEW = "EVENTOVERVIEW";
     public static final String TITLEVALIDATIONPANEL = "TITLEVALIDATIONPANEL";
 
     private DataModel model = new DataModel();
@@ -48,12 +51,19 @@ public class NewspaperUI extends UI {
         String month = request.getParameter("month");
         String del = request.getParameter("del");
         String title = request.getParameter("title");
-        boolean validated = "true".equals(request.getParameter("validated")); //This parameter is a backdoor to view information that is normally hidden from the user
+        String events = request.getParameter("events");
 
         model.setSelectedMonth(month);
         model.setSelectedDelivery(del);
         model.setSelectedTitle(title);
-        model.setIncludeValidatedDeliveries(validated);
+        switch(Optional.ofNullable(events).orElse("")) {
+            case "DONEMANUALCHECK":
+                model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK);
+                break;
+            case "CREATEDONLY":
+                model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.CREATEDONLY);
+                break;
+        }
 
         address = request.getRemoteAddr();
         getPage().setTitle("DPA");
@@ -61,14 +71,19 @@ public class NewspaperUI extends UI {
         // Create a navigator to control the views
         navigator = new Navigator(this, this);
 
-        StatisticsView deliveryPanel = new StatisticsView(model, DELIVERYPANEL);
+        if(!DeliveryFedoraCommunication.EventStatus.CREATEDONLY.equals(model.getIncludeValidatedDeliveries())) {
+            StatisticsView deliveryPanel = new StatisticsView(model, DELIVERYPANEL);
 
-        // Create and register the views
-        navigator.addView(MAINVIEW, deliveryPanel);
-        navigator.addView(CONFIGPANEL, new StatisticsView(model, CONFIGPANEL));
-        navigator.addView(DELIVERYPANEL, deliveryPanel);
-        navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(model, TITLEVALIDATIONPANEL));
-        navigator.addView(OVERVIEW, new StatisticsView(model, OVERVIEW));
+            // Create and register the views
+            navigator.addView(MAINVIEW, deliveryPanel);
+            navigator.addView(CONFIGPANEL, new StatisticsView(model, CONFIGPANEL));
+            navigator.addView(DELIVERYPANEL, deliveryPanel);
+            navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(model, TITLEVALIDATIONPANEL));
+            navigator.addView(OVERVIEW, new StatisticsView(model, OVERVIEW));
+        } else {
+            navigator.addView(EVENTOVERVIEW, new EventsView(model, EVENTOVERVIEW));
+        }
+
     }
 
 }
