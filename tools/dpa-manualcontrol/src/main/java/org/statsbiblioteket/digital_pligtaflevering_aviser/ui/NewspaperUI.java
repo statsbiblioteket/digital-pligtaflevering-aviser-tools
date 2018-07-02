@@ -81,7 +81,7 @@ public class NewspaperUI extends UI {
             navigator.addView(TITLEVALIDATIONPANEL, new StatisticsView(model, TITLEVALIDATIONPANEL));
             navigator.addView(OVERVIEW, new StatisticsView(model, OVERVIEW));
         } else {
-            navigator.addView(EVENTOVERVIEW, new EventsView(model, EVENTOVERVIEW));
+            navigator.addView(EVENTOVERVIEW, new EventsView(model));
         }
 
     }

@@ -3,8 +3,6 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -12,13 +10,14 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Confirmatio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.text.ParseException;
 import java.util.List;
 
 /**
- * The Calenderview
+ * The EventOverviewPanel
  * The full panel for showing all selection details of deliveries
  */
 public class EventOverviewPanel extends VerticalLayout implements StatisticsPanels {
@@ -40,35 +39,36 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
         Button.ClickListener buttonListener = new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
-                DomsItem di = model.getDeliveryFromName(clickEvent.getButton().getId());
+                DomsItem domsItem = model.getDeliveryFromName(clickEvent.getButton().getId());
 
+                List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = domsItem.getOriginalEvents();
 
-                List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = di.getOriginalEvents();
                 StoreResultWindow dialog = new StoreResultWindow(clickEvent.getButton().getId());
 
-                TextArea textArea = new TextArea();
-                textArea.setHeight(300, Unit.PIXELS);
-                textArea.setWidth(300, Unit.PIXELS);
+                EventPanel eventPanel = new EventPanel();
+                eventPanel.setValues(eventList);
+                eventPanel.setInitials(model.getInitials());
 
-                String eventText = "";
-                for(dk.statsbiblioteket.medieplatform.autonomous.Event event: eventList) {
-                    eventText = eventText + event.getEventID() + "\n";
-                }
-
-                textArea.setValue(eventText);
-
-                Layout ll = new VerticalLayout();
-                ll.addComponent(textArea);
-
-                dialog.setDialogContent(ll);
+                dialog.setDialogContent(eventPanel);
                 dialog.setModal(true);
 
                 UI.getCurrent().addWindow(dialog);
+                dialog.setListener(new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent event) {
+                        UI.getCurrent().removeWindow(dialog);
+                        if ("OKBUTTON".equals(event.getButton().getId())) {
+
+                            dk.statsbiblioteket.medieplatform.autonomous.Event oo = (dk.statsbiblioteket.medieplatform.autonomous.Event)eventPanel.getSelection();
+                            domsItem.removeEvents(oo.getEventID());
+                            UI.getCurrent().removeWindow(dialog);
+                        }
+                    }
+                });
             }
         };
 
         datePanel.addClickListener(buttonListener);
-
 
         tablesLayout.addComponent(datePanel);
         tablesLayout.setExpandRatio(datePanel, 1f);

@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * DatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
+ * EventDatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
  */
 public class EventDatePanel extends VerticalLayout {
     public static final String WEEKNO = "Weekno";
@@ -29,7 +29,6 @@ public class EventDatePanel extends VerticalLayout {
     private Logger log = LoggerFactory.getLogger(getClass());
     private CheckBox checkbox;
     private Table table;
-    private TextArea unmappable = new TextArea("");
     private static Button.ClickListener buttonListener;
     private Date month;
 
@@ -54,9 +53,6 @@ public class EventDatePanel extends VerticalLayout {
             table.addGeneratedColumn(day, new EventDatePanel.FieldGenerator());
         }
         table.setSortContainerPropertyId(WEEKNO);
-
-        unmappable.setEnabled(false);
-
         table.setWidth("100%");
         table.setHeightUndefined();
         table.setPageLength(0);
@@ -64,7 +60,6 @@ public class EventDatePanel extends VerticalLayout {
         table.setImmediate(true);
         this.addComponent(checkbox);
         this.addComponent(table);
-        this.addComponent(unmappable);
     }
 
 
@@ -132,7 +127,6 @@ public class EventDatePanel extends VerticalLayout {
 
             } catch (ParseException e) {
                 //Handling of perserexception is done by storing unparsable info to the panel for unmappable values.
-                //unmappableValues = unmappableValues.concat(item.getDeliveryName());
                 log.error("Strings could not get parsed into Dates in DatePanel", e);
             }
             table.sort();
@@ -179,15 +173,11 @@ public class EventDatePanel extends VerticalLayout {
 
                 String[] list = prop.getValue().toString().split("\n");
                 for(int rows = 1; rows< list.length; rows++) {
-                    area.setValue(prop.getValue().toString());
-                    area.setReadOnly(true);
                     Button expectationButton = new Button(list[rows]);
                     expectationButton.setId(list[rows]);
                     expectationButton.addClickListener(buttonListener);
                     vl.addComponent(expectationButton);
                 }
-
-
             }
             return vl;
         }
