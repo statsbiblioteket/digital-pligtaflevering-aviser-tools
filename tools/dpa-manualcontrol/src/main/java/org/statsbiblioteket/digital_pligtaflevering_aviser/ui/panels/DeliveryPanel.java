@@ -233,6 +233,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
                     if (!writeResult) {
                         Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
+                    } else {
+                        deliveryPanel.checkSpecific(item, true);
                     }
 
                 }
