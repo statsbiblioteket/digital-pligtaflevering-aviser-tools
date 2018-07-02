@@ -219,11 +219,11 @@ public class DataModel {
      * @param missingItems
      * @return
      */
-    public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
+    public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems, boolean force) {
         try {
             DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
             filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
-            return fedoraCommunication.writeDeliveryToFedora(deli);
+            return fedoraCommunication.writeDeliveryToFedora(deli, force);
         } catch (Exception e) {
             log.error("Exception occoured during writing DeliveryTitleInfo", e);
         }

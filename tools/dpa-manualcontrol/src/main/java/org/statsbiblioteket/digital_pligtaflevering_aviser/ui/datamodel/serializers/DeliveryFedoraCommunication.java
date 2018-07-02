@@ -288,14 +288,14 @@ public class DeliveryFedoraCommunication {
      *
      * @throws JAXBException
      */
-    public boolean writeDeliveryToFedora(DeliveryTitleInfo deli) throws JAXBException {
+    public boolean writeDeliveryToFedora(DeliveryTitleInfo deli, boolean force) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deli, os);
-        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
+        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray(), force);
     }
 
     /**
@@ -306,7 +306,7 @@ public class DeliveryFedoraCommunication {
      * @param statisticsStream
      * @return return true if the writing performed successfully
      */
-    public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
+    public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream, boolean force) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
         if (domsItem == null) {
@@ -328,7 +328,7 @@ public class DeliveryFedoraCommunication {
                         .filter(ds -> ds.getId().equals(VALIDATION_INFO_STREAMNAME))
                         .findAny();
 
-                if (profileOptional.isPresent()) {
+                if (profileOptional.isPresent() && !force) {
                     return false;
                 }
 

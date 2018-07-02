@@ -19,15 +19,24 @@ public class StoreResultWindow extends Window {
 
     private final Button ok = new Button("Ok");
     private final Button cancel = new Button("Cancel");
+    private final Button force = new Button("Force");
     private final Label checkStateInfo = new Label("Validation can not be performed, since it is already performed");
 
     public StoreResultWindow(String caption) {
         super(caption);
         ok.setId("OKBUTTON");
         cancel.setId("CANCELBUTTON");
+        force.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                ok.setEnabled(true);
+            }
+        });
+
 
         hl.addComponent(ok);
         hl.addComponent(cancel);
+        hl.addComponent(force);
         hl.addComponent(checkStateInfo);
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
@@ -50,6 +59,7 @@ public class StoreResultWindow extends Window {
      */
     public void setReady(boolean ready) {
         ok.setEnabled(ready);
+        force.setVisible(!ready);
         checkStateInfo.setVisible(!ready);
     }
 

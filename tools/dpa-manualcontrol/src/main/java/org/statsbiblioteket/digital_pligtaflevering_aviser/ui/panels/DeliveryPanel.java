@@ -229,7 +229,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 if ("OKBUTTON".equals(event.getButton().getId())) {
 
                     boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
-                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
+                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems(), true);
 
                     if (!writeResult) {
                         Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
