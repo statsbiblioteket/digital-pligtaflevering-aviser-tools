@@ -5,15 +5,18 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventAdminWindow;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,9 +45,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                 DomsItem domsItem = model.getDeliveryFromName(clickEvent.getButton().getId());
 
                 List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = domsItem.getOriginalEvents();
-
-                StoreResultWindow dialog = new StoreResultWindow(clickEvent.getButton().getId());
-
+                EventAdminWindow dialog = new EventAdminWindow(clickEvent.getButton().getId());
                 EventPanel eventPanel = new EventPanel();
                 eventPanel.setValues(eventList);
                 eventPanel.setInitials(model.getInitials());
@@ -57,11 +58,19 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
-                        if ("OKBUTTON".equals(event.getButton().getId())) {
-
+                        if ("OVERRIDE".equals(event.getButton().getId())) {
                             dk.statsbiblioteket.medieplatform.autonomous.Event oo = (dk.statsbiblioteket.medieplatform.autonomous.Event)eventPanel.getSelection();
-                            domsItem.removeEvents(oo.getEventID());
-                            UI.getCurrent().removeWindow(dialog);
+                            DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                    "override", oo.getEventID(), true);
+                            domsItem.appendEvent(domsEvent);
+                        } else if ("DELETE".equals(event.getButton().getId())) {
+                            dk.statsbiblioteket.medieplatform.autonomous.Event oo = (dk.statsbiblioteket.medieplatform.autonomous.Event)eventPanel.getSelection();
+                            int noOfEvents = domsItem.removeEvents(oo.getEventID());
+                            DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                    "Deleted " + noOfEvents + " instances of " + oo.getEventID() +
+                                            (oo.getDetails() == null ? "" : "\n" +
+                                                    "\nReason: " + oo.getDetails()), "EVENT_DELETED_MANUALLY", oo.isSuccess());
+                            domsItem.appendEvent(domsEvent);
                         }
                     }
                 });

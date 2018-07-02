@@ -64,12 +64,6 @@ public class EventsView extends VerticalLayout implements View {
                 try {
                     if (SearchPanel.startButtonId.equals(event.getButton().getId())) {
                         model.setSelectedMonth(searchPanel.getSelectedDate());
-                        if (!model.isMonthInitiated()) {
-                            Notification.show("This month is not prepared", Notification.Type.ERROR_MESSAGE);
-                            tabelsLayout.insertInitialTableValues();
-                            panelPrepare(false);
-                            return;
-                        }
                         model.initiateDeliveries();
                         model.initiateTitleHierachyFromFilesystem();
                         tabelsLayout.insertInitialTableValues();
