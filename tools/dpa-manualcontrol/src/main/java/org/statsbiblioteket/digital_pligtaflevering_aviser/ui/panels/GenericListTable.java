@@ -186,7 +186,9 @@ public class GenericListTable extends VerticalLayout {
     }
 
     public void selectFirst() {
-        table.select(table.firstItemId());
+        if(!table.isEmpty()) {
+            table.select(table.firstItemId());
+        }
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
