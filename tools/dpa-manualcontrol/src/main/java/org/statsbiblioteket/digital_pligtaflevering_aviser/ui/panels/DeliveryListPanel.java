@@ -1,8 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,7 +46,7 @@ public class DeliveryListPanel extends VerticalLayout {
         table.setImmediate(true);
 
         table.setVisibleColumns(new String[]{"Date", "Name"});
-
+        table.addGeneratedColumn("Date", new DeliveryListPanel.DateColumnGenerator());
         table.setColumnExpandRatio("Date", 0.5f);
         table.setColumnExpandRatio("Name", 0.5f);
         this.addComponent(checkbox);
@@ -80,4 +84,20 @@ public class DeliveryListPanel extends VerticalLayout {
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
     }
+
+    public class DateColumnGenerator implements Table.ColumnGenerator {
+            @Override
+            public Component generateCell(Table source, Object itemId, Object columnId) {
+                Property<?> prop = source.getItem(itemId).getItemProperty(columnId);
+                if (prop.getType().equals(Date.class)) {
+                    Date date = (Date) prop.getValue();
+                    if(date==null) {
+                        return null;
+                    }
+                    SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+                    return new Label(sdf.format(date));
+                }
+                return null;
+            }
+        }
 }
