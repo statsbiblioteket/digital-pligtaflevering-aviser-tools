@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -25,6 +26,7 @@ public class EventAdminWindow extends Window {
         override.setId("OVERRIDE");
         delete.setId("DELETE");
         cancel.setId("CANCELBUTTON");
+        cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
         hl.addComponent(override);
         hl.addComponent(delete);

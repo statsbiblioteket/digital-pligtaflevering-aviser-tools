@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -25,6 +26,7 @@ public class StoreResultWindow extends Window {
     public StoreResultWindow(String caption) {
         super(caption);
         ok.setId("OKBUTTON");
+        ok.setClickShortcut(ShortcutAction.KeyCode.ENTER);
         cancel.setId("CANCELBUTTON");
         force.addClickListener(new Button.ClickListener() {
             @Override
