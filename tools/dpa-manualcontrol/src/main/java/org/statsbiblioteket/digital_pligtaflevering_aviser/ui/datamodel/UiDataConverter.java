@@ -64,10 +64,10 @@ public class UiDataConverter {
     public static synchronized Map sectionConverter(List<Page> pageList) {
 
         Map<String, List<Page>> grouped = pageList.stream().collect(Collectors.groupingBy(pageItem -> pageItem.getSectionNumber()));
-        Map<String, TitleComponent> titleComponentList = new HashMap<String, TitleComponent>();
+        Map<Integer, TitleComponent> titleComponentList = new HashMap<Integer, TitleComponent>();
         for (List<Page> groupedPageList : grouped.values()) {
             Page firstPage = groupedPageList.get(0);
-            titleComponentList.put(firstPage.getSectionNumber(), new TitleComponent(firstPage.getSectionName(), firstPage.getSectionNumber(), groupedPageList.size()));
+            titleComponentList.put(Integer.parseInt(firstPage.getSectionNumber()), new TitleComponent(firstPage.getSectionName(), Integer.parseInt(firstPage.getSectionNumber()), groupedPageList.size()));
         }
         return titleComponentList;
     }

@@ -58,7 +58,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     public DeliveryPanel(DataModel model) {
         this.model = model;
         tablesLayout.setWidth("100%");
-
+        sectionSectionTable.setSortParam("sectionNumber");
         sectionSectionTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
