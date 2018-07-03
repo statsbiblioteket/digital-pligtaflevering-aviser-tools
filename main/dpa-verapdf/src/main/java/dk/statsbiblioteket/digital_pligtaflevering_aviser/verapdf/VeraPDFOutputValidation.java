@@ -77,20 +77,20 @@ public class VeraPDFOutputValidation {
 
         new HashSet<>(l).stream()
                 .map(item -> new ValidationResult(item, severenessFor(item)))
-                .filter(vr -> vr.getValidationEnum() != ValidationResult.ValidationResultEnum.ACCEPTABLE)
+                .filter(vr -> vr.getValidationEnum() != SeverenessLevel.ACCEPTABLE)
                 .forEach(vr -> rulesBroken.add(vr));
 
         return rulesBroken;
     }
 
-    public ValidationResult.ValidationResultEnum severenessFor(String sectionId) {
+    public SeverenessLevel severenessFor(String sectionId) {
         switch (sectionId) {
             case "6.1.3":
             case "6.5.2":
             case "6.6.1":
             case "6.6.2":
             case "6.9":
-                return ValidationResult.ValidationResultEnum.INVALID;
+                return SeverenessLevel.INVALID;
             case "6.1.7":
             case "6.1.11":
             case "6.2.6":
@@ -100,7 +100,7 @@ public class VeraPDFOutputValidation {
             case "6.3.6":
             case "6.2.10":
             case "6.3.2":
-                return ValidationResult.ValidationResultEnum.MANUAL_INSPECTION;
+                return SeverenessLevel.MANUAL_INSPECTION;
             case "6.1.2":
             case "6.1.4":
             case "6.1.6":
@@ -120,12 +120,12 @@ public class VeraPDFOutputValidation {
             case "6.7.10":
             case "6.4":
             case "6.1.5":
-                return ValidationResult.ValidationResultEnum.ACCEPTABLE;
+                return SeverenessLevel.ACCEPTABLE;
             default:
                 if (sectionId.startsWith("6.2.3") || sectionId.startsWith("6.7") || sectionId.startsWith("6.8")) {
-                    return ValidationResult.ValidationResultEnum.ACCEPTABLE;
+                    return SeverenessLevel.ACCEPTABLE;
                 } else {
-                    return ValidationResult.ValidationResultEnum.UNKNOWN;
+                    return SeverenessLevel.UNKNOWN;
                 }
         }
     }
