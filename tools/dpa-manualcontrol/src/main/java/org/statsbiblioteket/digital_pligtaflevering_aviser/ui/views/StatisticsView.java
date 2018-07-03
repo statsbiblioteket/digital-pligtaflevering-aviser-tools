@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -211,19 +212,15 @@ public class StatisticsView extends VerticalLayout implements View {
                         metadatalink.setResource(resource);
                         metadatalink.setDescription("Link to Second Page");
                     } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
-                        currentSelectedPage.clear();
-                        currentSelectedPage.add((Page) itemClickEvent.getItemId());
-                        currentSelectedArticle = null;
-
-                        pdfComponent.setVisible(true);
-                        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
-                        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
-                        String urlString = pdfStream.getUrl();
-                        pdfComponent.initiate(urlString);
-                        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
-                        metadatalink.setResource(resource);
-                        metadatalink.setDescription("Link to Second Page");
+                        viewPage((Page) itemClickEvent.getItemId());
                     }
+            }
+        });
+
+        tabelsLayout.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
+                viewPage((Page) valueChangeEvent.getProperty().getValue());
             }
         });
 
@@ -307,6 +304,24 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.addComponent(mainhlayout);
         panelPrepare(false);
     }
+
+
+    private void viewPage(Page pageElement) {
+        currentSelectedPage.clear();
+        currentSelectedPage.add(pageElement);
+        currentSelectedArticle = null;
+
+        pdfComponent.setVisible(true);
+        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
+        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+        String urlString = pdfStream.getUrl();
+        pdfComponent.initiate(urlString);
+        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
+        metadatalink.setResource(resource);
+        metadatalink.setDescription("Link to Second Page");
+    }
+
+
 
     /**
      * Set panes to being prepared for viewing details

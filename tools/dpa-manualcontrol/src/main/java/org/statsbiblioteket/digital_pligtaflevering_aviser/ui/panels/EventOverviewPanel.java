@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -124,6 +125,11 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
      */
     @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
+
+    }
+
+    @Override
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
 
     }
 

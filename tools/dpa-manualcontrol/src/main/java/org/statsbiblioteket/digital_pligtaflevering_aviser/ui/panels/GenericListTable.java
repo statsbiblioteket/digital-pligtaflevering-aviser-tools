@@ -185,7 +185,15 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    public void selectFirst() {
+        table.select(table.firstItemId());
+    }
+
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
+    }
+
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
+        table.addValueChangeListener(listener);
     }
 }

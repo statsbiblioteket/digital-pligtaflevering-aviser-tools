@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -173,6 +174,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 .collect(Collectors.toList());
 
         fileSelectionPanel.setInfo(filteredPages);
+        fileSelectionPanel.selectFirst();
 
         List<Article> articleList = new ArrayList<Article>();
         articleList.addAll(item.getArticles());
@@ -196,6 +198,10 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
         fileSelectionPanel.addItemClickListener(listener);
         articleSelectionPanel.addItemClickListener(listener);
+    }
+
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
+        fileSelectionPanel.addValueChangeListener(listener);
     }
 
     @Override
