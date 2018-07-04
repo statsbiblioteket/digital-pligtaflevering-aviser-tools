@@ -60,6 +60,9 @@ public class NewspaperUI extends UI {
             case "DONEMANUALCHECK":
                 model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK);
                 break;
+            case "DONEMANUALMINIMALCHECK":
+                model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.DONEMANUALMINIMALCHECK);
+                break;
             case "CREATEDONLY":
                 model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.CREATEDONLY);
                 break;

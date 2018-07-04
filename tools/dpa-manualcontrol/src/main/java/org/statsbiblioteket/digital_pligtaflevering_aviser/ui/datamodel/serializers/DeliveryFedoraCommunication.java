@@ -54,6 +54,7 @@ public class DeliveryFedoraCommunication {
 
     private static String itemType;
     private static String pastEvents;
+    private static String pastMinimalEvents;
     private static String thisEvent;
 
     private HashMap<String, DomsItem> deliveryList = new HashMap<>();
@@ -61,9 +62,10 @@ public class DeliveryFedoraCommunication {
     private DomsModule domsModule = new DomsModule();
     private DomsRepository repository;
 
-    public DeliveryFedoraCommunication(String itemType, String pastEvents, String thisEvent, DomsRepository repository) {
+    public DeliveryFedoraCommunication(String itemType, String pastEvents, String pastMinimalEvents, String thisEvent, DomsRepository repository) {
         this.itemType = itemType;
         this.pastEvents = pastEvents;
+        this.pastMinimalEvents = pastMinimalEvents;
         this.thisEvent = thisEvent;
         this.repository = repository;
     }
@@ -81,6 +83,9 @@ public class DeliveryFedoraCommunication {
         switch (eventStatus) {
             case READYFORMANUALCHECK:
                 items = getReadyForManual(deliveryFilter);
+                break;
+            case DONEMANUALMINIMALCHECK:
+                items = getDoneManualMinimal(deliveryFilter);
                 break;
             case DONEMANUALCHECK:
                 items = getDoneManual(deliveryFilter);
@@ -130,6 +135,13 @@ public class DeliveryFedoraCommunication {
                 pastEvents, "", "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
+
+    public Stream<DomsItem> getDoneManualMinimal(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                pastMinimalEvents + "", thisEvent, "", itemType))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
+    }
+
 
     /**
      * Get the domsItem from the uuid. The Item is fetched directly from fedora
@@ -360,6 +372,8 @@ public class DeliveryFedoraCommunication {
          * Get deliveries including deliveries where the manual check is done
          */
         DONEMANUALCHECK,
+
+        DONEMANUALMINIMALCHECK,
 
         CREATEDONLY;
     }

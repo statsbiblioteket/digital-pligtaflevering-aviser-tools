@@ -9,7 +9,8 @@
   <Parameter name="jvm.dumpheap" value="false"/>
   <Parameter name="bitrepository.ingester.baseurl" value="http://localhost:58709/"/>
   <Parameter name="bitrepository.sbpillar.mountpoint" value="/avisbits/dpaviser/"/>
-  <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived,Statistics_generated"/>
+  <Parameter name="autonomous.minimalpastSuccessfulEvents" value="Data_Archived,Statistics_generated"/>
+  <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived,Statistics_generated,Checksumfile_regenerated,Checksumfile_checked,VeraPDF_Invoked,VeraPDF"/>
   <Parameter name="autonomous.oldEvents" value=""/>
   <Parameter name="autonomous.itemTypes" value="doms:ContentModel_DPARoundTrip"/>
   <Parameter name="autonomous.sboi.pageSize" value="100"/>

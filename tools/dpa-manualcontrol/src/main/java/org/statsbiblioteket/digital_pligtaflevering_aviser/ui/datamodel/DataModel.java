@@ -49,6 +49,7 @@ public class DataModel {
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
                 map.getRequired("autonomous.pastSuccessfulEvents"),
+                map.getRequired("autonomous.minimalpastSuccessfulEvents"),
                 map.getRequired("autonomous.thisEvent"),
                 repository);
     }
