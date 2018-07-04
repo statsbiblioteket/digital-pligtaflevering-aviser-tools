@@ -1,9 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
+import com.vaadin.server.StreamResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.slf4j.Logger;
@@ -13,11 +15,16 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemReadWrite;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * DataModel has one initiated instance per browsersession. The datamodel contains cashed information about the
@@ -154,6 +161,53 @@ public class DataModel {
      */
     public void selectTitleDelivery() {
         selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
+    }
+
+
+    public StreamResource createResource() {
+        return new StreamResource(new StreamResource.StreamSource() {
+            @Override
+            public InputStream getStream() {
+                InputStream in = null;
+                try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    for (String title : currentlySelectedTitleHiearachy.getAllTitles()) {
+                        baos.write((title+";\n").getBytes());
+                        List<DeliveryTitleInfo> DeliveryTitleInfos = currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
+                        for (DeliveryTitleInfo deliveryTitleInfo : DeliveryTitleInfos) {
+
+                            baos.write((deliveryTitleInfo.getDeliveryName()+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getInitials()).orElse("")+",").getBytes());
+                            baos.write((deliveryTitleInfo.isChecked()+",").getBytes());
+                            baos.write((deliveryTitleInfo.getNoOfArticles()+",").getBytes());
+                            baos.write((deliveryTitleInfo.getNoOfPages()+",").getBytes());
+
+                            String missingItemString = "";
+                            List<Page> filteredPages = deliveryTitleInfo.getPages().stream().filter(p -> ConfirmationState.REJECTED.equals(p.getCheckedState())).collect(Collectors.toList());
+                            for(Page filteredPage : filteredPages) {
+                                missingItemString = missingItemString.concat(filteredPage.getPageName()).concat("-");
+                            }
+                            List<Article> filteredarticles = deliveryTitleInfo.getArticles().stream().filter(p -> ConfirmationState.REJECTED.equals(p.getCheckedState())).collect(Collectors.toList());
+                            for(Article filteredArticle : filteredarticles) {
+                                missingItemString = missingItemString.concat(filteredArticle.getArticleName()).concat("-");
+                            }
+
+                            baos.write((missingItemString+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getComment())+",").getBytes());
+                            baos.write(";\n".getBytes());
+                        }
+                    }
+
+                    byte[] bytes = baos.toByteArray();
+
+                    in = new ByteArrayInputStream(bytes);
+
+                } catch (Exception e) {
+                    log.error("ERROR EXPORTING DATA", e.getMessage());
+                }
+                return in;
+            }
+        }, "export.csv");
     }
 
     /**

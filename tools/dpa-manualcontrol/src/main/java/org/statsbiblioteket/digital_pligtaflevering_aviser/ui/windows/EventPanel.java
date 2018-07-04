@@ -7,8 +7,7 @@ import com.vaadin.ui.VerticalLayout;
 import java.util.List;
 
 /**
- * This panel contains results of validations in a titleDelivery, it gives the possiblity of viewing what has been validated
- * and store it if it is approved.
+ * This panel contains all deliveries in a calender-map, and it is possible to get information about the occoured events.
  */
 public class EventPanel extends VerticalLayout {
 

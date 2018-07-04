@@ -2,6 +2,8 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -50,6 +52,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true); //
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
+    private Button statusButton = new Button("StatusExport");
 
     /**
      * Construct the panel with a reference to the datamodel
@@ -95,7 +98,16 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             }
         });
 
+
+        // second, create a StreamResource and pass the previous StreamResource:
+        StreamResource resource = model.createResource();
+
+        // extend a component
+        FileDownloader downloader = new FileDownloader(resource);
+        downloader.extend(statusButton);
+
         buttonLayout.addComponent(saveCheckButton);
+        buttonLayout.addComponent(statusButton);
 
         this.addComponent(buttonLayout);
         this.addComponent(tablesLayout);
