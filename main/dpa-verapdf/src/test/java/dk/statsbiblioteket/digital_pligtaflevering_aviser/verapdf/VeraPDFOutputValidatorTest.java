@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.counting;
@@ -83,32 +84,30 @@ public class VeraPDFOutputValidatorTest {
                 .map((Node node) ->
                         Try.of(() -> new StreamTuple<>(
                                 "" + xPath.compile("ruleId/clause/text()").evaluate(node, XPathConstants.STRING),
-                                "" + xPath.compile("concat(ruleId/clause/text(), ': ', message/text())").evaluate(node, XPathConstants.STRING)
+                                "" + xPath.compile(
+                                        "concat(ruleId/clause/text(), ': ', message/text(), ' [ ', location/context/text(), ' ]')"
+                                ).evaluate(node, XPathConstants.STRING)
                         )).get())
-                .map(st -> new StreamTuple<>(validator.severenessFor(st.left()), st))
-                .peek((StreamTuple<SeverenessLevel, StreamTuple<String, String>> st) -> {
-                })
-                .collect(groupingBy(st -> st.left(), mapping(st -> st.right(), toList())));
+                .collect(groupingBy(st -> validator.severenessFor(st.left()), mapping(st -> st, toList())));
 
         Optional<SeverenessLevel> worstOutcome = outcomes.keySet().stream().max(Comparator.naturalOrder());
 
-        Object r = outcomes.entrySet().stream()
+        String thisOutcome = outcomes.entrySet().stream()
                 .peek((Map.Entry<SeverenessLevel, List<StreamTuple<String, String>>> s) -> {
                 })
                 .sorted(Comparator.comparing(Map.Entry::getKey))
                 .map(entry -> entry.getKey() + "\n"
                         + "------------------------------------------\n"
                         + entry.getValue().stream()
-                        .collect(groupingBy(i -> i, counting())).entrySet().stream()
-                        .peek((Map.Entry<StreamTuple<String, String>, Long> s) -> {
-                        })
+                        .collect(groupingBy(Function.identity(), counting())).entrySet().stream()
                         .sorted(Comparator.comparing(Map.Entry::getKey))
-                        .map(entry2 -> entry2.getValue() + ": " + entry2.getKey().right().replaceAll("[ \t]*\n[ \t]+", " "))
+                        .map((Map.Entry<StreamTuple<String, String>, Long> entry2) ->
+                                entry2.getValue() + ": " + entry2.getKey().right().replaceAll("[ \t]*\n[ \t]+", " "))
                         .collect(joining("\n"))
                 )
                 .collect(joining("\n\n"));
 
-        System.out.println(r);
+        System.out.println(thisOutcome);
 
     }
 
