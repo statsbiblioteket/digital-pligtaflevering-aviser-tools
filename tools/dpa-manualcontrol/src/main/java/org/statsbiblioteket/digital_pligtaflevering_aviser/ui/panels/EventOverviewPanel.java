@@ -59,19 +59,21 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
-                        if ("OVERRIDE".equals(event.getButton().getId())) {
-                            dk.statsbiblioteket.medieplatform.autonomous.Event oo = (dk.statsbiblioteket.medieplatform.autonomous.Event)eventPanel.getSelection();
-                            DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                    "override", oo.getEventID(), true);
-                            domsItem.appendEvent(domsEvent);
-                        } else if ("DELETE".equals(event.getButton().getId())) {
-                            dk.statsbiblioteket.medieplatform.autonomous.Event oo = (dk.statsbiblioteket.medieplatform.autonomous.Event)eventPanel.getSelection();
-                            int noOfEvents = domsItem.removeEvents(oo.getEventID());
-                            DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                    "Deleted " + noOfEvents + " instances of " + oo.getEventID() +
-                                            (oo.getDetails() == null ? "" : "\n" +
-                                                    "\nReason: " + oo.getDetails()), "EVENT_DELETED_MANUALLY", oo.isSuccess());
-                            domsItem.appendEvent(domsEvent);
+                        if(dialog.validateSecurityKey()) {
+                            if ("OVERRIDE".equals(event.getButton().getId())) {
+                                dk.statsbiblioteket.medieplatform.autonomous.Event itemEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                        "override by " + model.getInitials(), itemEvent.getEventID(), true);
+                                domsItem.appendEvent(domsEvent);
+                            } else if ("DELETE".equals(event.getButton().getId())) {
+                                dk.statsbiblioteket.medieplatform.autonomous.Event itemEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                int noOfEvents = domsItem.removeEvents(itemEvent.getEventID());
+                                DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                        "Deleted " + noOfEvents + " instances of " + itemEvent.getEventID() +
+                                                (itemEvent.getDetails() == null ? "" : "\n" +
+                                                        "\nReason: " + itemEvent.getDetails()+ "\nBy: "+model.getInitials()), "EVENT_DELETED_MANUALLY", itemEvent.isSuccess());
+                                domsItem.appendEvent(domsEvent);
+                            }
                         }
                     }
                 });
