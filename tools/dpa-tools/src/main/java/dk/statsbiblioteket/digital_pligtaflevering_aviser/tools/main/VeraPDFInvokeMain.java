@@ -91,8 +91,6 @@ public class VeraPDFInvokeMain {
      */
     @Module
     public static class VeraPDFInvokeModule {
-        public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
-        public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
         /**

@@ -9,7 +9,17 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
  * Approved: The document is ok
  */
 public enum SeverenessLevel {
-    INVALID, UNKNOWN, MANUAL_INSPECTION, ACCEPTABLE;
+    INVALID(true), UNKNOWN(true), MANUAL_INSPECTION(true), ACCEPTABLE(false);
+
+    private final boolean bad;
+
+    public boolean isBad() {
+        return bad;
+    }
+
+    SeverenessLevel(boolean bad) {
+        this.bad = bad;
+    }
 
     /**
      * Campare broken paragraphes, if comparable is worth than this return true
