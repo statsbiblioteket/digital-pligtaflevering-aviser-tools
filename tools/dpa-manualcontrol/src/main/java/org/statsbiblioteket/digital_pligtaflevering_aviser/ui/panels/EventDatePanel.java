@@ -2,6 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -165,12 +166,15 @@ public class EventDatePanel extends VerticalLayout {
             TextArea area = new TextArea(null, prop);
             if (prop.getValue() == null) {
                 area.setValue("");
+                area.setReadOnly(true);
+                vl.addComponent(area);
             } else if(prop.getValue().toString().contains("NO DELIVERY")) {
                 area.setValue(prop.getValue().toString());
                 area.setReadOnly(true);
                 vl.addComponent(area);
+                Button contentButton = new Button(new ThemeResource("icons/missing.png"));
+                vl.addComponent(contentButton);
             } else {
-
                 String[] list = prop.getValue().toString().split("\n");
                 for(int rows = 1; rows< list.length; rows++) {
                     Button expectationButton = new Button(list[rows]);

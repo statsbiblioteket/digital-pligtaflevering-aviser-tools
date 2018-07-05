@@ -2,6 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
@@ -178,7 +179,8 @@ public class DatePanel extends VerticalLayout {
     }
 
     /**
-     * Generate textareas as cells in the table
+     * Generate content for the date-panel.
+     * The content is of graphical form, and it is based on the allready inserted text.
      */
     static class FieldGenerator implements Table.ColumnGenerator {
         private LinkedHashMap<String, Boolean> expected;
@@ -193,21 +195,34 @@ public class DatePanel extends VerticalLayout {
             VerticalLayout vl = new VerticalLayout();
             Property prop = source.getItem(itemId).getItemProperty(columnId);
             TextArea area = new TextArea(null, prop);
-            if (prop.getValue() == null) {
+            if (prop.getValue() == null || "".equals(prop.getValue())) {
                 area.setValue("");
+                return vl;
             }
             area.setReadOnly(true);
             vl.addComponent(area);
 
+            Button contentButton = null;
+            if(prop.getValue().toString().contains("NO PAGES")) {
+                contentButton = new Button(new ThemeResource("icons/empty.png"));
+                vl.addComponent(contentButton);
+            } else if(prop.getValue().toString().contains("NO DELIVERY")) {
+                contentButton = new Button(new ThemeResource("icons/missing.png"));
+                vl.addComponent(contentButton);
+            }  else {
+                contentButton = new Button(new ThemeResource("icons/full.png"));
+                vl.addComponent(contentButton);
+            }
             Button expectationButton = null;
-
             if(expected==null) {
                 //Add nothing extra
             } else if(!Boolean.TRUE.equals(expected.get(columnId))) {
-                expectationButton = new Button("Not expected ");
+                expectationButton = new Button(new ThemeResource("icons/empty.png"));
+                vl.addComponent(expectationButton);
+            }  else {
+                expectationButton = new Button(new ThemeResource("icons/full.png"));
                 vl.addComponent(expectationButton);
             }
-
             return vl;
         }
     }
