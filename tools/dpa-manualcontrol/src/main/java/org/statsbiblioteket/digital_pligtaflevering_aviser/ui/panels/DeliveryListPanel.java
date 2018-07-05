@@ -47,8 +47,6 @@ public class DeliveryListPanel extends VerticalLayout {
 
         table.setVisibleColumns(new String[]{"Date", "Name"});
         table.addGeneratedColumn("Date", new DeliveryListPanel.DateColumnGenerator());
-        table.setColumnExpandRatio("Date", 0.5f);
-        table.setColumnExpandRatio("Name", 0.5f);
         this.addComponent(checkbox);
         this.addComponent(table);
     }

@@ -44,7 +44,9 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected DataModel model;
 
-    protected HorizontalLayout tablesLayout = new HorizontalLayout();
+    protected VerticalLayout tablesLayout = new VerticalLayout();
+    protected HorizontalLayout tablesLayout1 = new HorizontalLayout();
+    protected HorizontalLayout tablesLayout2 = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
@@ -61,7 +63,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     public DeliveryPanel(DataModel model) {
         this.model = model;
-        tablesLayout.setWidth("100%");
+        tablesLayout.setWidth("50%");
         sectionSectionTable.setSortParam("sectionNumber");
         sectionSectionTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
@@ -81,15 +83,18 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public void initialLayout() {
-        tablesLayout.addComponent(deliveryPanel);
-        tablesLayout.addComponent(sectionSectionTable);
-        tablesLayout.addComponent(fileSelectionPanel);
-        tablesLayout.addComponent(articleSelectionPanel);
+        tablesLayout1.addComponent(deliveryPanel);
+        tablesLayout1.addComponent(sectionSectionTable);
+        tablesLayout2.addComponent(fileSelectionPanel);
+        tablesLayout2.addComponent(articleSelectionPanel);
 
-        tablesLayout.setExpandRatio(deliveryPanel, 0.2f);
-        tablesLayout.setExpandRatio(sectionSectionTable, 0.2f);
-        tablesLayout.setExpandRatio(fileSelectionPanel, 0.4f);
-        tablesLayout.setExpandRatio(articleSelectionPanel, 0.1f);
+        tablesLayout1.setExpandRatio(deliveryPanel, 0.2f);
+        tablesLayout1.setExpandRatio(sectionSectionTable, 0.2f);
+        tablesLayout2.setExpandRatio(fileSelectionPanel, 0.4f);
+        tablesLayout2.setExpandRatio(articleSelectionPanel, 0.1f);
+
+        tablesLayout.addComponent(tablesLayout1);
+        tablesLayout.addComponent(tablesLayout2);
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
             @Override

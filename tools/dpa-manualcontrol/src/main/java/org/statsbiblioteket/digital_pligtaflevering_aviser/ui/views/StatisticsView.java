@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
@@ -118,26 +117,10 @@ public class StatisticsView extends VerticalLayout implements View {
                 tabelsLayout = new DeliveryValidationPanel(model);
         }
 
-        int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-        if(Settings.screenwidth != null) {
-            browserWidth = Settings.screenwidth;
-        }
-
-
-        // The UI is optimized to run on either a small or large screen.
-        // A limit of browserscreenwidth 1800 pixels is used.
-        // If the browserscreenwidth is large pdfComponent is shown at the right side of the tables, otherwise below.
-        // If the browserscreenwidth is large pdfComponent is 900px" X "1200px" otherwise 500px" X "7500px"
-        if (browserWidth > 1800) {
-            mainhlayout = new HorizontalLayout();
-            pdfComponent.setWidth("900px");
-            pdfComponent.setHeight("1200px");
-            tabelsLayout.setHeight("1200px");
-        } else {
-            mainhlayout = new VerticalLayout();
-            pdfComponent.setWidth("100%");
-            pdfComponent.setHeight("750px");
-        }
+        mainhlayout = new HorizontalLayout();
+        pdfComponent.setWidth("90%");
+        pdfComponent.setHeight("1200px");
+        tabelsLayout.setHeight("1200px");
 
         tabelsLayout.setVisible(false);
 
