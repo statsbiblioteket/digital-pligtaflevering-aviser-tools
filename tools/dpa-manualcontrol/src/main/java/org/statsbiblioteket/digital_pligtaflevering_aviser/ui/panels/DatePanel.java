@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryPattern;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.WeekPattern;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -86,7 +87,7 @@ public class DatePanel extends VerticalLayout {
         for(String header : table.getColumnHeaders()) {
             FieldGenerator oo = (FieldGenerator)table.getColumnGenerator(header);
             if(oo!=null) {
-                oo.setPattern(DeliveryPattern.deliveryPatterns.get(selectedTitle));
+                oo.setPattern(new DeliveryPattern().getDeliveryPattern(selectedTitle));
             }
         }
         Item newItemId = null;
@@ -183,10 +184,10 @@ public class DatePanel extends VerticalLayout {
      * The content is of graphical form, and it is based on the allready inserted text.
      */
     static class FieldGenerator implements Table.ColumnGenerator {
-        private LinkedHashMap<String, Boolean> expected;
+        private WeekPattern expected;
 
 
-        public void setPattern(LinkedHashMap<String, Boolean> expected) {
+        public void setPattern(WeekPattern expected) {
             this.expected = expected;
         }
 
@@ -216,7 +217,7 @@ public class DatePanel extends VerticalLayout {
             Button expectationButton = null;
             if(expected==null) {
                 //Add nothing extra
-            } else if(!Boolean.TRUE.equals(expected.get(columnId))) {
+            } else if(!Boolean.TRUE.equals(expected.getDayState(columnId.toString()))) {
                 expectationButton = new Button(new ThemeResource("icons/empty.png"));
                 vl.addComponent(expectationButton);
             }  else {

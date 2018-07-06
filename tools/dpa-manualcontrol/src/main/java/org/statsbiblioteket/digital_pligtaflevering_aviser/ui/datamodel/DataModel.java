@@ -405,7 +405,7 @@ public class DataModel {
     }
 
     /**
-     * Get a list of alle deliveries, which is currently beeing operated
+     * Get a list of all deliveries, which is currently beeing operated
      *
      * @return
      */
