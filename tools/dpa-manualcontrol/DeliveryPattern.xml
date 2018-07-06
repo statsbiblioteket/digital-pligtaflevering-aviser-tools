@@ -4,7 +4,7 @@
         <entry>
             <key>aarhusstiftstidende</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -33,13 +33,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>arbejderen</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>false</value>
@@ -68,13 +68,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>berlingsketidende</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -103,13 +103,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>boersen</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -138,13 +138,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>bornholmstidende</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -173,13 +173,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>bt</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -208,13 +208,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>dagbladetkoege</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -243,13 +243,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>dagbladetringsted</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -278,13 +278,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>dagbladetroskilde</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -313,13 +313,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>dagbladetstruer</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -348,13 +348,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>dernordschleswiger</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -383,13 +383,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>ekstrabladet</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -418,13 +418,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>flensborgavis</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -453,13 +453,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>fredericiadagblad1890</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -488,13 +488,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>frederiksborgamtsavis</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -523,13 +523,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>fyensstiftstidende</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -558,13 +558,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>fynsamtsavissvendborg</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -593,13 +593,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>helsingoerdagblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -628,13 +628,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>herningfolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -663,13 +663,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>holstebrodagblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -698,13 +698,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>horsensfolkeblad1866</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -733,13 +733,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>information</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -768,13 +768,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystensoenderborg</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -803,13 +803,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenbillund</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -838,13 +838,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenvarde</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -873,13 +873,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenesbjerg</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -908,13 +908,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenhaderslev</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -943,13 +943,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenkolding1995</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -978,13 +978,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystentoender</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1013,13 +1013,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenaabenraa</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1048,13 +1048,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>jydskevestkystenvejen</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1083,13 +1083,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>kristeligtdagblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1118,13 +1118,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>lemvigfolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1153,13 +1153,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>licitationen</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1188,13 +1188,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>lollandfalstersfolketidende</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1223,13 +1223,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>metroxpressoest</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1258,13 +1258,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>metroxpressvest</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1293,13 +1293,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>midtjyllandsavis1857</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1328,13 +1328,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>morgenavisenjyllandsposten</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1363,13 +1363,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>morsoefolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1398,13 +1398,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>nordjyskestiftstidendeaalborg</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1433,13 +1433,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>nordjyskestiftstidendehimmerland</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1468,13 +1468,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>nordjyskestiftstidendevendsyssel</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1503,13 +1503,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>nordvestnytholbaek</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1538,13 +1538,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>nordvestnytkalundborg</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1573,13 +1573,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>politiken</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1608,13 +1608,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>politikenweekly</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>false</value>
@@ -1643,13 +1643,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>randersamtsavis</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1678,13 +1678,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>ringkjoebingamtsdagblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1713,13 +1713,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>sjaellandskenaestved</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1748,13 +1748,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>sjaellandskeslagelse</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1783,13 +1783,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>skivefolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1818,13 +1818,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>thisteddagblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1853,13 +1853,13 @@
                         <key>Sun</key>
                         <value>true</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>vejleamtsfolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1888,13 +1888,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>viborgstiftsfolkeblad</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>true</value>
@@ -1923,13 +1923,13 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
         <entry>
             <key>weekendavisen</key>
             <value>
-                <list>
+                <weekDayList>
                     <entry>
                         <key>Mon</key>
                         <value>false</value>
@@ -1958,7 +1958,7 @@
                         <key>Sun</key>
                         <value>false</value>
                     </entry>
-                </list>
+                </weekDayList>
             </value>
         </entry>
     </deliveryPatterns>

@@ -80,14 +80,14 @@ public class DatePanel extends VerticalLayout {
      *
      * @param delStat
      */
-    public void setInfo(List<DeliveryTitleInfo> delStat, String selectedTitle) {
+    public void setInfo(List<DeliveryTitleInfo> delStat, WeekPattern deliveryPattern) {
         table.removeAllItems();
 
 
         for(String header : table.getColumnHeaders()) {
-            FieldGenerator oo = (FieldGenerator)table.getColumnGenerator(header);
-            if(oo!=null) {
-                oo.setPattern(new DeliveryPattern().getDeliveryPattern(selectedTitle));
+            FieldGenerator fieldGenerator = (FieldGenerator)table.getColumnGenerator(header);
+            if(fieldGenerator!=null) {
+                fieldGenerator.setPattern(deliveryPattern);
             }
         }
         Item newItemId = null;

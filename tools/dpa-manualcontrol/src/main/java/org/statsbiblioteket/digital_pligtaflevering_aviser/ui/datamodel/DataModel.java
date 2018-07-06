@@ -15,8 +15,13 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemReadWrite;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,13 +51,14 @@ public class DataModel {
     private String selectedSection = null;
     private String currentlySelectedMonth;
     private TitleDeliveryHierarchy currentlySelectedTitleHiearachy;
-
+    private DeliveryPattern deliveryPattern;
     private DeliveryFilesystemReadWrite filesystemReadWrite;
 
     private DeliveryFedoraCommunication fedoraCommunication;
 
     public DataModel() {
         String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
+        createDeliveryPattern();
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
                 map.getRequired("autonomous.pastSuccessfulEvents"),
@@ -60,6 +66,23 @@ public class DataModel {
                 map.getRequired("autonomous.thisEvent"),
                 repository);
     }
+
+    private void createDeliveryPattern() {
+        try {
+            String deliveryPatternPath = map.getRequired("dpa.manualcontrol.configpath") + "DeliveryPattern.xml";
+            InputStream is = new FileInputStream(deliveryPatternPath);
+            JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+            deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+        } catch(JAXBException | FileNotFoundException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public DeliveryPattern getDeliveryPattern() {
+        return deliveryPattern;
+    }
+
 
     public void cleanModel() {
         selectedDelItem = null;

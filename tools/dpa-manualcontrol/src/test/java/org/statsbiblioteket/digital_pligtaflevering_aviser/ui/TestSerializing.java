@@ -2,6 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.After;
 
 import org.junit.Before;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
@@ -128,6 +130,25 @@ public class TestSerializing {
         assertEquals(deliveryInfo.getDayState("Fri"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Sat"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Sun"), Boolean.FALSE);
+
+
+        Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
+        is = new FileInputStream(xmlPath.toFile());
+        jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+        jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+
+        deliveryInfo = deserializedObject.getDeliveryPattern("viborgstiftsfolkeblad");
+        assertEquals(deliveryInfo.getDayState("Mon"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Tue"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Wed"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Thu"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Fri"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Sat"), Boolean.TRUE);
+        assertEquals(deliveryInfo.getDayState("Sun"), Boolean.FALSE);
+
+
+
     }
 
 
