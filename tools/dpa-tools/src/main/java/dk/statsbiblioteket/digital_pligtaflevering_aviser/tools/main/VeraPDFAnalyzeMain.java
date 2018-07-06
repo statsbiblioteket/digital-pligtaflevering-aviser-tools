@@ -23,14 +23,21 @@ import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.inject.Named;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
@@ -70,8 +77,11 @@ public class VeraPDFAnalyzeMain {
     public static Stream<Node> streamFor(XPathExpression xpath, String xml) {
         NodeList nodeList = null;
         try {
-            nodeList = (NodeList) xpath.evaluate(xml, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = builderFactory.newDocumentBuilder();
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+            nodeList = (NodeList) xpath.evaluate(xmlDocument, XPathConstants.NODESET);
+        } catch (XPathExpressionException | ParserConfigurationException | IOException | SAXException e) {
             throw new RuntimeException("Failed to process " + xml, e);
         }
         // https://stackoverflow.com/a/23361853/53897
@@ -157,8 +167,8 @@ public class VeraPDFAnalyzeMain {
                     .map(st -> st.map((DomsItem roundtripItem) -> roundtripItem.allChildren()
                             .peek(i -> mxBean.currentId = String.valueOf(i))
                             .peek(i -> mxBean.idsProcessed++)
-                            .map(StreamTuple::create)
-                            .flatMap(st2 -> st2.flatMap((DomsItem item) -> item.datastreams().stream()
+                            .map(i -> new StreamTuple<>(i.getPath(), i))
+                            .flatMap(st2 -> st2.flatMap((DomsItem child) -> child.datastreams().stream()
                                     // only look at items with a verapdf datastream
                                     .filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME))
                                     .map(DomsDatastream::getDatastreamAsString) // VeraPDF XML output
@@ -170,41 +180,50 @@ public class VeraPDFAnalyzeMain {
                                             .peek((StreamTuple<String, String> s) -> {
                                             })
                                             .collect(groupingBy(st3 -> severenessFor(st3.left()), mapping(st3 -> st3, toList()))))
-                                    .peek((Map<SeverenessLevel, List<StreamTuple<String, String>>> m) ->
-                                            // create full report on item with everything grouped by severeness level
-                                            m.entrySet().stream()
-                                                    .sorted(Comparator.comparing(Map.Entry::getKey))
-                                                    .map(entry -> entry.getKey() + "\n"
-                                                            + "------------------------------------------\n"
-                                                            + entry.getValue().stream()
-                                                            // uniq -c
-                                                            .collect(groupingBy(Function.identity(), counting())).entrySet().stream()
-                                                            .sorted(Comparator.comparing(Map.Entry::getKey))
-                                                            .map(entry2 -> entry2.getValue() + ": " + entry2.getKey().right())
-                                                            .collect(joining("\n")))
-                                                    .forEach(report -> item.modifyDatastreamByValue(VERAPDF_REPORT_DATASTREAM, null, null,
-                                                            report.getBytes(StandardCharsets.UTF_8),
-                                                            null,
-                                                            "text/plain",
-                                                            null,
-                                                            new java.util.Date().getTime())
-                                                    ))
-                                    .map(m -> m.entrySet().stream() // only keep those with a bad severitylevel
+
+                                    // create full report on item with everything grouped by severeness level
+                                    .peek((Map<SeverenessLevel, List<StreamTuple<String, String>>> m) -> {
+                                        String report = m.entrySet().stream()
+                                                .sorted(Comparator.comparing(Map.Entry::getKey))
+                                                .map(entry -> entry.getKey() + "\n"
+                                                        + "------------------------------------------\n"
+                                                        + entry.getValue().stream()
+                                                        // uniq -c
+                                                        .collect(groupingBy(Function.identity(), counting())).entrySet().stream()
+                                                        .sorted(Comparator.comparing(Map.Entry::getKey))
+                                                        .map(entry2 -> entry2.getValue() + ": " + entry2.getKey().right())
+                                                        .collect(joining("\n")))
+                                                .collect(joining("\n\n"));
+                                        child.modifyDatastreamByValue(VERAPDF_REPORT_DATASTREAM, null, null, report.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new java.util.Date().getTime());
+                                    })
+                                    // only collect those with a bad severitylevel for the roundtrip report
+                                    .map(m -> m.entrySet().stream()
                                             .filter(entry -> entry.getKey().isBad())
                                             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
                                     )
                                     .filter(m -> m.size() > 0)
+
                             ))
-                            .peek((StreamTuple<DomsItem, Map<SeverenessLevel, List<StreamTuple<String, String>>>> m) -> {
+                            .collect(toList())
+                            .peek(m ->
+                            {
+
                             })
+                            //                           .map(m -> m.map( n -> n))
+                            //.collect(groupingBy(m -> m.left(), m -> m.right()))
+                            // create and set roundtrip report
+
                             .peek(System.out::println) // set global report
                             // Create simple summary for log file.
-                            .map((StreamTuple<DomsItem, Map<SeverenessLevel, List<StreamTuple<String, String>>>> m) -> m.left().getPath() + m.right().entrySet().stream()
-                                    .sorted()
-                                    .map(e -> e.getKey() + " " + e.getValue().size())
-                                    .collect(joining(", ")) // INVALID 1, MANUAL_INTERVENTION 2
-                            )))
-                    .collect(toList());
+                            .map((StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>> m) ->
+                                    m.left() + ": " + m.right().entrySet().stream()
+                                            .sorted()
+                                            .map(e -> e.getKey() + " " + e.getValue().size())
+                                            .collect(joining(", ")) // foo.pdf: INVALID 1, MANUAL_INTERVENTION 2
+                            )
+                            .collect(toList()))
+                    )
+                    .collect(toList());  // Results:  X ["foo.pdf: INVALID 1, MANUAL_INTERVENTION 2", "bar.pdf: INVALID 2"]
 
 /*
         List<Boolean> successful=eithersFromRoundtrip.get(Boolean.TRUE).stream()
