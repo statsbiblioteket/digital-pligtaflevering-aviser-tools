@@ -68,11 +68,23 @@ public class GenericListTable extends VerticalLayout {
         table.setVisible(initialVisible);
     }
 
-    /**
-     * Set a list of which columns in the table to make visible
-     *
-     * @param visibleColumns
-     */
+    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String[] columnNames, String tableId, boolean initialVisible) {
+        this(c, checkedColumn, checkedDefaultValue, visibleColumns, tableId, initialVisible);
+        int i = 0;
+        if (visibleColumns != null && columnNames != null) {
+            for(String colimn : visibleColumns) {
+                table.setColumnHeader(colimn, columnNames[i]);
+                i++;
+            }
+        }
+    }
+
+
+        /**
+         * Set a list of which columns in the table to make visible
+         *
+         * @param visibleColumns
+         */
     public void setVisibleColumns(String[] visibleColumns) {
         if (visibleColumns != null) {
             table.setVisibleColumns(visibleColumns);
