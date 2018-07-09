@@ -11,13 +11,13 @@ public class DeliveryPattern implements java.io.Serializable {
 
     @XmlElementWrapper
     @XmlElement
-    LinkedHashMap<String, WeekPattern> deliveryPatterns = new LinkedHashMap<String, WeekPattern>();
+    LinkedHashMap<String, WeekPattern> weekPatterns = new LinkedHashMap<String, WeekPattern>();
 
-    public void addDeliveryPattern(String name, WeekPattern deliveryPattern) {
-        this.deliveryPatterns.put(name, deliveryPattern);
+    public void addDeliveryPattern(String name, WeekPattern weekPattern) {
+        this.weekPatterns.put(name, weekPattern);
     }
 
-    public WeekPattern getDeliveryPattern(String name) {
-        return this.deliveryPatterns.get(name);
+    public WeekPattern getWeekPattern(String name) {
+        return this.weekPatterns.get(name);
     }
 }

@@ -49,7 +49,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
                 } catch (ParseException e) {
                     log.error("Date could not get parsed", e);
                 }
-                datePanel.setInfo(list, model.getDeliveryPattern().getDeliveryPattern(selectedTitle));
+                datePanel.setInfo(list, model.getDeliveryPattern().getWeekPattern(selectedTitle));
             }
         });
 

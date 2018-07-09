@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <deliveryPattern>
-    <deliveryPatterns>
+    <weekPatterns>
         <entry>
             <key>aarhusstiftstidende</key>
             <value>
@@ -1961,5 +1961,5 @@
                 </weekDayList>
             </value>
         </entry>
-    </deliveryPatterns>
+    </weekPatterns>
 </deliveryPattern>

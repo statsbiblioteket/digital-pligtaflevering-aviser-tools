@@ -47,7 +47,7 @@ public class TestSerializing {
      * @throws Exception
      */
     @Test
-    public void testMarshalUnmarshalDeliveryTitle2() throws Exception {
+    public void testMarshalUnmarshalDeliveryPattern() throws Exception {
 
         DeliveryPattern deliveryTitleInfos = new DeliveryPattern();
 
@@ -122,7 +122,7 @@ public class TestSerializing {
         Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
-        WeekPattern deliveryInfo = deserializedObject.getDeliveryPattern("viborgstiftsfolkeblad");
+        WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
         assertEquals(deliveryInfo.getDayState("Mon"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Tue"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Wed"), Boolean.TRUE);
@@ -138,7 +138,7 @@ public class TestSerializing {
         jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
         deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
-        deliveryInfo = deserializedObject.getDeliveryPattern("viborgstiftsfolkeblad");
+        deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
         assertEquals(deliveryInfo.getDayState("Mon"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Tue"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Wed"), Boolean.TRUE);
@@ -146,9 +146,6 @@ public class TestSerializing {
         assertEquals(deliveryInfo.getDayState("Fri"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Sat"), Boolean.TRUE);
         assertEquals(deliveryInfo.getDayState("Sun"), Boolean.FALSE);
-
-
-
     }
 
 
