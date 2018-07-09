@@ -38,6 +38,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Bit repository web client port
   config.vm.network :forwarded_port, :host => 18080, :guest => 8080
 
+  # verapdf-rest REST service
+  config.vm.network :forwarded_port, :host => 8090, :guest => 8090
 
 
   # Be able to get the artifacts from host Maven build.

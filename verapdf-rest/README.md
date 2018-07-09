@@ -18,3 +18,9 @@ When deployed use an invocation similar to:
     java -Ddw.server.applicationConnectors[0].port=8090 -Ddw.server.adminConnectors[0].port=8091 -jar verapdf-rest.jar server > logfile
 
 in a restarting wrapper.  Use Java 8!
+
+2018-07-09:
+
+Added to vagrant box.  Old boxes needs to be rebuild.
+
+
