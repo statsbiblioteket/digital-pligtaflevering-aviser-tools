@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertEquals;
 
 
@@ -51,68 +53,68 @@ public class TestSerializing {
 
         DeliveryPattern deliveryTitleInfos = new DeliveryPattern();
 
-        deliveryTitleInfos.addDeliveryPattern("aarhusstiftstidende", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("arbejderen", new WeekPattern(Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("berlingsketidende", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("boersen", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("bornholmstidende", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("bt", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("dagbladetkoege", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("dagbladetringsted", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("dagbladetroskilde", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("dagbladetstruer", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("dernordschleswiger", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("ekstrabladet", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("flensborgavis", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("fredericiadagblad1890", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("frederiksborgamtsavis", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("fyensstiftstidende", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("fynsamtsavissvendborg", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("helsingoerdagblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("herningfolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("holstebrodagblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("horsensfolkeblad1866", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("information", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystensoenderborg", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenbillund", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenvarde", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenesbjerg", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenhaderslev", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenkolding1995", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystentoender", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenaabenraa", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenvejen", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("kristeligtdagblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("lemvigfolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("licitationen", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("metroxpressoest", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("metroxpressvest", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("midtjyllandsavis1857", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("morgenavisenjyllandsposten", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("morsoefolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendeaalborg", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendehimmerland", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendevendsyssel", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("nordvestnytholbaek", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("nordvestnytkalundborg", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("politiken", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("politikenweekly", new WeekPattern(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("randersamtsavis", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("ringkjoebingamtsdagblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("sjaellandskenaestved", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("sjaellandskeslagelse", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("skivefolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("thisteddagblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE));
-        deliveryTitleInfos.addDeliveryPattern("vejleamtsfolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("viborgstiftsfolkeblad", new WeekPattern(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE));
-        deliveryTitleInfos.addDeliveryPattern("weekendavisen", new WeekPattern(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE));
+        deliveryTitleInfos.addDeliveryPattern("aarhusstiftstidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("arbejderen", new WeekPattern(FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("berlingsketidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("boersen", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("bornholmstidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("bt", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("dagbladetkoege", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("dagbladetringsted", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("dagbladetroskilde", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("dagbladetstruer", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("dernordschleswiger", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("ekstrabladet", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("flensborgavis", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("fredericiadagblad1890", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("frederiksborgamtsavis", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("fyensstiftstidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("fynsamtsavissvendborg", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("helsingoerdagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("herningfolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("holstebrodagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("horsensfolkeblad1866", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("information", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystensoenderborg", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenbillund", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenvarde", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenesbjerg", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenhaderslev", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenkolding1995", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystentoender", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenaabenraa", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("jydskevestkystenvejen", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("kristeligtdagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("lemvigfolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("licitationen", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("metroxpressoest", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("metroxpressvest", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("midtjyllandsavis1857", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("morgenavisenjyllandsposten", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("morsoefolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendeaalborg", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendehimmerland", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("nordjyskestiftstidendevendsyssel", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("nordvestnytholbaek", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("nordvestnytkalundborg", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("politiken", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("politikenweekly", new WeekPattern(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("randersamtsavis", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("ringkjoebingamtsdagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("sjaellandskenaestved", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("sjaellandskeslagelse", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("skivefolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("thisteddagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE));
+        deliveryTitleInfos.addDeliveryPattern("vejleamtsfolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("viborgstiftsfolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("weekendavisen", new WeekPattern(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE));
 
 
         File tempFile = createTestFile("DeliveryPattern");
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deliveryTitleInfos, tempFile);
 
@@ -123,29 +125,38 @@ public class TestSerializing {
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
         WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), Boolean.FALSE);
+        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
 
 
+
+    }
+
+    /**
+     * Validate that it is possible to convert between xml and the object DeliveryTitleInfo
+     * @throws Exception
+     */
+    @Test
+    public void testDeliveryPatternParsing() throws Exception {
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
-        is = new FileInputStream(xmlPath.toFile());
-        jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-        jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+        FileInputStream is = new FileInputStream(xmlPath.toFile());
+        JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
-        deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), Boolean.TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), Boolean.FALSE);
+        WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
+        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
+        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
     }
 
 
@@ -162,7 +173,7 @@ public class TestSerializing {
         File tempFile = createTestFile("MarshalUnmarshalDeliveryTitle");
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deliveryTitleInfo, tempFile);
 
@@ -195,7 +206,7 @@ public class TestSerializing {
         File tempFile = createTestFile("MissingItem");
         JAXBContext jaxbContext = JAXBContext.newInstance(MissingItem.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(missingItem, tempFile);
         assertEquals(missingItem.getType(), "t1");
@@ -259,7 +270,7 @@ public class TestSerializing {
         File tempFile = createTestFile("TitleDeliveryHierarchy");
         JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(titleDeliveryHierarchy, tempFile);
 

@@ -6,6 +6,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
@@ -69,12 +70,18 @@ public class EventDatePanel extends VerticalLayout {
         this.buttonListener = buttonListener;
     }
 
-
+    /**
+     * Set the month to be viewed in the panel
+     * @param month
+     */
     public void setMonth(Date month) {
         this.month = month;
     }
 
-
+    /**
+     * Set the content to be viewed in the calendar
+     * @param delStat
+     */
     public void setInfo(Set<String> delStat) {
         table.removeAllItems();
 
@@ -127,7 +134,7 @@ public class EventDatePanel extends VerticalLayout {
                 }
 
             } catch (ParseException e) {
-                //Handling of perserexception is done by storing unparsable info to the panel for unmappable values.
+                Notification.show("The application can not show all deliveries", Notification.Type.WARNING_MESSAGE);
                 log.error("Strings could not get parsed into Dates in DatePanel", e);
             }
             table.sort();

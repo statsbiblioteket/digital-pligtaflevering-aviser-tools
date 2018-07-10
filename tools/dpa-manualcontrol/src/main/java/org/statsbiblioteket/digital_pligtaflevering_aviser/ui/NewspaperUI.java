@@ -66,6 +66,9 @@ public class NewspaperUI extends UI {
             case "CREATEDONLY":
                 model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.CREATEDONLY);
                 break;
+            default:
+                model.setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK);
+                break;
         }
 
         address = request.getRemoteAddr();

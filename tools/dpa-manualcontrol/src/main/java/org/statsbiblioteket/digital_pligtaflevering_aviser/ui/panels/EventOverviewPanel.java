@@ -61,18 +61,18 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                         UI.getCurrent().removeWindow(dialog);
                         if(dialog.validateSecurityKey()) {
                             if ("OVERRIDE".equals(event.getButton().getId())) {
-                                dk.statsbiblioteket.medieplatform.autonomous.Event itemEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
-                                DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                        "override by " + model.getInitials(), itemEvent.getEventID(), true);
-                                domsItem.appendEvent(domsEvent);
+                                dk.statsbiblioteket.medieplatform.autonomous.Event selectedDomsEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                        "override by " + model.getInitials(), selectedDomsEvent.getEventID(), true);
+                                domsItem.appendEvent(overrideDomsEvent);
                             } else if ("DELETE".equals(event.getButton().getId())) {
-                                dk.statsbiblioteket.medieplatform.autonomous.Event itemEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
-                                int noOfEvents = domsItem.removeEvents(itemEvent.getEventID());
-                                DomsEvent domsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                        "Deleted " + noOfEvents + " instances of " + itemEvent.getEventID() +
-                                                (itemEvent.getDetails() == null ? "" : "\n" +
-                                                        "\nReason: " + itemEvent.getDetails()+ "\nBy: "+model.getInitials()), "EVENT_DELETED_MANUALLY", itemEvent.isSuccess());
-                                domsItem.appendEvent(domsEvent);
+                                dk.statsbiblioteket.medieplatform.autonomous.Event selectedDomsEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
+                                DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                        "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
+                                                (selectedDomsEvent.getDetails() == null ? "" : "\n" +
+                                                        "\nReason: " + selectedDomsEvent.getDetails()+ "\nBy: "+model.getInitials()), "EVENT_DELETED_MANUALLY", selectedDomsEvent.isSuccess());
+                                domsItem.appendEvent(newDeleteDomsEvent);
                             }
                         }
                     }
