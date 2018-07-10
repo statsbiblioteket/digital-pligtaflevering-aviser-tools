@@ -21,6 +21,7 @@ public class StoreResultWindow extends Window {
     private final Button ok = new Button("Ok");
     private final Button cancel = new Button("Cancel");
     private final Button force = new Button("Force");
+    private boolean forceClicked = false;
     private final Label checkStateInfo = new Label("Validation can not be performed, since it is already performed");
 
     public StoreResultWindow(String caption) {
@@ -32,6 +33,7 @@ public class StoreResultWindow extends Window {
             @Override
             public void buttonClick(Button.ClickEvent clickEvent) {
                 ok.setEnabled(true);
+                forceClicked = true;
             }
         });
 
@@ -53,6 +55,10 @@ public class StoreResultWindow extends Window {
     public void setListener(Button.ClickListener listener) {
         ok.addClickListener(listener);
         cancel.addClickListener(listener);
+    }
+
+    public boolean forceClicked() {
+        return forceClicked;
     }
 
     /**
