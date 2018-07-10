@@ -63,7 +63,7 @@
                             <artifactItems>
                                 <!--    mvn -B -q dependency:copy -Dartifact=org.verapdf:verapdf-rest:0.2.0-SNAPSHOT:jar:shaded -DoutputDirectory=. -Dmdep.stripClassifier -Dmdep.stripVersion -->
                                 <artifactItem>
-                                    <groupId>org.verapdf</groupId>
+                                    <groupId>dk.kb.org.verapdf</groupId>
                                     <artifactId>verapdf-rest</artifactId>
                                     <classifier>shaded</classifier>
                                     <type>jar</type>

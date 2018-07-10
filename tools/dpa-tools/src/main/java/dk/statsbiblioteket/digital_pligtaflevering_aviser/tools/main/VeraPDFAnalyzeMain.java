@@ -5,6 +5,7 @@ import dagger.Module;
 import dagger.Provides;
 import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -96,7 +97,7 @@ public class VeraPDFAnalyzeMain {
         public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
         public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
-        public static final String VERAPDF_REPORT_DATASTREAM = "VERAPDF_REPORT";
+        public static final String VERAPDFREPORT_DATASTREAM = "VERAPDFREPORT";
 
         /**
          * @noinspection PointlessBooleanExpression
@@ -192,9 +193,15 @@ public class VeraPDFAnalyzeMain {
                                                                     .sorted()
                                                                     .collect(joining("\n")))
                                                             .collect(joining("\n\n"));
-                                                    child.modifyDatastreamByValue(VERAPDF_REPORT_DATASTREAM, null, null, fullChildReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
 
-                                                    groupedBySevereness.entrySet().removeIf(e -> e.getKey().isBad());
+                                                    if (fullChildReport.length() == 0) {
+                                                        fullChildReport = "VeraPDF did not report any problems.";
+                                                    }
+                                                    child.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, fullChildReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
+
+                                                    // Only keep the bad ones
+                                                    groupedBySevereness.entrySet().removeIf(e -> e.getKey().isBad() == false);
+
                                                     return groupedBySevereness;
                                                 })
                                                 .peek((Map<SeverenessLevel, List<StreamTuple<String, String>>> o) -> {
@@ -202,6 +209,8 @@ public class VeraPDFAnalyzeMain {
                                         ))
                                         .sorted(Comparator.comparing(e -> e.left())) // path name
                                         .collect(toList());
+
+                                long[] badLines = new long[1];
 
                                 // Create report for roundtripItem of all bad items.
                                 String roundtripItemReport = pathSeverenessProblemsList.stream()
@@ -214,13 +223,16 @@ public class VeraPDFAnalyzeMain {
                                                         + entry.getValue().stream()
                                                         .map(st0 -> st0.left() + ": " + st0.right())
                                                         .sorted()
+                                                        .peek(s -> {badLines[0]++; })
                                                         .collect(joining("\n")))
                                                 .collect(joining("\n\n")))
                                         .collect(joining("\n\n"));
 
-                                roundtripItem.modifyDatastreamByValue(VERAPDF_REPORT_DATASTREAM, null, null, roundtripItemReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
 
-                                // FIXME:  Set event
+                                String actualRoundtripItemReport = badLines[0] > 0 ? roundtripItemReport : "Nothing non-acceptable reported by VeraPDF";
+
+                                roundtripItem.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, actualRoundtripItemReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
+
 
                                 // "foo.pdf: INVALID 1, MANUAL_INTERVENTION 2"
                                 List<String> toolReportLine = pathSeverenessProblemsList.stream()
@@ -229,6 +241,9 @@ public class VeraPDFAnalyzeMain {
                                                 .map(e -> e.getKey() + " " + e.getValue().size())
                                                 .collect(joining(", "))
                                         ).collect(toList());
+
+                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "Processed: \n" + toolReportLine, eventName,  badLines[0] == 0));
+
                                 return toolReportLine;
                             }
                     ))
@@ -236,59 +251,8 @@ public class VeraPDFAnalyzeMain {
                     })
                     .collect(toList()); // Results:  X ["foo.pdf: INVALID 1, MANUAL_INTERVENTION 2", "bar.pdf: INVALID 2"]
 
-/*
-        List<Boolean> successful=eithersFromRoundtrip.get(Boolean.TRUE).stream()
-        .map(either->either.right().get())
-        .collect(toList());
-        List<String> failed=eithersFromRoundtrip.get(Boolean.FALSE).stream()
-        .map(either->DomsItemTuple.stacktraceFor(either.left().get()))
-        .collect(toList());
-
-        if(failed.size()==0)
-
-        {
-        roundtripItem.appendEvent(new DomsEvent(agent,new Date(),successful.size()+" processed",eventName,true));
-        return true;
-        }else
-
-        {
-        // we have encountered exceptions not handled lower down.  Report those.
-        roundtripItem.appendEvent(new DomsEvent(agent,new Date(),String.join("\n\n",failed),eventName,false));
-        return false;
-        }
-        }))
-        .
-
-        collect(toList());
-*/
             return f;
         }
-
-/*
-        @Provides
-        protected Function<EventQuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
-            return query -> sboiEventIndexSearch(query, index).stream();
-        }
-
-        private List<DomsId> sboiEventIndexSearch(EventQuerySpecification query, SBOIEventIndex<Item> index) {
-            Iterator<Item> iterator;
-            try {
-                EventTrigger.Query<Item> q = new EventTrigger.Query<>();
-                q.getPastSuccessfulEvents().addAll(query.getPastSuccessfulEvents());
-                q.getOldEvents().addAll(query.getOldEvents());
-                q.getFutureEvents().addAll(query.getFutureEvents());
-                q.getTypes().addAll(query.getTypes());
-                iterator = index.search(false, q);
-            } catch (CommunicationException e) {
-                throw new RuntimeException("sboiEventIndexSearch()", e);
-            }
-            // http://stackoverflow.com/a/28491752/53897
-            // To keep this simple we simply read in the whole result in a list.
-            List<DomsId> l = new ArrayList<>();
-            iterator.forEachRemaining(item -> l.add(new DomsId(item.getDomsID())));
-            return l;
-        }
-         */
 
         @Provides
         ItemFactory<Item> provideItemFactory() {

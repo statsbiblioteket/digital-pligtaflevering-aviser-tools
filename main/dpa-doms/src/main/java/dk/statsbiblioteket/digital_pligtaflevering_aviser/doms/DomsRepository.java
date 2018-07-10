@@ -198,7 +198,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         try {
             return efedora.modifyDatastreamByValue(domsId.id(), datastream, checksumType, checksum, contents, alternativeIdentifiers, mimetype, comment, lastModifiedDate);
         } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
-            throw new RuntimeException("could not save datastream " + datastream + " for id " + domsId);
+            throw new RuntimeException("could not save datastream " + datastream + " for id " + domsId, e);
         }
     }
 

@@ -16,6 +16,8 @@ visualvm):
 
     vagrant ssh -- -Y
     
+You must have the KB specific version of veraPDF-rest available
+to Maven to build the box.   See /README.md for details.
 
 
 Setting up the DOMS+Bitrepository vagrant box
