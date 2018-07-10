@@ -239,9 +239,10 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.CHECKED);
                         model.addCheckedPage(page);
-                        if(!tabelsLayout.checkThePage(page, ConfirmationState.CHECKED)) {
-                            tabelsLayout.reloadTables();
-                        }
+                        tabelsLayout.checkThePage(page, ConfirmationState.CHECKED);
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
                     }
                 }
                 if (currentSelectedArticle != null) {
@@ -261,9 +262,11 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.REJECTED);
                         model.addCheckedPage(page);
-                        if(!tabelsLayout.checkThePage(page, ConfirmationState.REJECTED)) {
-                            tabelsLayout.reloadTables();
-                        }
+                        tabelsLayout.checkThePage(page, ConfirmationState.REJECTED);
+
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
                     }
                 }
                 if (currentSelectedArticle != null) {
