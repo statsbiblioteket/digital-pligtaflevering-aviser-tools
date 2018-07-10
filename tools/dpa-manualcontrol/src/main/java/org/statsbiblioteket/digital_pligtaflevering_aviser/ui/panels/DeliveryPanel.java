@@ -253,7 +253,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 UI.getCurrent().removeWindow(dialog);
                 if ("OKBUTTON".equals(event.getButton().getId())) {
 
-                    boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
+                    boolean writeResult = model.writeToCurrentItemCached(selectedDelivery, selectedTitle, true,
                             storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems(), dialog.forceClicked());
 
                     if (!writeResult) {

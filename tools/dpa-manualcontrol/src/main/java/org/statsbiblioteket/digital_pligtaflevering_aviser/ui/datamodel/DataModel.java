@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -50,8 +51,8 @@ public class DataModel {
     private String selectedTitle;
     private String selectedSection = null;
     private String currentlySelectedMonth;
-    private TitleDeliveryHierarchy currentlySelectedTitleHiearachy;
-    private DeliveryPattern deliveryPattern;
+    private TitleDeliveryHierarchy currentlySelectedTitleHierarchy;
+    private DeliveryPattern deliveryPattern = new DeliveryPattern();
     private DeliveryFilesystemReadWrite filesystemReadWrite;
 
     private DeliveryFedoraCommunication fedoraCommunication;
@@ -68,14 +69,21 @@ public class DataModel {
     }
 
     private void createDeliveryPattern() {
+        InputStream is = null;
         try {
-            String deliveryPatternPath = map.getRequired("dpa.manualcontrol.configpath") + "DeliveryPattern.xml";
-            InputStream is = new FileInputStream(deliveryPatternPath);
+            String deliveryPatternPath = map.getRequired("dpa.manualcontrol.configpath") + "/DeliveryPattern.xml";
+            is = new FileInputStream(deliveryPatternPath);
             JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
             deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
         } catch(JAXBException | FileNotFoundException e) {
             log.error(e.getMessage());
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 
@@ -90,7 +98,7 @@ public class DataModel {
         selectedTitle = null;
         selectedSection = null;
         currentlySelectedMonth = null;
-        currentlySelectedTitleHiearachy = null;
+        currentlySelectedTitleHierarchy = null;
     }
 
     /**
@@ -175,7 +183,7 @@ public class DataModel {
 
     public List<String> getTitlesFromFileSystem() throws Exception {
         initiateTitleHierachyFromFilesystem();
-        return currentlySelectedTitleHiearachy.getAllTitles();
+        return currentlySelectedTitleHierarchy.getAllTitles();
     }
 
     /**
@@ -183,20 +191,21 @@ public class DataModel {
      * deliveryname
      */
     public void selectTitleDelivery() {
-        selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
+        selectedDelItem = currentlySelectedTitleHierarchy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
     }
 
 
     public StreamResource createResource() {
-        return new StreamResource(new StreamResource.StreamSource() {
+        return new StreamResource(
+                new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 InputStream in = null;
                 try {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    for (String title : currentlySelectedTitleHiearachy.getAllTitles()) {
+                    for (String title : currentlySelectedTitleHierarchy.getAllTitles()) {
                         baos.write((title+";\n").getBytes());
-                        List<DeliveryTitleInfo> DeliveryTitleInfos = currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
+                        List<DeliveryTitleInfo> DeliveryTitleInfos = currentlySelectedTitleHierarchy.getDeliverysFromTitle(title);
                         for (DeliveryTitleInfo deliveryTitleInfo : DeliveryTitleInfos) {
 
                             baos.write((deliveryTitleInfo.getDeliveryName()+",").getBytes());
@@ -267,7 +276,7 @@ public class DataModel {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
-        return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
+        return currentlySelectedTitleHierarchy.getDeliverysFromTitle(title);
     }
 
     /**
@@ -276,7 +285,7 @@ public class DataModel {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliveryTitleObjects() {
-        return currentlySelectedTitleHiearachy.getDeliveryTitleObjects(selectedDelivery);
+        return currentlySelectedTitleHierarchy.getDeliveryTitleObjects(selectedDelivery);
     }
 
     /**
@@ -297,9 +306,9 @@ public class DataModel {
      * @param missingItems
      * @return
      */
-    public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems, boolean force) {
+    public boolean writeToCurrentItemCached(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems, boolean force) {
         try {
-            DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
+            DeliveryTitleInfo deli = currentlySelectedTitleHierarchy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
             filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
             return fedoraCommunication.writeDeliveryToFedora(deli, force);
         } catch (Exception e) {
@@ -309,7 +318,7 @@ public class DataModel {
     }
 
     /**
-     * Remove a specific cashed title in a delivery
+     * Remove a specific caced title in a delivery
      *
      * @throws Exception
      */
@@ -344,7 +353,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFedora() throws Exception {
-        currentlySelectedTitleHiearachy = fedoraCommunication.getTitleHierachyFromFedora();
+        currentlySelectedTitleHierarchy = fedoraCommunication.getTitleHierachyFromFedora();
     }
 
     /**
@@ -353,7 +362,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
-        currentlySelectedTitleHiearachy = filesystemReadWrite.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
+        currentlySelectedTitleHierarchy = filesystemReadWrite.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
     /**
@@ -405,7 +414,7 @@ public class DataModel {
      * @throws Exception
      */
     public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
-        return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+        return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHierarchy);
     }
 
     /**

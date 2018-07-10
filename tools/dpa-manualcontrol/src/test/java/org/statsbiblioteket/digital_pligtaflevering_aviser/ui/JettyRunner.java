@@ -61,12 +61,16 @@ public class JettyRunner {
             webapp.setInitParameter(paramName, paramValue);
         }
 
+        Path path = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
+        webapp.setInitParameter("dpa.manualcontrol.configpath", path.getParent().toString());
+
         // Ready
 
         Path webXmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "src/main/webapp/WEB-INF/web.xml");
         webapp.setDescriptor(webXmlPath.toString());
         webapp.setResourceBase(webXmlPath.getParent().getParent().toString());
         webapp.setParentLoaderPriority(true);
+
 
         server.setHandler(webapp);
 
