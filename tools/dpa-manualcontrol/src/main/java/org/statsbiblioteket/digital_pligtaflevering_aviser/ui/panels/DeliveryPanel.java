@@ -47,13 +47,13 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     protected DataModel model;
 
     protected VerticalLayout tablesLayout = new VerticalLayout();
-    protected HorizontalLayout tablesLayout1 = new HorizontalLayout();
-    protected HorizontalLayout tablesLayout2 = new HorizontalLayout();
+    protected HorizontalLayout tablesLayoutTop = new HorizontalLayout();
+    protected HorizontalLayout tablesLayoutBottom = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true); //
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true); //
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true);
+    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true);
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, articleColumnsNames, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
     private Button statusButton = new Button("StatusExport");
@@ -85,18 +85,18 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public void initialLayout() {
-        tablesLayout1.addComponent(deliveryPanel);
-        tablesLayout1.addComponent(sectionSectionTable);
-        tablesLayout2.addComponent(fileSelectionPanel);
-        tablesLayout2.addComponent(articleSelectionPanel);
+        tablesLayoutTop.addComponent(deliveryPanel);
+        tablesLayoutTop.addComponent(sectionSectionTable);
+        tablesLayoutBottom.addComponent(fileSelectionPanel);
+        tablesLayoutBottom.addComponent(articleSelectionPanel);
 
-        tablesLayout1.setExpandRatio(deliveryPanel, 0.2f);
-        tablesLayout1.setExpandRatio(sectionSectionTable, 0.2f);
-        tablesLayout2.setExpandRatio(fileSelectionPanel, 0.4f);
-        tablesLayout2.setExpandRatio(articleSelectionPanel, 0.1f);
+        tablesLayoutTop.setExpandRatio(deliveryPanel, 0.2f);
+        tablesLayoutTop.setExpandRatio(sectionSectionTable, 0.2f);
+        tablesLayoutBottom.setExpandRatio(fileSelectionPanel, 0.4f);
+        tablesLayoutBottom.setExpandRatio(articleSelectionPanel, 0.1f);
 
-        tablesLayout.addComponent(tablesLayout1);
-        tablesLayout.addComponent(tablesLayout2);
+        tablesLayout.addComponent(tablesLayoutTop);
+        tablesLayout.addComponent(tablesLayoutBottom);
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
             @Override

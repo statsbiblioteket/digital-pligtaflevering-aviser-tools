@@ -49,8 +49,8 @@ public class TitleValidationPanel extends DeliveryPanel {
             }
         });
 
-        tablesLayout1.addComponent(infoPanel);
-        tablesLayout1.setExpandRatio(infoPanel, 0.1f);
+        tablesLayoutTop.addComponent(infoPanel);
+        tablesLayoutTop.setExpandRatio(infoPanel, 0.1f);
         super.initialLayout();
     }
 
