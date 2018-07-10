@@ -81,16 +81,16 @@ public class DeliveryFedoraCommunication {
         Stream<DomsItem> items = null;
 
         switch (eventStatus) {
-            case READYFORMANUALCHECK:
+            case READYFORMANUALCHECK://Search for deliveries where all events is written, which is minimal on order to start manual checks
                 items = getReadyForManual(deliveryFilter);
                 break;
-            case DONEMANUALMINIMALCHECK:
+            case DONEMANUALMINIMALCHECK://Search for deliveries where all events is written, which is minimal on order to start manual checks
                 items = getDoneManualMinimal(deliveryFilter);
                 break;
-            case DONEMANUALCHECK:
+            case DONEMANUALCHECK://Search for deliveries where manual check is done
                 items = getDoneManual(deliveryFilter);
                 break;
-            case CREATEDONLY:
+            case CREATEDONLY://Search for deliveries that has been created
                 items = getCreatedOnly(deliveryFilter);
                 break;
 
@@ -116,7 +116,11 @@ public class DeliveryFedoraCommunication {
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
-
+    /**
+     * Get all deliveries that has just been created and nothing else
+     * @param deliveryFilter
+     * @return
+     */
     public Stream<DomsItem> getCreatedOnly(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 "Data_Received", "", "", itemType))
@@ -125,7 +129,7 @@ public class DeliveryFedoraCommunication {
 
 
     /**
-     * Get a list of deliveries, which is has already added an event that manual inspections has been done
+     * Get a list of deliveries, which has already added an event that manual inspections has been done
      *
      * @param deliveryFilter
      * @return
@@ -136,6 +140,11 @@ public class DeliveryFedoraCommunication {
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
+    /**
+     * Get a list of deliveries where all events is performed, which is nessesary in order to make manual control
+     * @param deliveryFilter
+     * @return
+     */
     public Stream<DomsItem> getDoneManualMinimal(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 pastMinimalEvents + "", thisEvent, "", itemType))
