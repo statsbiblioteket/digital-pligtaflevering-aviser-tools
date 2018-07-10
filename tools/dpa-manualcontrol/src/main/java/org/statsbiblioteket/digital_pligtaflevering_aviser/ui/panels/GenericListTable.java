@@ -71,11 +71,15 @@ public class GenericListTable extends VerticalLayout {
     public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String[] columnNames, String tableId, boolean initialVisible) {
         this(c, checkedColumn, checkedDefaultValue, visibleColumns, tableId, initialVisible);
         int i = 0;
-        if (visibleColumns != null && columnNames != null) {
-            for(String colimn : visibleColumns) {
-                table.setColumnHeader(colimn, columnNames[i]);
-                i++;
-            }
+        if (visibleColumns == null ||
+                columnNames == null ||
+                columnNames.length != visibleColumns.length) {
+            return;//If something in the delivered logic is wrong, just return without using logic, this is set by the programmer
+        }
+
+        for(String colimn : visibleColumns) {
+            table.setColumnHeader(colimn, columnNames[i]);
+            i++;
         }
     }
 

@@ -38,9 +38,14 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     protected Logger log = LoggerFactory.getLogger(getClass());
 
     private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"};
+    private static String[] deliveryColumnsNames = new String[]{"chk", "initials", "newspaperTitle", "pages", "articles"};
+
     private static String[] sectionColumns = new String[]{"sectionName", "sectionNumber", "pageCount"};
+    private static String[] sectionColumnsNames = new String[]{"sectionName", "section", "count"};
+
     private static String[] fileColumns = new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"};
     private static String[] fileColumnsNames = new String[]{"chk", "pageName", "page", "sectionName", "section"};
+
     private static String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
     private static String[] articleColumnsNames = new String[]{"chk", "articleName", "page", "sectionName", "section"};
 
@@ -51,8 +56,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     protected HorizontalLayout tablesLayoutBottom = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true);
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, deliveryColumnsNames, "DELIVERY", true);
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, sectionColumnsNames, "SECTION", true);
     protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true);
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, articleColumnsNames, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
