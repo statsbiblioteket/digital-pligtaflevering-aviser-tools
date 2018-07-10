@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
 import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Notification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
@@ -194,21 +195,24 @@ public class DataModel {
         selectedDelItem = currentlySelectedTitleHierarchy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
     }
 
-
-    public StreamResource createResource() {
+    /**
+     * Create a web-recourse for downloading a report of the status of manual controls of newspapers
+     * @return
+     */
+    public StreamResource createReportResource() {
         return new StreamResource(
                 new StreamResource.StreamSource() {
             @Override
             public InputStream getStream() {
                 InputStream in = null;
-                try {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
+                {
                     for (String title : currentlySelectedTitleHierarchy.getAllTitles()) {
                         baos.write((title+";\n").getBytes());
                         List<DeliveryTitleInfo> DeliveryTitleInfos = currentlySelectedTitleHierarchy.getDeliverysFromTitle(title);
                         for (DeliveryTitleInfo deliveryTitleInfo : DeliveryTitleInfos) {
 
-                            baos.write((deliveryTitleInfo.getDeliveryName()+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getDeliveryName()).orElse("")+",").getBytes());
                             baos.write((Optional.ofNullable(deliveryTitleInfo.getInitials()).orElse("")+",").getBytes());
                             baos.write((deliveryTitleInfo.isChecked()+",").getBytes());
                             baos.write((deliveryTitleInfo.getNoOfArticles()+",").getBytes());
@@ -225,7 +229,7 @@ public class DataModel {
                             }
 
                             baos.write((missingItemString+",").getBytes());
-                            baos.write((Optional.ofNullable(deliveryTitleInfo.getComment())+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getComment()).orElse("").replaceAll(","," ").replaceAll(";", " ")+",").getBytes());
                             baos.write(";\n".getBytes());
                         }
                     }
@@ -235,6 +239,7 @@ public class DataModel {
                     in = new ByteArrayInputStream(bytes);
 
                 } catch (Exception e) {
+                    Notification.show("The report can not get generated", Notification.Type.ERROR_MESSAGE);
                     log.error("ERROR EXPORTING DATA", e.getMessage());
                 }
                 return in;

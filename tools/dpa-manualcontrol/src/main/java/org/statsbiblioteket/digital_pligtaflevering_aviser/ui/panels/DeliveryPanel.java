@@ -112,7 +112,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
 
         // second, create a StreamResource and pass the previous StreamResource:
-        StreamResource resource = model.createResource();
+        StreamResource resource = model.createReportResource();
 
         // extend a component
         FileDownloader downloader = new FileDownloader(resource);
