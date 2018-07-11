@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -150,15 +149,15 @@ xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addD
                         .collect(toList());
 
                 Pattern pattern = Pattern.compile("dl_(........)_rt");
-                Mat
+
                 for(DomsItem item: roundtripItems) {
                     String relativePath = item.getPath();
 
 
                 }
-            }
+                return new ArrayList<>();
+            };
 
-            Paths.get(deliveriesFolder, item.getPath())))
 
 //                    .map(st -> st.map(roundtripItem -> {
 //                        Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.children()
@@ -199,7 +198,7 @@ xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addD
 //                            return false;
 //                        }
 //                    }))
-                    .collect(toList());
+//                    .collect(toList());
 
             return f;
         }

@@ -10,5 +10,6 @@
 * * * * * cd /root ; . /root/.bash_profile ; services/bin/ingest-deliveries.sh
 * * * * * cd /root ; . /root/.bash_profile ; services/bin/list-deletable-deliveries.sh
 * * * * * cd /root ; . /root/.bash_profile ; services/bin/regenerate-checksumfile.sh
-* * * * * cd /root ; . /root/.bash_profile ; services/bin/verapdf-analyze.sh
-* * * * * cd /root ; . /root/.bash_profile ; services/bin/verapdf-invoke.sh
+# configuration files are not yet right for veraPDF.  Use Launchers for now.
+#* * * * * cd /root ; . /root/.bash_profile ; services/bin/verapdf-analyze.sh
+#* * * * * cd /root ; . /root/.bash_profile ; services/bin/verapdf-invoke.sh

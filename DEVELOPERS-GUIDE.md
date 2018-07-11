@@ -1,6 +1,8 @@
 Developers Guide to DPA
 ===
 
+Note:  `mvn` must use a Java 8 JDK.
+
 Steps to emulate a full stage/prod scenario with cron in a docker instance against
 a vagrant backend:
 
