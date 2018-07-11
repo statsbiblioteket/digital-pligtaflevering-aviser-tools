@@ -273,55 +273,57 @@ stored externally in the Bitrepository) which is a "hasFile" relation.
 
 This is the expected Event-flow of the newspaper-deliveries:
 
+Event UI is a userintarface that can be used to modify the Event-floz for a specific delivery
+
     +-----------------------------+
     ! Create Delivery             !  (Data_Received)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Ingest                      !  (Data_Archived)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Generate checksum           !  (Checksumfile_regenerated)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Check generated checksum    !  (Checksumfile_checked)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Generate statistics         !  (Statistics_generated)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Create VeraPDF              !
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Check VeraPDF               !
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
-                  !
+                  V
     +-----------------------------+
     ! Generate Del. pattern match !
     +-----------------------------+
@@ -329,8 +331,10 @@ This is the expected Event-flow of the newspaper-deliveries:
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+                  
                   !        
-                  !        
-                                    
+                  V        
+    +-----------------------------+
+    ! Manual control UI           !
+    +-----------------------------+                                    
 
 
 
