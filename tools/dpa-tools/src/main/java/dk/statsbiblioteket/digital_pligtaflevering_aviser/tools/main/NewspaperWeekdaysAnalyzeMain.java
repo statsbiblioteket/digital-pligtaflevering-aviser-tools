@@ -26,6 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,8 +47,7 @@ import static java.util.stream.Collectors.toList;
 public class NewspaperWeekdaysAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(NewspaperWeekdaysAnalyzeMain.class);
 
-    public static final String VERAPDF_DATASTREAM_NAME = "VERAPDF";
-    public static final String DPA_VERAPDF_URL = "dpa.verapdf.url";
+    public static final String DPA_DELIVERY_PATTERN_XML_PATH = "dpa.delivery-pattern-xml.path";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -75,16 +78,33 @@ public class NewspaperWeekdaysAnalyzeMain {
                                    EnhancedFedora efedora,
                                    DomsEventStorage<Item> domsEventStorage,
                                    @Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
+                                   @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath, // DeliveryPattern.xml - talk to mmj.
                                    DefaultToolMXBean mxBean) {
 
             final String agent = getClass().getSimpleName();
+
+            
+            InputStream is = new FileInputStream(deliveryXmlPath); //
+            JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+            DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+
+            WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
+            assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
+            assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+
+
 
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
 
                     .map(item -> new StreamTuple<>(item, Paths.get(deliveriesFolder, item.getPath())))
-
 
 //                    .map(st -> st.map(roundtripItem -> {
 //                        Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.children()
@@ -130,7 +150,6 @@ public class NewspaperWeekdaysAnalyzeMain {
             return f;
         }
 
-
         @Provides
         protected Function<EventQuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
             return query -> sboiEventIndexSearch(query, index).stream();
@@ -173,6 +192,10 @@ public class NewspaperWeekdaysAnalyzeMain {
             return map.getRequired(DPA_DELIVERIES_FOLDER);
         }
 
-
+        @Provides
+        @Named(DPA_DELIVERY_PATTERN_XML_PATH)
+        String provideManualControlConfigPath(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN_XML_PATH);
+        }
     }
 }
