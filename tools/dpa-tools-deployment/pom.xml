@@ -232,6 +232,18 @@
                                     </mainClass>
                                     <id>set-event-on-uuid</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFInvokeMain
+                                    </mainClass>
+                                    <id>verapdf-invoke</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFAnalyzeMain
+                                    </mainClass>
+                                    <id>verapdf-analyze</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
