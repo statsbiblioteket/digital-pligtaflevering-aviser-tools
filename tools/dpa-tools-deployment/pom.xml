@@ -244,6 +244,12 @@
                                     </mainClass>
                                     <id>verapdf-analyze</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.NewspaperWeekdaysAnalyzeMain
+                                    </mainClass>
+                                    <id>newspaper-weekdays-analyze</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
