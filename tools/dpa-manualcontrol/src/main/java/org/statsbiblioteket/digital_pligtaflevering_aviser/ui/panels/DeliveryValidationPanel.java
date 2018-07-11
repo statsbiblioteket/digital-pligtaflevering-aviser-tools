@@ -53,8 +53,8 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-        tablesLayout.addComponent(deliveryListPanel);
-        tablesLayout.setExpandRatio(deliveryListPanel, 0.2f);
+        tablesLayoutTop.addComponent(deliveryListPanel);
+        tablesLayoutTop.setExpandRatio(deliveryListPanel, 0.1f);
         super.initialLayout();
 
         doneDeliveryButton.addClickListener(new Button.ClickListener() {

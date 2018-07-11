@@ -5,42 +5,35 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
-/**
- * Window for confirming that the performed checks should be stored in fedora
- */
-public class StoreResultWindow extends Window {
+
+public class EventAdminWindow extends Window {
 
     private final HorizontalLayout contentPanel = new HorizontalLayout();
     private final VerticalLayout vl = new VerticalLayout();
     private final HorizontalLayout hl = new HorizontalLayout();
     private Layout resultPanel;
 
-    private final Button ok = new Button("Ok");
+    private final Button override = new Button("Override");
+    private final Button delete = new Button("Delete");
     private final Button cancel = new Button("Cancel");
-    private final Button force = new Button("Force");
-    private boolean forceClicked = false;
+    private final TextField securityKey = new TextField();
     private final Label checkStateInfo = new Label("Validation can not be performed, since it is already performed");
 
-    public StoreResultWindow(String caption) {
+    public EventAdminWindow(String caption) {
         super(caption);
-        ok.setId("OKBUTTON");
-        ok.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        override.setId("OVERRIDE");
+        delete.setId("DELETE");
         cancel.setId("CANCELBUTTON");
-        force.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent clickEvent) {
-                ok.setEnabled(true);
-                forceClicked = true;
-            }
-        });
+        cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
-
-        hl.addComponent(ok);
+        hl.addComponent(override);
+        hl.addComponent(delete);
         hl.addComponent(cancel);
-        hl.addComponent(force);
+        hl.addComponent(securityKey);
         hl.addComponent(checkStateInfo);
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
@@ -48,27 +41,18 @@ public class StoreResultWindow extends Window {
         super.setContent(vl);
     }
 
+    public boolean validateSecurityKey() {
+        return "S3cr3t".equals(securityKey.getValue());
+    }
+
     /**
      * Set listeners to the buttons in the dialog
      * @param listener
      */
     public void setListener(Button.ClickListener listener) {
-        ok.addClickListener(listener);
+        override.addClickListener(listener);
+        delete.addClickListener(listener);
         cancel.addClickListener(listener);
-    }
-
-    public boolean forceClicked() {
-        return forceClicked;
-    }
-
-    /**
-     * Set the dialog to be ready or not ready to perform a press on ok.
-     * @param ready if the parameter is false the "ok" button is disabled and a comment about why it is disabled is shown
-     */
-    public void setReady(boolean ready) {
-        ok.setEnabled(ready);
-        force.setVisible(!ready);
-        checkStateInfo.setVisible(!ready);
     }
 
     /**

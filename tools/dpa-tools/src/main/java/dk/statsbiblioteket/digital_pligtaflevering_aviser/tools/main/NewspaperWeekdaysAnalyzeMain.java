@@ -3,8 +3,8 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.EventQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.QuerySpecification;
@@ -26,15 +26,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
@@ -78,33 +75,90 @@ public class NewspaperWeekdaysAnalyzeMain {
                                    EnhancedFedora efedora,
                                    DomsEventStorage<Item> domsEventStorage,
                                    @Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                                   @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath, // DeliveryPattern.xml - talk to mmj.
+                                   @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath,
                                    DefaultToolMXBean mxBean) {
 
             final String agent = getClass().getSimpleName();
 
-            
-            InputStream is = new FileInputStream(deliveryXmlPath); //
-            JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-            DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+            DeliveryPattern deliveryPattern = new DeliveryPattern();
+            /* Used this to convert and manually replaced QUOTE with a ".  Ask mmj to port JAXB loading code
 
-            WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-            assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
-            assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addDeliveryPattern(QUOTE", key/text(), "QUOTE, new WeekPattern(", value/list/entry[key = "Mon"]/value, ",", value/list/entry[key = "Tue"]/value, ",",value/list/entry[key = "Wed"]/value, ",",value/list/entry[key = "Thu"]/value, ",",value/list/entry[key = "Fri"]/value, ",",value/list/entry[key = "Sat"]/value, ",",value/list/entry[key = "Sun"]/value, "));")' -n < DeliveryPattern.xml
+
+*/
+            deliveryPattern.addDeliveryPattern("aarhusstiftstidende", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("arbejderen", new WeekPattern(false, true, true, true, true, false, false));
+            deliveryPattern.addDeliveryPattern("berlingsketidende", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("boersen", new WeekPattern(true, true, true, true, true, false, false));
+            deliveryPattern.addDeliveryPattern("bornholmstidende", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("bt", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("dagbladetkoege", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("dagbladetringsted", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("dagbladetroskilde", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("dagbladetstruer", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("dernordschleswiger", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("ekstrabladet", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("flensborgavis", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("fredericiadagblad1890", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("frederiksborgamtsavis", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("fyensstiftstidende", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("fynsamtsavissvendborg", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("helsingoerdagblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("herningfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("holstebrodagblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("horsensfolkeblad1866", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("information", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("jydskevestkystensoenderborg", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenbillund", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenvarde", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenesbjerg", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenhaderslev", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenkolding1995", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystentoender", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenaabenraa", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("jydskevestkystenvejen", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("kristeligtdagblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("lemvigfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("licitationen", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("metroxpressoest", new WeekPattern(true, true, true, true, true, false, false));
+            deliveryPattern.addDeliveryPattern("metroxpressvest", new WeekPattern(true, true, true, true, true, false, false));
+            deliveryPattern.addDeliveryPattern("midtjyllandsavis1857", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("morgenavisenjyllandsposten", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("morsoefolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendeaalborg", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendehimmerland", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendevendsyssel", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("nordvestnytholbaek", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("nordvestnytkalundborg", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("politiken", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("politikenweekly", new WeekPattern(false, false, false, false, false, false, false));
+            deliveryPattern.addDeliveryPattern("randersamtsavis", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("ringkjoebingamtsdagblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("sjaellandskenaestved", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("sjaellandskeslagelse", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("skivefolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("thisteddagblad", new WeekPattern(true, true, true, true, true, true, true));
+            deliveryPattern.addDeliveryPattern("vejleamtsfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("viborgstiftsfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
+            deliveryPattern.addDeliveryPattern("weekendavisen", new WeekPattern(false, false, false, false, true, false, false));
+
+            Tool f = () -> {
+                List<DomsItem> roundtripItems = Stream.of(workToDoQuery)
+                        .flatMap(domsRepository::query)
+                        .peek(o -> log.trace("Query returned: {}", o))
+                        .collect(toList());
+
+                Pattern pattern = Pattern.compile("dl_(........)_rt");
+                Mat
+                for(DomsItem item: roundtripItems) {
+                    String relativePath = item.getPath();
 
 
+                }
+            }
 
-            Tool f = () -> Stream.of(workToDoQuery)
-                    .flatMap(domsRepository::query)
-                    .peek(o -> log.trace("Query returned: {}", o))
-
-                    .map(item -> new StreamTuple<>(item, Paths.get(deliveriesFolder, item.getPath())))
+            Paths.get(deliveriesFolder, item.getPath())))
 
 //                    .map(st -> st.map(roundtripItem -> {
 //                        Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.children()
@@ -198,4 +252,5 @@ public class NewspaperWeekdaysAnalyzeMain {
             return map.getRequired(DPA_DELIVERY_PATTERN_XML_PATH);
         }
     }
+
 }

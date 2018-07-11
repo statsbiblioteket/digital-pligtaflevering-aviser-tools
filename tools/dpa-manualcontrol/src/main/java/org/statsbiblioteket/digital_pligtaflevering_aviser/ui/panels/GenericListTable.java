@@ -68,11 +68,27 @@ public class GenericListTable extends VerticalLayout {
         table.setVisible(initialVisible);
     }
 
-    /**
-     * Set a list of which columns in the table to make visible
-     *
-     * @param visibleColumns
-     */
+    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String[] columnNames, String tableId, boolean initialVisible) {
+        this(c, checkedColumn, checkedDefaultValue, visibleColumns, tableId, initialVisible);
+        int i = 0;
+        if (visibleColumns == null ||
+                columnNames == null ||
+                columnNames.length != visibleColumns.length) {
+            return;//If something in the delivered logic is wrong, just return without using logic, this is set by the programmer
+        }
+
+        for(String colimn : visibleColumns) {
+            table.setColumnHeader(colimn, columnNames[i]);
+            i++;
+        }
+    }
+
+
+        /**
+         * Set a list of which columns in the table to make visible
+         *
+         * @param visibleColumns
+         */
     public void setVisibleColumns(String[] visibleColumns) {
         if (visibleColumns != null) {
             table.setVisibleColumns(visibleColumns);
@@ -185,7 +201,17 @@ public class GenericListTable extends VerticalLayout {
         }
     }
 
+    public void selectFirst() {
+        if(table.size() > 0) {
+            table.select(table.firstItemId());
+        }
+    }
+
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
+    }
+
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
+        table.addValueChangeListener(listener);
     }
 }

@@ -1,6 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel;
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
@@ -117,26 +117,10 @@ public class StatisticsView extends VerticalLayout implements View {
                 tabelsLayout = new DeliveryValidationPanel(model);
         }
 
-        int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-        if(Settings.screenwidth != null) {
-            browserWidth = Settings.screenwidth;
-        }
-
-
-        // The UI is optimized to run on either a small or large screen.
-        // A limit of browserscreenwidth 1800 pixels is used.
-        // If the browserscreenwidth is large pdfComponent is shown at the right side of the tables, otherwise below.
-        // If the browserscreenwidth is large pdfComponent is 900px" X "1200px" otherwise 500px" X "7500px"
-        if (browserWidth > 1800) {
-            mainhlayout = new HorizontalLayout();
-            pdfComponent.setWidth("900px");
-            pdfComponent.setHeight("1200px");
-            tabelsLayout.setHeight("1200px");
-        } else {
-            mainhlayout = new VerticalLayout();
-            pdfComponent.setWidth("100%");
-            pdfComponent.setHeight("750px");
-        }
+        mainhlayout = new HorizontalLayout();
+        pdfComponent.setWidth("90%");
+        pdfComponent.setHeight("1200px");
+        tabelsLayout.setHeight("1200px");
 
         tabelsLayout.setVisible(false);
 
@@ -211,19 +195,15 @@ public class StatisticsView extends VerticalLayout implements View {
                         metadatalink.setResource(resource);
                         metadatalink.setDescription("Link to Second Page");
                     } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
-                        currentSelectedPage.clear();
-                        currentSelectedPage.add((Page) itemClickEvent.getItemId());
-                        currentSelectedArticle = null;
-
-                        pdfComponent.setVisible(true);
-                        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
-                        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
-                        String urlString = pdfStream.getUrl();
-                        pdfComponent.initiate(urlString);
-                        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
-                        metadatalink.setResource(resource);
-                        metadatalink.setDescription("Link to Second Page");
+                        viewPage((Page) itemClickEvent.getItemId());
                     }
+            }
+        });
+
+        tabelsLayout.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
+                viewPage((Page) valueChangeEvent.getProperty().getValue());
             }
         });
 
@@ -259,9 +239,10 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.CHECKED);
                         model.addCheckedPage(page);
-                        if(!tabelsLayout.checkThePage(page, ConfirmationState.CHECKED)) {
-                            tabelsLayout.reloadTables();
-                        }
+                        tabelsLayout.checkThePage(page, ConfirmationState.CHECKED);
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
                     }
                 }
                 if (currentSelectedArticle != null) {
@@ -281,9 +262,11 @@ public class StatisticsView extends VerticalLayout implements View {
                     for(Page page : currentSelectedPage) {
                         page.setCheckedState(ConfirmationState.REJECTED);
                         model.addCheckedPage(page);
-                        if(!tabelsLayout.checkThePage(page, ConfirmationState.REJECTED)) {
-                            tabelsLayout.reloadTables();
-                        }
+                        tabelsLayout.checkThePage(page, ConfirmationState.REJECTED);
+
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
                     }
                 }
                 if (currentSelectedArticle != null) {
@@ -307,6 +290,24 @@ public class StatisticsView extends VerticalLayout implements View {
         layout.addComponent(mainhlayout);
         panelPrepare(false);
     }
+
+
+    private void viewPage(Page pageElement) {
+        currentSelectedPage.clear();
+        currentSelectedPage.add(pageElement);
+        currentSelectedArticle = null;
+
+        pdfComponent.setVisible(true);
+        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
+        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+        String urlString = pdfStream.getUrl();
+        pdfComponent.initiate(urlString);
+        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
+        metadatalink.setResource(resource);
+        metadatalink.setDescription("Link to Second Page");
+    }
+
+
 
     /**
      * Set panes to being prepared for viewing details

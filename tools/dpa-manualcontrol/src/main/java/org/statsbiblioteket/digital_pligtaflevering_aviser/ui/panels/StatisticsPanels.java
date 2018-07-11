@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Component;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
@@ -36,6 +37,8 @@ public interface StatisticsPanels extends Component {
      * @param listener
      */
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener);
+
+    public void addValueChangeListener(Property.ValueChangeListener listener);
 
     /**
      * Insert values which is initiated into the model to the UI-component in the respective panel

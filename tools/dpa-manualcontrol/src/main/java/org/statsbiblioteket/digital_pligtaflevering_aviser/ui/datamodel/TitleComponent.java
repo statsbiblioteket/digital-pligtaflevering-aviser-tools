@@ -6,10 +6,10 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
  */
 public class TitleComponent {
     private String sectionName;
-    private String sectionNumber;
+    private int sectionNumber;
     private int pageCount;
 
-    public TitleComponent(String sectionName, String sectionNumber, int pageCount) {
+    public TitleComponent(String sectionName, int sectionNumber, int pageCount) {
         this.sectionName = sectionName;
         this.sectionNumber = sectionNumber;
         this.pageCount = pageCount;
@@ -23,11 +23,11 @@ public class TitleComponent {
         this.sectionName = sectionName;
     }
 
-    public String getSectionNumber() {
+    public int getSectionNumber() {
         return sectionNumber;
     }
 
-    public void setSectionNumber(String sectionNumber) {
+    public void setSectionNumber(int sectionNumber) {
         this.sectionNumber = sectionNumber;
     }
 

@@ -6,36 +6,35 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryPattern;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.WeekPattern;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * DatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
+ * EventDatePanel contains a table which can be used for viewing deliveries plotted into a month-layout
  */
-public class DatePanel extends VerticalLayout {
+public class EventDatePanel extends VerticalLayout {
     public static final String WEEKNO = "Weekno";
     private final Map<Integer, String> dayMap;
     private Logger log = LoggerFactory.getLogger(getClass());
     private CheckBox checkbox;
     private Table table;
-    private TextArea unmappable = new TextArea("");
+    private static Button.ClickListener buttonListener;
+    private Date month;
 
-    public DatePanel() {
+    public EventDatePanel() {
         dayMap = new LinkedHashMap<Integer, String>();//LinkedHashMap to keep insertion order
         dayMap.put(Calendar.MONDAY,"Mon");
         dayMap.put(Calendar.TUESDAY,"Tue");
@@ -53,12 +52,9 @@ public class DatePanel extends VerticalLayout {
 
         for (String day : dayMap.values()) {
             table.addContainerProperty(day, String.class, null);
-            table.addGeneratedColumn(day, new DatePanel.FieldGenerator());
+            table.addGeneratedColumn(day, new EventDatePanel.FieldGenerator());
         }
         table.setSortContainerPropertyId(WEEKNO);
-
-        unmappable.setEnabled(false);
-
         table.setWidth("100%");
         table.setHeightUndefined();
         table.setPageLength(0);
@@ -66,32 +62,30 @@ public class DatePanel extends VerticalLayout {
         table.setImmediate(true);
         this.addComponent(checkbox);
         this.addComponent(table);
-        this.addComponent(unmappable);
     }
 
-    Date month;
 
+
+    public void addClickListener(Button.ClickListener buttonListener) {
+        this.buttonListener = buttonListener;
+    }
+
+    /**
+     * Set the month to be viewed in the panel
+     * @param month
+     */
     public void setMonth(Date month) {
         this.month = month;
     }
 
     /**
-     * Set a list of DeliveryTitleInfo and deploy values into the relevant days in the currently viewed month
-     *
+     * Set the content to be viewed in the calendar
      * @param delStat
      */
-    public void setInfo(List<DeliveryTitleInfo> delStat, WeekPattern deliveryPattern) {
+    public void setInfo(Set<String> delStat) {
         table.removeAllItems();
 
-
-        for(String header : table.getColumnHeaders()) {
-            FieldGenerator fieldGenerator = (FieldGenerator)table.getColumnGenerator(header);
-            if(fieldGenerator!=null) {
-                fieldGenerator.setPattern(deliveryPattern);
-            }
-        }
         Item newItemId = null;
-        String unmappableValues = "";
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(month);
@@ -115,15 +109,14 @@ public class DatePanel extends VerticalLayout {
             newItemId.getItemProperty(weekday_name).setValue(i+ "\n"+"NO DELIVERY");
         }
 
-        for (DeliveryTitleInfo item : delStat) {
+        for (String item : delStat) {
             try {
-                Matcher matcher = UiDataConverter.getPatternMatcher(item.getDeliveryName());
+                Matcher matcher = UiDataConverter.getPatternMatcher(item);
                 if (matcher.matches()) {
-                    String roundtripValue = matcher.group(2);
 
                     Calendar day = Calendar.getInstance();
                     day.setFirstDayOfWeek(Calendar.MONDAY);
-                    day.setTime(UiDataConverter.getDateFromDeliveryItemDirectoryName(item.getDeliveryName()));
+                    day.setTime(UiDataConverter.getDateFromDeliveryItemDirectoryName(item));
 
                     String weekday_no = day.get(Calendar.WEEK_OF_YEAR)+"";
                     String weekday_name = dayMap.get(day.get(Calendar.DAY_OF_WEEK));
@@ -132,29 +125,18 @@ public class DatePanel extends VerticalLayout {
                     Property tableCell = tableRow.getItemProperty(weekday_name);
 
                     Object oldCellValue = tableCell.getValue();
-                    String newCellValue = "";
-                    if(item.getNoOfPages()==0 ) {
-                        newCellValue = "NO PAGES";
-                    } else {
-                        newCellValue = "rt-"+roundtripValue + ": pages=" + item.getNoOfPages() + ", articles=" + item.getNoOfArticles();
-                    }
 
                     if (oldCellValue.toString().contains("NO DELIVERY")) {
-                        tableCell.setValue(oldCellValue.toString().replace("NO DELIVERY", newCellValue));
+                        tableCell.setValue(oldCellValue.toString().replace("NO DELIVERY", item));
                     } else {
-                        tableCell.setValue(oldCellValue + "\n" + newCellValue);
+                        tableCell.setValue(oldCellValue + "\n" + item);
                     }
-
-                } else {
-                    unmappableValues = unmappableValues.concat(item.getDeliveryName());
                 }
 
             } catch (ParseException e) {
-                //Handling of perserexception is done by storing unparsable info to the panel for unmappable values.
-                unmappableValues = unmappableValues.concat(item.getDeliveryName());
+                Notification.show("The application can not show all deliveries", Notification.Type.WARNING_MESSAGE);
                 log.error("Strings could not get parsed into Dates in DatePanel", e);
             }
-            unmappable.setValue(unmappableValues);
             table.sort();
         }
     }
@@ -180,49 +162,33 @@ public class DatePanel extends VerticalLayout {
     }
 
     /**
-     * Generate content for the date-panel.
-     * The content is of graphical form, and it is based on the allready inserted text.
+     * Generate textareas as cells in the table
      */
     static class FieldGenerator implements Table.ColumnGenerator {
-        private WeekPattern expected;
-
-
-        public void setPattern(WeekPattern expected) {
-            this.expected = expected;
-        }
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {
             VerticalLayout vl = new VerticalLayout();
             Property prop = source.getItem(itemId).getItemProperty(columnId);
             TextArea area = new TextArea(null, prop);
-            if (prop.getValue() == null || "".equals(prop.getValue())) {
+            if (prop.getValue() == null) {
                 area.setValue("");
-                return vl;
-            }
-            area.setReadOnly(true);
-            vl.addComponent(area);
-
-            Button contentButton = null;
-            if(prop.getValue().toString().contains("NO PAGES")) {
-                contentButton = new Button(new ThemeResource("icons/empty.png"));
-                vl.addComponent(contentButton);
+                area.setReadOnly(true);
+                vl.addComponent(area);
             } else if(prop.getValue().toString().contains("NO DELIVERY")) {
-                contentButton = new Button(new ThemeResource("icons/missing.png"));
+                area.setValue(prop.getValue().toString());
+                area.setReadOnly(true);
+                vl.addComponent(area);
+                Button contentButton = new Button(new ThemeResource("icons/missing.png"));
                 vl.addComponent(contentButton);
-            }  else {
-                contentButton = new Button(new ThemeResource("icons/full.png"));
-                vl.addComponent(contentButton);
-            }
-            Button expectationButton = null;
-            if(expected==null) {
-                //Add nothing extra
-            } else if(!Boolean.TRUE.equals(expected.getDayState(columnId.toString()))) {
-                expectationButton = new Button(new ThemeResource("icons/empty.png"));
-                vl.addComponent(expectationButton);
-            }  else {
-                expectationButton = new Button(new ThemeResource("icons/full.png"));
-                vl.addComponent(expectationButton);
+            } else {
+                String[] list = prop.getValue().toString().split("\n");
+                for(int rows = 1; rows< list.length; rows++) {
+                    Button expectationButton = new Button(list[rows]);
+                    expectationButton.setId(list[rows]);
+                    expectationButton.addClickListener(buttonListener);
+                    vl.addComponent(expectationButton);
+                }
             }
             return vl;
         }

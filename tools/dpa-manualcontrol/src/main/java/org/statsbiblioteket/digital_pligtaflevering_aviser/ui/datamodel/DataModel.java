@@ -1,9 +1,12 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel;
 
+import com.vaadin.server.StreamResource;
+import com.vaadin.ui.Notification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import org.slf4j.Logger;
@@ -13,11 +16,22 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializ
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemReadWrite;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * DataModel has one initiated instance per browsersession. The datamodel contains cashed information about the
@@ -31,27 +45,53 @@ public class DataModel {
 
     //Formatter for naming the cashing folder by the date
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
-    private boolean includeValidatedDeliveries = false;
+    private DeliveryFedoraCommunication.EventStatus eventStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
     private String initials;
     private DeliveryTitleInfo selectedDelItem;
     private String selectedDelivery;
     private String selectedTitle;
     private String selectedSection = null;
     private String currentlySelectedMonth;
-    private TitleDeliveryHierarchy currentlySelectedTitleHiearachy;
-
+    private TitleDeliveryHierarchy currentlySelectedTitleHierarchy;
+    private DeliveryPattern deliveryPattern = new DeliveryPattern();
     private DeliveryFilesystemReadWrite filesystemReadWrite;
 
     private DeliveryFedoraCommunication fedoraCommunication;
 
     public DataModel() {
         String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
+        createDeliveryPattern();
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
                 map.getRequired("autonomous.pastSuccessfulEvents"),
+                map.getRequired("autonomous.minimalpastSuccessfulEvents"),
                 map.getRequired("autonomous.thisEvent"),
                 repository);
     }
+
+    private void createDeliveryPattern() {
+        InputStream is = null;
+        try {
+            String deliveryPatternPath = map.getRequired("dpa.manualcontrol.configpath") + "/DeliveryPattern.xml";
+            is = new FileInputStream(deliveryPatternPath);
+            JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+            deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+        } catch(JAXBException | FileNotFoundException e) {
+            log.error(e.getMessage());
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+    }
+
+    public DeliveryPattern getDeliveryPattern() {
+        return deliveryPattern;
+    }
+
 
     public void cleanModel() {
         selectedDelItem = null;
@@ -59,7 +99,7 @@ public class DataModel {
         selectedTitle = null;
         selectedSection = null;
         currentlySelectedMonth = null;
-        currentlySelectedTitleHiearachy = null;
+        currentlySelectedTitleHierarchy = null;
     }
 
     /**
@@ -71,8 +111,12 @@ public class DataModel {
         this.initials = initials;
     }
 
-    public void setIncludeValidatedDeliveries(boolean includeValidatedDeliveries) {
-        this.includeValidatedDeliveries = includeValidatedDeliveries;
+    public void setIncludeValidatedDeliveries(DeliveryFedoraCommunication.EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+    }
+
+    public DeliveryFedoraCommunication.EventStatus getIncludeValidatedDeliveries() {
+        return this.eventStatus;
     }
 
     /**
@@ -140,7 +184,7 @@ public class DataModel {
 
     public List<String> getTitlesFromFileSystem() throws Exception {
         initiateTitleHierachyFromFilesystem();
-        return currentlySelectedTitleHiearachy.getAllTitles();
+        return currentlySelectedTitleHierarchy.getAllTitles();
     }
 
     /**
@@ -148,7 +192,59 @@ public class DataModel {
      * deliveryname
      */
     public void selectTitleDelivery() {
-        selectedDelItem = currentlySelectedTitleHiearachy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
+        selectedDelItem = currentlySelectedTitleHierarchy.getDeliveryTitleCheckStatus(selectedTitle, selectedDelivery);
+    }
+
+    /**
+     * Create a web-recourse for downloading a report of the status of manual controls of newspapers
+     * @return
+     */
+    public StreamResource createReportResource() {
+        return new StreamResource(
+                new StreamResource.StreamSource() {
+            @Override
+            public InputStream getStream() {
+                InputStream in = null;
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
+                {
+                    for (String title : currentlySelectedTitleHierarchy.getAllTitles()) {
+                        baos.write((title+";\n").getBytes());
+                        List<DeliveryTitleInfo> DeliveryTitleInfos = currentlySelectedTitleHierarchy.getDeliverysFromTitle(title);
+                        for (DeliveryTitleInfo deliveryTitleInfo : DeliveryTitleInfos) {
+
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getDeliveryName()).orElse("")+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getInitials()).orElse("")+",").getBytes());
+                            baos.write((deliveryTitleInfo.isChecked()+",").getBytes());
+                            baos.write((deliveryTitleInfo.getNoOfArticles()+",").getBytes());
+                            baos.write((deliveryTitleInfo.getNoOfPages()+",").getBytes());
+
+                            String missingItemString = "";
+                            List<Page> filteredPages = deliveryTitleInfo.getPages().stream().filter(p -> ConfirmationState.REJECTED.equals(p.getCheckedState())).collect(Collectors.toList());
+                            for(Page filteredPage : filteredPages) {
+                                missingItemString = missingItemString.concat(filteredPage.getPageName()).concat("-");
+                            }
+                            List<Article> filteredarticles = deliveryTitleInfo.getArticles().stream().filter(p -> ConfirmationState.REJECTED.equals(p.getCheckedState())).collect(Collectors.toList());
+                            for(Article filteredArticle : filteredarticles) {
+                                missingItemString = missingItemString.concat(filteredArticle.getArticleName()).concat("-");
+                            }
+
+                            baos.write((missingItemString+",").getBytes());
+                            baos.write((Optional.ofNullable(deliveryTitleInfo.getComment()).orElse("").replaceAll(","," ").replaceAll(";", " ")+",").getBytes());
+                            baos.write(";\n".getBytes());
+                        }
+                    }
+
+                    byte[] bytes = baos.toByteArray();
+
+                    in = new ByteArrayInputStream(bytes);
+
+                } catch (Exception e) {
+                    Notification.show("The report can not get generated", Notification.Type.ERROR_MESSAGE);
+                    log.error("ERROR EXPORTING DATA", e.getMessage());
+                }
+                return in;
+            }
+        }, "export.csv");
     }
 
     /**
@@ -185,7 +281,7 @@ public class DataModel {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliverysFromTitle(String title) {
-        return currentlySelectedTitleHiearachy.getDeliverysFromTitle(title);
+        return currentlySelectedTitleHierarchy.getDeliverysFromTitle(title);
     }
 
     /**
@@ -194,18 +290,14 @@ public class DataModel {
      * @return
      */
     public List<DeliveryTitleInfo> getDeliveryTitleObjects() {
-        return currentlySelectedTitleHiearachy.getDeliveryTitleObjects(selectedDelivery);
+        return currentlySelectedTitleHierarchy.getDeliveryTitleObjects(selectedDelivery);
     }
 
     /**
      * Initiate the list of deliveries which is currently beeing in operation
      */
     public void initiateDeliveries() {
-        DeliveryFedoraCommunication.EventStatus evtStatus = DeliveryFedoraCommunication.EventStatus.READYFORMANUALCHECK;
-        if (this.includeValidatedDeliveries) {
-            evtStatus = DeliveryFedoraCommunication.EventStatus.DONEMANUALCHECK;
-        }
-        fedoraCommunication.initiateDeliveries(evtStatus, "dl_" + currentlySelectedMonth);
+        fedoraCommunication.initiateDeliveries(eventStatus, "dl_" + currentlySelectedMonth);
     }
 
     /**
@@ -219,11 +311,11 @@ public class DataModel {
      * @param missingItems
      * @return
      */
-    public boolean writeToCurrentItemCashed(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems) {
+    public boolean writeToCurrentItemCached(String deliveryName, String titleName, boolean checked, String initials, String comment, List<MissingItem> missingItems, boolean force) {
         try {
-            DeliveryTitleInfo deli = currentlySelectedTitleHiearachy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
+            DeliveryTitleInfo deli = currentlySelectedTitleHierarchy.setDeliveryTitleCheckStatus(titleName, deliveryName, checked, initials, comment, missingItems);
             filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, deli);
-            return fedoraCommunication.writeDeliveryToFedora(deli);
+            return fedoraCommunication.writeDeliveryToFedora(deli, force);
         } catch (Exception e) {
             log.error("Exception occoured during writing DeliveryTitleInfo", e);
         }
@@ -231,7 +323,7 @@ public class DataModel {
     }
 
     /**
-     * Remove a specific cashed title in a delivery
+     * Remove a specific caced title in a delivery
      *
      * @throws Exception
      */
@@ -266,7 +358,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFedora() throws Exception {
-        currentlySelectedTitleHiearachy = fedoraCommunication.getTitleHierachyFromFedora();
+        currentlySelectedTitleHierarchy = fedoraCommunication.getTitleHierachyFromFedora();
     }
 
     /**
@@ -275,7 +367,7 @@ public class DataModel {
      * @throws Exception
      */
     public void initiateTitleHierachyFromFilesystem() throws Exception {
-        currentlySelectedTitleHiearachy = filesystemReadWrite.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
+        currentlySelectedTitleHierarchy = filesystemReadWrite.initiateTitleHierachyFromFilesystem(currentlySelectedMonth);
     }
 
     /**
@@ -327,7 +419,7 @@ public class DataModel {
      * @throws Exception
      */
     public boolean saveCurrentTitleHierachyToFilesystem() throws Exception {
-        return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHiearachy);
+        return filesystemReadWrite.saveDeliveryToFilesystem(currentlySelectedMonth, currentlySelectedTitleHierarchy);
     }
 
     /**
@@ -350,7 +442,7 @@ public class DataModel {
     }
 
     /**
-     * Get a list of alle deliveries, which is currently beeing operated
+     * Get a list of all deliveries, which is currently beeing operated
      *
      * @return
      */

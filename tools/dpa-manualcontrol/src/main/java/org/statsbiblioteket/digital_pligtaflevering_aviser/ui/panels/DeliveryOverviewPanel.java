@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.VerticalLayout;
@@ -48,7 +49,7 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
                 } catch (ParseException e) {
                     log.error("Date could not get parsed", e);
                 }
-                datePanel.setInfo(list);
+                datePanel.setInfo(list, model.getDeliveryPattern().getWeekPattern(selectedTitle));
             }
         });
 
@@ -100,6 +101,11 @@ public class DeliveryOverviewPanel extends VerticalLayout implements StatisticsP
      */
     @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
+
+    }
+
+    @Override
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
 
     }
 
