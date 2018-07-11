@@ -311,23 +311,6 @@
                     <artifactItems>
                         <artifactItem>
                             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-                            <artifactId>dpa-dashboard</artifactId>
-                            <version>${project.version}</version>
-                            <type>war</type>
-                            <overWrite>true</overWrite>
-                            <destFileName>dpa-dashboard.war</destFileName>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-                            <artifactId>dpa-dashboard</artifactId>
-                            <version>${project.version}</version>
-                            <!-- our own custom type for this -->
-                            <type>tomcat-xml</type>
-                            <overWrite>true</overWrite>
-                            <destFileName>dpa-dashboard.xml</destFileName>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
                             <artifactId>dpa-manualcontrol</artifactId>
                             <version>${project.version}</version>
                             <type>war</type>
