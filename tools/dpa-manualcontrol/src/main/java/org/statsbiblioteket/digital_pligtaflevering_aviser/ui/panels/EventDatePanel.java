@@ -176,8 +176,8 @@ public class EventDatePanel extends VerticalLayout {
         public Component generateCell(Table source, Object itemId, Object columnId) {
             VerticalLayout vl = new VerticalLayout();
             Property prop = source.getItem(itemId).getItemProperty(columnId);
-            Object oon = prop.getValue();
-            if(oon!=null) {
+            Object propertyValue = prop.getValue();
+            if(propertyValue!=null) {
 
                 List<DeliveryInformationComponent> componentList = (List<DeliveryInformationComponent>)prop.getValue();
 

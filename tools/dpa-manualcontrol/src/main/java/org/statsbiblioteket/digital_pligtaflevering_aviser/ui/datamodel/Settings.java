@@ -7,4 +7,5 @@ public class Settings {
 
     public static Integer screenwidth = null;
     public static String[] expectedEvents = null;
+    public static String[] trustedUsers = null;
 }

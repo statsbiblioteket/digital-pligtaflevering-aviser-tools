@@ -20,6 +20,7 @@
   <Parameter name="autonomous.component.fedoraDelayBetweenRetries" value="10"/>
   <Parameter name="dpa.manualcontrol.cashingfolder" value="/tmp/"/>
   <Parameter name="dpa.manualcontrol.configpath" value="/tmp/"/>
+  <Parameter name="dpa.manualcontrol.truetedUsers" value="nieb,mmj,abr"/>
   <Parameter name="doms.collection.pid" value="doms_sboi_dpaCollection"/>
 
   <Parameter name="casServerUrlPrefix" value="https://samling.statsbiblioteket.dk/casinternal/"/>

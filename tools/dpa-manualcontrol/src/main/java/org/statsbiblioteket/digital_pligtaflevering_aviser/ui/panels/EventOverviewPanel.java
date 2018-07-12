@@ -4,6 +4,7 @@ import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
@@ -13,12 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventAdminWindow;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventPanel;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,7 +63,8 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
-                        if(dialog.validateSecurityKey()) {
+
+                        if(Arrays.stream(Settings.trustedUsers).filter(initials -> initials.equals(model.getInitials())).count()>0) {
                             if ("OVERRIDE".equals(event.getButton().getId())) {
                                 dk.statsbiblioteket.medieplatform.autonomous.Event selectedDomsEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
                                 DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
@@ -75,6 +79,8 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                                         "\nReason: " + selectedDomsEvent.getDetails()+ "\nBy: "+model.getInitials()), "EVENT_DELETED_MANUALLY", selectedDomsEvent.isSuccess());
                                 domsItem.appendEvent(newDeleteDomsEvent);
                             }
+                        } else {
+                            Notification.show("You are not added to the list of trusted users", Notification.Type.HUMANIZED_MESSAGE);
                         }
                     }
                 });

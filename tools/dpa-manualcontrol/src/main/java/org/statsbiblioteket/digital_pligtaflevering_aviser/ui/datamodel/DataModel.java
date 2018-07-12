@@ -62,6 +62,7 @@ public class DataModel {
     public DataModel() {
         String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
         Settings.expectedEvents = map.getRequired("autonomous.pastSuccessfulEvents").split(",");
+        Settings.trustedUsers = map.getRequired("dpa.manualcontrol.truetedUsers").split(",");
         createDeliveryPattern();
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
