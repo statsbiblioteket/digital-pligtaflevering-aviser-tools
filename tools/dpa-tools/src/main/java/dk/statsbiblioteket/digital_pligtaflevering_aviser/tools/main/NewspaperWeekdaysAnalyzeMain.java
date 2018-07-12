@@ -3,6 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -26,16 +27,29 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Unfinished
@@ -148,59 +162,91 @@ xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addD
                         .peek(o -> log.trace("Query returned: {}", o))
                         .collect(toList());
 
-                Pattern pattern = Pattern.compile("dl_(........)_rt");
+                Pattern pattern = Pattern.compile("dl_(........)_rt.*");
 
-                for(DomsItem item: roundtripItems) {
+                List<String> result = new ArrayList<>();
+
+                for (DomsItem item : roundtripItems) {
                     String relativePath = item.getPath();
 
+                    Path deliveryPath = Paths.get(deliveriesFolder, relativePath).toAbsolutePath();
 
+                    mxBean.currentId = deliveryPath.toString();
+                    mxBean.idsProcessed++;
+
+                    if (Files.exists(deliveryPath) == false) {
+                        throw new RuntimeException(new FileNotFoundException(deliveryPath.toString()));
+                    }
+
+                    // Same as ingester
+                    Set<String> foundTitles = Files.walk(deliveryPath, 1)
+                            .filter(Files::isDirectory)
+                            .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
+                            .map(p -> p.getFileName().toString())
+                            .collect(toSet());
+
+                    Matcher matcher = pattern.matcher(relativePath);
+                    if (matcher.matches() == false) {
+                        continue;
+                    }
+                    String dateString = matcher.group(1);
+                    LocalDate localDate = LocalDate.parse(dateString.substring(0, 4) + "-" + dateString.substring(4, 6) + "-" + dateString.substring(6, 8));
+                    DayOfWeek dayOfWeek = localDate.getDayOfWeek();
+
+                    String[] dayIds = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+                    String dayId = dayIds[dayOfWeek.getValue() - 1];
+
+                    Set<String> expectedTitles = deliveryPattern.entryStream()
+                            .filter(e -> e.getValue().getDayState(dayId))
+                            .map(e -> e.getKey())
+                            .sorted()
+                            .collect(toSet());
+
+                    Set<String> missingTitles = new HashSet<>(expectedTitles);
+                    missingTitles.removeAll(foundTitles);
+
+                    Set<String> extraTitles = new HashSet<>(foundTitles);
+                    extraTitles.removeAll(expectedTitles);
+
+                    /*  Now generate this snippet:
+
+                    {
+                    "weekday": "Mon",
+                    "expectedTitles": ["avis1","avis2"],
+                    "foundTitles": ["avis1","avis3"],
+                    "missingTitles":["avis2"],
+                    "extraTitles":["avis3"],
+                    }
+                     */
+
+                   String jsonSnippet = String.join("\n",
+                            "{",
+                            "\"weekday\": \"" + dayId + "\"",
+                            "\"expectedTitles\": " + jsonifySet(expectedTitles),
+                            "\"foundTitles\": " + jsonifySet(foundTitles),
+                            "\"missingTitles\": " + jsonifySet(missingTitles),
+                            "\"extraTitles\": " + jsonifySet(extraTitles),
+                            "}"
+                    );
+
+                   item.modifyDatastreamByValue("NEWSPAPERWEEKDAY", null, null,jsonSnippet.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, null);
+                   item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, true));
+
+
+                    result.add(item.getDomsId().id() + " " + deliveryPath + " missingTitles: " + jsonifySet(missingTitles));
                 }
-                return new ArrayList<>();
+                return result;
             };
-
-
-//                    .map(st -> st.map(roundtripItem -> {
-//                        Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.children()
-//                                .peek(i -> mxBean.currentId = String.valueOf(i))
-//                                .peek(i -> mxBean.idsProcessed++)
-//                                // ignore those already processed if flag is set
-//                                .filter(i -> (i.datastreams().stream()
-//                                        .anyMatch(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)) && reuseExistingDatastream) == false)
-//                                // process pdf datastreams.
-//                                .flatMap(i -> i.datastreams().stream()
-//                                        .filter(datastream -> datastream.getMimeType().equals("application/pdf"))
-//                                        .peek(datastream -> log.trace("Found PDF stream on {}", i))
-//                                        .map(datastream -> getUrlForBitrepositoryItemPossiblyLocallyAvailable(i, bitrepositoryURLPrefix, bitrepositoryMountpoint, datastream.getUrl()))
-//                                        .map(url -> Try.of(() -> {
-//                                            log.trace("{} - processing URL: {}", i, url);
-//                                            long startTime = System.currentTimeMillis();
-//                                            String veraPDF_output = veraPdfInvokerProvider.get().apply(url);
-//                                            i.modifyDatastreamByValue(VERAPDF_DATASTREAM_NAME, null, null, veraPDF_output.getBytes(StandardCharsets.UTF_8), null, "text/xml", "URL: " + url, null);
-//                                            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, url, (System.currentTimeMillis() - startTime));
-//                                            return Boolean.TRUE;
-//                                        }).toEither())
-//                                        .peek((Either<Throwable, Boolean> s) -> log.trace("{}", s)))
-//                                .collect(partitioningBy(either -> either.isRight()));
-//
-//                        List<Boolean> successful = eithersFromRoundtrip.get(Boolean.TRUE).stream()
-//                                .map(either -> either.right().get())
-//                                .collect(toList());
-//                        List<String> failed = eithersFromRoundtrip.get(Boolean.FALSE).stream()
-//                                .map(either -> DomsItemTuple.stacktraceFor(either.left().get()))
-//                                .collect(toList());
-//
-//                        if (failed.size() == 0) {
-//                            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), successful.size() + " processed", eventName, true));
-//                            return true;
-//                        } else {
-//                            // we have encountered exceptions not handled lower down.  Report those.
-//                            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), String.join("\n\n", failed), eventName, false));
-//                            return false;
-//                        }
-//                    }))
-//                    .collect(toList());
-
             return f;
+        }
+
+        public String jsonifySet(Set<String> set) {
+            return "[" +
+                    set.stream()
+                            .sorted()
+                            .map(s -> "\"" + s.replaceAll("\"", "\\") + "\"")
+                            .collect(joining(", "))
+                    + "]";
         }
 
         @Provides
@@ -251,5 +297,4 @@ xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addD
             return map.getRequired(DPA_DELIVERY_PATTERN_XML_PATH);
         }
     }
-
 }

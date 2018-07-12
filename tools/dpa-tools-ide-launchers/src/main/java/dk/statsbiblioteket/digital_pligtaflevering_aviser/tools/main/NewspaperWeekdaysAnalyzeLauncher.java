@@ -17,7 +17,7 @@ public class NewspaperWeekdaysAnalyzeLauncher {
 
 
         NewspaperWeekdaysAnalyzeMain.main(new String[]{
-                "newspapers-on-weekdays-analyze.properties",
+                "newspaper-weekdays-analyze.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 DPA_DELIVERY_PATTERN_XML_PATH + "=" + configPath.toAbsolutePath()
 

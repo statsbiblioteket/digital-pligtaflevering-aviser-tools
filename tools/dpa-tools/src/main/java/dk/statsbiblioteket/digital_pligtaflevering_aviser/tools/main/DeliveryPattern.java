@@ -4,6 +4,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @XmlRootElement
 public class DeliveryPattern implements java.io.Serializable {
@@ -18,5 +20,9 @@ public class DeliveryPattern implements java.io.Serializable {
 
     public WeekPattern getWeekPattern(String name) {
         return this.weekPatterns.get(name);
+    }
+
+    public Stream<Map.Entry<String, WeekPattern>> entryStream() {
+        return weekPatterns.entrySet().stream();
     }
 }
