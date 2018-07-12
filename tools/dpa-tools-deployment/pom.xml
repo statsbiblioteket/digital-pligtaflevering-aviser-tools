@@ -232,6 +232,24 @@
                                     </mainClass>
                                     <id>set-event-on-uuid</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFInvokeMain
+                                    </mainClass>
+                                    <id>verapdf-invoke</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFAnalyzeMain
+                                    </mainClass>
+                                    <id>verapdf-analyze</id>
+                                </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.NewspaperWeekdaysAnalyzeMain
+                                    </mainClass>
+                                    <id>newspaper-weekdays-analyze</id>
+                                </program>
                             </programs>
                         </configuration>
                     </execution>
@@ -297,23 +315,6 @@
                 </executions>
                 <configuration>
                     <artifactItems>
-                        <artifactItem>
-                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-                            <artifactId>dpa-dashboard</artifactId>
-                            <version>${project.version}</version>
-                            <type>war</type>
-                            <overWrite>true</overWrite>
-                            <destFileName>dpa-dashboard.war</destFileName>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-                            <artifactId>dpa-dashboard</artifactId>
-                            <version>${project.version}</version>
-                            <!-- our own custom type for this -->
-                            <type>tomcat-xml</type>
-                            <overWrite>true</overWrite>
-                            <destFileName>dpa-dashboard.xml</destFileName>
-                        </artifactItem>
                         <artifactItem>
                             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
                             <artifactId>dpa-manualcontrol</artifactId>

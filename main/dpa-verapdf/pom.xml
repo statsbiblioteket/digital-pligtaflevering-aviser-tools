@@ -72,5 +72,23 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>dk.kb.stream</groupId>
+            <artifactId>streamtuples</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dk.kb.stream</groupId>
+            <artifactId>streamtuples</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+        </dependency>
     </dependencies>
 </project>

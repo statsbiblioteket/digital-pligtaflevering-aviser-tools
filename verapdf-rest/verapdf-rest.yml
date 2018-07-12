@@ -1,0 +1,9 @@
+# What ports to bind to in development.  This can be overridden in production.
+
+server:
+  applicationConnectors:
+  - type: http
+    port: 8090
+  adminConnectors:
+  - type: http
+    port: 8091

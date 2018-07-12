@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class ValidationResults {
 
     private ArrayList<ValidationResult> rulesBroken = new ArrayList<ValidationResult>();
-    private ValidationResult.ValidationResultEnum worstBrokenRule = ValidationResult.ValidationResultEnum.ACCEPTABLE;
+    private SeverenessLevel worstBrokenRule = SeverenessLevel.ACCEPTABLE;
 
     /**
      * Add an new element to the lest of broken paragraphes
@@ -29,7 +29,7 @@ public class ValidationResults {
      *
      * @return
      */
-    public ValidationResult.ValidationResultEnum getWorstBrokenRule() {
+    public SeverenessLevel getWorstBrokenRule() {
         return worstBrokenRule;
     }
 

@@ -16,6 +16,8 @@ visualvm):
 
     vagrant ssh -- -Y
     
+You must have the KB specific version of veraPDF-rest available
+to Maven to build the box.   See /README.md for details.
 
 
 Setting up the DOMS+Bitrepository vagrant box
@@ -42,7 +44,7 @@ Now download Zulu OpenJDK 8, install Bit Repository and DOMS and run a
 tiny web server on top of the Bit Repository file system so we can
 retrieve the files stored:
 
-    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
+    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh; nohup bash /vagrant/run-verapdf-rest.sh"
 
 
 Note that DOMS will take a while to initialize (SBOI and DOMS Wui Solr

@@ -1,0 +1,71 @@
+Hej
+Jeg har lige vist Mads mine rettelser til hans DPA VAADIN brugerflade.
+Det var bare småting, som jeg lavede fordi de irriterede mig.
+
+Rettelser til kortere kolonne navne. Det gjorde brugerfladen rarere at se på, for det gjorde at man ikke har brug for horizontale scrollbars på almindelige skærme
+Generel flytning af pdf frontpage ned under listerne, ikke ved siden af. Det skal revertes. Mads havde allerede kode som gjorde det, hvis skærmen er bred nok. Problemet er nok bare at han havde sat en for lav værdi for “bred nok”, så mine almindelige skærme var “brede nok” og den pakkede derfor alt ting ind i en linie.
+Fix af Overview siden så ugerne starte med Mandag, ikke søndag
+Fix af Overview værdier, så værdien for en dag ikke blot er “1 - 7 - 1”, men i stedet “rt-1, pages=7, articles=1” så man kan forstå hvad man ser på.
+Jeg er nu klar til at begynde de rettelser jeg blev bedt om.
+
+Jeg har snakket vores design igennem med Mads.
+Vi er kommet frem til følgende.
+
+Vi bruger Overview siden i VAADIN brugerfladen
+http://mirzam:9021/dpa-manualcontrol/VAADIN;mode=manualvalidate?month=201705#!OVERVIEW
+(Tryk start, hvis den ikke viser jer en liste af avis titler. Så vælg en af titlerne)
+
+Vi får overview siden til at tegne kalenderen inden man har valgt en titel, da fejlene er for en delivery, ikke for et bestemt avishus.
+
+Når kalenderen tegnes, lægger den Happy/Sad ikoner (Mads siger at baggrundsfarver er meget besværlige) ind på dagene, som angiver om de har bestået de automatiske checks
+
+Hvis der er en Sad, så er der en knap, så man kan gøre den glad. Den knap bør åbne et nyt “vindue” med “er du sikker?” og en forklaring af hvad du gør nu.
+
+Der bør være mouse over eller noget på sad, så man kan se hvad fejlen var.
+
+Dernæst snakkede vi lidt om hvilke events der betød hvad osv.
+Så jeg ser det, er kæden af events
+
+Data_Received
+Data_Archived -> Xml Validated
+Checksum Regen
+Checksum Checked -> Verapdf invoked -> Verapdf checked
+Statistics generated
+VAADIN brugerfladen kigger pt. efter deliveries der har fået “Statistics Generated” eventet.
+
+Det virker fornuftigt, og den vil ikke virke uden statistics. Det giver også mening at batches der ikke har bestået
+checksum checket bliver ignoreret af overview grænsefladen.
+
+Vi skal faktisk have set på hvilke “slags” events Niels kan overrule, og hvilke han ikke kan. Som jeg ser det har vi disse checks
+
+Xml validation: Overrule?
+Checksum: Overrule: NO
+Verapdf: Overrule?
+AvisTitlerPåUgedag(CSV): YES
+Så VAADIN skulle nu finde alle deliveries der har Statistics=True og AvisTitlerPåUgedag=NotNull. Det burde være muligt at søge efter.
+
+Så TBA skal lave en AvisTitlerPåUgedag komponenten udfra den CSV som Niels har lavet. Den skal bare rapportere fejlen som event outcome comment (tror jeg nok det hedder)
+Formatet af det er ikke rigtigt et problem, men hvis du kan separere teknisk info fra human readable fejl, f.eks. vha et json format ala
+
+{
+    "errorMessage": "This is the human readable error message",
+    "stackTrace":"Here you can dump whatever about what went wrong"
+}
+Felterne kan hedde noget andet osv.
+Og det kan måske også være rart at for denne komponent at du viser fejlen som
+
+{
+    "weekday": "wednesday",
+    "expectedTitles": ["avis1","avis2"],
+    "foundTitles": ["avis1","avis3"],
+    "missingTitles":["avis2"],
+    "extraTitles":["avis3"],
+    "error": "STACKTRACE OSV"
+}
+Det ville nok faktisk være et bedre format, da vi så ville kunne formatere en god besked til Niels selv. Ja, brug det.
+
+--
+Asger Askov Blekinge
+IT Developer, IT-development
+Royal Danish Library, Victor Albecks Vej 1, 8000 Aarhus C, Denmark.
+Tel: +45 8946 2100
