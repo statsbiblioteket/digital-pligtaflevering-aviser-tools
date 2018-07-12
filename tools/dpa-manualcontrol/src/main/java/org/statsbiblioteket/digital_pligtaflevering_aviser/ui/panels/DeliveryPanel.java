@@ -58,7 +58,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, deliveryColumnsNames, "DELIVERY", true);
     protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, sectionColumnsNames, "SECTION", true);
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true);
+    protected GenericListTable pageSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true);
     protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, articleColumnsNames, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
     private Button statusButton = new Button("StatusExport");
@@ -81,7 +81,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             }
         });
         deliveryPanel.setSortParam("newspaperTitle");
-        fileSelectionPanel.setSortParam("pageName");
+        pageSelectionPanel.setSortParam("pageName");
         articleSelectionPanel.setSortParam("articleName");
     }
 
@@ -92,12 +92,12 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
     public void initialLayout() {
         tablesLayoutTop.addComponent(deliveryPanel);
         tablesLayoutTop.addComponent(sectionSectionTable);
-        tablesLayoutBottom.addComponent(fileSelectionPanel);
+        tablesLayoutBottom.addComponent(pageSelectionPanel);
         tablesLayoutBottom.addComponent(articleSelectionPanel);
 
         tablesLayoutTop.setExpandRatio(deliveryPanel, 0.2f);
         tablesLayoutTop.setExpandRatio(sectionSectionTable, 0.2f);
-        tablesLayoutBottom.setExpandRatio(fileSelectionPanel, 0.4f);
+        tablesLayoutBottom.setExpandRatio(pageSelectionPanel, 0.4f);
         tablesLayoutBottom.setExpandRatio(articleSelectionPanel, 0.1f);
 
         tablesLayout.addComponent(tablesLayoutTop);
@@ -133,7 +133,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public boolean checkThePage(Object itemId, ConfirmationState checkedState) {
-        return fileSelectionPanel.checkSpecific(itemId, checkedState);
+        return pageSelectionPanel.checkSpecific(itemId, checkedState);
     }
 
     public void reloadTables() {
@@ -157,7 +157,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     protected void showTheSelectedTitle(boolean redrawSectionTable) {
 
-        fileSelectionPanel.setEnabled(false);
+        pageSelectionPanel.setEnabled(false);
         articleSelectionPanel.setEnabled(false);
 
         String selectedDelivery = model.getSelectedDelivery();
@@ -172,7 +172,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             return;
         }
 
-        fileSelectionPanel.setEnabled(true);
+        pageSelectionPanel.setEnabled(true);
         articleSelectionPanel.setEnabled(true);
 
         List<Page> pages = title.getPage();
@@ -197,8 +197,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 .filter(distinctByKey(page -> page.getId()))
                 .collect(Collectors.toList());
 
-        fileSelectionPanel.setInfo(filteredPages);
-        fileSelectionPanel.selectFirst();
+        pageSelectionPanel.setInfo(filteredPages);
+        pageSelectionPanel.selectFirst();
 
         List<Article> articleList = new ArrayList<Article>();
         articleList.addAll(item.getArticles());
@@ -220,12 +220,12 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-        fileSelectionPanel.addItemClickListener(listener);
+        pageSelectionPanel.addItemClickListener(listener);
         articleSelectionPanel.addItemClickListener(listener);
     }
 
     public void addValueChangeListener(Property.ValueChangeListener listener) {
-        fileSelectionPanel.addValueChangeListener(listener);
+        pageSelectionPanel.addValueChangeListener(listener);
     }
 
     @Override
