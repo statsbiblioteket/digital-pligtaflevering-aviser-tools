@@ -12,12 +12,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Confirmatio
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventAdminWindow;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -81,10 +82,9 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
         };
 
         datePanel.addClickListener(buttonListener);
-
+        datePanel.setWidth("100%");
         tablesLayout.addComponent(datePanel);
-        tablesLayout.setExpandRatio(datePanel, 1f);
-
+        tablesLayout.setWidth("100%");
         this.addComponent(buttonLayout);
         this.addComponent(tablesLayout);
     }
@@ -139,13 +139,17 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
     @Override
     public void insertInitialTableValues() throws Exception {
 
-
         try {
             datePanel.setMonth(model.getSelectedMonth());
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        datePanel.setInfo(model.getInitiatedDeliveries());
+        List<DeliveryInformationComponent> deliveryInformationList = new ArrayList<DeliveryInformationComponent>();
+        for(String item : model.getInitiatedDeliveries()) {
+            DomsItem domsItem = model.getDeliveryFromName(item);
+            deliveryInformationList.add(new DeliveryInformationComponent(item, UiDataConverter.validateEventCollection(domsItem.getOriginalEvents())));
+        }
+        datePanel.setInfo(deliveryInformationList);
     }
 
     /**

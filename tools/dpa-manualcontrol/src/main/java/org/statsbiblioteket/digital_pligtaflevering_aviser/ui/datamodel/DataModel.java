@@ -60,6 +60,7 @@ public class DataModel {
 
     public DataModel() {
         String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
+        Settings.expectedEvents = map.getRequired("autonomous.pastSuccessfulEvents").split(",");
         createDeliveryPattern();
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),

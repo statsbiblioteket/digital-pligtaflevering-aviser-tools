@@ -311,25 +311,25 @@ Event UI is a userintarface that can be used to modify the Event-floz for a spec
                   !                                                     +----------+
                   V
     +-----------------------------+
-    ! Create VeraPDF              !
+    ! Create VeraPDF              !  (VeraPDF_Invoked)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
                   V
     +-----------------------------+
-    ! Check VeraPDF               !
+    ! Check VeraPDF               !  (VeraPDF_Analyzed)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
                   !                                                     +----------+
                   V
     +-----------------------------+
-    ! Generate Del. pattern match !
+    ! Generate Del. pattern match !  (Newspaper_Weekdays_Analyzed)
     +-----------------------------+
                   !                                                     +----------+
                  < >---Fail---------------------------------------------! Event UI !
-                  !                                                     +----------+                  
+                  !                                                     +----------+
                   !        
                   V        
     +-----------------------------+
