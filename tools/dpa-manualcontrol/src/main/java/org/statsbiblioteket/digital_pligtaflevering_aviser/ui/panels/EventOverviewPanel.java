@@ -5,8 +5,11 @@ import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
@@ -23,6 +26,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The EventOverviewPanel
@@ -52,6 +56,48 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                 List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = domsItem.getOriginalEvents();
                 EventAdminWindow dialog = new EventAdminWindow(clickEvent.getButton().getId());
                 EventPanel eventPanel = new EventPanel();
+
+                eventPanel.addButtonEventListener(new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(Button.ClickEvent clickEvent) {
+
+                        Optional<DomsDatastream> validationStream = null;
+                        switch(clickEvent.getButton().getId()) {
+                            case "VeraPDF_Analyzed":
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("VERAPDFREPORT")).findAny();
+                                break;
+                            case "Newspaper_Weekdays_Analyzed":
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("NEWSPAPERWEEKDAY")).findAny();
+                                break;
+                            case "Statistics_generated":
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("DELIVERYSTATISTICS")).findAny();
+                                break;
+                        }
+
+                        if (validationStream!=null && validationStream.isPresent()) {
+                            String validationString = validationStream.get().getDatastreamAsString();
+
+                            TextArea field = new TextArea();
+                            field.setWidth(1000, Unit.PIXELS);
+                            field.setRows(50);
+                            field.setValue(validationString);
+
+                            EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId());
+                            textDialog.setDialogContent(field);
+                            textDialog.setModal(true);
+                            UI.getCurrent().addWindow(textDialog);
+
+                            textDialog.addCloseListener(new Window.CloseListener() {
+                                // inline close-listener
+                                @Override
+                                public void windowClose(Window.CloseEvent e) {
+                                    UI.getCurrent().removeWindow(textDialog);
+                                }
+                            });
+                        }
+                    }
+                });
+
                 eventPanel.setValues(eventList);
                 eventPanel.setInitials(model.getInitials());
 
@@ -76,12 +122,20 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                 DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
                                         "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
                                                 (selectedDomsEvent.getDetails() == null ? "" : "\n" +
-                                                        "\nReason: " + selectedDomsEvent.getDetails()+ "\nBy: "+model.getInitials()), "EVENT_DELETED_MANUALLY", selectedDomsEvent.isSuccess());
+                                                        "\nReason: " + selectedDomsEvent.getDetails()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", selectedDomsEvent.isSuccess());
                                 domsItem.appendEvent(newDeleteDomsEvent);
                             }
                         } else {
                             Notification.show("You are not added to the list of trusted users", Notification.Type.HUMANIZED_MESSAGE);
                         }
+                    }
+                });
+
+                dialog.addCloseListener(new Window.CloseListener() {
+                    // inline close-listener
+                    @Override
+                    public void windowClose(Window.CloseEvent e) {
+                        UI.getCurrent().removeWindow(dialog);
                     }
                 });
             }

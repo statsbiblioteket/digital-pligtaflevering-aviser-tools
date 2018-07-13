@@ -8,7 +8,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.EventDatePanel;
 
 import java.util.List;
 
@@ -20,6 +19,7 @@ public class EventPanel extends VerticalLayout {
     private TextField initials = new TextField("Initials");
     private BeanItemContainer articleBeans;
     private Table eventTable;
+    private Button.ClickListener listener;
 
     public EventPanel() {
         super();
@@ -62,6 +62,10 @@ public class EventPanel extends VerticalLayout {
     }
 
 
+    public void addButtonEventListener(Button.ClickListener listener) {
+        this.listener = listener;
+    }
+
 
     @Override
     public void setEnabled(boolean enabled) {
@@ -82,11 +86,10 @@ public class EventPanel extends VerticalLayout {
     /**
      * Generate textareas as cells in the table
      */
-    static class FieldGenerator implements Table.ColumnGenerator {
+    class FieldGenerator implements Table.ColumnGenerator {
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {
-            VerticalLayout vl = new VerticalLayout();
             Property prop = source.getItem(itemId).getItemProperty(columnId);
             Object propertyValue = prop.getValue();
             Button expectationButton = new Button();
@@ -94,6 +97,8 @@ public class EventPanel extends VerticalLayout {
                 ThemeResource themeRecourse = ((Boolean)propertyValue).booleanValue() ?
                         new ThemeResource("icons/accept.png") : new ThemeResource("icons/fail.png");
                 expectationButton = new Button(themeRecourse);
+                expectationButton.setId(((dk.statsbiblioteket.medieplatform.autonomous.Event)itemId).getEventID());
+                expectationButton.addClickListener(listener);
             } else {
                 expectationButton = new Button(new ThemeResource("icons/fail.png"));
             }
