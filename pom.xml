@@ -131,6 +131,12 @@
                 <version>0.6.2</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.sun.jersey.contribs</groupId>
+                <artifactId>jersey-multipart</artifactId>
+                <version>1.17.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -149,10 +155,6 @@
         <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-batch-trigger</module>
         <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-bitrepository-ingester</module>
         <module>sbforge-parent-1.18/newspaper-parent-1.5/newspaper-prompt-doms-ingester</module>
-
-        <!-- dashboard web interface -->
-        <module>tools/dpa-dashboard</module>
-        <module>tools/dpa-dashboard-javaee7</module>
 
         <!-- manual control web interface -->
         <module>tools/dpa-manualcontrol</module>

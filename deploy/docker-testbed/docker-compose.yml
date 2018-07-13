@@ -9,9 +9,12 @@ services:
     image: kb/dpa-cron
     volumes:
       - ../../delivery-samples:/delivery-samples:ro
+      - $HOME/.Xauthority:/root/.Xauthority
     network_mode: host
     environment:
       - TZ=Europe/Copenhagen  # FIXME:  Use host value.
+      - DISPLAY=${DISPLAY}
+
 
 #    ports:
 #    # talk to DOMS+Bitrepository running in virtualbox on host (or port forwarded to)

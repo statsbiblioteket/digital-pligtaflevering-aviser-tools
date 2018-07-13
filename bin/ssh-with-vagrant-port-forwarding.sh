@@ -8,4 +8,4 @@
 HOST=${1:-pc591.sb}
 
 # http://linuxcommand.org/lc3_man_pages/ssh1.html
-ssh -X -A -L7880:localhost:7880 -L58608:localhost:58608 -L58709:localhost:58709 $HOST
+ssh -X -A -L7880:localhost:7880 -L58608:localhost:58608 -L58709:localhost:58709 -L8090:localhost:8090 $HOST

@@ -26,12 +26,19 @@ set -e
 
 ln -s /vagrant/nohup.out /home/vagrant/nohup.out
 
+# Get zulu java 8
+apt-get update > /dev/null
+apt-get install -y software-properties-common
 
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x219BD9C9
+apt-add-repository 'deb http://repos.azulsystems.com/ubuntu stable main'
 
 apt-get update > /dev/null
-apt-get install -y zip unzip openjdk-7-jdk zookeeperd git xmlstarlet xauth
+apt-get install -y zulu-8
+apt-get install -y zip unzip openjdk-7-jdk zookeeperd git xmlstarlet xauth software-properties-common
 
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+update-java-alternatives -s java-1.7.0-openjdk-amd64
 
 # May be deleteable, check with ABR.
 apt-get install -y redis-server

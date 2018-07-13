@@ -1,6 +1,13 @@
 Changelog:
 ===
 
+2018-07-11:
+
+* New autonomous component: invoke verapdf via rest on all PDF files in roundtrip and store result in datastream.
+* New autonomous component: analyze verapdf output from above and generate full report on child, and bad-enough report on roundtrip.
+* New autonomous component: analyze roundtrip on disk to see correspondence with spread sheet.
+* "dashboard" webapp removed as all interesting functionality has been moved to "manual control" webapp.
+
 2018-05-03:
 
 * New autonomous component: Regenerate checksums.txt file for ingested delivery.
