@@ -58,4 +58,14 @@ Hvis man vil have browseren til at starte på siden TitleValidation for april 20
 http://aldebaran:9021/dpa-manualcontrol/?month=201704#!TITLEVALIDATIONPANEL
 
 
+Der er mulighed for at validere aviser der ikke er kørt igennem de automatiske kontrol-steps.
+I sommeren 2018 sættes flere automatiske kontrol-steps i drift.
+Hvis der er behov for at lave manuel kontrol på deliveries der ikke er kørt gennem alle automatiske steps kan dette gøres således:
+?events=DONEMANUALMINIMALCHECK
+
+Der kan benyttes flere samtidige konfigurationer. f.ex. kan man køre med april 2017 samtidigt med tidlig kontrol således:
+http://aldebaran:9021/dpa-manualcontrol/?month=201704&events=DONEMANUALMINIMALCHECK#!TITLEVALIDATIONPANEL
+
+Generelt bør "?events=DONEMANUALMINIMALCHECK" kun benyttes indtil de automatiske kontroller begynder at køre
+
 

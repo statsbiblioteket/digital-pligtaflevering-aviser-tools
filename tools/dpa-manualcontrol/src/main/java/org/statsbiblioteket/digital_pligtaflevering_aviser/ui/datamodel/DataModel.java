@@ -21,6 +21,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -60,6 +61,8 @@ public class DataModel {
 
     public DataModel() {
         String cashingfolder = map.getRequired("dpa.manualcontrol.cashingfolder");
+        Settings.expectedEvents = map.getRequired("autonomous.pastSuccessfulEvents").split(",");
+        Settings.trustedUsers = map.getRequired("dpa.manualcontrol.truetedUsers").split(",");
         createDeliveryPattern();
         filesystemReadWrite = new DeliveryFilesystemReadWrite(cashingfolder);
         fedoraCommunication = new DeliveryFedoraCommunication(map.getRequired("autonomous.itemTypes"),
@@ -71,19 +74,22 @@ public class DataModel {
 
     private void createDeliveryPattern() {
         InputStream is = null;
-        try {
-            String deliveryPatternPath = map.getRequired("dpa.manualcontrol.configpath") + "/DeliveryPattern.xml";
-            is = new FileInputStream(deliveryPatternPath);
-            JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-            deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
-        } catch(JAXBException | FileNotFoundException e) {
-            log.error(e.getMessage());
-        } finally {
+        String deliveryPatternPath = map.getDefault("dpa.manualcontrol.configpath", "");
+        File configFile = new File(deliveryPatternPath + "/DeliveryPattern.xml");
+        if(configFile.exists()) {
             try {
-                is.close();
-            } catch (IOException e) {
+                is = new FileInputStream(deliveryPatternPath + "/DeliveryPattern.xml");
+                JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
+                Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+            } catch (JAXBException | FileNotFoundException e) {
                 log.error(e.getMessage());
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                }
             }
         }
     }

@@ -1,9 +1,15 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.EventDatePanel;
+
 import java.util.List;
 
 /**
@@ -13,22 +19,23 @@ public class EventPanel extends VerticalLayout {
 
     private TextField initials = new TextField("Initials");
     private BeanItemContainer articleBeans;
-    private Table articleTable;
+    private Table eventTable;
 
     public EventPanel() {
         super();
         this.setSpacing(true);
-
+        initials.setEnabled(false);
         articleBeans = new BeanItemContainer(dk.statsbiblioteket.medieplatform.autonomous.Event.class);
 
         // Bind a table to it
-        articleTable = new Table("checked articles", articleBeans);
-        articleTable.setVisibleColumns( new Object[] {"date", "eventID", "success", "details"} );
-        articleTable.setWidth("100%");
-        articleTable.setHeight("150px");
-        articleTable.setSelectable(true);
-        articleTable.setImmediate(true);
-        this.addComponent(articleTable);
+        eventTable = new Table("checked articles", articleBeans);
+        eventTable.setVisibleColumns( new Object[] {"date", "eventID", "success", "details"} );
+        eventTable.addGeneratedColumn("success", new EventPanel.FieldGenerator());
+        eventTable.setWidth("100%");
+        eventTable.setHeight("150px");
+        eventTable.setSelectable(true);
+        eventTable.setImmediate(true);
+        this.addComponent(eventTable);
         this.addComponent(initials);
     }
 
@@ -51,7 +58,7 @@ public class EventPanel extends VerticalLayout {
     }
 
     public Object getSelection() {
-        return articleTable.getValue();
+        return eventTable.getValue();
     }
 
 
@@ -72,4 +79,25 @@ public class EventPanel extends VerticalLayout {
     }
 
 
+    /**
+     * Generate textareas as cells in the table
+     */
+    static class FieldGenerator implements Table.ColumnGenerator {
+
+        @Override
+        public Component generateCell(Table source, Object itemId, Object columnId) {
+            VerticalLayout vl = new VerticalLayout();
+            Property prop = source.getItem(itemId).getItemProperty(columnId);
+            Object propertyValue = prop.getValue();
+            Button expectationButton = new Button();
+            if(propertyValue!=null) {
+                ThemeResource themeRecourse = ((Boolean)propertyValue).booleanValue() ?
+                        new ThemeResource("icons/accept.png") : new ThemeResource("icons/fail.png");
+                expectationButton = new Button(themeRecourse);
+            } else {
+                expectationButton = new Button(new ThemeResource("icons/fail.png"));
+            }
+            return expectationButton;
+        }
+    }
 }

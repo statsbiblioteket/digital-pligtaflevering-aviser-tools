@@ -28,7 +28,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
     public DeliveryValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(false);
-        fileSelectionPanel.setEnabled(false);
+        pageSelectionPanel.setEnabled(false);
 
         deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
