@@ -2,8 +2,8 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -15,7 +15,7 @@ public class EventAdminWindow extends Window {
     private final HorizontalLayout contentPanel = new HorizontalLayout();
     private final VerticalLayout vl = new VerticalLayout();
     private final HorizontalLayout hl = new HorizontalLayout();
-    private Layout resultPanel;
+    private Component resultPanel;
 
     private final Button override = new Button("Override");
     private final Button delete = new Button("Delete");
@@ -50,7 +50,7 @@ public class EventAdminWindow extends Window {
      * Insert the content to view in the dialog
      * @param content
      */
-    public void setDialogContent(Layout content) {
+    public void setDialogContent(Component content) {
         resultPanel = content;
         contentPanel.addComponent(resultPanel);
     }
