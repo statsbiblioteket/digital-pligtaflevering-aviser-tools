@@ -20,6 +20,7 @@ import java.util.function.Function;
 /**
  * See http://docs.verapdf.org/develop/processor/ for official instructions.
  */
+@Deprecated
 public class VeraPDFValidator implements Function<InputStream, byte[]> {
     private String flavorId;
     private Boolean prettyXml;

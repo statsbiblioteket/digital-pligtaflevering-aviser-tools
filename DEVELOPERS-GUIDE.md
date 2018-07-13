@@ -1,6 +1,33 @@
 Developers Guide to DPA
 ===
 
+Note:  `mvn` must use a Java 8 JDK.
+
+Steps to emulate a full stage/prod scenario with cron in a docker instance against
+a vagrant backend:
+
+* Optionally copy extra deliveries to /delivery-samples
+* `mvn clean install`
+* `(cd vagrant; mvn clean install)`
+* `vagrant plugin install vagrant-timezone`
+* `vagrant plugin install vagrant-scp`
+* `vagrant up`
+* `vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh; nohup bash /vagrant/run-verapdf-rest.sh"`
+* `while true; do date; vagrant ssh -c 'JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 bash 7880-doms/bin/doms.sh update'; sleep 45; done`
+
+In a separate shell:
+
+* `(cd deploy/docker-testbed; ./prepare.sh)`
+* `(cd deploy/docker-testbed; docker-compose up --build)`
+
+This allows all autonomous components to be run like they would run in stage/prod 
+(if the same crontab was present).
+
+
+Introduction
+---
+
+
 This document contains information relevant to a developer who needs
 to work on DPA.  
 

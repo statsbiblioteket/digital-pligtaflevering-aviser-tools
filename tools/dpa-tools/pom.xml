@@ -93,6 +93,10 @@
             <groupId>one.util</groupId>
             <artifactId>streamex</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-multipart</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -61,6 +61,17 @@
                         <!-- https://maven.apache.org/plugins/maven-dependency-plugin/examples/copying-artifacts.html -->
                         <configuration>
                             <artifactItems>
+                                <!--    mvn -B -q dependency:copy -Dartifact=org.verapdf:verapdf-rest:0.2.0-SNAPSHOT:jar:shaded -DoutputDirectory=. -Dmdep.stripClassifier -Dmdep.stripVersion -->
+                                <artifactItem>
+                                    <groupId>dk.kb.org.verapdf</groupId>
+                                    <artifactId>verapdf-rest</artifactId>
+                                    <classifier>shaded</classifier>
+                                    <type>jar</type>
+                                    <version>0.2.0-SNAPSHOT</version>
+                                    <overWrite>yes</overWrite>
+                                    <outputDirectory>${project.build.directory}/artifacts-copied/</outputDirectory>
+                                    <destFileName>verapdf-rest.jar</destFileName>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.bitrepository.reference</groupId>
                                     <artifactId>bitrepository-integration</artifactId>
