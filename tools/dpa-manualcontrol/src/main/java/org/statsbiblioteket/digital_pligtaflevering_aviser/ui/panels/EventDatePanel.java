@@ -17,6 +17,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataCo
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent.ValidationState;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,6 +34,7 @@ import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.D
  */
 public class EventDatePanel extends VerticalLayout {
     public static final String WEEKNO = "Weekno";
+    private static SimpleDateFormat sdf = new SimpleDateFormat("MMM");
     private final Map<Integer, String> dayMap;
     private Logger log = LoggerFactory.getLogger(getClass());
     private CheckBox checkbox;
@@ -82,6 +84,7 @@ public class EventDatePanel extends VerticalLayout {
      */
     public void setMonth(Date month) {
         this.month = month;
+        table.setCaption(sdf.format(month));
     }
 
     /**

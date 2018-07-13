@@ -273,7 +273,7 @@ stored externally in the Bitrepository) which is a "hasFile" relation.
 
 This is the expected Event-flow of the newspaper-deliveries:
 
-Event UI is a userintarface that can be used to modify the Event-floz for a specific delivery
+Event UI is a userinterface that can be used to modify the Event-flow for a specific delivery
 
     +-----------------------------+
     ! Create Delivery             !  (Data_Received)
