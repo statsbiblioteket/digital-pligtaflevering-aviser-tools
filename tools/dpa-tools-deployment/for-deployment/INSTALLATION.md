@@ -28,7 +28,7 @@ Add folders and giwe write acess
 /home/dpaviser/applicationSettings
 
 
-Copy "DeliveryPattern.xml" from "source /etc/profil" to "/home/dpaviser/applicationSettings"
+Copy `services/conf/DeliveryPattern.xml` to `/home/dpaviser/applicationSettings/`
 
 
 ...
