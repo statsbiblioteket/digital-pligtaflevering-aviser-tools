@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
