@@ -50,6 +50,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "virtualbox" do |v|
     #v.memory = 8192 # stationary
     v.memory = 6000 # laptop
+    v.memory = 10240 # Sufficient for verapdf
     v.cpus = 2 # or more for heavy load
     ## https://stackoverflow.com/a/27878224/53897
     #v.customize ["createhd",  "--filename", "m4_disk0", "--size", "1048576"] # 1 TB
