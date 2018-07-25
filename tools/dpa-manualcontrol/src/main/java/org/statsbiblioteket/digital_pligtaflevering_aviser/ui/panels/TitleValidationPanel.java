@@ -21,7 +21,8 @@ public class TitleValidationPanel extends DeliveryPanel {
     public TitleValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(true);
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfArticles", "noOfPages"});
+        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "deliveryName", "noOfPages", "noOfArticles"});
+        deliveryPanel.setSortParam("deliveryName");
         infoPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -48,8 +49,8 @@ public class TitleValidationPanel extends DeliveryPanel {
             }
         });
 
-        tablesLayout.addComponent(infoPanel);
-        tablesLayout.setExpandRatio(infoPanel, 0.1f);
+        tablesLayoutTop.addComponent(infoPanel);
+        tablesLayoutTop.setExpandRatio(infoPanel, 0.1f);
         super.initialLayout();
     }
 

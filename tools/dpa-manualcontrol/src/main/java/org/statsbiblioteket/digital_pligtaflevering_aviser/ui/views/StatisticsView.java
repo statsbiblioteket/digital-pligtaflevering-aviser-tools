@@ -1,14 +1,13 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.views;
 
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Link;
@@ -22,7 +21,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
-import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
@@ -32,26 +30,15 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.ConfigPanel
 
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryOverviewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.DeliveryValidationPanel;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.PageViewPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.StatisticsPanels;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.TitleValidationPanel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.SearchPanel;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
-
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
-import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The full panel for showing deliveries and titles.
@@ -65,9 +52,9 @@ public class StatisticsView extends VerticalLayout implements View {
     private SearchPanel searchPanel = new SearchPanel();
     private DataModel model;
     private Link metadatalink = new Link("Metadatalink", null);
-    private Embedded pdfComponent = new Embedded(null, null);
+    private PageViewPanel pdfComponent = new PageViewPanel();
     private StatisticsPanels tabelsLayout;
-    private Page currentSelectedPage;
+    private List<Page> currentSelectedPage = new ArrayList<Page>();
     private Article currentSelectedArticle;
 
     public StatisticsView(DataModel model, String type) {
@@ -78,10 +65,6 @@ public class StatisticsView extends VerticalLayout implements View {
         searchPanel.setWidth("100%");
         Layout mainhlayout;
         final VerticalLayout layout = new VerticalLayout();
-
-        pdfComponent.setMimeType("application/pdf");
-        //noinspection deprecation
-        pdfComponent.setType(Embedded.TYPE_BROWSER);
         metadatalink.setTargetName("_blank");
 
         MenuBar.Command configCommand = new MenuBar.Command() {
@@ -134,22 +117,10 @@ public class StatisticsView extends VerticalLayout implements View {
                 tabelsLayout = new DeliveryValidationPanel(model);
         }
 
-
-        int browserWidth = UI.getCurrent().getPage().getBrowserWindowWidth();
-        // The UI is optimized to run on either a small or large screen.
-        // A limit of browserscreenwidth 1800 pixels is used.
-        // If the browserscreenwidth is large pdfComponent is shown at the right side of the tables, otherwise below.
-        // If the browserscreenwidth is large pdfComponent is 900px" X "1200px" otherwise 500px" X "7500px"
-        if (browserWidth > 1800) {
-            mainhlayout = new HorizontalLayout();
-            pdfComponent.setWidth("900px");
-            pdfComponent.setHeight("1200px");
-            tabelsLayout.setHeight("1200px");
-        } else {
-            mainhlayout = new VerticalLayout();
-            pdfComponent.setWidth("500px");
-            pdfComponent.setHeight("750px");
-        }
+        mainhlayout = new HorizontalLayout();
+        pdfComponent.setWidth("90%");
+        pdfComponent.setHeight("1200px");
+        tabelsLayout.setHeight("1200px");
 
         tabelsLayout.setVisible(false);
 
@@ -218,41 +189,61 @@ public class StatisticsView extends VerticalLayout implements View {
 
                     if ("ARTICLE".equals(itemClickEvent.getComponent().getId())) {
                         currentSelectedArticle = (Article) itemClickEvent.getItemId();
-                        currentSelectedPage = null;
-
+                        currentSelectedPage.clear();
                         pdfComponent.setVisible(false);
-
                         Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedArticle.getId() + "/datastreams/XML/content");
                         metadatalink.setResource(resource);
                         metadatalink.setDescription("Link to Second Page");
                     } else if ("PAGE".equals(itemClickEvent.getComponent().getId())) {
-                        currentSelectedPage = (Page) itemClickEvent.getItemId();
-                        currentSelectedArticle = null;
-
-                        pdfComponent.setVisible(true);
-                        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.getId()).children().findFirst().get();
-                        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
-                        String urlString = pdfStream.getUrl();
-
-                        StreamResource streamRecource = createStreamResource(urlString);
-                        pdfComponent.setSource(streamRecource);
-                        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.getId() + "/datastreams/XML/content");
-                        metadatalink.setResource(resource);
-                        metadatalink.setDescription("Link to Second Page");
+                        viewPage((Page) itemClickEvent.getItemId());
                     }
             }
         });
 
+        tabelsLayout.addValueChangeListener(new Property.ValueChangeListener() {
+            @Override
+            public void valueChange(Property.ValueChangeEvent valueChangeEvent) {
+                viewPage((Page) valueChangeEvent.getProperty().getValue());
+            }
+        });
+
+        Button frontpageViewButton = new Button("Show frontpages");
+        frontpageViewButton.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent event) {
+
+                String selectedDelivery = model.getSelectedDelivery();
+                String selectedTitle = model.getSelectedTitle();
+                if (selectedDelivery == null || selectedTitle == null) {
+                    return;
+                }
+                currentSelectedPage = model.getTitleObj(selectedDelivery, selectedTitle).getFrontpages().stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
+                ArrayList<String> pageList = new ArrayList<String>();
+
+                for(Page page : currentSelectedPage) {
+                    DomsItem domsItem = model.getItemFromUuid(page.getId()).children().findFirst().get();
+                    DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+                    String urlString = pdfStream.getUrl();
+                    pageList.add(urlString);
+                }
+                pdfComponent.initiate(pageList.toArray(new String[pageList.size()]));
+            }
+        });
 
         Button confirmViewButton = new Button("Confirmed");
         confirmViewButton.addClickListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
 
-                if (currentSelectedPage != null) {
-                    currentSelectedPage.setCheckedState(ConfirmationState.CHECKED);
-                    model.addCheckedPage(currentSelectedPage);
-                    tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.CHECKED);
+                if (currentSelectedPage != null && currentSelectedPage.size()>0) {
+                    for(Page page : currentSelectedPage) {
+                        page.setCheckedState(ConfirmationState.CHECKED);
+                        model.addCheckedPage(page);
+                        tabelsLayout.checkThePage(page, ConfirmationState.CHECKED);
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
+                    }
                 }
                 if (currentSelectedArticle != null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.CHECKED);
@@ -267,10 +258,16 @@ public class StatisticsView extends VerticalLayout implements View {
             @Override
             public void buttonClick(Button.ClickEvent event) {
 
-                if (currentSelectedPage != null) {
-                    currentSelectedPage.setCheckedState(ConfirmationState.REJECTED);
-                    model.addCheckedPage(currentSelectedPage);
-                    tabelsLayout.checkThePage(currentSelectedPage, ConfirmationState.REJECTED);
+                if (currentSelectedPage != null && currentSelectedPage.size()>0) {
+                    for(Page page : currentSelectedPage) {
+                        page.setCheckedState(ConfirmationState.REJECTED);
+                        model.addCheckedPage(page);
+                        tabelsLayout.checkThePage(page, ConfirmationState.REJECTED);
+
+                    }
+                    if(currentSelectedPage.size()>1) {
+                        tabelsLayout.reloadTables();
+                    }
                 }
                 if (currentSelectedArticle != null) {
                     currentSelectedArticle.setCheckedState(ConfirmationState.REJECTED);
@@ -282,82 +279,43 @@ public class StatisticsView extends VerticalLayout implements View {
 
         layout.addComponent(header);
         layout.addComponent(searchPanel);
-
         mainhlayout.addComponent(tabelsLayout);
-
+        viewControlLayout.addComponent(frontpageViewButton);
         viewControlLayout.addComponent(confirmViewButton);
         viewControlLayout.addComponent(rejectViewButton);
         viewControlLayout.addComponent(metadatalink);
-
         viewLayout.addComponent(viewControlLayout);
         viewLayout.addComponent(pdfComponent);
-
         mainhlayout.addComponent(viewLayout);
         layout.addComponent(mainhlayout);
         panelPrepare(false);
     }
+
+
+    private void viewPage(Page pageElement) {
+        currentSelectedPage.clear();
+        currentSelectedPage.add(pageElement);
+        currentSelectedArticle = null;
+
+        pdfComponent.setVisible(true);
+        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
+        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+        String urlString = pdfStream.getUrl();
+        pdfComponent.initiate(urlString);
+        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
+        metadatalink.setResource(resource);
+        metadatalink.setDescription("Link to Second Page");
+    }
+
+
 
     /**
      * Set panes to being prepared for viewing details
      * @param prepare
      */
     private void panelPrepare(boolean prepare) {
-        pdfComponent.setVisible(prepare);
         metadatalink.setVisible(prepare);
-        tabelsLayout.setVisible(prepare);
-    }
-
-    /**
-     * Convert the urlString to the pdfComponent-file into a StreamResource for viewing in UI
-     * @param urlString
-     * @return
-     * @throws Exception
-     */
-    private synchronized StreamResource createStreamResource(final String urlString) {
-
-        final StreamResource resource = new StreamResource(new StreamResource.StreamSource() {
-            @Override
-            public InputStream getStream() {
-
-                    String bitrepositoryMountpoint = NewspaperContextListener.configurationmap.getRequired(BITREPOSITORY_SBPILLAR_MOUNTPOINT);
-                    String bitrepositoryUrlPrefix = NewspaperContextListener.configurationmap.getRequired(BITMAG_BASEURL_PROPERTY);
-
-                    if (urlString.startsWith(bitrepositoryUrlPrefix) == false) {
-                        try {
-                            URL url = new URL(urlString);
-                            InputStream inps = url.openStream();
-                            return inps;
-                        } catch (IOException e) {
-                            Notification.show("The application can not read the pdf-file", Notification.Type.WARNING_MESSAGE);
-                            log.error("The stream could not get opened " + urlString, e);
-                        }
-                    } else {
-                        if (urlString.length() < bitrepositoryUrlPrefix.length()) {
-                            Notification.show("The application can not create a link to the url, please contact support", Notification.Type.ERROR_MESSAGE);
-                        }
-                        String resourceName = urlString.substring(bitrepositoryUrlPrefix.length());
-                        final File file;
-                        try {
-                            Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(resourceName, CharEncoding.UTF_8));
-                            file = path.toFile();
-                            InputStream inputStream = new FileInputStream(file);
-                            return inputStream;
-                        } catch (UnsupportedEncodingException e) {
-                            Notification.show("The application can not read the pdf-file (Url encoding)", Notification.Type.WARNING_MESSAGE);
-                            log.error("The stream could not get opened " + urlString, e);
-                        } catch (FileNotFoundException e) {
-                            Notification.show("The application can not read the pdf-file (FileNotFound)", Notification.Type.WARNING_MESSAGE);
-                            log.error("The stream could not get opened " + urlString, e);
-                        }
-                    }
-
-                    return null;
-
-            }
-        }, "pages.pdf"); // Short pagename is needed
-        resource.setMIMEType("application/pdf");
-        resource.setCacheTime(1000);
-        return resource;
+        tabelsLayout.setVisible(true);
     }
 
     /**
@@ -383,5 +341,4 @@ public class StatisticsView extends VerticalLayout implements View {
         tabelsLayout.viewIsEntered();
         Notification.show("DPA Delivery validation");
     }
-
 }

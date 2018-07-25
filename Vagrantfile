@@ -38,6 +38,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Bit repository web client port
   config.vm.network :forwarded_port, :host => 18080, :guest => 8080
 
+  # verapdf-rest REST service
+  config.vm.network :forwarded_port, :host => 8090, :guest => 8090
 
 
   # Be able to get the artifacts from host Maven build.
@@ -46,11 +48,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.synced_folder "delivery-samples/", "/delivery-samples"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 8192
+    #v.memory = 8192 # stationary
+    v.memory = 6000 # laptop
+    v.memory = 10240 # Sufficient for verapdf
     v.cpus = 2 # or more for heavy load
-    # https://stackoverflow.com/a/27878224/53897
-    v.customize ["createhd",  "--filename", "m4_disk0", "--size", "1048576"] # 1 TB
-    v.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd", "--medium", "m4_disk0.vdi"]
+    ## https://stackoverflow.com/a/27878224/53897
+    #v.customize ["createhd",  "--filename", "m4_disk0", "--size", "1048576"] # 1 TB
+    #v.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "1", "--type", "hdd", "--medium", "m4_disk0.vdi"]
+
+    # Make command line shorter for newer versions of VirtualBox.
+    v.customize ["modifyvm", :id, "--audio", "none"]
+    # https://github.com/hashicorp/vagrant/issues/9524
+
   end
 
   # for jvisualvm

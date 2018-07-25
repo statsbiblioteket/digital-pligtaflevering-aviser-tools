@@ -79,8 +79,12 @@
             <version>2.2</version>
         </dependency>
         <dependency>
-            <groupId>io.javaslang</groupId>
-            <artifactId>javaslang</artifactId>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dk.kb.stream</groupId>
+            <artifactId>streamtuples</artifactId>
         </dependency>
     </dependencies>
 

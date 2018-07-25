@@ -3,7 +3,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.harness;
 import javax.management.MXBean;
 
 /**
- * Basic MXBean to provide a window to the Tool through a local connection with visualvm.  A default implementation is
+ * Basic MXBean to provide a window to the Tool through a local connection with visualvm/jconsole/jmc.  A default implementation is
  * provided.  If more information is needed, extend this interface and annotate it with @MXBean, and provide a new
  * implementation.
  */

@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
+import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -19,15 +20,27 @@ public class StoreResultWindow extends Window {
 
     private final Button ok = new Button("Ok");
     private final Button cancel = new Button("Cancel");
+    private final Button force = new Button("Force");
+    private boolean forceClicked = false;
     private final Label checkStateInfo = new Label("Validation can not be performed, since it is already performed");
 
     public StoreResultWindow(String caption) {
         super(caption);
         ok.setId("OKBUTTON");
+        ok.setClickShortcut(ShortcutAction.KeyCode.ENTER);
         cancel.setId("CANCELBUTTON");
+        force.addClickListener(new Button.ClickListener() {
+            @Override
+            public void buttonClick(Button.ClickEvent clickEvent) {
+                ok.setEnabled(true);
+                forceClicked = true;
+            }
+        });
+
 
         hl.addComponent(ok);
         hl.addComponent(cancel);
+        hl.addComponent(force);
         hl.addComponent(checkStateInfo);
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
@@ -44,12 +57,17 @@ public class StoreResultWindow extends Window {
         cancel.addClickListener(listener);
     }
 
+    public boolean forceClicked() {
+        return forceClicked;
+    }
+
     /**
      * Set the dialog to be ready or not ready to perform a press on ok.
      * @param ready if the parameter is false the "ok" button is disabled and a comment about why it is disabled is shown
      */
     public void setReady(boolean ready) {
         ok.setEnabled(ready);
+        force.setVisible(!ready);
         checkStateInfo.setVisible(!ready);
     }
 

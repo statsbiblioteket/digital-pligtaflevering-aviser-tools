@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.ui.Component;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
@@ -19,7 +20,7 @@ public interface StatisticsPanels extends Component {
      * @param itemId
      * @param checkedState
      */
-    public void checkThePage(Object itemId, ConfirmationState checkedState);
+    public boolean checkThePage(Object itemId, ConfirmationState checkedState);
 
     /**
      * Set the checkmark in the articleTable
@@ -29,12 +30,15 @@ public interface StatisticsPanels extends Component {
     public void checkTheArticle(Object itemId, ConfirmationState checkedState);
 
 
+    public void reloadTables();
 
     /**
      * Add selectionListener to fileSelectionTable
      * @param listener
      */
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener);
+
+    public void addValueChangeListener(Property.ValueChangeListener listener);
 
     /**
      * Insert values which is initiated into the model to the UI-component in the respective panel

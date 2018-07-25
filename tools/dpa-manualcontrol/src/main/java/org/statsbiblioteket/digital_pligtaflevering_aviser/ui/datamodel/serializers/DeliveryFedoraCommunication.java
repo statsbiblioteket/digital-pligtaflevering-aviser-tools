@@ -1,13 +1,16 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
+import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
@@ -28,12 +31,14 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -49,6 +54,7 @@ public class DeliveryFedoraCommunication {
 
     private static String itemType;
     private static String pastEvents;
+    private static String pastMinimalEvents;
     private static String thisEvent;
 
     private HashMap<String, DomsItem> deliveryList = new HashMap<>();
@@ -56,9 +62,10 @@ public class DeliveryFedoraCommunication {
     private DomsModule domsModule = new DomsModule();
     private DomsRepository repository;
 
-    public DeliveryFedoraCommunication(String itemType, String pastEvents, String thisEvent, DomsRepository repository) {
+    public DeliveryFedoraCommunication(String itemType, String pastEvents, String pastMinimalEvents, String thisEvent, DomsRepository repository) {
         this.itemType = itemType;
         this.pastEvents = pastEvents;
+        this.pastMinimalEvents = pastMinimalEvents;
         this.thisEvent = thisEvent;
         this.repository = repository;
     }
@@ -74,12 +81,19 @@ public class DeliveryFedoraCommunication {
         Stream<DomsItem> items = null;
 
         switch (eventStatus) {
-            case READYFORMANUALCHECK:
+            case READYFORMANUALCHECK://Search for deliveries where all events is written, which is minimal on order to start manual checks
                 items = getReadyForManual(deliveryFilter);
                 break;
-            case DONEMANUALCHECK:
+            case DONEMANUALMINIMALCHECK://Search for deliveries where all events is written, which is minimal on order to start manual checks
+                items = getDoneManualMinimal(deliveryFilter);
+                break;
+            case DONEMANUALCHECK://Search for deliveries where manual check is done
                 items = getDoneManual(deliveryFilter);
                 break;
+            case CREATEDONLY://Search for deliveries that has been created
+                items = getCreatedOnly(deliveryFilter);
+                break;
+
         }
 
         items.forEach(new Consumer<DomsItem>() {
@@ -103,7 +117,19 @@ public class DeliveryFedoraCommunication {
     }
 
     /**
-     * Get a list of deliveries, which is has already added an event that manual inspections has been done
+     * Get all deliveries that has just been created and nothing else
+     * @param deliveryFilter
+     * @return
+     */
+    public Stream<DomsItem> getCreatedOnly(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                "Data_Received", "", "", itemType))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
+    }
+
+
+    /**
+     * Get a list of deliveries, which has already added an event that manual inspections has been done
      *
      * @param deliveryFilter
      * @return
@@ -113,6 +139,18 @@ public class DeliveryFedoraCommunication {
                 pastEvents, "", "", itemType))
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
+
+    /**
+     * Get a list of deliveries where all events is performed, which is nessesary in order to make manual control
+     * @param deliveryFilter
+     * @return
+     */
+    public Stream<DomsItem> getDoneManualMinimal(String deliveryFilter) {
+        return repository.query(domsModule.providesWorkToDoQuerySpecification(
+                pastMinimalEvents + "", thisEvent, "", itemType))
+                .filter(ts -> ts.getPath().contains(deliveryFilter));
+    }
+
 
     /**
      * Get the domsItem from the uuid. The Item is fetched directly from fedora
@@ -271,14 +309,14 @@ public class DeliveryFedoraCommunication {
      *
      * @throws JAXBException
      */
-    public boolean writeDeliveryToFedora(DeliveryTitleInfo deli) throws JAXBException {
+    public boolean writeDeliveryToFedora(DeliveryTitleInfo deli, boolean force) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(deli, os);
-        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray());
+        return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray(), force);
     }
 
     /**
@@ -289,7 +327,7 @@ public class DeliveryFedoraCommunication {
      * @param statisticsStream
      * @return return true if the writing performed successfully
      */
-    public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream) {
+    public boolean writeToCurrentItemInFedora(String deliveryName, String titleName, byte[] statisticsStream, boolean force) {
 
         DomsItem domsItem = getDeliveryFromName(deliveryName);
         if (domsItem == null) {
@@ -311,7 +349,7 @@ public class DeliveryFedoraCommunication {
                         .filter(ds -> ds.getId().equals(VALIDATION_INFO_STREAMNAME))
                         .findAny();
 
-                if (profileOptional.isPresent()) {
+                if (profileOptional.isPresent() && !force) {
                     return false;
                 }
 
@@ -342,6 +380,10 @@ public class DeliveryFedoraCommunication {
         /**
          * Get deliveries including deliveries where the manual check is done
          */
-        DONEMANUALCHECK;
+        DONEMANUALCHECK,
+
+        DONEMANUALMINIMALCHECK,
+
+        CREATEDONLY;
     }
 }

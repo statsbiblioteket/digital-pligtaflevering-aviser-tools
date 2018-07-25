@@ -25,6 +25,12 @@ Add folders and giwe write acess
 /home/dpaviser/var/locks
 /home/dpaviser/var/dpa-manualcontrol
 /home/dpaviser/logs
+/home/dpaviser/applicationSettings
+
+
+Copy `services/conf/DeliveryPattern.xml` to `/home/dpaviser/applicationSettings/`
+
+
 ...
 
 

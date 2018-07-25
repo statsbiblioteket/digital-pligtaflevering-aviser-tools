@@ -1,2 +1,11 @@
-src/main/webapp/VAADIN/
+
+src/main/webapp/VAADIN/*
+
+!src/main/webapp/VAADIN/themes/
+!src/main/webapp/VAADIN/themes/*
+!src/main/webapp/VAADIN/themes/reindeer/
+!src/main/webapp/VAADIN/themes/reindeer/*
+!src/main/webapp/VAADIN/themes/reindeer/icons/
+!src/main/webapp/VAADIN/themes/reindeer/icons/*
+
 

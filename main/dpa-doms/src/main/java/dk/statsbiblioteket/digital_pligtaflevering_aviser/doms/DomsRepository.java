@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Repository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -16,8 +17,9 @@ import dk.statsbiblioteket.medieplatform.autonomous.PassQThrough_Query;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulator;
 import dk.statsbiblioteket.medieplatform.autonomous.PremisManipulatorFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex_DigitalPligtafleveringAviser;
 import dk.statsbiblioteket.medieplatform.autonomous.SolrJConnector;
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,12 +46,12 @@ import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTON
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.DOMS_COLLECTION;
 
 /**
- *
+ * @noinspection WeakerAccess, UnnecessaryLocalVariable
  */
 public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecification, DomsItem> {
     private final HttpSolrServer summaSearch;
     private final String recordBase;
-    private SBOIEventIndex<Item> sboiEventIndex;
+    private SBOIEventIndex_DigitalPligtafleveringAviser<Item> sboiEventIndex;
     private WebResource webResource;
     private EnhancedFedora efedora;
     private DomsEventStorage<Item> domsEventStorage;
@@ -60,7 +63,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     @Inject
-    public DomsRepository(SBOIEventIndex<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
+    public DomsRepository(SBOIEventIndex_DigitalPligtafleveringAviser<Item> sboiEventIndex, @Named(DomsId.DPA_WEBRESOURCE) WebResource webResource,
                           EnhancedFedora efedora, DomsEventStorage<Item> domsEventStorage,
                           @Named(AUTONOMOUS_SBOI_URL) String summaLocation,
                           @Named(DOMS_COLLECTION) String recordBase) {
@@ -80,33 +83,51 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
         final EventTrigger.Query<Item> eventTriggerQuery;
         final boolean details;
+        final Iterator<Item> searchIterator;
 
-        if (querySpecification instanceof EventQuerySpecification) {
-            EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
-
-            eventTriggerQuery = new EventTrigger.Query<>();
-            eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
-            eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
-            eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
-            eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
-
-            details = eventQuerySpecification.getDetails();
-        } else if (querySpecification instanceof SBOIQuerySpecification) {
-            SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
-            eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
-            details = false;
-        } else {
-            throw new UnsupportedOperationException("Bad query specification instance");
-        }
         try {
+            if (querySpecification instanceof EventQuerySpecification) {
+                EventQuerySpecification eventQuerySpecification = (EventQuerySpecification) querySpecification;
+
+                eventTriggerQuery = new EventTrigger.Query<>();
+                eventTriggerQuery.getPastSuccessfulEvents().addAll(eventQuerySpecification.getPastSuccessfulEvents());
+                eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
+                eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
+                eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
+
+                details = true; // we must get details from DOMS; SBOI is not enough. // eventQuerySpecification.getDetails();
+
+                // Inlined getTriggeredItems to be able to log those not considered anyway.
+                // https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/ef9a2b7d204a70b3056ddd8d9e7a614c1c013dfc/item-event-framework/sboi-doms-event-framework/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/SBOIEventIndex.java#L43
+                Iterator<Item> sboiItems = sboiEventIndex.search(details, eventTriggerQuery);
+                ArrayList<Item> result = new ArrayList<>();
+                while (sboiItems.hasNext()) {
+                    Item next = sboiItems.next();
+                    if (sboiEventIndex.match(next, eventTriggerQuery)) {
+                        result.add(next);
+                    } else {
+                        log.info("SBIO index not current - Skipping item " + next);
+                    }
+                }
+                searchIterator = result.iterator();
+                // End of inlining
+
+            } else if (querySpecification instanceof SBOIQuerySpecification) {
+                SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
+                eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
+                details = false;
+                searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
+            } else {
+                throw new UnsupportedOperationException("Bad query specification instance");
+            }
             // To keep it simple, read in the whole response as a list and create the stream from that.
 
-            List<DomsItem> domsItemList = new ArrayList<>();
+            List<String> resultIds = new ArrayList<>();
+            searchIterator.forEachRemaining(item -> resultIds.add(item.getDomsID()));
 
-            Iterator<Item> searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
-            searchIterator.forEachRemaining(item -> domsItemList.add(new DomsItem(new DomsId(item.getDomsID()), this)));
-
-            return domsItemList.stream();
+            return resultIds.stream()
+                    .map(DomsId::new)
+                    .map(this::lookup);
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -177,10 +198,9 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         try {
             return efedora.modifyDatastreamByValue(domsId.id(), datastream, checksumType, checksum, contents, alternativeIdentifiers, mimetype, comment, lastModifiedDate);
         } catch (BackendMethodFailedException | BackendInvalidCredsException | BackendInvalidResourceException e) {
-            throw new RuntimeException("could not save datastream " + datastream + " for id " + domsId);
+            throw new RuntimeException("could not save datastream " + datastream + " for id " + domsId, e);
         }
     }
-
 
 //    @Deprecated
 //    public Date appendEventToItem(DomsId domsId, String agent, Date timestamp, String details, String eventType, boolean outcome) {
@@ -197,8 +217,8 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     /**
      * appendEventToItem provides a link to DomsEventStorage.appendEventToItem(...) using a DomsId.
      *
-     * @param domsId    domsId to add event to
-     * @param event eventdata holder
+     * @param domsId domsId to add event to
+     * @param event  eventdata holder
      * @return date returned from storage
      */
 
@@ -247,19 +267,27 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
     }
 
     /**
-     * get the content of the DC datastream on XML form parsed into a W3C DOM structur so we can post-process it easily.
-     * EnhancedFedora does not expose the "get DC explicitly as xml" functionality directly.  Note that
-     * we work with Strings, which may result in encoding problems if ever the response includes non-ASCII characters!
+     * get the content of the datastream on XML form as raw bytes.  This is easy to parse into a W3C DOM structure so we
+     * can post-process it easily. The input stream must be closed by the caller.
      *
      * @param domsId id of doms object to retrieve DC datastream from.
-     * @return DC on XML form.
+     * @return inputstream of the actual bytes.
      */
-    public String getDC(DomsId domsId) {
-        final String id = domsId.id();
-        final String p = "/datastreams/DC/content";
+    public InputStream getDataStreamInputStream(DomsId domsId, String datastreamId) {
+        if (Objects.requireNonNull(datastreamId, "datastreamId").contains("/")) {
+            throw new IllegalArgumentException("datastreamId contains /: " + datastreamId);
+        }
 
-        String dcContent = webResource.path(id).path(p).queryParam("format", "xml").get(String.class);
-        return dcContent;
+        // https://wiki.duraspace.org/display/FEDORA38/REST+API#RESTAPI-getDatastreamDissemination
+        final String id = domsId.id();
+        final String p = "/datastreams/" + datastreamId + "/content";
+
+        ClientResponse cr = webResource.path(id).path(p).queryParam("format", "xml").get(ClientResponse.class);
+        if (cr.getStatus() < 300) {
+            return cr.getEntityInputStream();
+        } else {
+            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ": status= " + cr.getStatus());
+        }
     }
 
     /**

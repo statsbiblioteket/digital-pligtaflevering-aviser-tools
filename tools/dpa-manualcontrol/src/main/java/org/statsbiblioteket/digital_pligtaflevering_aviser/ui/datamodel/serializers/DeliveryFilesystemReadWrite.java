@@ -1,12 +1,17 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Serialize objects into files on the local filesystem.
@@ -51,7 +56,9 @@ public class DeliveryFilesystemReadWrite {
         File[] listOfFiles = folderForThis.listFiles();
 
         for (File titleFolder : listOfFiles) {
-            currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
+            if(titleFolder.isFile()) {
+                currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
+            }
         }
         return currentlySelectedTitleHiearachy;
     }

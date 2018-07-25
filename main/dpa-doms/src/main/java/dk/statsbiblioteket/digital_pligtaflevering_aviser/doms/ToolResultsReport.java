@@ -1,8 +1,8 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.google.common.base.Throwables;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.streams.IdValue;
-import javaslang.control.Either;
+import dk.kb.stream.StreamTuple;
+import io.vavr.control.Either;
 
 import javax.inject.Inject;
 import java.util.Comparator;
@@ -25,8 +25,8 @@ import static java.util.stream.Collectors.toList;
  *
  * @noinspection ALL
  */
-public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Either<Exception, ToolResult>>>, ToolResult> {
-    private final BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> renderResultFunction;
+public class ToolResultsReport<K> implements BiFunction<K, List<StreamTuple<K, Either<Exception, ToolResult>>>, ToolResult> {
+    private final BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> renderResultFunction;
     private final Function<Throwable, String> stackTraceRenderer;
     private final BiConsumer<K, Exception> stackTraceLogger;
 
@@ -48,7 +48,7 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
      */
 
     @Inject
-    public ToolResultsReport(BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> renderResultFunction,
+    public ToolResultsReport(BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> renderResultFunction,
                              BiConsumer<K, Exception> stackTraceLogger,
                              Function<Throwable, String> stackTraceRenderer
     ) {
@@ -58,26 +58,26 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
     }
 
     @Override
-    public ToolResult apply(K domsItem, List<IdValue<K, Either<Exception, ToolResult>>> idValues) {
+    public ToolResult apply(K domsItem, List<StreamTuple<K, Either<Exception, ToolResult>>> streamTuples) {
 
         // These can probably be written smarter, but for now keep it simple.
 
         // find all that threw exception.
 
-        List<IdValue<K, Exception>> threwException = idValues.stream()
+        List<StreamTuple<K, Exception>> threwException = streamTuples.stream()
                 .filter(c -> c.filter(Either::isLeft))
                 .map(c -> c.map(Either::getLeft))
                 .collect(toList());
 
         // find all that completed successfully
 
-        List<IdValue<K, ToolResult>> ok = idValues.stream()
+        List<StreamTuple<K, ToolResult>> ok = streamTuples.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(ToolResult::isSuccess))
                 .collect(toList());
 
-        List<IdValue<K, ToolResult>> failed = idValues.stream()
+        List<StreamTuple<K, ToolResult>> failed = streamTuples.stream()
                 .filter(c -> c.filter(Either::isRight))
                 .map(c -> c.map(Either::get))
                 .filter(c -> c.filter(t -> t.isSuccess() == false))
@@ -89,9 +89,9 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
 
         Map<String, List<String>> idsForRootCauseMap = threwException.stream()
                 .collect(
-                        groupingBy(c -> stackTraceRenderer.apply(Throwables.getRootCause(c.value())),
+                        groupingBy(c -> stackTraceRenderer.apply(Throwables.getRootCause(c.right())),
                                 TreeMap::new,  // sorted keys
-                                mapping(c -> c.id().toString(), toList()))
+                                mapping(c -> c.left().toString(), toList()))
                 );
 
         // a, b, c:
@@ -103,9 +103,9 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
                 .collect(joining("\n"));
 
         String renderedStacktraces = threwException.stream()
-                .sorted(Comparator.comparing(c -> c.id().toString())) // sort by string representation of id.
-                .peek(c -> stackTraceLogger.accept(c.id(), c.value()))
-                .map(c -> c.id() + ":\n" + stackTraceRenderer.apply(c.value()) + "\n")
+                .sorted(Comparator.comparing(c -> c.left().toString())) // sort by string representation of id.
+                .peek(c -> stackTraceLogger.accept(c.left(), c.right()))
+                .map(c -> c.left() + ":\n" + stackTraceRenderer.apply(c.right()) + "\n")
                 .collect(joining("\n"));
 
         if (failed.size() == 0 && threwException.size() == 0) { // Nothing went wrong.
@@ -136,14 +136,14 @@ public class ToolResultsReport<K> implements BiFunction<K, List<IdValue<K, Eithe
         }
     }
 
-    public static class OK_COUNT_FAIL_LIST_RENDERER<K> implements BiFunction<List<IdValue<K, ToolResult>>, List<IdValue<K, ToolResult>>, String> {
+    public static class OK_COUNT_FAIL_LIST_RENDERER<K> implements BiFunction<List<StreamTuple<K, ToolResult>>, List<StreamTuple<K, ToolResult>>, String> {
         @Override
-        public String apply(List<IdValue<K, ToolResult>> ok, List<IdValue<K, ToolResult>> failed) {
+        public String apply(List<StreamTuple<K, ToolResult>> ok, List<StreamTuple<K, ToolResult>> failed) {
             return ok.size() + " ok" +
                     (failed.size() > 0
                             ? "\n\n" + failed.size() + " failed:\n=========\n" +
                             failed.stream()
-                                    .map(c -> c.map((id, v) -> id + ": " + v.getHumanlyReadableMessage()).value())
+                                    .map(c -> c.map((id, v) -> id + ": " + v.getHumanlyReadableMessage()).right())
                                     .collect(joining("\n"))
                             : ""
                     );

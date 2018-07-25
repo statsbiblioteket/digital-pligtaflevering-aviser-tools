@@ -28,7 +28,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
     public DeliveryValidationPanel(DataModel model) {
         super(model);
         sectionSectionTable.setVisible(false);
-        fileSelectionPanel.setEnabled(false);
+        pageSelectionPanel.setEnabled(false);
 
         deliveryListPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
@@ -41,7 +41,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"});
+        deliveryPanel.setVisibleColumns(new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"});
         deliveryPanel.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -53,8 +53,8 @@ public class DeliveryValidationPanel extends DeliveryPanel {
             }
         });
 
-        tablesLayout.addComponent(deliveryListPanel);
-        tablesLayout.setExpandRatio(deliveryListPanel, 0.2f);
+        tablesLayoutTop.addComponent(deliveryListPanel);
+        tablesLayoutTop.setExpandRatio(deliveryListPanel, 0.1f);
         super.initialLayout();
 
         doneDeliveryButton.addClickListener(new Button.ClickListener() {

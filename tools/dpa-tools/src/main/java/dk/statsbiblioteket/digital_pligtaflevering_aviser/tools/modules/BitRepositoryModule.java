@@ -3,8 +3,9 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules;
 import dagger.Module;
 import dagger.Provides;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
-import javaslang.control.Try;
+import io.vavr.control.Try;
 
+import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import java.net.URLEncoder;
 import java.nio.file.Path;
@@ -13,7 +14,6 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
-import javax.enterprise.inject.Produces;
 
 /**
  * Dagger module for bitrepository related dependencies.

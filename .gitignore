@@ -20,3 +20,8 @@ buildNumber.properties
 .project
 .factorypath
 
+/tools/dpa-dashboard-cdi/nb-configuration.xml
+/soapui.log
+/soapui-errors.log
+/global-groovy.log
+/_Deparsed_XSubs.pm

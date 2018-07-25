@@ -1,5 +1,6 @@
 # digital-pligtaflevering-aviser-tools
 
+[![wercker status](https://app.wercker.com/status/8696b835217d47b14f71175a72ad818c/s/ "wercker status")](https://app.wercker.com/project/byKey/8696b835217d47b14f71175a72ad818c)
 
 Quicklinks:
 
@@ -270,9 +271,107 @@ is the relation from the "page" node to the PDF file (which is
 stored externally in the Bitrepository) which is a "hasFile" relation.
 
 
+This is the expected Event-flow of the newspaper-deliveries:
+
+Event UI is a userinterface that can be used to modify the Event-flow for a specific delivery
+
+    +-----------------------------+
+    ! Create Delivery             !  (Data_Received)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Ingest                      !  (Data_Archived)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Generate checksum           !  (Checksumfile_regenerated)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Check generated checksum    !  (Checksumfile_checked)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Generate statistics         !  (Statistics_generated)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Create VeraPDF              !  (VeraPDF_Invoked)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Check VeraPDF               !  (VeraPDF_Analyzed)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  V
+    +-----------------------------+
+    ! Generate Del. pattern match !  (Newspaper_Weekdays_Analyzed)
+    +-----------------------------+
+                  !                                                     +----------+
+                 < >---Fail---------------------------------------------! Event UI !
+                  !                                                     +----------+
+                  !        
+                  V        
+    +-----------------------------+
+    ! Manual control UI           !
+    +-----------------------------+                                    
+
 
 
 # VeraPDF
+
+VeraPDF is a PDF/A validator suite which we use to get reports of the
+preservation quality of the PDFs ingested.
+
+Due to various problems it needs to run in a separate JVM.  See https://sbprojects.statsbiblioteket.dk/jira/browse/DPA-124
+for details.  It was found that the easiest way to get a production ready 
+REST service was to improve on https://github.com/veraPDF/veraPDF-rest.
+
+Currently it resides in 
+
+    git clone https://github.com/statsbiblioteket/veraPDF-rest 
+    
+until the changes are merged back upstream.  Note that as of 2018-07-09 this is on the
+TRA branch which github is configured to know!
+
+Ensure the artifact is available to Maven (e.g. installed in the ~/.m2 local repository) 
+before building the vagrant box.
+ 
+
+To get the VeraPDF-rest shaded jar for local use or to deploy to stage/prod use: 
+
+    mvn -B -q dependency:copy -Dartifact=org.verapdf:verapdf-rest:0.2.0-SNAPSHOT:jar:shaded -DoutputDirectory=. -Dmdep.stripClassifier -Dmdep.stripVersion 
+
+to download to verapdf-rest.jar to the current directory.  
+
+When deployed use an invocation similar to:
+
+    java -Ddw.server.applicationConnectors[0].port=8090 -Ddw.server.adminConnectors[0].port=8091 -jar verapdf-rest.jar server > logfile
+
+in a restarting wrapper.  Use Java 8!
+
+
+
 
 (2017-03-20:  This information is outdated.  DPA-24 include a request for this document to be updated)
 

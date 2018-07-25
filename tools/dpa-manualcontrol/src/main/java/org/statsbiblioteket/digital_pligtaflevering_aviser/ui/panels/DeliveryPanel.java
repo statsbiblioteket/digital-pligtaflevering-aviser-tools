@@ -1,6 +1,9 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Property;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -34,21 +37,31 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfArticles", "noOfPages"};
+    private static String[] deliveryColumns = new String[]{"checked", "initials", "newspaperTitle", "noOfPages", "noOfArticles"};
+    private static String[] deliveryColumnsNames = new String[]{"chk", "initials", "newspaperTitle", "pages", "articles"};
+
     private static String[] sectionColumns = new String[]{"sectionName", "sectionNumber", "pageCount"};
+    private static String[] sectionColumnsNames = new String[]{"sectionName", "section", "count"};
+
     private static String[] fileColumns = new String[]{"checkedState", "pageName", "pageNumber", "sectionName", "sectionNumber"};
+    private static String[] fileColumnsNames = new String[]{"chk", "pageName", "page", "sectionName", "section"};
+
     private static String[] articleColumns = new String[]{"checkedState", "articleName", "pageNumber", "sectionName", "sectionNumber"};
+    private static String[] articleColumnsNames = new String[]{"chk", "articleName", "page", "sectionName", "section"};
 
     protected DataModel model;
 
-    protected HorizontalLayout tablesLayout = new HorizontalLayout();
+    protected VerticalLayout tablesLayout = new VerticalLayout();
+    protected HorizontalLayout tablesLayoutTop = new HorizontalLayout();
+    protected HorizontalLayout tablesLayoutBottom = new HorizontalLayout();
     protected HorizontalLayout buttonLayout = new HorizontalLayout();
 
-    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, "DELIVERY", true);
-    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, "SECTION", true); //
-    protected GenericListTable fileSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, "PAGE", true); //
-    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, "ARTICLE", false);
+    protected GenericListTable deliveryPanel = new GenericListTable(DeliveryTitleInfo.class, "checked", null, deliveryColumns, deliveryColumnsNames, "DELIVERY", true);
+    protected GenericListTable sectionSectionTable = new GenericListTable(TitleComponent.class, null, null, sectionColumns, sectionColumnsNames, "SECTION", true);
+    protected GenericListTable pageSelectionPanel = new GenericListTable(Page.class, "checkedState", ConfirmationState.UNCHECKED, fileColumns, fileColumnsNames, "PAGE", true);
+    protected GenericListTable articleSelectionPanel = new GenericListTable(Article.class, "checkedState", ConfirmationState.UNCHECKED, articleColumns, articleColumnsNames, "ARTICLE", false);
     private Button saveCheckButton = new Button("Save check");
+    private Button statusButton = new Button("StatusExport");
 
     /**
      * Construct the panel with a reference to the datamodel
@@ -57,8 +70,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     public DeliveryPanel(DataModel model) {
         this.model = model;
-        tablesLayout.setWidth("100%");
-
+        tablesLayout.setWidth("50%");
+        sectionSectionTable.setSortParam("sectionNumber");
         sectionSectionTable.addItemClickListener(new ItemClickEvent.ItemClickListener() {
             @Override
             public void itemClick(ItemClickEvent itemClickEvent) {
@@ -68,8 +81,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             }
         });
         deliveryPanel.setSortParam("newspaperTitle");
-        fileSelectionPanel.setSortParam("sectionName");
-        articleSelectionPanel.setSortParam("sectionName");
+        pageSelectionPanel.setSortParam("pageName");
+        articleSelectionPanel.setSortParam("articleName");
     }
 
     /**
@@ -77,15 +90,18 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public void initialLayout() {
-        tablesLayout.addComponent(deliveryPanel);
-        tablesLayout.addComponent(sectionSectionTable);
-        tablesLayout.addComponent(fileSelectionPanel);
-        tablesLayout.addComponent(articleSelectionPanel);
+        tablesLayoutTop.addComponent(deliveryPanel);
+        tablesLayoutTop.addComponent(sectionSectionTable);
+        tablesLayoutBottom.addComponent(pageSelectionPanel);
+        tablesLayoutBottom.addComponent(articleSelectionPanel);
 
-        tablesLayout.setExpandRatio(deliveryPanel, 0.2f);
-        tablesLayout.setExpandRatio(sectionSectionTable, 0.2f);
-        tablesLayout.setExpandRatio(fileSelectionPanel, 0.4f);
-        tablesLayout.setExpandRatio(articleSelectionPanel, 0.1f);
+        tablesLayoutTop.setExpandRatio(deliveryPanel, 0.2f);
+        tablesLayoutTop.setExpandRatio(sectionSectionTable, 0.2f);
+        tablesLayoutBottom.setExpandRatio(pageSelectionPanel, 0.4f);
+        tablesLayoutBottom.setExpandRatio(articleSelectionPanel, 0.1f);
+
+        tablesLayout.addComponent(tablesLayoutTop);
+        tablesLayout.addComponent(tablesLayoutBottom);
 
         saveCheckButton.addClickListener(new Button.ClickListener() {
             @Override
@@ -94,7 +110,16 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             }
         });
 
+
+        // second, create a StreamResource and pass the previous StreamResource:
+        StreamResource resource = model.createReportResource();
+
+        // extend a component
+        FileDownloader downloader = new FileDownloader(resource);
+        downloader.extend(statusButton);
+
         buttonLayout.addComponent(saveCheckButton);
+        buttonLayout.addComponent(statusButton);
 
         this.addComponent(buttonLayout);
         this.addComponent(tablesLayout);
@@ -107,8 +132,12 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      * @param checkedState
      */
     @Override
-    public void checkThePage(Object itemId, ConfirmationState checkedState) {
-        fileSelectionPanel.checkSpecific(itemId, checkedState);
+    public boolean checkThePage(Object itemId, ConfirmationState checkedState) {
+        return pageSelectionPanel.checkSpecific(itemId, checkedState);
+    }
+
+    public void reloadTables() {
+        showTheSelectedTitle(true);
     }
 
     /**
@@ -128,7 +157,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     protected void showTheSelectedTitle(boolean redrawSectionTable) {
 
-        fileSelectionPanel.setEnabled(false);
+        pageSelectionPanel.setEnabled(false);
         articleSelectionPanel.setEnabled(false);
 
         String selectedDelivery = model.getSelectedDelivery();
@@ -143,7 +172,7 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
             return;
         }
 
-        fileSelectionPanel.setEnabled(true);
+        pageSelectionPanel.setEnabled(true);
         articleSelectionPanel.setEnabled(true);
 
         List<Page> pages = title.getPage();
@@ -168,7 +197,8 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 .filter(distinctByKey(page -> page.getId()))
                 .collect(Collectors.toList());
 
-        fileSelectionPanel.setInfo(filteredPages);
+        pageSelectionPanel.setInfo(filteredPages);
+        pageSelectionPanel.selectFirst();
 
         List<Article> articleList = new ArrayList<Article>();
         articleList.addAll(item.getArticles());
@@ -190,8 +220,12 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
      */
     @Override
     public void addFileSelectedListener(ItemClickEvent.ItemClickListener listener) {
-        fileSelectionPanel.addItemClickListener(listener);
+        pageSelectionPanel.addItemClickListener(listener);
         articleSelectionPanel.addItemClickListener(listener);
+    }
+
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
+        pageSelectionPanel.addValueChangeListener(listener);
     }
 
     @Override
@@ -224,11 +258,13 @@ public class DeliveryPanel extends VerticalLayout implements StatisticsPanels {
                 UI.getCurrent().removeWindow(dialog);
                 if ("OKBUTTON".equals(event.getButton().getId())) {
 
-                    boolean writeResult = model.writeToCurrentItemCashed(selectedDelivery, selectedTitle, true,
-                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems());
+                    boolean writeResult = model.writeToCurrentItemCached(selectedDelivery, selectedTitle, true,
+                            storePanel.getInitials(), storePanel.getComment(), storePanel.getMissingItems(), dialog.forceClicked());
 
                     if (!writeResult) {
                         Notification.show("The result can not get stored, please contact support", Notification.Type.ERROR_MESSAGE);
+                    } else {
+                        deliveryPanel.checkSpecific(item, true);
                     }
 
                 }

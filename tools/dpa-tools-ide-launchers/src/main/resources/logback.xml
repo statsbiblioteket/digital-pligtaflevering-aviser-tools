@@ -22,7 +22,7 @@
         </encoder>
     </appender>
 
-    <logger name="dk.statsbiblioteket" level="trace" />
+    <logger name="dk.statsbiblioteket" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

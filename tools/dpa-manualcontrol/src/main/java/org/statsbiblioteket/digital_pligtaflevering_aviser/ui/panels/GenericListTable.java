@@ -1,5 +1,6 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -63,14 +64,31 @@ public class GenericListTable extends VerticalLayout {
         }
         table.setId(tableId);
         table.setColumnExpandRatio(checkedColumn, 0.3f);
+        table.setColumnWidth(checkedColumn, 20);
         table.setVisible(initialVisible);
     }
 
-    /**
-     * Set a list of which columns in the table to make visible
-     *
-     * @param visibleColumns
-     */
+    public GenericListTable(Class c, String checkedColumn, Object checkedDefaultValue, String[] visibleColumns, String[] columnNames, String tableId, boolean initialVisible) {
+        this(c, checkedColumn, checkedDefaultValue, visibleColumns, tableId, initialVisible);
+        int i = 0;
+        if (visibleColumns == null ||
+                columnNames == null ||
+                columnNames.length != visibleColumns.length) {
+            return;//If something in the delivered logic is wrong, just return without using logic, this is set by the programmer
+        }
+
+        for(String colimn : visibleColumns) {
+            table.setColumnHeader(colimn, columnNames[i]);
+            i++;
+        }
+    }
+
+
+        /**
+         * Set a list of which columns in the table to make visible
+         *
+         * @param visibleColumns
+         */
     public void setVisibleColumns(String[] visibleColumns) {
         if (visibleColumns != null) {
             table.setVisibleColumns(visibleColumns);
@@ -91,11 +109,17 @@ public class GenericListTable extends VerticalLayout {
      *
      * @param itemId
      * @param value
+     * @return returns true if the item could be found
      */
-    public void checkSpecific(Object itemId, Object value) {
+    public boolean checkSpecific(Object itemId, Object value) {
         //noinspection unchecked
-        table.getItem(itemId).getItemProperty(checkedColumnName).setValue(value);
-        table.refreshRowCache();
+        Item itm = table.getItem(itemId);
+        if(itm!=null) {
+            itm.getItemProperty(checkedColumnName).setValue(value);
+            table.refreshRowCache();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -172,11 +196,22 @@ public class GenericListTable extends VerticalLayout {
             }
             c.setReadOnly(true);
             c.setHeight("13px");
+            c.setWidth("20px");
             return c;
+        }
+    }
+
+    public void selectFirst() {
+        if(table.size() > 0) {
+            table.select(table.firstItemId());
         }
     }
 
     public void addItemClickListener(ItemClickEvent.ItemClickListener listener) {
         table.addItemClickListener(listener);
+    }
+
+    public void addValueChangeListener(Property.ValueChangeListener listener) {
+        table.addValueChangeListener(listener);
     }
 }

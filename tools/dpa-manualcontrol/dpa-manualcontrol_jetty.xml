@@ -9,7 +9,8 @@
   <Parameter name="jvm.dumpheap" value="false"/>
   <Parameter name="bitrepository.ingester.baseurl" value="---"/>
   <Parameter name="bitrepository.sbpillar.mountpoint" value="/avisbits/dpaviser"/>
-  <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived,Statistics_generated"/>
+  <Parameter name="autonomous.minimalpastSuccessfulEvents" value="Data_Archived,Statistics_generated"/>
+  <Parameter name="autonomous.pastSuccessfulEvents" value="Data_Archived,Statistics_generated,Checksumfile_regenerated,Checksumfile_checked,Newspaper_Weekdays_Analyzed,VeraPDF_Analyzed,VeraPDF_Invoked"/>
   <Parameter name="autonomous.oldEvents" value=""/>
   <Parameter name="autonomous.itemTypes" value="doms:ContentModel_DPARoundTrip"/>
   <Parameter name="autonomous.sboi.pageSize" value="100"/>
@@ -18,10 +19,12 @@
   <Parameter name="autonomous.component.fedoraRetries" value="10"/>
   <Parameter name="autonomous.component.fedoraDelayBetweenRetries" value="10"/>
   <Parameter name="dpa.manualcontrol.cashingfolder" value="/tmp/"/>
+  <Parameter name="dpa.manualcontrol.configpath" value="/tmp/"/>
+  <Parameter name="dpa.manualcontrol.truetedUsers" value="nieb,mmj,abr"/>
   <Parameter name="doms.collection.pid" value="doms_sboi_dpaCollection"/>
 
   <Parameter name="casServerUrlPrefix" value="https://samling.statsbiblioteket.dk/casinternal/"/>
   <Parameter name="casServerLoginUrl" value="https://samling.statsbiblioteket.dk/casinternal/"/>
   <Parameter name="serverName" value="localhost"/>
-  <Parameter name="service" value="http://localhost:8080/dpa-manualcontrol/VAADIN;mode=manualvalidate"/>
+  <Parameter name="service" value="http://localhost:8080/dpa-manualcontrol/"/>
 </Context>

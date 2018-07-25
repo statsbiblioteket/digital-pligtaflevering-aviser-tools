@@ -8,14 +8,16 @@ need at least 12 GB RAM to be able to do anything interesting.
 This was tested with a manually downloaded VirtualBox 5.0.20->5.1.14
 on Ubuntu 16.04 LTS->16.10 with OpenJDK 8 as java.
 
-The version of Vagrant shipping with Ubuntu is too old. Install
-vagrant yourself from https://www.vagrantup.com/downloads.html.
+The version of Vagrant shipping with Ubuntu is too old even for 18.04 LTS. 
+Install vagrant yourself from https://www.vagrantup.com/downloads.html.
 
 Note:   Use the following command to get X11 forwarding (for e.g.
 visualvm):
 
     vagrant ssh -- -Y
     
+You must have the KB specific version of veraPDF-rest available
+to Maven to build the box.   See /README.md for details.
 
 
 Setting up the DOMS+Bitrepository vagrant box
@@ -42,7 +44,7 @@ Now download Zulu OpenJDK 8, install Bit Repository and DOMS and run a
 tiny web server on top of the Bit Repository file system so we can
 retrieve the files stored:
 
-    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh"
+    vagrant ssh -c "nohup bash -x /vagrant/install_bitrepository.sh; nohup bash -x /vagrant/install_doms.sh; nohup bash /vagrant/run-bitrepositorystub-webserver.sh; nohup bash /vagrant/run-verapdf-rest.sh"
 
 
 Note that DOMS will take a while to initialize (SBOI and DOMS Wui Solr
@@ -64,6 +66,14 @@ Do *not* use the `vagrant snapshot` command to restore snapshots.
 Running programs and file system mappings are not properly handled.
 Either use the VirtualBox GUI or the VBoxManage command to revert to
 earlier snapshots.
+
+Using the vagrant box from another machine:
+===
+
+* Ensure that the virtualbox instance uses bridged networking.
+* Use the `bin/ssh-with-vagrant-port-forwarding.sh` script as inspiration for 
+port forwarding from the development machine to the machine running the vagrant instance. 
+
 
 Ingesting deliveries:
 ===
