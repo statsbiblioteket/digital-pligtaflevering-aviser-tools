@@ -22,7 +22,8 @@ public class WeekdayResult {
     public WeekdayResult(String weekday,
                          List<String> expectedTitles,
                          List<String> foundTitles,
-                         List<String> missingTitles, List<String> extraTitles) {
+                         List<String> missingTitles,
+                         List<String> extraTitles) {
         this.weekday = weekday;
         this.expectedTitles = expectedTitles;
         this.foundTitles = foundTitles;

@@ -1,9 +1,9 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import dagger.Component;
 import dagger.Module;
@@ -37,20 +37,19 @@ import javax.inject.Named;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,12 +57,12 @@ import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 /**
- * Unfinished
+ * Unfinished. -TBA
+ *
+ * You can say that again.... -ABR
  */
 public class NewspaperWeekdaysAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(NewspaperWeekdaysAnalyzeMain.class);
@@ -89,9 +88,7 @@ public class NewspaperWeekdaysAnalyzeMain {
     @Module
     public static class NewspaperWeekdaysAnalyzeModule {
 
-        /**
-         * @noinspection PointlessBooleanExpression
-         */
+      
         @Provides
         protected Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                                    QuerySpecification workToDoQuery,
@@ -104,105 +101,78 @@ public class NewspaperWeekdaysAnalyzeMain {
 
             final String agent = getClass().getSimpleName();
     
-            DeliveryPattern deliveryPattern;
-            try (InputStream is = new FileInputStream(deliveryXmlPath);) {
-                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
-            } catch (Exception e){
-                throw new RuntimeException("Failed to load deliveryPattern from '"+deliveryXmlPath+"'",e);
-            }
+            DeliveryPattern deliveryPattern = getDeliveryPattern(deliveryXmlPath);
+    
+            ObjectWriter writer = createJsonWriter();
+    
+            //Pattern pattern = Pattern.compile("dl_(\\d{4})-(\\d{2})-(\\d{2})_rt\\d+");
+            Pattern pattern = Pattern.compile("dl_([\\d]{8})_rt\\d+");
             
-
-            Tool f = () -> {
+            Tool tool = () -> {
+                //Find the roundtrips
                 List<DomsItem> roundtripItems = Stream.of(workToDoQuery)
                         .flatMap(domsRepository::query)
                         .peek(o -> log.trace("Query returned: {}", o))
                         .collect(toList());
 
-                Pattern pattern = Pattern.compile("dl_(........)_rt.*");
-
+              
                 List<String> result = new ArrayList<>();
 
+                //For each round trip
                 for (DomsItem item : roundtripItems) {
-                    String relativePath = item.getPath();
-
-                    Path deliveryPath = Paths.get(deliveriesFolder, relativePath).toAbsolutePath();
-
-                    mxBean.currentId = deliveryPath.toString();
+    
+                    mxBean.currentId = item.toString();
                     mxBean.idsProcessed++;
-
-                    if (Files.exists(deliveryPath) == false) {
-                        throw new RuntimeException(new FileNotFoundException(deliveryPath.toString()));
-                    }
-
-                    // Same as ingester
-                    Set<String> foundTitles = Files.walk(deliveryPath, 1)
-                            .filter(Files::isDirectory)
-                            .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
-                            .map(p -> p.getFileName().toString())
-                            .collect(toSet());
-
-                    Matcher matcher = pattern.matcher(relativePath);
-                    if (matcher.matches() == false) {
+    
+                    //Get the roundtrip name of the form dl_(........)_rt.*
+                    String relativePath = item.getPath();
+                    
+                    //Calculate the day-name from the delivery date
+                    DayOfWeek dayId;
+                    try {
+                        dayId = getDayID(pattern,relativePath);
+                    } catch (InvalidObjectException e) {
+                        log.warn("Could not parse delivery date from delivery {} with name '{}', so skipping it",
+                                 item,
+                                 relativePath);
                         continue;
                     }
-                    String dateString = matcher.group(1);
-                    LocalDate localDate = LocalDate.parse(dateString.substring(0, 4) + "-" + dateString.substring(4, 6) + "-" + dateString.substring(6, 8));
-                    DayOfWeek dayOfWeek = localDate.getDayOfWeek();
+    
+                    //Find the expected titles for this day
+                    List<String> expectedTitles = deliveryPattern.entryStream()
+                                                                .filter(e -> e.getValue().getDayState(dayId))
+                                                                .map(e -> e.getKey())
+                                                                .distinct()
+                                                                .sorted()
+                                                                .collect(toList());
+                    
+    
+                    List<String> foundTitles = item.children()
+                                                   .map(p -> Paths.get(p.getPath()).getFileName().toString())
+                                                   .distinct()
+                                                   .sorted()
+                                                   .collect(toList());
+                        
+                     
 
-                    String[] dayIds = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-                    String dayId = dayIds[dayOfWeek.getValue() - 1];
-
-                    Set<String> expectedTitles = deliveryPattern.entryStream()
-                            .filter(e -> e.getValue().getDayState(dayId))
-                            .map(e -> e.getKey())
-                            .sorted()
-                            .collect(toSet());
-
-                    Set<String> missingTitles = new HashSet<>(expectedTitles);
+                    //Missing titles must be ExpectedTitles - FoundTitles
+                    List<String> missingTitles = new ArrayList<>(expectedTitles);
                     missingTitles.removeAll(foundTitles);
 
-                    Set<String> extraTitles = new HashSet<>(foundTitles);
+                    //Extra titles must be FoundTitles - ExpectedTitles
+                    List<String> extraTitles = new ArrayList<>(foundTitles);
                     extraTitles.removeAll(expectedTitles);
 
                     
-                    
-                    /*  Now generate this snippet:
-                    {
-                        "weekday": "Mon",
-                        "expectedTitles": [
-                            "avis1",
-                            "avis2"
-                         ],
-                        "foundTitles": [
-                            "avis1",
-                            "avis3"
-                         ],
-                        "missingTitles":[
-                            "avis2"
-                         ],
-                        "extraTitles":[
-                            "avis3"
-                        ]
-                    }
-                     */
+    
+                    WeekdayResult weekDayResult = new WeekdayResult(dayId.getDisplayName(TextStyle.SHORT, Locale.US),
+                                                                    expectedTitles,
+                                                                    foundTitles,
+                                                                    missingTitles,
+                                                                    extraTitles);
     
     
-                    WeekdayResult weekDayResult = new WeekdayResult(dayId,
-                                                                    new ArrayList<>(expectedTitles),
-                                                                    new ArrayList<>(foundTitles),
-                                                                    new ArrayList<>(missingTitles),
-                                                                    new ArrayList<>(extraTitles));
-    
-                    ObjectMapper mapper = new ObjectMapper()
-                            .enable(SerializationFeature.INDENT_OUTPUT)
-                            .enable(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS);
-    
-                    DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
-                    prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-    
-                    String jsonSnippet = mapper.writer(prettyPrinter).writeValueAsString(weekDayResult);
+                    String jsonSnippet = writer.writeValueAsString(weekDayResult);
     
                     item.modifyDatastreamByValue("NEWSPAPERWEEKDAY",
                                                  null,
@@ -215,20 +185,83 @@ public class NewspaperWeekdaysAnalyzeMain {
                     item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, true));
 
 
-                    result.add(item.getDomsId().id() + " " + deliveryPath + " missingTitles: " + jsonifySet(missingTitles));
+                    result.add(item.getDomsId() + " missingTitles: " + writer.writeValueAsString(missingTitles));
                 }
                 return result;
             };
-            return f;
+            return tool;
+        }
+    
+    
+        /**
+         *
+         *                       Now generate this snippet:
+         *                     {
+         *                         "weekday": "Mon",
+         *                         "expectedTitles": [
+         *                             "avis1",
+         *                             "avis2"
+         *                          ],
+         *                         "foundTitles": [
+         *                             "avis1",
+         *                             "avis3"
+         *                          ],
+         *                         "missingTitles":[
+         *                             "avis2"
+         *                          ],
+         *                         "extraTitles":[
+         *                             "avis3"
+         *                         ]
+         *                     }
+         *
+         **/
+        protected ObjectWriter createJsonWriter() {
+            ObjectMapper mapper = new ObjectMapper()
+                    .enable(SerializationFeature.INDENT_OUTPUT)
+                    .enable(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS);
+        
+            DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+            prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        
+            return mapper.writer(prettyPrinter);
+        }
+    
+        /**
+         * Get the weekday name from the delivery name.
+         *
+         * Parses the deliveryName as a date, and calculates the weekday name from that
+         * @param pattern
+         * @param deliveryName
+         * @return
+         * @throws InvalidObjectException
+         */
+        protected DayOfWeek getDayID(Pattern pattern, String deliveryName) throws InvalidObjectException {
+            //If the item is not a delivery, skip it
+            Matcher matcher = pattern.matcher(deliveryName);
+            if (matcher.matches() == false) {
+                throw new InvalidObjectException("deliveryName '"+deliveryName+"' does not match pattern '"+pattern+"'");
+            }
+            
+            String dateString = matcher.group(1);
+            DayOfWeek dayOfWeek = LocalDate.parse(dateString,
+                                                  new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter())
+                                           .getDayOfWeek();
+        
+            
+            return dayOfWeek;
         }
 
-        public String jsonifySet(Set<String> set) {
-            return "[" +
-                    set.stream()
-                            .sorted()
-                            .map(s -> "\"" + s.replaceAll("\"", "\\") + "\"")
-                            .collect(joining(", "))
-                    + "]";
+        private DeliveryPattern getDeliveryPattern(
+                @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath) {
+            DeliveryPattern deliveryPattern;
+            try (InputStream is = new FileInputStream(deliveryXmlPath);) {
+                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to load deliveryPattern from '"+deliveryXmlPath+"'",e);
+            }
+            return deliveryPattern;
         }
 
         @Provides

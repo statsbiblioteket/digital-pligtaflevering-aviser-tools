@@ -6,31 +6,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -41,31 +41,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -76,31 +76,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -111,31 +111,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -146,31 +146,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -181,31 +181,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -216,31 +216,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -251,31 +251,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -286,31 +286,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -321,31 +321,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -356,31 +356,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -391,31 +391,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -426,31 +426,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -461,31 +461,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -496,31 +496,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -531,31 +531,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -566,31 +566,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -601,31 +601,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -636,31 +636,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -671,31 +671,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -706,31 +706,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -741,31 +741,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -776,31 +776,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -811,31 +811,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -846,31 +846,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -881,31 +881,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -916,31 +916,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -951,31 +951,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -986,31 +986,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1021,31 +1021,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1056,31 +1056,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1091,31 +1091,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1126,31 +1126,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1161,31 +1161,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1196,31 +1196,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1231,31 +1231,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1266,31 +1266,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1301,31 +1301,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1336,31 +1336,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1371,31 +1371,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1406,31 +1406,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1441,31 +1441,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1476,31 +1476,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1511,31 +1511,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1546,31 +1546,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1581,31 +1581,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1616,31 +1616,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1651,31 +1651,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1686,31 +1686,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1721,31 +1721,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1756,31 +1756,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1791,31 +1791,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1826,31 +1826,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>true</value>
                     </entry>
                 </weekDayList>
@@ -1861,31 +1861,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1896,31 +1896,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
@@ -1931,31 +1931,31 @@
             <value>
                 <weekDayList>
                     <entry>
-                        <key>Mon</key>
+                        <key>MONDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Tue</key>
+                        <key>TUESDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Wed</key>
+                        <key>WEDNESDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Thu</key>
+                        <key>THURSDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Fri</key>
+                        <key>FRIDAY</key>
                         <value>true</value>
                     </entry>
                     <entry>
-                        <key>Sat</key>
+                        <key>SATURDAY</key>
                         <value>false</value>
                     </entry>
                     <entry>
-                        <key>Sun</key>
+                        <key>SUNDAY</key>
                         <value>false</value>
                     </entry>
                 </weekDayList>
