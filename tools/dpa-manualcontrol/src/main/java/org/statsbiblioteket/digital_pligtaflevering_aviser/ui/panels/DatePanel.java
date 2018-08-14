@@ -216,12 +216,14 @@ public class DatePanel extends VerticalLayout {
                 vl.addComponent(contentButton);
             }  else {
                 contentButton = new Button(new ThemeResource("icons/full.png"));
-                contentButton.setDescription("The delivery on this day for this newspapertitle has contents of newspaperpages");
+                contentButton.setDescription("The delivery on this day for this newspapertitle has newspaperpages");
                 vl.addComponent(contentButton);
             }
             Button expectationButton;
             if (expected == null) {
-                //Add nothing extra, expected is null, when there is no configuration file for deliverypattern
+                expectationButton = new Button(new ThemeResource("icons/missing.png"));
+                expectationButton.setDescription("The selected newspapertitle is unknown");
+                vl.addComponent(expectationButton);
             } else {
                 String name = columnId.toString();
                 DayOfWeek weekDay = DayOfWeek.valueOf(name);
