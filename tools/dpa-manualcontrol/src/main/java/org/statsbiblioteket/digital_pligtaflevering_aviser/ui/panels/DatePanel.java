@@ -207,36 +207,32 @@ public class DatePanel extends VerticalLayout {
 
             Button contentButton;
             if(value.toString().contains("NO PAGES")) {
-                //contentButton = new Button(new ThemeResource("icons/empty.png"));
-                contentButton = new Button("No Pages");
+                contentButton = new Button(new ThemeResource("icons/empty.png"));
+                contentButton.setDescription("The delivery on this day for this newspapertitle has no content");
                 vl.addComponent(contentButton);
             } else if(value.toString().contains("NO DELIVERY")) {
-                contentButton = new Button("Delivery Missing");
-                //contentButton = new Button(new ThemeResource("icons/missing.png"));
+                contentButton = new Button(new ThemeResource("icons/missing.png"));
+                contentButton.setDescription("The delivery on this day has not been recieved");
                 vl.addComponent(contentButton);
             }  else {
-                //contentButton = new Button(new ThemeResource("icons/full.png"));
-                contentButton = new Button("Delivery present");
+                contentButton = new Button(new ThemeResource("icons/full.png"));
+                contentButton.setDescription("The delivery on this day for this newspapertitle has contents of newspaperpages");
                 vl.addComponent(contentButton);
             }
             Button expectationButton;
             if (expected == null) {
-                if (value.toString().contains("NO DELIVERY")) {
-                    expectationButton = new Button("as Expected");
-                    vl.addComponent(expectationButton);
-                } else {
-                    expectationButton = new Button("but Unexpected");
-                    vl.addComponent(expectationButton);
-                }
+                //Add nothing extra, expected is null, when there is no configuration file for deliverypattern
             } else {
                 String name = columnId.toString();
                 DayOfWeek weekDay = DayOfWeek.valueOf(name);
                 boolean dayState = expected.getDayState(weekDay);
                 if(!Boolean.TRUE.equals(dayState)) {
-                    expectationButton = new Button("but Unexpected");
+                    expectationButton = new Button(new ThemeResource("icons/empty.png"));
+                    expectationButton.setDescription("The deliverypattern indicates that there should be no delivery on this day for this newspapertitle");
                     vl.addComponent(expectationButton);
                 } else {
-                    expectationButton = new Button("as Expected");
+                    expectationButton = new Button(new ThemeResource("icons/full.png"));
+                    expectationButton.setDescription("The deliverypattern indicates that there should be a delivery on this day for this newspapertitle");
                     vl.addComponent(expectationButton);
                 }
             }
