@@ -75,7 +75,7 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.URL_TO_BATCH_DIR_PROPERTY;
 
 /**
- * Unfinished
+ * Ingests the delivery in Doms and Bitrepo
  */
 public class IngesterMain {
 
