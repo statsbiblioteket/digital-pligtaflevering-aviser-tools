@@ -5,7 +5,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProje
 import java.nio.file.Path;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
-import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.NewspaperWeekdaysAnalyzeMain.DPA_DELIVERY_PATTERN_XML_PATH;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.NewspaperWeekdaysAnalyzeMain.DPA_DELIVERY_PATTERN1_XML_PATH;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.NewspaperWeekdaysAnalyzeMain.DPA_DELIVERY_PATTERN2_XML_PATH;
 
 public class NewspaperWeekdaysAnalyzeLauncher {
     public static void main(String[] args) throws Exception {
@@ -19,7 +20,8 @@ public class NewspaperWeekdaysAnalyzeLauncher {
         NewspaperWeekdaysAnalyzeMain.main(new String[]{
                 "newspaper-weekdays-analyze.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
-                DPA_DELIVERY_PATTERN_XML_PATH + "=" + configPath.toAbsolutePath()
+                DPA_DELIVERY_PATTERN1_XML_PATH + "=" + configPath.toAbsolutePath(),
+                DPA_DELIVERY_PATTERN2_XML_PATH + "=" + configPath.toAbsolutePath()
 
         });
     }

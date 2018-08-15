@@ -67,7 +67,12 @@ import static java.util.stream.Collectors.toList;
 public class NewspaperWeekdaysAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(NewspaperWeekdaysAnalyzeMain.class);
 
-    public static final String DPA_DELIVERY_PATTERN_XML_PATH = "dpa.delivery-pattern-xml.path";
+    //The path for the xml-file describing the deliverypattern
+    public static final String DPA_DELIVERY_PATTERN1_XML_PATH = "dpa.delivery-pattern1-xml.path";
+    public static final String DPA_DELIVERY_PATTERN2_XML_PATH = "dpa.delivery-pattern2-xml.path";
+    public static final String DPA_DELIVERY_PATTERN_START = "dpa.delivery-pattern-start";
+    //The time when DPA_DELIVERY_PATTERN2_XML_PATH is supposed to be used
+    public static final String DPA_DELIVERY_PATTERN_SWITCH = "dpa.delivery-pattern-switch";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -96,12 +101,16 @@ public class NewspaperWeekdaysAnalyzeMain {
                                    EnhancedFedora efedora,
                                    DomsEventStorage<Item> domsEventStorage,
                                    @Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                                   @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath,
+                                   @Named(DPA_DELIVERY_PATTERN1_XML_PATH) String deliveryXmlPath1,
+                                   @Named(DPA_DELIVERY_PATTERN2_XML_PATH) String deliveryXmlPath2,
+                                   @Named(DPA_DELIVERY_PATTERN_START) String patternStartDate,
+                                   @Named(DPA_DELIVERY_PATTERN_SWITCH) String patternSwitchDate,
                                    DefaultToolMXBean mxBean) {
 
             final String agent = getClass().getSimpleName();
     
-            DeliveryPattern deliveryPattern = getDeliveryPattern(deliveryXmlPath);
+            DeliveryPattern deliveryPattern1 = getDeliveryPattern1(deliveryXmlPath1);
+            DeliveryPattern deliveryPattern2 = getDeliveryPattern2(deliveryXmlPath2);
     
             ObjectWriter writer = createJsonWriter();
     
@@ -129,8 +138,18 @@ public class NewspaperWeekdaysAnalyzeMain {
                     
                     //Calculate the day-name from the delivery date
                     DayOfWeek dayId;
+                    boolean afterDateCheckLimit = true;
+                    boolean afterDate2Limit = true;
+
                     try {
                         dayId = getDayID(pattern,relativePath);
+                        LocalDate deliveryDate = getDate(pattern,relativePath);
+
+                        LocalDate patternSwitchDLimit = getDate(pattern,patternSwitchDate);
+                        afterDate2Limit = deliveryDate.compareTo(patternSwitchDLimit) > 0;
+
+                        LocalDate patternAnalyzeStartDate = getDate(pattern,patternStartDate);
+                        afterDateCheckLimit = deliveryDate.compareTo(patternAnalyzeStartDate) > 0;
                     } catch (InvalidObjectException e) {
                         log.warn("Could not parse delivery date from delivery {} with name '{}', so skipping it",
                                  item,
@@ -138,15 +157,26 @@ public class NewspaperWeekdaysAnalyzeMain {
                         continue;
                     }
     
-                    //Find the expected titles for this day
-                    List<String> expectedTitles = deliveryPattern.entryStream()
-                                                                .filter(e -> e.getValue().getDayState(dayId))
-                                                                .map(e -> e.getKey())
-                                                                .distinct()
-                                                                .sorted()
-                                                                .collect(toList());
-                    
-    
+                    //Find the expected titles for this day, depending on the date find the appropriate pattern
+                    List<String> expectedTitles;
+                    if(afterDate2Limit) {
+                        expectedTitles = deliveryPattern1.entryStream()
+                                .filter(e -> e.getValue().getDayState(dayId))
+                                .map(e -> e.getKey())
+                                .distinct()
+                                .sorted()
+                                .collect(toList());
+                    } else {
+                        expectedTitles = deliveryPattern2.entryStream()
+                                .filter(e -> e.getValue().getDayState(dayId))
+                                .map(e -> e.getKey())
+                                .distinct()
+                                .sorted()
+                                .collect(toList());
+                    }
+
+
+
                     List<String> foundTitles = item.children()
                                                    .map(p -> Paths.get(p.getPath()).getFileName().toString())
                                                    .distinct()
@@ -173,6 +203,13 @@ public class NewspaperWeekdaysAnalyzeMain {
     
     
                     String jsonSnippet = writer.writeValueAsString(weekDayResult);
+
+                    boolean failState;
+                    if(weekDayResult.getMissingTitles().size()>0 && afterDateCheckLimit) {
+                        failState = false;
+                    } else {
+                        failState = true;
+                    }
     
                     item.modifyDatastreamByValue("NEWSPAPERWEEKDAY",
                                                  null,
@@ -182,7 +219,7 @@ public class NewspaperWeekdaysAnalyzeMain {
                                                  "text/plain",
                                                  null,
                                                  null);
-                    item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, true));
+                    item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, failState));
 
 
                     result.add(item.getDomsId() + " missingTitles: " + writer.writeValueAsString(missingTitles));
@@ -251,8 +288,34 @@ public class NewspaperWeekdaysAnalyzeMain {
             return dayOfWeek;
         }
 
-        private DeliveryPattern getDeliveryPattern(
-                @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath) {
+
+        protected LocalDate getDate(Pattern pattern, String deliveryName) throws InvalidObjectException {
+            //If the item is not a delivery, skip it
+            Matcher matcher = pattern.matcher(deliveryName);
+            if (matcher.matches() == false) {
+                throw new InvalidObjectException("deliveryName '"+deliveryName+"' does not match pattern '"+pattern+"'");
+            }
+
+            String dateString = matcher.group(1);
+            return LocalDate.parse(dateString,
+                    new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter());
+        }
+
+        private DeliveryPattern getDeliveryPattern1(
+                @Named(DPA_DELIVERY_PATTERN1_XML_PATH) String deliveryXmlPath) {
+            DeliveryPattern deliveryPattern;
+            try (InputStream is = new FileInputStream(deliveryXmlPath);) {
+                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
+            } catch (Exception e){
+                throw new RuntimeException("Failed to load deliveryPattern from '"+deliveryXmlPath+"'",e);
+            }
+            return deliveryPattern;
+        }
+
+        private DeliveryPattern getDeliveryPattern2(
+                @Named(DPA_DELIVERY_PATTERN2_XML_PATH) String deliveryXmlPath) {
             DeliveryPattern deliveryPattern;
             try (InputStream is = new FileInputStream(deliveryXmlPath);) {
                 JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
@@ -307,9 +370,28 @@ public class NewspaperWeekdaysAnalyzeMain {
         }
 
         @Provides
-        @Named(DPA_DELIVERY_PATTERN_XML_PATH)
-        String provideManualControlConfigPath(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN_XML_PATH);
+        @Named(DPA_DELIVERY_PATTERN2_XML_PATH)
+        String provideManualControlConfigPath1(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN2_XML_PATH);
         }
+
+        @Provides
+        @Named(DPA_DELIVERY_PATTERN1_XML_PATH)
+        String provideManualControlConfigPath2(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN1_XML_PATH);
+        }
+
+        @Provides
+        @Named(DPA_DELIVERY_PATTERN_START)
+        String provideDeliveryPatternDate(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN_START);
+        }
+
+        @Provides
+        @Named(DPA_DELIVERY_PATTERN_SWITCH)
+        String provideDeliveryPatternFuture(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN_SWITCH);
+        }
+
     }
 }
