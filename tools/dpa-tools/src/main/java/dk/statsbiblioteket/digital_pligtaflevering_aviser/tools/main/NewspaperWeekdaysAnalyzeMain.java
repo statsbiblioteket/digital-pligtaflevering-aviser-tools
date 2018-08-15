@@ -19,6 +19,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPatternList;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekdayResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -67,13 +69,9 @@ import static java.util.stream.Collectors.toList;
 public class NewspaperWeekdaysAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(NewspaperWeekdaysAnalyzeMain.class);
 
-    //The path for the xml-file describing the deliverypattern
-    public static final String DPA_DELIVERY_PATTERN1_XML_PATH = "dpa.delivery-pattern1-xml.path";
-    public static final String DPA_DELIVERY_PATTERN2_XML_PATH = "dpa.delivery-pattern2-xml.path";
-    public static final String DPA_DELIVERY_PATTERN_START = "dpa.delivery-pattern-start";
-    //The time when DPA_DELIVERY_PATTERN2_XML_PATH is supposed to be used
-    public static final String DPA_DELIVERY_PATTERN_SWITCH = "dpa.delivery-pattern-switch";
-
+    //The path for the xml-file describing the deliverypattern, of the form path:lastDeliveryWithThisPattern,path:astDeliveryWithThisPattern
+    public static final String DPA_DELIVERY_PATTERN = "dpa.delivery-pattern";
+    
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
@@ -101,16 +99,10 @@ public class NewspaperWeekdaysAnalyzeMain {
                                    EnhancedFedora efedora,
                                    DomsEventStorage<Item> domsEventStorage,
                                    @Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                                   @Named(DPA_DELIVERY_PATTERN1_XML_PATH) String deliveryXmlPath1,
-                                   @Named(DPA_DELIVERY_PATTERN2_XML_PATH) String deliveryXmlPath2,
-                                   @Named(DPA_DELIVERY_PATTERN_START) String patternStartDate,
-                                   @Named(DPA_DELIVERY_PATTERN_SWITCH) String patternSwitchDate,
+                                   DeliveryPatternList deliveryPatternList,
                                    DefaultToolMXBean mxBean) {
 
             final String agent = getClass().getSimpleName();
-    
-            DeliveryPattern deliveryPattern1 = getDeliveryPattern1(deliveryXmlPath1);
-            DeliveryPattern deliveryPattern2 = getDeliveryPattern2(deliveryXmlPath2);
     
             ObjectWriter writer = createJsonWriter();
     
@@ -138,18 +130,9 @@ public class NewspaperWeekdaysAnalyzeMain {
                     
                     //Calculate the day-name from the delivery date
                     DayOfWeek dayId;
-                    boolean afterDateCheckLimit = true;
-                    boolean afterDate2Limit = true;
-
+    
                     try {
                         dayId = getDayID(pattern,relativePath);
-                        LocalDate deliveryDate = getDate(pattern,relativePath);
-
-                        LocalDate patternSwitchDLimit = getDate(pattern,patternSwitchDate);
-                        afterDate2Limit = deliveryDate.compareTo(patternSwitchDLimit) > 0;
-
-                        LocalDate patternAnalyzeStartDate = getDate(pattern,patternStartDate);
-                        afterDateCheckLimit = deliveryDate.compareTo(patternAnalyzeStartDate) > 0;
                     } catch (InvalidObjectException e) {
                         log.warn("Could not parse delivery date from delivery {} with name '{}', so skipping it",
                                  item,
@@ -157,24 +140,16 @@ public class NewspaperWeekdaysAnalyzeMain {
                         continue;
                     }
     
+                    DeliveryPattern deliveryPattern = deliveryPatternList.getMostRecentDeliveryPatternBefore(
+                            relativePath);
+    
                     //Find the expected titles for this day, depending on the date find the appropriate pattern
-                    List<String> expectedTitles;
-                    if(afterDate2Limit) {
-                        expectedTitles = deliveryPattern1.entryStream()
+                    List<String> expectedTitles = deliveryPattern.entryStream()
                                 .filter(e -> e.getValue().getDayState(dayId))
                                 .map(e -> e.getKey())
                                 .distinct()
                                 .sorted()
                                 .collect(toList());
-                    } else {
-                        expectedTitles = deliveryPattern2.entryStream()
-                                .filter(e -> e.getValue().getDayState(dayId))
-                                .map(e -> e.getKey())
-                                .distinct()
-                                .sorted()
-                                .collect(toList());
-                    }
-
 
 
                     List<String> foundTitles = item.children()
@@ -205,11 +180,7 @@ public class NewspaperWeekdaysAnalyzeMain {
                     String jsonSnippet = writer.writeValueAsString(weekDayResult);
 
                     boolean failState;
-                    if(weekDayResult.getMissingTitles().size()>0 && afterDateCheckLimit) {
-                        failState = false;
-                    } else {
-                        failState = true;
-                    }
+                    failState = weekDayResult.getMissingTitles().size() <= 0;
     
                     item.modifyDatastreamByValue("NEWSPAPERWEEKDAY",
                                                  null,
@@ -300,33 +271,13 @@ public class NewspaperWeekdaysAnalyzeMain {
             return LocalDate.parse(dateString,
                     new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter());
         }
-
-        private DeliveryPattern getDeliveryPattern1(
-                @Named(DPA_DELIVERY_PATTERN1_XML_PATH) String deliveryXmlPath) {
-            DeliveryPattern deliveryPattern;
-            try (InputStream is = new FileInputStream(deliveryXmlPath);) {
-                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
-            } catch (Exception e){
-                throw new RuntimeException("Failed to load deliveryPattern from '"+deliveryXmlPath+"'",e);
-            }
-            return deliveryPattern;
+    
+        @Provides
+        protected DeliveryPatternList getDeliveryPattern(@Named(DPA_DELIVERY_PATTERN) String deliveryPatterns) {
+            return DeliveryPatternList.parseFromString(deliveryPatterns);
         }
-
-        private DeliveryPattern getDeliveryPattern2(
-                @Named(DPA_DELIVERY_PATTERN2_XML_PATH) String deliveryXmlPath) {
-            DeliveryPattern deliveryPattern;
-            try (InputStream is = new FileInputStream(deliveryXmlPath);) {
-                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
-            } catch (Exception e){
-                throw new RuntimeException("Failed to load deliveryPattern from '"+deliveryXmlPath+"'",e);
-            }
-            return deliveryPattern;
-        }
-
+    
+    
         @Provides
         protected Function<EventQuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
             return query -> sboiEventIndexSearch(query, index).stream();
@@ -370,28 +321,11 @@ public class NewspaperWeekdaysAnalyzeMain {
         }
 
         @Provides
-        @Named(DPA_DELIVERY_PATTERN2_XML_PATH)
+        @Named(DPA_DELIVERY_PATTERN)
         String provideManualControlConfigPath1(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN2_XML_PATH);
+            return map.getRequired(DPA_DELIVERY_PATTERN);
         }
 
-        @Provides
-        @Named(DPA_DELIVERY_PATTERN1_XML_PATH)
-        String provideManualControlConfigPath2(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN1_XML_PATH);
-        }
-
-        @Provides
-        @Named(DPA_DELIVERY_PATTERN_START)
-        String provideDeliveryPatternDate(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN_START);
-        }
-
-        @Provides
-        @Named(DPA_DELIVERY_PATTERN_SWITCH)
-        String provideDeliveryPatternFuture(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN_SWITCH);
-        }
 
     }
 }
