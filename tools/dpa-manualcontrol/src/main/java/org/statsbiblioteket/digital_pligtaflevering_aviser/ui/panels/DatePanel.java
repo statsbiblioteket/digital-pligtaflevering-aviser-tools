@@ -221,7 +221,7 @@ public class DatePanel extends VerticalLayout {
             }
             Button expectationButton;
             if (expected == null) {
-                expectationButton = new Button(new ThemeResource("icons/missing.png"));
+                expectationButton = new Button(new ThemeResource("icons/unknown.png"));
                 expectationButton.setDescription("Unknown newspaper title received");
                 vl.addComponent(expectationButton);
             } else {
