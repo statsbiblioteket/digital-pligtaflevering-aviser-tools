@@ -2,16 +2,16 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryPattern;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.WeekPattern;
 
 
 import javax.xml.bind.JAXBContext;
@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 
 import static java.lang.Boolean.FALSE;
@@ -125,13 +126,13 @@ public class TestSerializing {
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
         WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.MONDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.TUESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.WEDNESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.THURSDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.FRIDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SATURDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SUNDAY), FALSE);
 
 
 
@@ -150,13 +151,13 @@ public class TestSerializing {
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
         WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.MONDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.TUESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.WEDNESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.THURSDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.FRIDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SATURDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SUNDAY), FALSE);
     }
 
 

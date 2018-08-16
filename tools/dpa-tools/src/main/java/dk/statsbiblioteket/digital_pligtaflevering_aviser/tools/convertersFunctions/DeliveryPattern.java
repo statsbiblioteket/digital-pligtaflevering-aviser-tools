@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
+package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+
 
 @XmlRootElement
 public class DeliveryPattern implements java.io.Serializable {
