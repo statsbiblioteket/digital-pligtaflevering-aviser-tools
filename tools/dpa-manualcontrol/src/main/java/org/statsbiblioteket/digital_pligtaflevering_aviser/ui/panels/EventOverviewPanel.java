@@ -54,7 +54,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                 DomsItem domsItem = model.getDeliveryFromName(clickEvent.getButton().getId());
 
                 List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = domsItem.getOriginalEvents();
-                EventAdminWindow dialog = new EventAdminWindow(clickEvent.getButton().getId());
+                EventAdminWindow dialog = new EventAdminWindow(clickEvent.getButton().getId(), true);
                 EventPanel eventPanel = new EventPanel();
 
                 eventPanel.addButtonEventListener(new Button.ClickListener() {
@@ -82,7 +82,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                             field.setRows(50);
                             field.setValue(validationString);
 
-                            EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId());
+                            EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
                             textDialog.setDialogContent(field);
                             textDialog.setModal(true);
                             UI.getCurrent().addWindow(textDialog);
@@ -98,7 +98,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     }
                 });
 
-                eventPanel.setValues(eventList);
+                eventPanel.setValues(UiDataConverter.convertList(eventList));
                 eventPanel.setInitials(model.getInitials());
 
                 dialog.setDialogContent(eventPanel);

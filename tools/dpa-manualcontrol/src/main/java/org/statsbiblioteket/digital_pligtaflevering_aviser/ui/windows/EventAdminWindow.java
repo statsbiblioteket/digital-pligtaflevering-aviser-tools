@@ -1,9 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -21,16 +23,20 @@ public class EventAdminWindow extends Window {
     private final Button delete = new Button("Delete");
     private final Button cancel = new Button("Cancel");
 
-    public EventAdminWindow(String caption) {
+    public EventAdminWindow(String caption, boolean actionAllowed) {
         super(caption);
-        override.setId("OVERRIDE");
-        delete.setId("DELETE");
-        cancel.setId("CANCELBUTTON");
-        cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        if(actionAllowed) {
+            override.setId("OVERRIDE");
+            delete.setId("DELETE");
+            override.setEnabled(false);
+            delete.setEnabled(false);
+            cancel.setId("CANCELBUTTON");
+            cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
-        hl.addComponent(override);
-        hl.addComponent(delete);
-        hl.addComponent(cancel);
+            hl.addComponent(override);
+            hl.addComponent(delete);
+            hl.addComponent(cancel);
+        }
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
         super.setContent(vl);
@@ -52,6 +58,28 @@ public class EventAdminWindow extends Window {
      */
     public void setDialogContent(Component content) {
         resultPanel = content;
+        content.addListener(new Listener() {
+            @Override
+            public void componentEvent(Event event) {
+                System.out.println(event);
+            }
+        });
+        contentPanel.addComponent(resultPanel);
+    }
+
+    /**
+     * Insert the content to view in the dialog
+     * @param content
+     */
+    public void setDialogContent(EventPanel content) {
+        resultPanel = content;
+        content.setClickListener(new ItemClickEvent.ItemClickListener() {
+            @Override
+            public void itemClick(ItemClickEvent itemClickEvent) {
+                override.setEnabled(true);
+                delete.setEnabled(true);
+            }
+        });
         contentPanel.addComponent(resultPanel);
     }
 }

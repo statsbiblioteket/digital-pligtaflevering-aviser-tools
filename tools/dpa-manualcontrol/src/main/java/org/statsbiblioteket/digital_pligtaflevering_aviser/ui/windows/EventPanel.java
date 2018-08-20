@@ -2,12 +2,19 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.MouseEvents;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.EventDTO;
+
 
 import java.util.List;
 
@@ -25,16 +32,16 @@ public class EventPanel extends VerticalLayout {
         super();
         this.setSpacing(true);
         initials.setEnabled(false);
-        articleBeans = new BeanItemContainer(dk.statsbiblioteket.medieplatform.autonomous.Event.class);
+        articleBeans = new BeanItemContainer(EventDTO.class);
 
         // Bind a table to it
         eventTable = new Table("checked articles", articleBeans);
         eventTable.setVisibleColumns( new Object[] {"date", "eventID", "success", "details"} );
         eventTable.addGeneratedColumn("success", new EventPanel.FieldGenerator());
+        eventTable.addGeneratedColumn("details", new EventPanel.DetailsFieldGenerator());
         eventTable.setWidth("100%");
         eventTable.setHeight("150px");
         eventTable.setSelectable(true);
-        eventTable.setImmediate(true);
         this.addComponent(eventTable);
         this.addComponent(initials);
     }
@@ -47,12 +54,16 @@ public class EventPanel extends VerticalLayout {
         initials.setValue(defaultInitials);
     }
 
+    public void setClickListener(ItemClickEvent.ItemClickListener listener) {
+        eventTable.addItemClickListener(listener);
+    }
+
     /**
      * Set values to be viewed in the panel
      */
-    public void setValues(List<dk.statsbiblioteket.medieplatform.autonomous.Event> items) {
+    public void setValues(List<EventDTO> items) {
 
-        for (dk.statsbiblioteket.medieplatform.autonomous.Event o : items) {
+        for (EventDTO o : items) {
             articleBeans.addBean(o);
         }
     }
@@ -84,7 +95,7 @@ public class EventPanel extends VerticalLayout {
 
 
     /**
-     * Generate textareas as cells in the table
+     * generate failstate as a button
      */
     class FieldGenerator implements Table.ColumnGenerator {
 
@@ -97,12 +108,52 @@ public class EventPanel extends VerticalLayout {
                 ThemeResource themeRecourse = ((Boolean)propertyValue).booleanValue() ?
                         new ThemeResource("icons/accept.png") : new ThemeResource("icons/fail.png");
                 expectationButton = new Button(themeRecourse);
-                expectationButton.setId(((dk.statsbiblioteket.medieplatform.autonomous.Event)itemId).getEventID());
+                expectationButton.setId(((EventDTO)itemId).getEventID());
                 expectationButton.addClickListener(listener);
             } else {
                 expectationButton = new Button(new ThemeResource("icons/fail.png"));
             }
             return expectationButton;
+        }
+    }
+
+    /**
+     * Generate button for viewing detail
+     */
+    class DetailsFieldGenerator implements Table.ColumnGenerator {
+
+        @Override
+        public Component generateCell(Table source, Object itemId, Object columnId) {
+            Button button = new Button();
+            button = new Button("details: "+ source.getItem(itemId).getItemProperty(columnId).getValue().toString().length());
+
+            button.addClickListener(new Button.ClickListener() {
+                @Override
+                public void buttonClick(Button.ClickEvent clickEvent) {
+                    TextArea field = new TextArea();
+                    field.setWidth(1000, Unit.PIXELS);
+                    field.setRows(50);
+                    Property prop = source.getItem(itemId).getItemProperty(columnId);
+                    Object propertyValue = prop.getValue();
+
+                    field.setValue(propertyValue.toString());
+
+                    EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
+                    textDialog.setDialogContent(field);
+                    textDialog.setModal(true);
+                    UI.getCurrent().addWindow(textDialog);
+
+                    textDialog.addCloseListener(new Window.CloseListener() {
+                        // inline close-listener
+                        @Override
+                        public void windowClose(Window.CloseEvent e) {
+                            UI.getCurrent().removeWindow(textDialog);
+                        }
+                    });
+                }
+            });
+
+            return button;
         }
     }
 }
