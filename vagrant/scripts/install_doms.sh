@@ -2,6 +2,7 @@
 
 # set -e # not tested yet
 
+[ -e "$HOME/doms_installed" ] && exit 0
 export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 
 INSTALL_DIR="$HOME/7880-doms"
@@ -55,3 +56,4 @@ xmlstarlet ed -P --inplace --update '//Parameter[@name="fedora.updatetracker.per
 $installerDir/bin/install.sh $INSTALL_DIR
 
 # rm -r $installerDir
+touch "$HOME/doms_installed"
