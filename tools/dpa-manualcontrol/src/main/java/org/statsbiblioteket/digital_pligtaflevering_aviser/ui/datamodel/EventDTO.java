@@ -4,12 +4,24 @@ import dk.statsbiblioteket.medieplatform.autonomous.Event;
 
 import java.util.Date;
 
+/**
+ * Simple DTO-class for containing data fo a event in the doms
+ */
 public class EventDTO {
 
     private String eventID;
     private boolean success;
     private String details;
     private Date date;
+
+    /**
+     * Construct the EventDTO based on a doms-event
+     * @param event @see {@link dk.statsbiblioteket.medieplatform.autonomous.Event}
+     */
+    public EventDTO(Event event) {
+        this(event.getEventID(), event.isSuccess(), event.getDetails(), event.getDate());
+    }
+
 
     public EventDTO(String eventID, boolean success, String details, Date date) {
         this.eventID=eventID;

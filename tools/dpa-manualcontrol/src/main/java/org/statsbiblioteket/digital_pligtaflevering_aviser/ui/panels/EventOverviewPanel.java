@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.EventDTO;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Settings;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.UiDataConverter;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.EventAdminWindow;
@@ -82,10 +83,10 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                             field.setRows(50);
                             field.setValue(validationString);
 
+                            //Open a dialog with the simple content of a textarea containing the stream from the event-log
                             EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
                             textDialog.setDialogContent(field);
                             textDialog.setModal(true);
-                            UI.getCurrent().addWindow(textDialog);
 
                             textDialog.addCloseListener(new Window.CloseListener() {
                                 // inline close-listener
@@ -94,6 +95,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                     UI.getCurrent().removeWindow(textDialog);
                                 }
                             });
+                            UI.getCurrent().addWindow(textDialog);
                         }
                     }
                 });
@@ -112,12 +114,12 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
 
                         if(Arrays.stream(Settings.trustedUsers).filter(initials -> initials.equals(model.getInitials())).count()>0) {
                             if ("OVERRIDE".equals(event.getButton().getId())) {
-                                dk.statsbiblioteket.medieplatform.autonomous.Event selectedDomsEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
                                 DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
                                         "override by " + model.getInitials(), selectedDomsEvent.getEventID(), true);
                                 domsItem.appendEvent(overrideDomsEvent);
                             } else if ("DELETE".equals(event.getButton().getId())) {
-                                dk.statsbiblioteket.medieplatform.autonomous.Event selectedDomsEvent = (dk.statsbiblioteket.medieplatform.autonomous.Event) eventPanel.getSelection();
+                                EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
                                 int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
                                 DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
                                         "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +

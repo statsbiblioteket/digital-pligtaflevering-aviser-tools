@@ -25,18 +25,18 @@ public class EventAdminWindow extends Window {
 
     public EventAdminWindow(String caption, boolean actionAllowed) {
         super(caption);
-        if(actionAllowed) {
-            override.setId("OVERRIDE");
-            delete.setId("DELETE");
-            override.setEnabled(false);
-            delete.setEnabled(false);
-            cancel.setId("CANCELBUTTON");
-            cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
-            hl.addComponent(override);
-            hl.addComponent(delete);
-            hl.addComponent(cancel);
-        }
+        override.setId("OVERRIDE");
+        delete.setId("DELETE");
+        override.setEnabled(!actionAllowed);
+        delete.setEnabled(!actionAllowed);
+        cancel.setId("CANCELBUTTON");
+        cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+
+        hl.addComponent(override);
+        hl.addComponent(delete);
+        hl.addComponent(cancel);
+
         vl.addComponent(contentPanel);
         vl.addComponent(hl);
         super.setContent(vl);
@@ -58,12 +58,6 @@ public class EventAdminWindow extends Window {
      */
     public void setDialogContent(Component content) {
         resultPanel = content;
-        content.addListener(new Listener() {
-            @Override
-            public void componentEvent(Event event) {
-                System.out.println(event);
-            }
-        });
         contentPanel.addComponent(resultPanel);
     }
 

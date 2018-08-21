@@ -124,8 +124,7 @@ public class EventPanel extends VerticalLayout {
 
         @Override
         public Component generateCell(Table source, Object itemId, Object columnId) {
-            Button button = new Button();
-            button = new Button("details: "+ source.getItem(itemId).getItemProperty(columnId).getValue().toString().length());
+            Button button = new Button("details: "+ source.getItem(itemId).getItemProperty(columnId).getValue().toString().length());
 
             button.addClickListener(new Button.ClickListener() {
                 @Override
@@ -137,6 +136,7 @@ public class EventPanel extends VerticalLayout {
                     Object propertyValue = prop.getValue();
 
                     field.setValue(propertyValue.toString());
+                    field.setEnabled(true);
 
                     EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
                     textDialog.setDialogContent(field);

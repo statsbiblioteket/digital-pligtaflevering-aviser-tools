@@ -115,7 +115,7 @@ public class UiDataConverter {
     public static List<EventDTO> convertList(List<Event> events) {
         List<EventDTO> returnEventList = new ArrayList<EventDTO>();
         for(Event event : events) {
-            returnEventList.add(new EventDTO(event.getEventID(), event.isSuccess(), event.getDetails(), event.getDate()));
+            returnEventList.add(new EventDTO(event));
         }
         return returnEventList;
     }
