@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+[ -e "$HOME/bitrepo_installed" ] && exit 0
 
 curl -L -O http://archive.apache.org/dist/activemq/5.14.3/apache-activemq-5.14.3-bin.tar.gz
 tar xvzf apache-activemq-5.14.3-bin.tar.gz
@@ -17,3 +17,4 @@ patch -p1 -l -d bitrepository-quickstart < /vagrant/bitrepository-quickstart.dif
 export JAVA_HOME=/usr/lib/jvm/zulu-8-amd64
 bitrepository-quickstart/setup.sh
 
+touch "$HOME/bitrepo_installed"
