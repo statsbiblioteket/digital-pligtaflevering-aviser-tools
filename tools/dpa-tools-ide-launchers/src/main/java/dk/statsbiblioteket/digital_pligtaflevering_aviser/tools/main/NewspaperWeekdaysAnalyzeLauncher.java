@@ -13,16 +13,15 @@ public class NewspaperWeekdaysAnalyzeLauncher {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
         Path batchPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperWeekdaysAnalyzeLauncher.class, "delivery-samples");
-        Path configPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperWeekdaysAnalyzeLauncher.class, "DeliveryPattern.xml");
+        Path deliveryPatternPathNone = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperWeekdaysAnalyzeLauncher.class, "configuration-files/src/main/resources/DeliveryPattern-none.xml");
+        Path deliveryPatternPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperWeekdaysAnalyzeLauncher.class, "configuration-files/src/main/resources/DeliveryPattern.xml");
 
 
         NewspaperWeekdaysAnalyzeMain.main(new String[]{
                 "newspaper-weekdays-analyze.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
-                DPA_DELIVERY_PATTERN + "=" +
-                configPath.toAbsolutePath() + ":dl_20180101_rt0" +
-                "," +
-                configPath.toAbsolutePath()
+                DPA_DELIVERY_PATTERN + "=" + deliveryPatternPathNone.toAbsolutePath() + ":dl_20180101_rt0" +
+                "," + deliveryPatternPath.toAbsolutePath()
 
         });
     }

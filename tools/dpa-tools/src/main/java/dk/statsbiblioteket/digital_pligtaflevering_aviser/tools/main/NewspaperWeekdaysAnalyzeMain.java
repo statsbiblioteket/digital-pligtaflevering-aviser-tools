@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -20,6 +21,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXB
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPatternList;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekdayResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -30,19 +32,24 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.util.xml.DOM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.io.InvalidObjectException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatterBuilder;
@@ -52,12 +59,15 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.GenerateStatisticsMain.STATISTICS_STREAM_NAME;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
 import static java.util.stream.Collectors.toList;
 
@@ -142,23 +152,32 @@ public class NewspaperWeekdaysAnalyzeMain {
     
                     DeliveryPattern deliveryPattern = deliveryPatternList.getMostRecentDeliveryPatternBefore(
                             relativePath);
-    
-                    //Find the expected titles for this day, depending on the date find the appropriate pattern
-                    List<String> expectedTitles = deliveryPattern.entryStream()
-                                .filter(e -> e.getValue().getDayState(dayId))
-                                .map(e -> e.getKey())
-                                .distinct()
-                                .sorted()
-                                .collect(toList());
 
+                    List<String> expectedTitles = deliveryPattern.entryStream().filter(e -> e.getValue().getDayState(dayId))
+                            .map(e -> e.getKey())
+                            .distinct()
+                            .sorted()
+                            .collect(toList());
 
-                    List<String> foundTitles = item.children()
-                                                   .map(p -> Paths.get(p.getPath()).getFileName().toString())
-                                                   .distinct()
-                                                   .sorted()
-                                                   .collect(toList());
-                        
-                     
+                    List<String> foundTitles = new ArrayList<String>();
+
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document doc = DOM.streamToDOM(item.getDataStreamInputStream(STATISTICS_STREAM_NAME), true);
+                    //Document doc = builder.parse(inps);
+                    XPathFactory xPathfactory = XPathFactory.newInstance();
+                    XPath xpath = xPathfactory.newXPath();
+                    XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
+                    NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        String titleItem = nl.item(i).getNodeValue();
+                        XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
+                        NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
+                        if(pages.getLength()>0) {
+                            foundTitles.add(titleItem);
+                        }
+                    }
 
                     //Missing titles must be ExpectedTitles - FoundTitles
                     List<String> missingTitles = new ArrayList<>(expectedTitles);
@@ -168,8 +187,6 @@ public class NewspaperWeekdaysAnalyzeMain {
                     List<String> extraTitles = new ArrayList<>(foundTitles);
                     extraTitles.removeAll(expectedTitles);
 
-                    
-    
                     WeekdayResult weekDayResult = new WeekdayResult(dayId.getDisplayName(TextStyle.SHORT, Locale.US),
                                                                     expectedTitles,
                                                                     foundTitles,
