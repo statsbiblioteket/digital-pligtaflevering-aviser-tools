@@ -32,6 +32,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.util.xml.DOM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -152,9 +153,7 @@ public class NewspaperWeekdaysAnalyzeMain {
                     DeliveryPattern deliveryPattern = deliveryPatternList.getMostRecentDeliveryPatternBefore(
                             relativePath);
 
-                    Stream<Map.Entry<String, WeekPattern>> wp = deliveryPattern.entryStream();
-
-                    List<String> expectedTitles = wp.filter(e -> e.getValue().getDayState(dayId))
+                    List<String> expectedTitles = deliveryPattern.entryStream().filter(e -> e.getValue().getDayState(dayId))
                             .map(e -> e.getKey())
                             .distinct()
                             .sorted()
@@ -162,36 +161,21 @@ public class NewspaperWeekdaysAnalyzeMain {
 
                     List<String> foundTitles = new ArrayList<String>();
 
-                    //Start initializing datamodel of tileObjects that has not yet been performed
-                    final List<DomsDatastream> datastreams = item.datastreams();
-                    Optional<DomsDatastream> profileOptional = datastreams.stream()
-                            .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
-                            .findAny();
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document doc = DOM.streamToDOM(item.getDataStreamInputStream(STATISTICS_STREAM_NAME), true);
+                    //Document doc = builder.parse(inps);
+                    XPathFactory xPathfactory = XPathFactory.newInstance();
+                    XPath xpath = xPathfactory.newXPath();
+                    XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
+                    NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-                    //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
-                    if (profileOptional.isPresent()) {
-
-                        DomsDatastream ds = profileOptional.get();
-                        //We are reading this textstring as a String and are aware that this might lead to encoding problems
-                        StringReader reader = new StringReader(ds.getDatastreamAsString());
-                        InputSource inps = new InputSource(reader);
-
-                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder builder = factory.newDocumentBuilder();
-                        Document doc = builder.parse(inps);
-                        XPathFactory xPathfactory = XPathFactory.newInstance();
-                        XPath xpath = xPathfactory.newXPath();
-                        XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
-                        NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-                        for (int i = 0; i < nl.getLength(); i++) {
-                            String titleItem = nl.item(i).getNodeValue();
-                            XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
-                            NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
-                            if(pages.getLength()>0) {
-                                foundTitles.add(titleItem);
-                            }
-
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        String titleItem = nl.item(i).getNodeValue();
+                        XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
+                        NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
+                        if(pages.getLength()>0) {
+                            foundTitles.add(titleItem);
                         }
                     }
 
