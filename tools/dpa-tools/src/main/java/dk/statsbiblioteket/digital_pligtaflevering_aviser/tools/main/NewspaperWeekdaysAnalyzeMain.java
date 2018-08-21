@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
@@ -21,7 +20,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXB
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPatternList;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekdayResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -32,22 +30,17 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.util.xml.DOM;
+import dk.statsbiblioteket.util.xml.XPathSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
+import java.io.InputStream;
 import java.io.InvalidObjectException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -58,8 +51,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,46 +143,24 @@ public class NewspaperWeekdaysAnalyzeMain {
                     DeliveryPattern deliveryPattern = deliveryPatternList.getMostRecentDeliveryPatternBefore(
                             relativePath);
 
-                    Stream<Map.Entry<String, WeekPattern>> wp = deliveryPattern.entryStream();
-
-                    List<String> expectedTitles = wp.filter(e -> e.getValue().getDayState(dayId))
+                    List<String> expectedTitles = deliveryPattern.entryStream().filter(e -> e.getValue().getDayState(dayId))
                             .map(e -> e.getKey())
                             .distinct()
                             .sorted()
                             .collect(toList());
 
                     List<String> foundTitles = new ArrayList<String>();
-
-                    //Start initializing datamodel of tileObjects that has not yet been performed
-                    final List<DomsDatastream> datastreams = item.datastreams();
-                    Optional<DomsDatastream> profileOptional = datastreams.stream()
-                            .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
-                            .findAny();
-
+    
                     //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
-                    if (profileOptional.isPresent()) {
-
-                        DomsDatastream ds = profileOptional.get();
-                        //We are reading this textstring as a String and are aware that this might lead to encoding problems
-                        StringReader reader = new StringReader(ds.getDatastreamAsString());
-                        InputSource inps = new InputSource(reader);
-
-                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                        DocumentBuilder builder = factory.newDocumentBuilder();
-                        Document doc = builder.parse(inps);
-                        XPathFactory xPathfactory = XPathFactory.newInstance();
-                        XPath xpath = xPathfactory.newXPath();
-                        XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
-                        NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
+                    try (InputStream dataStreamInputStream = item.getDataStreamInputStream(STATISTICS_STREAM_NAME)) {
+        
+                        Document doc = DOM.streamToDOM(dataStreamInputStream, true);
+                        XPathSelector xpath = DOM.createXPathSelector();
+                        NodeList nl = xpath.selectNodeList(doc,
+                                                           "/deliveryStatistics/titles/title[count(pages/page) > 0]/@titleName");
                         for (int i = 0; i < nl.getLength(); i++) {
                             String titleItem = nl.item(i).getNodeValue();
-                            XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
-                            NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
-                            if(pages.getLength()>0) {
-                                foundTitles.add(titleItem);
-                            }
-
+                            foundTitles.add(titleItem);
                         }
                     }
 
