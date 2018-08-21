@@ -155,9 +155,9 @@ public class NewspaperWeekdaysAnalyzeMain {
                     try (InputStream dataStreamInputStream = item.getDataStreamInputStream(STATISTICS_STREAM_NAME)) {
         
                         Document doc = DOM.streamToDOM(dataStreamInputStream, true);
-                        XPathSelector xpath = DOM.createXPathSelector();
+                        XPathSelector xpath = DOM.createXPathSelector("ns","www.sb.dk/dpa/delivery");
                         NodeList nl = xpath.selectNodeList(doc,
-                                                           "/deliveryStatistics/titles/title[count(pages/page) > 0]/@titleName");
+                                                           "/deliveryStatistics/ns:titles/ns:title[count(ns:pages/ns:page) > 0]/@titleName");
                         for (int i = 0; i < nl.getLength(); i++) {
                             String titleItem = nl.item(i).getNodeValue();
                             foundTitles.add(titleItem);
