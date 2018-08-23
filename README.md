@@ -343,9 +343,9 @@ Event UI is a userinterface that can be used to modify the Event-flow for a spec
 VeraPDF is a PDF/A validator suite which we use to get reports of the
 preservation quality of the PDFs ingested.
 
-Due to various problems it needs to run in a separate JVM.  See https://sbprojects.statsbiblioteket.dk/jira/browse/DPA-124
+Due to various problems it needs to run in a separate JVM.  See <https://sbprojects.statsbiblioteket.dk/jira/browse/DPA-124>
 for details.  It was found that the easiest way to get a production ready 
-REST service was to improve on https://github.com/veraPDF/veraPDF-rest.
+REST service was to improve on <https://github.com/veraPDF/veraPDF-rest>.
 
 Currently it resides in 
 
