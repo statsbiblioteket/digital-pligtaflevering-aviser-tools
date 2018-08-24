@@ -3,14 +3,16 @@
 SCRIPT_DIR=$(dirname $(readlink -f $BASH_SOURCE[0]))
 
 set -x
+set -e
 
+cd ${SCRIPT_DIR}
 host=${1:-pc596}
 
-#Checkout project on remote machine
+Checkout project on remote machine
 ssh -A -t "$host" << EOF
 set -x
-mkdir -p ~/Projects/digital-pligtaflevering-aviser-tools
-cd ~/Projects/digital-pligtaflevering-aviser-tools
+mkdir -p ${SCRIPT_DIR}
+cd ${SCRIPT_DIR}
 git clone git@github.com:statsbiblioteket/digital-pligtaflevering-aviser-tools.git .
 EOF
 
@@ -24,7 +26,7 @@ JAVA8="env JAVA_HOME=/usr/lib/jvm/zulu-8-amd64"
 
 #Start vagrant
 ssh -A -t "$host" <<-EOF
-	cd ~/Projects/digital-pligtaflevering-aviser-tools;
+	cd ${SCRIPT_DIR};
 
 
 	vagrant plugin list | grep vagrant-timezone || vagrant plugin install vagrant-timezone
@@ -67,7 +69,7 @@ ZOOKEEPER_PORT=2121
 ssh -A -L"$FEDORA_PORT:localhost:$FEDORA_PORT" -L"$SBOI_PORT:localhost:$SBOI_PORT" -L"$BITREPO_PORT:localhost:$BITREPO_PORT" -L"$ACTIVEMQ_PORT:localhost:$ACTIVEMQ_PORT" -L"$VERAPDF_PORT:localhost:$VERAPDF_PORT" "$host"  <<-EOF
 set -e
 set -x
-cd ~/Projects/digital-pligtaflevering-aviser-tools
+cd $SCRIPT_DIR;
 while true; do
 	date;
 	vagrant ssh -c '${JAVA7} ~/7880-doms/bin/doms.sh update';
