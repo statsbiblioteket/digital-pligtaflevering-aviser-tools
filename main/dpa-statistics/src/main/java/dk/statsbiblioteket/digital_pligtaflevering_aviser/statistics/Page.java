@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Page in a newspaper, Serializable to make it convertible between a stream of xml and an objectmodel
  */
-@XmlRootElement
 public class Page implements java.io.Serializable {
 
     private String id;

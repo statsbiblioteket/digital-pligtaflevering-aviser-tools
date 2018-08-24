@@ -14,6 +14,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationM
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbUtils;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaLoggingStrings;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -87,12 +88,20 @@ public class GenerateStatisticsMain {
                 String deliveryName = domsItem.getPath();
                 long startDeliveryStatTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.START_GENERATE_STATISTICS, deliveryName);
-                DeliveryStatistics deliveryStatistics = parser.processDomsIdToStream().apply(domsItem);
-                if (deliveryStatistics == null) {
-                    return ToolResult.fail("The statistics which should be generated from the delivery could not be generated");
+                DeliveryStatistics deliveryStatistics;
+                try {
+                    deliveryStatistics = parser.processDomsIdToStream().apply(domsItem);
+                } catch (Exception e){
+                    log.error("Caught Exception on item {}",domsItem,e);
+                    return ToolResult.fail("Failed to generate statistics for delivery " + deliveryName+ " at the time " + new Date().toString());
                 }
-                byte[] statisticsStream = parser.processDeliveryStatisticsToBytestream().apply(deliveryStatistics);
-                String settingDate = new java.util.Date().toString();
+                byte[] statisticsStream;
+                try {
+                    statisticsStream = JaxbUtils.processDeliveryStatisticsToBytestream().apply(deliveryStatistics);
+                } catch (Exception e){
+                    log.error("Caught Exception on item {}",domsItem,e);
+                    return ToolResult.fail("Failed marshall statistics as XML for " + deliveryName + " at the time " + new Date().toString());
+                }
 
                 domsItem.modifyDatastreamByValue(
                         STATISTICS_STREAM_NAME,
@@ -107,11 +116,7 @@ public class GenerateStatisticsMain {
                 long finishedDeliveryStatTime = System.currentTimeMillis();
                 log.info(KibanaLoggingStrings.FINISHED_GENERATE_STATISTICS, deliveryName, finishedDeliveryStatTime - startDeliveryStatTime);
 
-                if (statisticsStream != null) {
-                    return ToolResult.ok(settingDate);
-                } else {
-                    return ToolResult.fail("Statistics could not get generated on " + deliveryName + " at the time " + settingDate);
-                }
+                return ToolResult.ok(new Date().toString());
             };
         }
 

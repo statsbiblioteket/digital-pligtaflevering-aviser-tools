@@ -1,44 +1,28 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.SBOIQuerySpecification;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsParser;
-import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -206,7 +190,7 @@ public class DeliveryFedoraCommunication {
 
                 if (validationStream.isPresent()) {
                     String validationString = validationStream.get().getDatastreamAsString();
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(validationString));
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.toDeliveryTitleInfo(validationString));
                 }
             }
 
@@ -218,29 +202,23 @@ public class DeliveryFedoraCommunication {
 
             //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
             if (profileOptional.isPresent()) {
-
+    
                 DomsDatastream ds = profileOptional.get();
                 //We are reading this textstring as a String and are aware that this might lead to encoding problems
                 StringReader reader = new StringReader(ds.getDatastreamAsString());
-                InputSource inps = new InputSource(reader);
-
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document doc = builder.parse(inps);
-                XPathFactory xPathfactory = XPathFactory.newInstance();
-                XPath xpath = xPathfactory.newXPath();
-                XPathExpression expr = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title']/@titleName");
-                NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-                for (int i = 0; i < nl.getLength(); i++) {
-                    String titleItem = nl.item(i).getNodeValue();
-
-                    XPathExpression articleExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='articles']/*[local-name()='article']");
-                    NodeList articles = (NodeList) articleExpression.evaluate(doc, XPathConstants.NODESET);
-                    XPathExpression pagesExpression = xpath.compile("/deliveryStatistics/*[local-name()='titles']/*[local-name()='title'][@titleName='" + titleItem + "']/*[local-name()='pages']/*[local-name()='page']");
-                    NodeList pages = (NodeList) pagesExpression.evaluate(doc, XPathConstants.NODESET);
-
-                    currentlySelectedTitleHiearachy.addDeliveryToTitle(new DeliveryTitleInfo(delivery, titleItem, articles.getLength(), pages.getLength()));
+                Unmarshaller jaxbUnmarshaller = MarshallerFunctions.jaxbContext.createUnmarshaller();
+                DeliveryStatistics deliveryStatistics = (DeliveryStatistics) jaxbUnmarshaller.unmarshal(reader);
+                
+                List<Title> titles = deliveryStatistics.getTitles();
+                for (Title title : titles) {
+                    String titleItem = title.getTitleName();
+    
+                    DeliveryTitleInfo dsDeliveryTitleInfo = new DeliveryTitleInfo(delivery,
+                                                                                  titleItem,
+                                                                                  title.getNoOfArticles(),
+                                                                                  title.getNoOfArticles());
+    
+                    currentlySelectedTitleHiearachy.addDeliveryToTitle(dsDeliveryTitleInfo);
                 }
             }
         }
@@ -265,40 +243,31 @@ public class DeliveryFedoraCommunication {
         }
 
         final List<DomsDatastream> datastreams = domsItem.datastreams();
-        Optional<DomsDatastream> profileOptional = datastreams.stream()
-                .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
-                .findAny();
-
-        if (profileOptional.isPresent()) {
-            try {
-                DomsDatastream ds = profileOptional.get();
-                //We are reading this textstring as a String and are aware that this might leed to encoding problems
-                StringReader reader = new StringReader(ds.getDatastreamAsString());
-                InputSource inps = new InputSource(reader);
-
-                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                DeliveryStatistics deserializedObject = (DeliveryStatistics) jaxbUnmarshaller.unmarshal(inps);
-
-                Title selectedTitleObj = null;
-                List<Title> titleList = deserializedObject.getTitles().getTitles();
-                for (Title title : titleList) {
-                    if (selectedTitle.equals(title.getTitleName())) {
-                        selectedTitleObj = title;
-                    }
-                }
-                if (selectedTitleObj == null) {
-                    return null;
-                }
-
-                return selectedTitleObj;
-
-            } catch (JAXBException e) {
-                log.error("Parsing of XML-streams has failed", e);
-                return null;
-            }
+        DomsDatastream datastream = datastreams.stream()
+                                            .filter(ds -> ds.getId().equals(STATISTICS_STREAM_NAME))
+                                            .findAny()
+                                            .orElse(null);
+        if (datastream == null) {
+            return null;
         }
-        return null;
+    
+        try {
+            //We are reading this textstring as a String and are aware that this might leed to encoding problems
+            StringReader reader = new StringReader(datastream.getDatastreamAsString());
+            Unmarshaller jaxbUnmarshaller = MarshallerFunctions.jaxbContext.createUnmarshaller();
+            DeliveryStatistics deliveryStatistics = (DeliveryStatistics) jaxbUnmarshaller.unmarshal(reader);
+        
+            Title selectedTitleObj = deliveryStatistics.getTitles()
+                                                       .stream()
+                                                       .filter(title -> title.getTitleName().equals(selectedTitle))
+                                                       .findFirst()
+                                                       .orElse(null);
+            return selectedTitleObj;
+        
+        } catch (JAXBException e) {
+            log.error("Parsing of XML-streams has failed for {} and {}", selectedDelivery, selectedTitle, e);
+            return null;
+        }
     }
 
     /**
@@ -310,15 +279,10 @@ public class DeliveryFedoraCommunication {
      * @throws JAXBException
      */
     public boolean writeDeliveryToFedora(DeliveryTitleInfo deli, boolean force) throws JAXBException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        jaxbMarshaller.marshal(deli, os);
+        ByteArrayOutputStream os = MarshallerFunctions.marshallDeliveryTitleInfo(deli);
         return writeToCurrentItemInFedora(deli.getDeliveryName(), deli.getNewspaperTitle(), os.toByteArray(), force);
     }
-
+    
     /**
      * Write to current title in delivery
      *

@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Article in a newspaper, Serializable to make it convertible between a stream of xml and an objectmodel
  */
-@XmlRootElement
 public class Article implements java.io.Serializable {
 
     //The id of the article is the uuid which is used in fedora
