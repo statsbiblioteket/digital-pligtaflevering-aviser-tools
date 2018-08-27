@@ -175,6 +175,9 @@ public class StatisticsView extends VerticalLayout implements View {
                         searchPanel.setLabel(newUri.toURL().toString());
                     }
 
+                } catch(javax.xml.bind.UnmarshalException e) {
+                    Notification.show("The metadata of the delivery is wrong, ask support to regenerate it", Notification.Type.WARNING_MESSAGE);
+                    log.error("Exception has accoured during initialization of datamodel", e);
                 } catch (Exception e) {
                     Notification.show("The application has hit an unexpected incedent, please contact support", Notification.Type.ERROR_MESSAGE);
                     log.error("Exception has accoured during initialization of datamodel", e);
