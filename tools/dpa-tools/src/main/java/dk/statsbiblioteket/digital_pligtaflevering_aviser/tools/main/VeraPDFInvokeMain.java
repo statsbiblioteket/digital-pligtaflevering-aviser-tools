@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -101,8 +102,6 @@ public class VeraPDFInvokeMain {
         protected Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                                    QuerySpecification workToDoQuery,
                                    DomsRepository domsRepository,
-                                   EnhancedFedora efedora,
-                                   DomsEventStorage<Item> domsEventStorage,
                                    @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryURLPrefix,
                                    @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint,
                                    @Named(DPA_VERAPDF_REUSEEXISTINGDATASTREAM) boolean reuseExistingDatastream,
@@ -111,32 +110,35 @@ public class VeraPDFInvokeMain {
 
             final String agent = getClass().getSimpleName();
 
-            Tool f = () -> Stream.of(workToDoQuery)
+            Tool tool = () -> Stream.of(workToDoQuery)
+
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
                     .map(item -> new StreamTuple<>(item.toString(), item))
-                    .map(st -> st.map(roundtripItem -> {
-                        Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.allChildren()
-                                .peek(i -> mxBean.currentId = String.valueOf(i))
-                                .peek(i -> mxBean.idsProcessed++)
-                                // ignore those already processed if flag is set
-                                .filter(i -> (i.datastreams().stream()
-                                        .anyMatch(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)) && reuseExistingDatastream) == false)
-                                // process pdf datastreams.
-                                .flatMap(i -> i.datastreams().stream()
-                                        .filter(datastream -> datastream.getMimeType().equals("application/pdf"))
-                                        .peek(datastream -> log.trace("Found PDF stream on {}", i))
-                                        .map(datastream -> getUrlForBitrepositoryItemPossiblyLocallyAvailable(i, bitrepositoryURLPrefix, bitrepositoryMountpoint, datastream.getUrl()))
-                                        .map(url -> Try.of(() -> {
-                                            log.trace("{} - processing URL: {}", i, url);
-                                            long startTime = System.currentTimeMillis();
-                                            String veraPDF_output = veraPdfInvokerProvider.get().apply(url);
-                                            i.modifyDatastreamByValue(VERAPDF_DATASTREAM_NAME, null, null, veraPDF_output.getBytes(StandardCharsets.UTF_8), null, "text/xml", "URL: " + url, null);
-                                            log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, url, (System.currentTimeMillis() - startTime));
-                                            return Boolean.TRUE;
-                                        }).toEither())
-                                        .peek((Either<Throwable, Boolean> s) -> log.trace("{}", s)))
-                                .collect(partitioningBy(either -> either.isRight()));
+                    .map(streamTuple -> streamTuple.map(
+                            roundtripItem -> {
+                                Map<Boolean, List<Either<Throwable, Boolean>>> eithersFromRoundtrip = roundtripItem.allChildren()
+                                        .peek(child -> mxBean.currentId = String.valueOf(child))
+                                        .peek(child -> mxBean.idsProcessed++)
+                                        // ignore those already processed if flag is set
+                                        .filter(child -> (child.datastreams().stream()
+                                                .anyMatch(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)) && reuseExistingDatastream) == false)
+                                        // process pdf datastreams.
+                                        .flatMap(child -> child.datastreams().stream()
+                                                .filter(datastream -> datastream.getMimeType().equals("application/pdf"))
+                                                .peek(datastream -> log.trace("Found PDF stream on {}", child))
+                                                .map(datastream -> getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, datastream.getUrl()))
+                                                .map(url -> Try.of(() -> {
+                                                    log.trace("{} - processing URL: {}", child, url);
+
+                                                    long startTime = System.currentTimeMillis();
+                                                    String veraPDF_output = veraPdfInvokerProvider.get().apply(url);
+                                                    child.modifyDatastreamByValue(VERAPDF_DATASTREAM_NAME, null, null, veraPDF_output.getBytes(StandardCharsets.UTF_8), null, "text/xml", "URL: " + url, null);
+                                                    log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, url, (System.currentTimeMillis() - startTime));
+                                                    return Boolean.TRUE;
+                                                }).toEither())
+                                                .peek((Either<Throwable, Boolean> either) -> log.trace("{}", either)))
+                                        .collect(partitioningBy(either -> either.isRight()));
 
                         List<Boolean> successful = eithersFromRoundtrip.get(Boolean.TRUE).stream()
                                 .map(either -> either.right().get())
@@ -156,23 +158,23 @@ public class VeraPDFInvokeMain {
                     }))
                     .collect(toList());
 
-            return f;
+            return tool;
         }
 
         public URL getUrlForBitrepositoryItemPossiblyLocallyAvailable(DomsItem domsItem, String bitrepositoryURLPrefix, String bitrepositoryMountpoint, String itemURL) {
             if (itemURL.startsWith(bitrepositoryURLPrefix)) {
-                /* We have an URL pointing to a resource.  If it has the same prefix as the bitrepository we know has a locally available leg,
-                then take the rest and use it from the mount point of the locally available leg.
-                */
-                if (itemURL.length() < bitrepositoryURLPrefix.length()) {
-                    throw new IllegalArgumentException(" url '" + itemURL + "' shorter than bitrepositoryUrlPrefix");
-                }
                 final String resourceName;
                 resourceName = itemURL.substring(bitrepositoryURLPrefix.length());
                 final File file;
                 try {
                     Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(resourceName, CharEncoding.UTF_8));
                     file = path.toFile();
+                    //This check is only done when the link is to a file in the filesystem, which is how it is used in production
+                    if(!file.exists()) {
+                        log.error("Unknown link to file " + path.toString());
+                        throw new RuntimeException("Unknown link to file " + path.toString());
+                    }
+
                     log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
                     return file.toURI().toURL();
                 } catch (UnsupportedEncodingException e) {
