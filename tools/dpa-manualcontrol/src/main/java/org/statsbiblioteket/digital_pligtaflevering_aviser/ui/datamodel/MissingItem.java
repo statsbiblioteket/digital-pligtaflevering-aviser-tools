@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * MissingItem contains the description of something in a delivery, which was expected to be there, but can not be found
  */
-@XmlRootElement
 public class MissingItem implements java.io.Serializable {
 
     private String type;

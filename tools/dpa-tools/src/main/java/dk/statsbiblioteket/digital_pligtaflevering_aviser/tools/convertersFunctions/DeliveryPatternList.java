@@ -3,7 +3,6 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunct
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.FileInputStream;
@@ -41,8 +40,7 @@ public class DeliveryPatternList {
         log.trace("Parsing patterns {}",deliveryPatterns);
         Unmarshaller jaxbUnmarshaller;
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
-            jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            jaxbUnmarshaller = JaxbUtils.jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
             throw new RuntimeException("Failed to create jaxb unmarshaller",e);
         }
