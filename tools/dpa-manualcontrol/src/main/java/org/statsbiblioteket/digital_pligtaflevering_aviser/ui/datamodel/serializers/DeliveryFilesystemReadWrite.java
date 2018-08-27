@@ -1,17 +1,11 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers;
 
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Serialize objects into files on the local filesystem.
@@ -57,7 +51,7 @@ public class DeliveryFilesystemReadWrite {
 
         for (File titleFolder : listOfFiles) {
             if(titleFolder.isFile()) {
-                currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.streamToDeliveryTitleInfo(titleFolder));
+                currentlySelectedTitleHiearachy.addDeliveryToTitle(MarshallerFunctions.toDeliveryTitleInfo(titleFolder));
             }
         }
         return currentlySelectedTitleHiearachy;
@@ -106,8 +100,7 @@ public class DeliveryFilesystemReadWrite {
 
         File fileForThisTitleDelivery = createCashingFile(folderForThisXml, currentlySelectedTitleHiearachy.getDeliveryName(), currentlySelectedTitleHiearachy.getNewspaperTitle());
 
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        Marshaller jaxbMarshaller = MarshallerFunctions.jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(currentlySelectedTitleHiearachy, fileForThisTitleDelivery);

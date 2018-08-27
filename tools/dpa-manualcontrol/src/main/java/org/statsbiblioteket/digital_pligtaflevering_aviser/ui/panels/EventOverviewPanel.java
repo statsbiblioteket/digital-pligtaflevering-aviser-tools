@@ -124,7 +124,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                 DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
                                         "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
                                                 (selectedDomsEvent.getDetails() == null ? "" : "\n" +
-                                                        "\nReason: " + selectedDomsEvent.getDetails()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", selectedDomsEvent.isSuccess());
+                                                        "\nReason: " + selectedDomsEvent.getEventID()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", selectedDomsEvent.isSuccess());
                                 domsItem.appendEvent(newDeleteDomsEvent);
                             }
                         } else {
