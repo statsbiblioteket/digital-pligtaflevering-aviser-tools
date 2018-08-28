@@ -2,6 +2,19 @@ Next release
 =============
 
 
+Newspaper statistics
+--------------------
+* Newspaper statistics xml files were generated with the a `www.sb.dk`-namespace. As we do not own that domain, this needed to be changed.
+  Current version use the namespace `kb.dk/dpa/delivery-statistics`.
+  
+* Plan to fix the namespace of older deliveries
+    1. We stop the `generate-statistics` component
+    2. MMJ will use the Manual Control WUI to remove the event `Statistics_generated` from all old deliveries
+    3. Use the url <http://avior:58608/newspapr/sbsolr/collection1/select?q=item_model%3A%22doms%3AContentModel_DPARoundtrip%22%0AAND%0Aevent%3A%22Statistics_generated%22&rows=1000&fl=item_uuid&wt=csv&indent=true> (replace avior with prod search host) to verify that all events have been removed.
+    3. Replace the component `generate-statistics` with the fixed version from this release.
+    4. Start the component again.
+  
+
 Newspaper Weekdays Analyzer
 ----------------------------
 
