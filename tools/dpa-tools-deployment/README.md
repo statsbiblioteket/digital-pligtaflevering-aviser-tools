@@ -23,9 +23,9 @@ So something like:
 
 After compilation 
 
-* Copy the generated tarball to dpaviser@achernar:
+* Copy the generated tarball to `dpaviser@achernar`:
 
-As dpaviser@achernar
+As `dpaviser@achernar`
 
 Simple redeployment can be done without stopping Tomcat.  Just unpack the tarball to `services/`
 and let Tomcat detect the redeployment.  This requires a changed datestamp

@@ -2,16 +2,16 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekPattern;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.After;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryPattern;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.MissingItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.TitleDeliveryHierarchy;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.WeekPattern;
 
 
 import javax.xml.bind.JAXBContext;
@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 
 import static java.lang.Boolean.FALSE;
@@ -33,10 +34,12 @@ import static org.junit.Assert.assertEquals;
  * Simple unittest for validation of the datamodel
  */
 public class TestSerializing {
-
+    
+    private JAXBContext jaxbContext;
+    
     @Before
     public void setUp() throws Exception {
-
+        jaxbContext = JAXBContext.newInstance(DeliveryPattern.class,MissingItem.class,TitleDeliveryHierarchy.class);
     }
 
     @After
@@ -112,7 +115,7 @@ public class TestSerializing {
 
 
         File tempFile = createTestFile("DeliveryPattern");
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryPattern.class);
+        
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -120,18 +123,17 @@ public class TestSerializing {
 
 
         InputStream is = new FileInputStream(tempFile);
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
         WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.MONDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.TUESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.WEDNESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.THURSDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.FRIDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SATURDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SUNDAY), FALSE);
 
 
 
@@ -145,18 +147,17 @@ public class TestSerializing {
     public void testDeliveryPatternParsing() throws Exception {
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
         FileInputStream is = new FileInputStream(xmlPath.toFile());
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         DeliveryPattern deserializedObject = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
 
         WeekPattern deliveryInfo = deserializedObject.getWeekPattern("viborgstiftsfolkeblad");
-        assertEquals(deliveryInfo.getDayState("Mon"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Tue"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Wed"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Thu"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Fri"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sat"), TRUE);
-        assertEquals(deliveryInfo.getDayState("Sun"), FALSE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.MONDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.TUESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.WEDNESDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.THURSDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.FRIDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SATURDAY), TRUE);
+        assertEquals(deliveryInfo.getDayState(DayOfWeek.SUNDAY), FALSE);
     }
 
 
@@ -171,7 +172,6 @@ public class TestSerializing {
         DeliveryTitleInfo deliveryTitleInfo = new DeliveryTitleInfo("dl_11111111", "test", 5, 7);
 
         File tempFile = createTestFile("MarshalUnmarshalDeliveryTitle");
-        JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryTitleInfo.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -184,8 +184,7 @@ public class TestSerializing {
 
         InputStream is = new FileInputStream(tempFile);
 
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryTitleInfo.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         DeliveryTitleInfo deserializedObject = (DeliveryTitleInfo) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(deserializedObject.getDeliveryName(), "dl_11111111");
@@ -193,36 +192,7 @@ public class TestSerializing {
         assertEquals(deserializedObject.getNoOfArticles(), 5);
         assertEquals(deserializedObject.getNoOfPages(), 7);
     }
-
-    /**
-     * Validate that it is possible to convert between xml and the object MissingItem
-     * @throws Exception
-     */
-    @Test
-    public void testMissingItemSerialize() throws Exception {
-
-        MissingItem missingItem  = new MissingItem("t1", "t2");
-        /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
-        File tempFile = createTestFile("MissingItem");
-        JAXBContext jaxbContext = JAXBContext.newInstance(MissingItem.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        jaxbMarshaller.marshal(missingItem, tempFile);
-        assertEquals(missingItem.getType(), "t1");
-        assertEquals(missingItem.getValue(), "t2");
-
-        InputStream is = new FileInputStream(tempFile);
-
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(MissingItem.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-        MissingItem deserializedObject = (MissingItem) jaxbUnmarshaller.unmarshal(is);
-
-        assertEquals(deserializedObject.getType(), "t1");
-        assertEquals(deserializedObject.getValue(), "t2");
-
-    }
-
+    
     /**
      * Validate that TitleDeliveryHierarchy handles deliverylists correctly, and that it can be streamed to and from xml
      * @throws Exception
@@ -268,7 +238,6 @@ public class TestSerializing {
 
         /*Wrapper wrapper = tabelsLayout.getDeliveries();*/
         File tempFile = createTestFile("TitleDeliveryHierarchy");
-        JAXBContext jaxbContext = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, FALSE);
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -276,8 +245,7 @@ public class TestSerializing {
 
         InputStream is = new FileInputStream(tempFile);
 
-        JAXBContext jaxbContext1 = JAXBContext.newInstance(TitleDeliveryHierarchy.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         TitleDeliveryHierarchy deserializedObject = (TitleDeliveryHierarchy) jaxbUnmarshaller.unmarshal(is);
 
         assertEquals(2, deserializedObject.getAllTitles().size());

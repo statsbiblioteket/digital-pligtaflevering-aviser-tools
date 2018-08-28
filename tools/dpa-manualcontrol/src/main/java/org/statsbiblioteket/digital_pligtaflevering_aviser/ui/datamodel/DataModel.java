@@ -9,22 +9,18 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFedoraCommunication;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.DeliveryFilesystemReadWrite;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.MarshallerFunctions;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.serializers.RepositoryProvider;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -73,25 +69,9 @@ public class DataModel {
     }
 
     private void createDeliveryPattern() {
-        InputStream is = null;
         String deliveryPatternPath = map.getDefault("dpa.manualcontrol.configpath", "");
         File configFile = new File(deliveryPatternPath + "/DeliveryPattern.xml");
-        if(configFile.exists()) {
-            try {
-                is = new FileInputStream(deliveryPatternPath + "/DeliveryPattern.xml");
-                JAXBContext jaxbContext1 = JAXBContext.newInstance(DeliveryPattern.class);
-                Unmarshaller jaxbUnmarshaller = jaxbContext1.createUnmarshaller();
-                deliveryPattern = (DeliveryPattern) jaxbUnmarshaller.unmarshal(is);
-            } catch (JAXBException | FileNotFoundException e) {
-                log.error(e.getMessage());
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                }
-            }
-        }
+        deliveryPattern = MarshallerFunctions.unmarshallDeliveryPattern(configFile);
     }
 
     public DeliveryPattern getDeliveryPattern() {

@@ -6,22 +6,13 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Article;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.DeliveryStatistics;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Page;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.Title;
+import dk.statsbiblioteket.util.xml.DOM;
+import dk.statsbiblioteket.util.xml.XPathSelector;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
@@ -90,9 +81,10 @@ public class DomsParser {
                                 DocumentBuilder builder = builderFactory.newDocumentBuilder();
                                 Document xmlDocument = builder.parse(inps);
 
-                                String sectionName = getSectionName(xmlDocument);
-                                String sectionNumber = getSectionNumber(xmlDocument);
-                                String pageNumber = getPageNumber(xmlDocument);
+                                XPathSelector xpath = DOM.createXPathSelector();
+                                String sectionName = xpath.selectString(xmlDocument, "//sectionname");
+                                String sectionNumber = xpath.selectString(xmlDocument, "//sectionnumber");
+                                String pageNumber = xpath.selectString(xmlDocument, "//pagenumber");
                                 String id = fileItem.getDomsId().id();
 
                                 //fileItemName = fileItemName.substring(fileItemName.lastIndexOf("/"));
@@ -102,7 +94,7 @@ public class DomsParser {
                                     title.addPage(new Page(id, fileItemName, sectionName, sectionNumber, pageNumber));
                                 }
                             } catch (Exception e) {
-                                return null;
+                                throw new RuntimeException("Failed on "+fileItem,e);
                             }
 
                         }
@@ -111,79 +103,6 @@ public class DomsParser {
             }
 
             return deliveryStatistics;
-        };
-    }
-
-    /**
-     * Find the sectionName inside metadata of an xml-file descriping a page
-     * @param xmlDocument
-     * @return
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
-     * @throws XPathExpressionException
-     */
-    public String getSectionName(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("//sectionname");
-        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
-        return sectionName;
-    }
-
-    /**
-     * Find the sectionNumber inside a document
-     * @param xmlDocument
-     * @return
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
-     * @throws XPathExpressionException
-     */
-    public String getSectionNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("//sectionnumber");
-        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
-        return sectionName;
-    }
-
-    /**
-     * Find the pagename inside a document
-     * @param xmlDocument
-     * @return
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
-     * @throws XPathExpressionException
-     */
-    public String getPageNumber(Document xmlDocument) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("//pagenumber");
-        String sectionName = expr.evaluate(xmlDocument, XPathConstants.STRING).toString();
-        return sectionName;
-    }
-
-
-    /**
-     * convert DeliveryStatistics into a bytseArray which can be saved in doms
-     * @return
-     */
-    public Function<DeliveryStatistics, byte[]> processDeliveryStatisticsToBytestream() {
-        return domsItem -> {
-            ByteArrayOutputStream deliveryArrayStream = new ByteArrayOutputStream();
-            try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(DeliveryStatistics.class);
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                jaxbMarshaller.marshal(domsItem, deliveryArrayStream);
-            } catch (Exception e) {
-                return null;
-            }
-            return deliveryArrayStream.toByteArray();
         };
     }
 }

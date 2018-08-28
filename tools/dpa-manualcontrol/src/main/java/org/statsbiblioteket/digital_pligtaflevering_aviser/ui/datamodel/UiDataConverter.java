@@ -7,6 +7,7 @@ import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Delivery
 import javax.swing.text.DateFormatter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -109,5 +110,13 @@ public class UiDataConverter {
             }
         }
         return SUCCES;
+    }
+
+    public static List<EventDTO> convertList(List<Event> events) {
+        List<EventDTO> returnEventList = new ArrayList<EventDTO>();
+        for(Event event : events) {
+            returnEventList.add(new EventDTO(event));
+        }
+        return returnEventList;
     }
 }

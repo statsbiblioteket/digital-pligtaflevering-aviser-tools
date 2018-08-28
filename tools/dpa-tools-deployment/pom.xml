@@ -17,6 +17,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <output>target/appassembler/services/META-INF/maven/dependency-tree.txt</output>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyyMMdd'T'HHmmssX</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -357,7 +359,7 @@
                 <configuration>
                     <!-- get git info in name - https://stackoverflow.com/a/3269902/53897 -->
                     <!--suppress MavenModelInspection -->
-                    <finalName>dpa_${git.branch}_${git.commit.id.abbrev}</finalName>
+                    <finalName>dpa_${timestamp}_${git.branch}_${git.commit.id.abbrev}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
 
                     <descriptors>

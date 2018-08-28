@@ -1,5 +1,10 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -13,6 +18,9 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPattern;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DeliveryPatternList;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.WeekdayResult;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
@@ -22,43 +30,48 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.util.xml.DOM;
+import dk.statsbiblioteket.util.xml.XPathSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
-import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool.AUTONOMOUS_THIS_EVENT;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.GenerateStatisticsMain.STATISTICS_STREAM_NAME;
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.IngesterMain.DPA_DELIVERIES_FOLDER;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 /**
- * Unfinished
+ * Unfinished. -TBA
+ *
+ * You can say that again.... -ABR
  */
 public class NewspaperWeekdaysAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(NewspaperWeekdaysAnalyzeMain.class);
 
-    public static final String DPA_DELIVERY_PATTERN_XML_PATH = "dpa.delivery-pattern-xml.path";
-
+    //The path for the xml-file describing the deliverypattern, of the form path:lastDeliveryWithThisPattern,path:astDeliveryWithThisPattern
+    public static final String DPA_DELIVERY_PATTERN = "dpa.delivery-pattern";
+    
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
                 args,
@@ -78,9 +91,7 @@ public class NewspaperWeekdaysAnalyzeMain {
     @Module
     public static class NewspaperWeekdaysAnalyzeModule {
 
-        /**
-         * @noinspection PointlessBooleanExpression
-         */
+      
         @Provides
         protected Tool provideTool(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
                                    QuerySpecification workToDoQuery,
@@ -88,167 +99,187 @@ public class NewspaperWeekdaysAnalyzeMain {
                                    EnhancedFedora efedora,
                                    DomsEventStorage<Item> domsEventStorage,
                                    @Named(DPA_DELIVERIES_FOLDER) String deliveriesFolder,
-                                   @Named(DPA_DELIVERY_PATTERN_XML_PATH) String deliveryXmlPath,
+                                   DeliveryPatternList deliveryPatternList,
                                    DefaultToolMXBean mxBean) {
 
             final String agent = getClass().getSimpleName();
-
-            DeliveryPattern deliveryPattern = new DeliveryPattern();
-            /* Used this to convert and manually replaced QUOTE with a ".  Ask mmj to port JAXB loading code
-
-xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addDeliveryPattern(QUOTE", key/text(), "QUOTE, new WeekPattern(", value/list/entry[key = "Mon"]/value, ",", value/list/entry[key = "Tue"]/value, ",",value/list/entry[key = "Wed"]/value, ",",value/list/entry[key = "Thu"]/value, ",",value/list/entry[key = "Fri"]/value, ",",value/list/entry[key = "Sat"]/value, ",",value/list/entry[key = "Sun"]/value, "));")' -n < DeliveryPattern.xml
-
-*/
-            deliveryPattern.addDeliveryPattern("aarhusstiftstidende", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("arbejderen", new WeekPattern(false, true, true, true, true, false, false));
-            deliveryPattern.addDeliveryPattern("berlingsketidende", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("boersen", new WeekPattern(true, true, true, true, true, false, false));
-            deliveryPattern.addDeliveryPattern("bornholmstidende", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("bt", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("dagbladetkoege", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("dagbladetringsted", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("dagbladetroskilde", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("dagbladetstruer", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("dernordschleswiger", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("ekstrabladet", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("flensborgavis", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("fredericiadagblad1890", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("frederiksborgamtsavis", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("fyensstiftstidende", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("fynsamtsavissvendborg", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("helsingoerdagblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("herningfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("holstebrodagblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("horsensfolkeblad1866", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("information", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("jydskevestkystensoenderborg", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenbillund", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenvarde", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenesbjerg", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenhaderslev", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenkolding1995", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystentoender", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenaabenraa", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("jydskevestkystenvejen", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("kristeligtdagblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("lemvigfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("licitationen", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("metroxpressoest", new WeekPattern(true, true, true, true, true, false, false));
-            deliveryPattern.addDeliveryPattern("metroxpressvest", new WeekPattern(true, true, true, true, true, false, false));
-            deliveryPattern.addDeliveryPattern("midtjyllandsavis1857", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("morgenavisenjyllandsposten", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("morsoefolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendeaalborg", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendehimmerland", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("nordjyskestiftstidendevendsyssel", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("nordvestnytholbaek", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("nordvestnytkalundborg", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("politiken", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("politikenweekly", new WeekPattern(false, false, false, false, false, false, false));
-            deliveryPattern.addDeliveryPattern("randersamtsavis", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("ringkjoebingamtsdagblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("sjaellandskenaestved", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("sjaellandskeslagelse", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("skivefolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("thisteddagblad", new WeekPattern(true, true, true, true, true, true, true));
-            deliveryPattern.addDeliveryPattern("vejleamtsfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("viborgstiftsfolkeblad", new WeekPattern(true, true, true, true, true, true, false));
-            deliveryPattern.addDeliveryPattern("weekendavisen", new WeekPattern(false, false, false, false, true, false, false));
-
-            Tool f = () -> {
+    
+            ObjectWriter writer = createJsonWriter();
+    
+            //Pattern pattern = Pattern.compile("dl_(\\d{4})-(\\d{2})-(\\d{2})_rt\\d+");
+            Pattern pattern = Pattern.compile("dl_([\\d]{8})_rt\\d+");
+            
+            Tool tool = () -> {
+                //Find the roundtrips
                 List<DomsItem> roundtripItems = Stream.of(workToDoQuery)
                         .flatMap(domsRepository::query)
                         .peek(o -> log.trace("Query returned: {}", o))
                         .collect(toList());
 
-                Pattern pattern = Pattern.compile("dl_(........)_rt.*");
-
+              
                 List<String> result = new ArrayList<>();
 
+                //For each round trip
                 for (DomsItem item : roundtripItems) {
-                    String relativePath = item.getPath();
-
-                    Path deliveryPath = Paths.get(deliveriesFolder, relativePath).toAbsolutePath();
-
-                    mxBean.currentId = deliveryPath.toString();
+    
+                    mxBean.currentId = item.toString();
                     mxBean.idsProcessed++;
-
-                    if (Files.exists(deliveryPath) == false) {
-                        throw new RuntimeException(new FileNotFoundException(deliveryPath.toString()));
-                    }
-
-                    // Same as ingester
-                    Set<String> foundTitles = Files.walk(deliveryPath, 1)
-                            .filter(Files::isDirectory)
-                            .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
-                            .map(p -> p.getFileName().toString())
-                            .collect(toSet());
-
-                    Matcher matcher = pattern.matcher(relativePath);
-                    if (matcher.matches() == false) {
+    
+                    //Get the roundtrip name of the form dl_(........)_rt.*
+                    String relativePath = item.getPath();
+                    
+                    //Calculate the day-name from the delivery date
+                    DayOfWeek dayId;
+    
+                    try {
+                        dayId = getDayID(pattern,relativePath);
+                    } catch (InvalidObjectException e) {
+                        log.warn("Could not parse delivery date from delivery {} with name '{}', so skipping it",
+                                 item,
+                                 relativePath);
                         continue;
                     }
-                    String dateString = matcher.group(1);
-                    LocalDate localDate = LocalDate.parse(dateString.substring(0, 4) + "-" + dateString.substring(4, 6) + "-" + dateString.substring(6, 8));
-                    DayOfWeek dayOfWeek = localDate.getDayOfWeek();
+    
+                    DeliveryPattern deliveryPattern = deliveryPatternList.getMostRecentDeliveryPatternBefore(
+                            relativePath);
 
-                    String[] dayIds = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-                    String dayId = dayIds[dayOfWeek.getValue() - 1];
-
-                    Set<String> expectedTitles = deliveryPattern.entryStream()
-                            .filter(e -> e.getValue().getDayState(dayId))
+                    List<String> expectedTitles = deliveryPattern.entryStream().filter(e -> e.getValue().getDayState(dayId))
                             .map(e -> e.getKey())
+                            .distinct()
                             .sorted()
-                            .collect(toSet());
+                            .collect(toList());
 
-                    Set<String> missingTitles = new HashSet<>(expectedTitles);
+                    List<String> foundTitles = new ArrayList<String>();
+    
+                    //<deliveryStatistics deliveryName="dl_20160811_rt1"><titles><title titleName="verapdf"><pages><page checkedState="UNCHECKED" id="uuid:f1642d44-fe50-441e-bedb-99562a034353" pageName="dl_20160811_rt1/verapdf/pages/20160811_verapdf_section01_page005_v20160811x1#0005" pageNumber="1" sectionName="undefined" sectionNumber="1"/>
+                    try (InputStream dataStreamInputStream = item.getDataStreamInputStream(STATISTICS_STREAM_NAME)) {
+        
+                        Document doc = DOM.streamToDOM(dataStreamInputStream, true);
+                        XPathSelector xpath = DOM.createXPathSelector("ns","www.sb.dk/dpa/delivery");
+                        NodeList nl = xpath.selectNodeList(doc,
+                                                           "/deliveryStatistics/ns:titles/ns:title[count(ns:pages/ns:page) > 0]/@titleName");
+                        for (int i = 0; i < nl.getLength(); i++) {
+                            String titleItem = nl.item(i).getNodeValue();
+                            foundTitles.add(titleItem);
+                        }
+                    }
+
+                    //Missing titles must be ExpectedTitles - FoundTitles
+                    List<String> missingTitles = new ArrayList<>(expectedTitles);
                     missingTitles.removeAll(foundTitles);
 
-                    Set<String> extraTitles = new HashSet<>(foundTitles);
+                    //Extra titles must be FoundTitles - ExpectedTitles
+                    List<String> extraTitles = new ArrayList<>(foundTitles);
                     extraTitles.removeAll(expectedTitles);
 
-                    /*  Now generate this snippet:
+                    WeekdayResult weekDayResult = new WeekdayResult(dayId.getDisplayName(TextStyle.SHORT, Locale.US),
+                                                                    expectedTitles,
+                                                                    foundTitles,
+                                                                    missingTitles,
+                                                                    extraTitles);
+    
+    
+                    String jsonSnippet = writer.writeValueAsString(weekDayResult);
 
-                    {
-                    "weekday": "Mon",
-                    "expectedTitles": ["avis1","avis2"],
-                    "foundTitles": ["avis1","avis3"],
-                    "missingTitles":["avis2"],
-                    "extraTitles":["avis3"],
-                    }
-                     */
-
-                   String jsonSnippet = String.join("\n",
-                            "{",
-                            "\"weekday\": \"" + dayId + "\"",
-                            "\"expectedTitles\": " + jsonifySet(expectedTitles),
-                            "\"foundTitles\": " + jsonifySet(foundTitles),
-                            "\"missingTitles\": " + jsonifySet(missingTitles),
-                            "\"extraTitles\": " + jsonifySet(extraTitles),
-                            "}"
-                    );
-
-                   item.modifyDatastreamByValue("NEWSPAPERWEEKDAY", null, null,jsonSnippet.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, null);
-                   item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, true));
+                    boolean failState;
+                    failState = weekDayResult.getMissingTitles().size() <= 0;
+    
+                    item.modifyDatastreamByValue("NEWSPAPERWEEKDAY",
+                                                 null,
+                                                 null,
+                                                 jsonSnippet.getBytes(StandardCharsets.UTF_8),
+                                                 null,
+                                                 "text/plain",
+                                                 null,
+                                                 null);
+                    item.appendEvent(new DomsEvent(agent, new Date(), jsonSnippet, eventName, failState));
 
 
-                    result.add(item.getDomsId().id() + " " + deliveryPath + " missingTitles: " + jsonifySet(missingTitles));
+                    result.add(item.getDomsId() + " missingTitles: " + writer.writeValueAsString(missingTitles));
                 }
                 return result;
             };
-            return f;
+            return tool;
+        }
+    
+    
+        /**
+         *
+         *                       Now generate this snippet:
+         *                     {
+         *                         "weekday": "Mon",
+         *                         "expectedTitles": [
+         *                             "avis1",
+         *                             "avis2"
+         *                          ],
+         *                         "foundTitles": [
+         *                             "avis1",
+         *                             "avis3"
+         *                          ],
+         *                         "missingTitles":[
+         *                             "avis2"
+         *                          ],
+         *                         "extraTitles":[
+         *                             "avis3"
+         *                         ]
+         *                     }
+         *
+         **/
+        protected ObjectWriter createJsonWriter() {
+            ObjectMapper mapper = new ObjectMapper()
+                    .enable(SerializationFeature.INDENT_OUTPUT)
+                    .enable(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS);
+        
+            DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+            prettyPrinter.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        
+            return mapper.writer(prettyPrinter);
+        }
+    
+        /**
+         * Get the weekday name from the delivery name.
+         *
+         * Parses the deliveryName as a date, and calculates the weekday name from that
+         * @param pattern
+         * @param deliveryName
+         * @return
+         * @throws InvalidObjectException
+         */
+        protected DayOfWeek getDayID(Pattern pattern, String deliveryName) throws InvalidObjectException {
+            //If the item is not a delivery, skip it
+            Matcher matcher = pattern.matcher(deliveryName);
+            if (matcher.matches() == false) {
+                throw new InvalidObjectException("deliveryName '"+deliveryName+"' does not match pattern '"+pattern+"'");
+            }
+            
+            String dateString = matcher.group(1);
+            DayOfWeek dayOfWeek = LocalDate.parse(dateString,
+                                                  new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter())
+                                           .getDayOfWeek();
+        
+            
+            return dayOfWeek;
         }
 
-        public String jsonifySet(Set<String> set) {
-            return "[" +
-                    set.stream()
-                            .sorted()
-                            .map(s -> "\"" + s.replaceAll("\"", "\\") + "\"")
-                            .collect(joining(", "))
-                    + "]";
-        }
 
+        protected LocalDate getDate(Pattern pattern, String deliveryName) throws InvalidObjectException {
+            //If the item is not a delivery, skip it
+            Matcher matcher = pattern.matcher(deliveryName);
+            if (matcher.matches() == false) {
+                throw new InvalidObjectException("deliveryName '"+deliveryName+"' does not match pattern '"+pattern+"'");
+            }
+
+            String dateString = matcher.group(1);
+            return LocalDate.parse(dateString,
+                    new DateTimeFormatterBuilder().appendPattern("yyyyMMdd").toFormatter());
+        }
+    
+        @Provides
+        protected DeliveryPatternList getDeliveryPattern(@Named(DPA_DELIVERY_PATTERN) String deliveryPatterns) {
+            return DeliveryPatternList.parseFromString(deliveryPatterns);
+        }
+    
+    
         @Provides
         protected Function<EventQuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
             return query -> sboiEventIndexSearch(query, index).stream();
@@ -292,9 +323,11 @@ xmlstarlet sel -t -m '//deliveryPatterns/entry' -v 'concat("deliveryPattern.addD
         }
 
         @Provides
-        @Named(DPA_DELIVERY_PATTERN_XML_PATH)
-        String provideManualControlConfigPath(ConfigurationMap map) {
-            return map.getRequired(DPA_DELIVERY_PATTERN_XML_PATH);
+        @Named(DPA_DELIVERY_PATTERN)
+        String provideManualControlConfigPath1(ConfigurationMap map) {
+            return map.getRequired(DPA_DELIVERY_PATTERN);
         }
+
+
     }
 }

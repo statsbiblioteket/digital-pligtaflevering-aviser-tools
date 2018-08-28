@@ -19,15 +19,18 @@ import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import io.vavr.control.Either;
 import io.vavr.control.Try;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 import javax.xml.bind.DatatypeConverter;
-import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Locale;
@@ -180,24 +183,25 @@ public class RegenerateChecksumfileMain {
         }
 
         public static DomsItemTuple<String> md5sumTupleForDataStream(DomsItem item, String datastreamName, String filename) {
-            return new DomsItemTuple<>(item, md5ForClosableInputStream(item.getDataStreamInputStream(datastreamName), filename) + "  " + filename);
+            try (InputStream dataStreamInputStream = item.getDataStreamInputStream(datastreamName)) {
+                return new DomsItemTuple<>(item,
+                                           md5ForClosableInputStream(dataStreamInputStream, filename) + "  "
+                                           + filename);
+    
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to work with inputstream for '"+datastreamName+"' for '"+item+"' for filename='"+filename+"'",e);
+            }
         }
 
-        /**
-         * @noinspection unused, StatementWithEmptyBody
-         */
-        public static String md5ForClosableInputStream(InputStream originalInputStream, String id) {
+        public static String md5ForClosableInputStream(InputStream inputStream, String id) {
             try {
                 MessageDigest digest = MessageDigest.getInstance("md5");
-                try (DigestInputStream inputStream = new DigestInputStream(new BufferedInputStream(originalInputStream), digest)) {
-                    byte[] buf = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = inputStream.read(buf)) > 0) {
-                        // just read.
-                    }
-                    // http://www.dev-garden.org/2013/04/16/java-byte-array-as-a-hex-string-the-easy-way/
-                    return DatatypeConverter.printHexBinary(digest.digest()).toLowerCase(Locale.ROOT);
+                try (OutputStream outputStream = new DigestOutputStream(NullOutputStream.NULL_OUTPUT_STREAM, digest)) {
+                    IOUtils.copy(inputStream, outputStream);
                 }
+                // http://www.dev-garden.org/2013/04/16/java-byte-array-as-a-hex-string-the-easy-way/
+                return DatatypeConverter.printHexBinary(digest.digest()).toLowerCase(Locale.ROOT);
+    
             } catch (Exception e) {
                 throw new RuntimeException("md5ForInputStream() id=" + id, e);
             }

@@ -2,23 +2,25 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Title in a newspaper, Serializable to make it convertible between a stream of xml and an objectmodel
  */
-@XmlRootElement
 public class Title implements java.io.Serializable {
 
     private String titleName;
 
-    @XmlElement(name = "articles", required = false, namespace = "www.sb.dk/dpa/delivery")
-    private Articles articles = new Articles();
+    @XmlElement(name = "article", required = false)
+    @XmlElementWrapper(name="articles")
+    private List<Article> articles = new ArrayList<>();
 
-    @XmlElement(name = "pages", required = false, namespace = "www.sb.dk/dpa/delivery")
-    private Pages pages = new Pages();
+    @XmlElement(name = "page", required = false)
+    @XmlElementWrapper(name="pages")
+    private List<Page> pages = new ArrayList<>();
 
     public Title() {
     }
@@ -41,23 +43,23 @@ public class Title implements java.io.Serializable {
     }
 
     public int getNoOfArticles() {
-        return this.articles.getArticles().size();
+        return this.articles.size();
     }
 
     public int getNoOfPages() {
-        return this.pages.getPages().size();
+        return this.pages.size();
     }
 
     public List<Article> getArticle() {
-        return this.articles.getArticles();
+        return this.articles;
     }
 
     public List<Page> getPage() {
-        return this.pages.getPages();
+        return this.pages;
     }
 
     public List<Page> getFrontpages() {
-        return pages.getPages().stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
+        return pages.stream().filter(f -> f.getPageNumber().equals("1")).collect(Collectors.toList());
     }
 
 
@@ -66,7 +68,7 @@ public class Title implements java.io.Serializable {
      * @param name
      */
     public void addArticle(Article name) {
-        articles.addArticle(name);
+        articles.add(name);
     }
 
     /**
@@ -74,7 +76,7 @@ public class Title implements java.io.Serializable {
      * @param pages
      */
     public void setPages(List<Page> pages) {
-        this.pages.setPages(pages);
+        this.pages = pages;
     }
 
     /**
@@ -82,6 +84,6 @@ public class Title implements java.io.Serializable {
      * @param name
      */
     public void addPage(Page name) {
-        pages.addPage(name);
+        pages.add(name);
     }
 }
