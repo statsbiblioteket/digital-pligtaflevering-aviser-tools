@@ -18,8 +18,12 @@ public class LongTextPanel extends VerticalLayout {
         field.setRows(40);
         this.addComponent(field);
         this.panelContent = panelContent;
-        if(this.panelContent.length()>20000) {
-            field.setValue(this.panelContent.substring(0,10000));
+
+        //If the text contains more then 20.000 characters, show the first 10.000
+        //The idea is that it is very rare that more then 10.000 characters is needed, and often the text only contains about 100 characters
+        if(this.panelContent.length()>20_000) {
+            //If the text contains more then 20.000 characters, just show the beginning, and give the user a possibility of showing everything
+            field.setValue(this.panelContent.substring(0,10_000));
             this.addComponent(showAll);
             showAll.addClickListener(new Button.ClickListener() {
                 @Override
@@ -28,6 +32,7 @@ public class LongTextPanel extends VerticalLayout {
                 }
             });
         } else {
+            //If the text contains less then 20.000 characters, just show everythin, and no detail-button
             field.setValue(this.panelContent);
         }
         field.setEnabled(true);

@@ -133,7 +133,6 @@ public class EventPanel extends VerticalLayout {
                     Property prop = source.getItem(itemId).getItemProperty(columnId);
                     Object propertyValue = prop.getValue();
                     LongTextPanel field = new LongTextPanel(propertyValue.toString());
-                    field.setWidth(1000, Unit.PIXELS);
 
                     EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
                     textDialog.setDialogContent(field);

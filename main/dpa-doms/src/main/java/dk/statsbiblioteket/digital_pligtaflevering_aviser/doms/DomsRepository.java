@@ -81,6 +81,13 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         return query(querySpecification, true);
     }
 
+    /**
+     * Construct a query for searches in doms.
+     * If QuerySpecification is of the type 'SBOIQuerySpecification' then the value of details is ignored
+     * @param querySpecification
+     * @param details
+     * @return
+     */
     public Stream<DomsItem> query(QuerySpecification querySpecification, final boolean details) {
 
         // -- Create and populate SBIO query and return the DOMS ids found as a stream.
@@ -116,6 +123,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             } else if (querySpecification instanceof SBOIQuerySpecification) {
                 SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
                 eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
+                //Searches with SBOIQuerySpecification is always done with details=false
                 searchIterator = sboiEventIndex.search(false, eventTriggerQuery);
             } else {
                 throw new UnsupportedOperationException("Bad query specification instance");
