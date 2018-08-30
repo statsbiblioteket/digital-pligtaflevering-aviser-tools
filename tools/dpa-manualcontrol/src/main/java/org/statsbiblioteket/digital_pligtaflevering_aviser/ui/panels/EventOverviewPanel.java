@@ -54,6 +54,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
             public void buttonClick(Button.ClickEvent clickEvent) {
                 DomsItem domsItem = model.getDeliveryFromName(clickEvent.getButton().getId());
 
+                //Her henter vi events datastreamen med de store stack traces
                 List<dk.statsbiblioteket.medieplatform.autonomous.Event> eventList = domsItem.getOriginalEvents();
                 EventAdminWindow dialog = new EventAdminWindow(clickEvent.getButton().getId(), true);
                 EventPanel eventPanel = new EventPanel();

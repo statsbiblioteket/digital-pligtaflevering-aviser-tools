@@ -96,7 +96,7 @@ public class DeliveryFedoraCommunication {
      */
     public Stream<DomsItem> getReadyForManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                pastEvents, thisEvent, "", itemType))
+                pastEvents, thisEvent, "", itemType), false)
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
@@ -107,7 +107,7 @@ public class DeliveryFedoraCommunication {
      */
     public Stream<DomsItem> getCreatedOnly(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                "Data_Received", "", "", itemType))
+                "Data_Received", "", "", itemType), false)
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
@@ -120,7 +120,7 @@ public class DeliveryFedoraCommunication {
      */
     public Stream<DomsItem> getDoneManual(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                pastEvents, "", "", itemType))
+                pastEvents, "", "", itemType), false)
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
@@ -131,7 +131,7 @@ public class DeliveryFedoraCommunication {
      */
     public Stream<DomsItem> getDoneManualMinimal(String deliveryFilter) {
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
-                pastMinimalEvents + "", thisEvent, "", itemType))
+                pastMinimalEvents + "", thisEvent, "", itemType), false)
                 .filter(ts -> ts.getPath().contains(deliveryFilter));
     }
 
