@@ -78,11 +78,14 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
     @Override
     public Stream<DomsItem> query(QuerySpecification querySpecification) {
+        return query(querySpecification, true);
+    }
+
+    public Stream<DomsItem> query(QuerySpecification querySpecification, final boolean details) {
 
         // -- Create and populate SBIO query and return the DOMS ids found as a stream.
 
         final EventTrigger.Query<Item> eventTriggerQuery;
-        final boolean details;
         final Iterator<Item> searchIterator;
 
         try {
@@ -94,8 +97,6 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
                 eventTriggerQuery.getFutureEvents().addAll(eventQuerySpecification.getFutureEvents());
                 eventTriggerQuery.getOldEvents().addAll(eventQuerySpecification.getOldEvents());
                 eventTriggerQuery.getTypes().addAll(eventQuerySpecification.getTypes());
-
-                details = true; // we must get details from DOMS; SBOI is not enough. // eventQuerySpecification.getDetails();
 
                 // Inlined getTriggeredItems to be able to log those not considered anyway.
                 // https://github.com/statsbiblioteket/newspaper-batch-event-framework/blob/ef9a2b7d204a70b3056ddd8d9e7a614c1c013dfc/item-event-framework/sboi-doms-event-framework/src/main/java/dk/statsbiblioteket/medieplatform/autonomous/SBOIEventIndex.java#L43
@@ -115,8 +116,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
             } else if (querySpecification instanceof SBOIQuerySpecification) {
                 SBOIQuerySpecification sboiQuerySpecification = (SBOIQuerySpecification) querySpecification;
                 eventTriggerQuery = new PassQThrough_Query<>(sboiQuerySpecification.getQ());
-                details = false;
-                searchIterator = sboiEventIndex.search(details, eventTriggerQuery);
+                searchIterator = sboiEventIndex.search(false, eventTriggerQuery);
             } else {
                 throw new UnsupportedOperationException("Bad query specification instance");
             }

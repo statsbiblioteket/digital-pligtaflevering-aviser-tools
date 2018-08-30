@@ -14,6 +14,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.EventDTO;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels.LongTextPanel;
 
 
 import java.util.List;
@@ -129,14 +130,10 @@ public class EventPanel extends VerticalLayout {
             button.addClickListener(new Button.ClickListener() {
                 @Override
                 public void buttonClick(Button.ClickEvent clickEvent) {
-                    TextArea field = new TextArea();
-                    field.setWidth(1000, Unit.PIXELS);
-                    field.setRows(50);
                     Property prop = source.getItem(itemId).getItemProperty(columnId);
                     Object propertyValue = prop.getValue();
-
-                    field.setValue(propertyValue.toString());
-                    field.setEnabled(true);
+                    LongTextPanel field = new LongTextPanel(propertyValue.toString());
+                    field.setWidth(1000, Unit.PIXELS);
 
                     EventAdminWindow textDialog = new EventAdminWindow(clickEvent.getButton().getId(), false);
                     textDialog.setDialogContent(field);
