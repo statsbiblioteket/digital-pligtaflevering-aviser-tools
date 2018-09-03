@@ -164,8 +164,8 @@ public class VeraPDFAnalyzeMain {
                     .peek(o -> log.trace("Query returned: {}", o))
                     .map(StreamTuple::create)
                     .map(st -> st.map((DomsItem roundtripItem) -> {
-
-                                List<StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>>> pathSeverenessProblemsList = roundtripItem.allChildren()
+                        log.info("Start collecting veraPDF-results for the rondtrip: " + roundtripItem.getPath());
+                        List<StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>>> pathSeverenessProblemsList = roundtripItem.allChildren()
                                         .peek(i -> mxBean.currentId = String.valueOf(i))
                                         .peek(i -> mxBean.idsProcessed++)
                                         .map(i -> new StreamTuple<>(i.getPath(), i))
@@ -174,6 +174,7 @@ public class VeraPDFAnalyzeMain {
                                                 .filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME))
                                                 .map(DomsDatastream::getDatastreamAsString) // VeraPDF XML output
                                                 .map(xml -> {
+                                                    log.info("Collecting result from the delivery: " + child.getPath());
                                                     Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, xml)
                                                             .map(node -> Try.of(() -> new StreamTuple<>(
                                                                     leftXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " "),
