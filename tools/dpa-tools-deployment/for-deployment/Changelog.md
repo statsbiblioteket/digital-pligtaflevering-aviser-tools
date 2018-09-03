@@ -1,4 +1,12 @@
 
+2018-09-03
+=============
+
+dpa-manualcontrol
+--------------
+Improve log and allowing to stop a delivery
+
+
 2018-08-30
 =============
 
