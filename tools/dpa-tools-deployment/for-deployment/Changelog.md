@@ -1,4 +1,12 @@
 
+2018-08-30
+=============
+
+dpa-manualcontrol
+--------------
+fixes to make the application able to run with less memory allocation
+
+
 2018-08-28
 =============
 
