@@ -22,19 +22,22 @@ public class EventAdminWindow extends Window {
     private final Button override = new Button("Override");
     private final Button delete = new Button("Delete");
     private final Button cancel = new Button("Cancel");
+    private final Button stop = new Button("Manually stop");
 
-    public EventAdminWindow(String caption, boolean actionAllowed) {
+    public EventAdminWindow(String caption, boolean actionAllowed) {//Manually_stopped
         super(caption);
         if(actionAllowed) {
             override.setId("OVERRIDE");
             delete.setId("DELETE");
             override.setEnabled(!actionAllowed);
             delete.setEnabled(!actionAllowed);
+            stop.setId("STOP");
             cancel.setId("CANCELBUTTON");
             cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
             hl.addComponent(override);
             hl.addComponent(delete);
+            hl.addComponent(stop);
             hl.addComponent(cancel);
         }
 
@@ -51,6 +54,7 @@ public class EventAdminWindow extends Window {
         override.addClickListener(listener);
         delete.addClickListener(listener);
         cancel.addClickListener(listener);
+        stop.addClickListener(listener);
     }
 
     /**
