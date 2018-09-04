@@ -24,9 +24,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.ingester.KibanaL
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
-import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
-import dk.statsbiblioteket.medieplatform.autonomous.DomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
@@ -44,7 +42,6 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -133,6 +130,10 @@ public class VeraPDFInvokeMain {
 
                                                     long startTime = System.currentTimeMillis();
                                                     String veraPDF_output = veraPdfInvokerProvider.get().apply(url);
+                                                    if(!isXMLLike(veraPDF_output)) {
+                                                        log.error("File does not appear to be valid " + url);
+                                                        return Boolean.FALSE;
+                                                    }
                                                     child.modifyDatastreamByValue(VERAPDF_DATASTREAM_NAME, null, null, veraPDF_output.getBytes(StandardCharsets.UTF_8), null, "text/xml", "URL: " + url, null);
                                                     log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, url, (System.currentTimeMillis() - startTime));
                                                     return Boolean.TRUE;
@@ -159,6 +160,20 @@ public class VeraPDFInvokeMain {
                     .collect(toList());
 
             return tool;
+        }
+
+        /**
+         * return true if the String passed in is something like XML
+         *
+         * @param inXMLStr a string that might be XML
+         * @return true of the string is XML, false otherwise
+         */
+        public static boolean isXMLLike(String inXMLStr) {
+            if (inXMLStr != null && inXMLStr.trim().length() > 0) {
+                // IF WE EVEN RESEMBLE XML
+                return inXMLStr.trim().startsWith("<");
+            }
+            return false;
         }
 
         public URL getUrlForBitrepositoryItemPossiblyLocallyAvailable(DomsItem domsItem, String bitrepositoryURLPrefix, String bitrepositoryMountpoint, String itemURL) {
