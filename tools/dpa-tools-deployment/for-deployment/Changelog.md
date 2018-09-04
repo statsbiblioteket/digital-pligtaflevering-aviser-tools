@@ -1,8 +1,17 @@
 
+
+2018-09-04
+=============
+
+VeraPDFInvoke
+--------------
+Log when result from VeraPDF is not XML
+
+
 2018-09-03
 =============
 
-dpa-manualcontrol
+VeraPDFAnalyze
 --------------
 Improve log and allowing to stop a delivery
 
