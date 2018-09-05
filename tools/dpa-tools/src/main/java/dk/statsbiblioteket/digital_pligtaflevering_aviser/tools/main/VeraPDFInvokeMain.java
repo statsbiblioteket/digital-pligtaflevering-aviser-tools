@@ -132,7 +132,7 @@ public class VeraPDFInvokeMain {
                                                     String veraPDF_output = veraPdfInvokerProvider.get().apply(url);
                                                     if(!isXMLLike(veraPDF_output)) {
                                                         log.error("File does not appear to be valid " + url);
-                                                        return Boolean.FALSE;
+                                                        throw new Exception("File does not appear to be valid " + url);
                                                     }
                                                     child.modifyDatastreamByValue(VERAPDF_DATASTREAM_NAME, null, null, veraPDF_output.getBytes(StandardCharsets.UTF_8), null, "text/xml", "URL: " + url, null);
                                                     log.info(KibanaLoggingStrings.FINISHED_FILE_PDFINVOKE, url, (System.currentTimeMillis() - startTime));

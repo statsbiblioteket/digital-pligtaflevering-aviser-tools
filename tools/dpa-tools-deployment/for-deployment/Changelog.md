@@ -1,11 +1,11 @@
 
 
-2018-09-04
+2018-09-05
 =============
 
 VeraPDFInvoke
 --------------
-Log when result from VeraPDF is not XML
+Log when result from VeraPDF is not XML, and set the delivery into a stopped-state
 
 
 2018-09-03

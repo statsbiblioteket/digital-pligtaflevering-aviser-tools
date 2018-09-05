@@ -98,18 +98,19 @@ public class UiDataConverter {
      * @return
      */
     public static ValidationState validateEventCollection(List<Event> events) {
+        ValidationState finalEventState = SUCCES;
         for(String event : Settings.expectedEvents) {
             ValidationState eventState = eventlistToValidationstate(events, event);
             switch(eventState) {
                 case FAIL:
                     return FAIL;
                 case PROGRESS:
-                    return PROGRESS;
+                    finalEventState = PROGRESS;
                 case SUCCES:
                     break;
             }
         }
-        return SUCCES;
+        return finalEventState;
     }
 
     public static List<EventDTO> convertList(List<Event> events) {
