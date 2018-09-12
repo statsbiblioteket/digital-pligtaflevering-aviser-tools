@@ -252,6 +252,13 @@
                                     </mainClass>
                                     <id>newspaper-weekdays-analyze</id>
                                 </program>
+                                <program>
+                                    <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.ManualQACompleterMain
+                                    </mainClass>
+                                    <id>manualQA-completer</id>
+                                </program>
+
                             </programs>
                         </configuration>
                     </execution>
