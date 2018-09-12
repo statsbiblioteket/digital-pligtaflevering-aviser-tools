@@ -21,9 +21,9 @@ public class NewspaperWeekdaysAnalyzeLauncher {
                 "newspaper-weekdays-analyze.properties",
                 DPA_DELIVERIES_FOLDER + "=" + batchPath.toAbsolutePath(),
                 DPA_DELIVERY_PATTERN + "=" +
-                deliveryPatternPathNone.toAbsolutePath() + ":dl_20180801_rt0" +
+                deliveryPatternPathNone.toAbsolutePath() + ":dl_20180101_rt0" +
                 "," +
-                deliveryPatternPath.toAbsolutePath()
+                deliveryPatternPath.toAbsolutePath() + ":dl_20220101_rt0"
 
         });
     }
