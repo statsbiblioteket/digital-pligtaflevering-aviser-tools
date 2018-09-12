@@ -113,27 +113,29 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
 
-                        if(Arrays.stream(Settings.trustedUsers).filter(initials -> initials.equals(model.getInitials())).count()>0) {
-                            if ("OVERRIDE".equals(event.getButton().getId())) {
-                                EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
-                                DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                        "override by " + model.getInitials(), selectedDomsEvent.getEventID(), true);
-                                domsItem.appendEvent(overrideDomsEvent);
-                            } else if ("DELETE".equals(event.getButton().getId())) {
-                                EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
-                                int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
-                                DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                        "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
-                                                (selectedDomsEvent.getDetails() == null ? "" : "\n" +
-                                                        "\nReason: " + selectedDomsEvent.getEventID()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", true);
-                                domsItem.appendEvent(newDeleteDomsEvent);
-                            } else if ("STOP".equals(event.getButton().getId())) {
-                                DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                        "Adding an Event to force a roundtrip to be manually stopped", "Manually_stopped", true);
-                                domsItem.appendEvent(newDeleteDomsEvent);
-                            }
-                        } else {
-                            Notification.show("You are not added to the list of trusted users", Notification.Type.HUMANIZED_MESSAGE);
+                        if(Arrays.stream(Settings.trustedUsers)
+                                 .noneMatch(initials -> initials.equals(model.getInitials()))) {
+                            Notification.show("You are not added to the list of trusted users",
+                                              Notification.Type.HUMANIZED_MESSAGE);
+                            return;
+                        }
+                        if ("OVERRIDE".equals(event.getButton().getId())) {
+                            EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
+                            DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                    "override by " + model.getInitials(), selectedDomsEvent.getEventID(), true);
+                            domsItem.appendEvent(overrideDomsEvent);
+                        } else if ("DELETE".equals(event.getButton().getId())) {
+                            EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
+                            int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
+                            DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                    "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
+                                            (selectedDomsEvent.getDetails() == null ? "" : "\n" +
+                                                    "\nReason: " + selectedDomsEvent.getEventID()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", true);
+                            domsItem.appendEvent(newDeleteDomsEvent);
+                        } else if ("STOP".equals(event.getButton().getId())) {
+                            DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
+                                    "Adding an Event to force a roundtrip to be manually stopped", "Manually_stopped", true);
+                            domsItem.appendEvent(newDeleteDomsEvent);
                         }
                     }
                 });
