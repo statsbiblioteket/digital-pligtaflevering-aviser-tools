@@ -22,6 +22,6 @@ public class DeliveryInformationComponent {
     }
 
     public enum ValidationState {
-        FAIL, PROGRESS, SUCCES, DATE;
+        FAIL, PROGRESS, MANUAL_QA_COMPLETE, APPROVED, DATE;
     }
 }

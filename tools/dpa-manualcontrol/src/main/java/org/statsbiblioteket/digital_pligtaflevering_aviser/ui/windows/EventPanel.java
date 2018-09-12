@@ -107,12 +107,12 @@ public class EventPanel extends VerticalLayout {
             Button expectationButton = new Button();
             if(propertyValue!=null) {
                 ThemeResource themeRecourse = ((Boolean)propertyValue).booleanValue() ?
-                        new ThemeResource("icons/accept.png") : new ThemeResource("icons/fail.png");
+                        new ThemeResource("icons/events/outcome_success.png") : new ThemeResource("icons/events/outcome_failure.png");
                 expectationButton = new Button(themeRecourse);
                 expectationButton.setId(((EventDTO)itemId).getEventID());
                 expectationButton.addClickListener(listener);
             } else {
-                expectationButton = new Button(new ThemeResource("icons/fail.png"));
+                expectationButton = new Button(new ThemeResource("icons/events/outcome_failure.png"));
             }
             return expectationButton;
         }

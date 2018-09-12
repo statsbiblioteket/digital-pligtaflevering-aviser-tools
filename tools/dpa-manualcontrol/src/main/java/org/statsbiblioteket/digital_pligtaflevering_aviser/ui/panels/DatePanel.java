@@ -207,21 +207,21 @@ public class DatePanel extends VerticalLayout {
 
             Button contentButton;
             if(value.toString().contains("NO PAGES")) {
-                contentButton = new Button(new ThemeResource("icons/empty.png"));
+                contentButton = new Button(new ThemeResource("icons/newspaper/empty.png"));
                 contentButton.setDescription("The delivery for this newspapertitle has no pages");
                 vl.addComponent(contentButton);
             } else if(value.toString().contains("NO DELIVERY")) {
-                contentButton = new Button(new ThemeResource("icons/missing.png"));
+                contentButton = new Button(new ThemeResource("icons/newspapers/missing.png"));
                 contentButton.setDescription("The delivery has not been received");
                 vl.addComponent(contentButton);
             }  else {
-                contentButton = new Button(new ThemeResource("icons/full.png"));
+                contentButton = new Button(new ThemeResource("icons/newspapers/full.png"));
                 contentButton.setDescription("The delivery for this newspapertitle contains 1+ newspaperpages");
                 vl.addComponent(contentButton);
             }
             Button expectationButton;
             if (expected == null) {
-                expectationButton = new Button(new ThemeResource("icons/unknown.png"));
+                expectationButton = new Button(new ThemeResource("icons/newspapers/unknown.png"));
                 expectationButton.setDescription("Unknown newspaper title received");
                 vl.addComponent(expectationButton);
             } else {
@@ -229,11 +229,11 @@ public class DatePanel extends VerticalLayout {
                 DayOfWeek weekDay = DayOfWeek.valueOf(name);
                 boolean dayState = expected.getDayState(weekDay);
                 if(!Boolean.TRUE.equals(dayState)) {
-                    expectationButton = new Button(new ThemeResource("icons/empty.png"));
+                    expectationButton = new Button(new ThemeResource("icons/newspapers/empty.png"));
                     expectationButton.setDescription("There should be NO delivery for this newspapertitle");
                     vl.addComponent(expectationButton);
                 } else {
-                    expectationButton = new Button(new ThemeResource("icons/full.png"));
+                    expectationButton = new Button(new ThemeResource("icons/newspapers/full.png"));
                     expectationButton.setDescription("There should be a delivery for this newspapertitle");
                     vl.addComponent(expectationButton);
                 }

@@ -13,7 +13,12 @@ import com.vaadin.ui.Window;
  * Window for administartion of doms-events
  */
 public class EventAdminWindow extends Window {
-
+    
+    public static final String APPROVE_BUTTON = "APPROVE";
+    public static final String DELETE_BUTTON = "DELETE";
+    public static final String OVERRIDE_BUTTON = "OVERRIDE";
+    public static final String STOP_BUTTON = "STOP";
+    public static final String CANCEL_BUTTON = "CANCELBUTTON";
     private final HorizontalLayout contentPanel = new HorizontalLayout();
     private final VerticalLayout vl = new VerticalLayout();
     private final HorizontalLayout hl = new HorizontalLayout();
@@ -23,21 +28,25 @@ public class EventAdminWindow extends Window {
     private final Button delete = new Button("Delete");
     private final Button cancel = new Button("Cancel");
     private final Button stop = new Button("Manually stop");
+    private final Button approve = new Button("Approve");
 
     public EventAdminWindow(String caption, boolean actionAllowed) {//Manually_stopped
         super(caption);
         if(actionAllowed) {
-            override.setId("OVERRIDE");
-            delete.setId("DELETE");
+            //These buttons are controlled in EventOverviewPanel
+            override.setId(OVERRIDE_BUTTON);
+            delete.setId(DELETE_BUTTON);
+            approve.setId(APPROVE_BUTTON);
             override.setEnabled(!actionAllowed);
             delete.setEnabled(!actionAllowed);
-            stop.setId("STOP");
-            cancel.setId("CANCELBUTTON");
+            stop.setId(STOP_BUTTON);
+            cancel.setId(CANCEL_BUTTON);
             cancel.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
             hl.addComponent(override);
             hl.addComponent(delete);
             hl.addComponent(stop);
+            hl.addComponent(approve);
             hl.addComponent(cancel);
         }
 
@@ -55,6 +64,7 @@ public class EventAdminWindow extends Window {
         delete.addClickListener(listener);
         cancel.addClickListener(listener);
         stop.addClickListener(listener);
+        approve.addClickListener(listener);
     }
 
     /**

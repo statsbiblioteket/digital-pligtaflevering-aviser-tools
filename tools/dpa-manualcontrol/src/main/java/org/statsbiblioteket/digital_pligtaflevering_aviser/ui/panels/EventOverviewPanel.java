@@ -15,6 +15,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.statistics.ConfirmationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.Constants;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.EventDTO;
@@ -63,20 +64,23 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     @Override
                     public void buttonClick(Button.ClickEvent clickEvent) {
 
-                        Optional<DomsDatastream> validationStream = null;
+                        Optional<DomsDatastream> validationStream = Optional.empty();
                         switch(clickEvent.getButton().getId()) {
-                            case "VeraPDF_Analyzed":
-                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("VERAPDFREPORT")).findAny();
+                            case Constants.VERA_PDF_ANALYZED_EVENT:
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(
+                                        Constants.DS_VERAPDFREPORT)).findAny();
                                 break;
-                            case "Newspaper_Weekdays_Analyzed":
-                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("NEWSPAPERWEEKDAY")).findAny();
+                            case Constants.WEEKDAYS_ANALYZED_EVENT:
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(
+                                        Constants.DS_NEWSPAPERWEEKDAY)).findAny();
                                 break;
-                            case "Statistics_generated":
-                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals("DELIVERYSTATISTICS")).findAny();
+                            case Constants.STATISTICS_GENERATED_EVENT:
+                                validationStream = domsItem.datastreams().stream().filter(validationStreams -> validationStreams.getId().equals(
+                                        Constants.DS_DELIVERYSTATISTICS)).findAny();
                                 break;
                         }
 
-                        if (validationStream!=null && validationStream.isPresent()) {
+                        if (validationStream.isPresent()) {
                             String validationString = validationStream.get().getDatastreamAsString();
 
                             TextArea field = new TextArea();
@@ -109,34 +113,58 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
 
                 UI.getCurrent().addWindow(dialog);
                 dialog.setListener(new Button.ClickListener() {
+                    //These buttons are defined in EventAdminWindow
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
 
                         if(Arrays.stream(Settings.trustedUsers)
                                  .noneMatch(initials -> initials.equals(model.getInitials()))) {
-                            Notification.show("You are not added to the list of trusted users",
+                            Notification.show("You are not added to the list of trusted users ("+Arrays.toString(Settings.trustedUsers)+")",
                                               Notification.Type.HUMANIZED_MESSAGE);
                             return;
                         }
-                        if ("OVERRIDE".equals(event.getButton().getId())) {
+                        if (EventAdminWindow.OVERRIDE_BUTTON.equals(event.getButton().getId())) {
                             EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
-                            DomsEvent overrideDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                    "override by " + model.getInitials(), selectedDomsEvent.getEventID(), true);
+                            DomsEvent overrideDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                                        new java.util.Date(),
+                                                                        "override by " + model.getInitials(),
+                                                                        selectedDomsEvent.getEventID(),
+                                                                        true);
                             domsItem.appendEvent(overrideDomsEvent);
-                        } else if ("DELETE".equals(event.getButton().getId())) {
+                        } else if (EventAdminWindow.DELETE_BUTTON.equals(event.getButton().getId())) {
                             EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
                             int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
-                            DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                    "Deleted " + noOfEvents + " instances of " + selectedDomsEvent.getEventID() +
-                                            (selectedDomsEvent.getDetails() == null ? "" : "\n" +
-                                                    "\nReason: " + selectedDomsEvent.getEventID()+ "\nBy: "+model.getInitials()), "Event_deleted_manually", true);
+                            String note = "Deleted " + noOfEvents + " instances of "
+                                          + selectedDomsEvent.getEventID() +
+                                          (selectedDomsEvent.getDetails() == null ? "" :
+                                                   "\n" +
+                                                   "\nReason: "
+                                                   + selectedDomsEvent.getEventID()
+                                                   + "\nBy: " + model.getInitials());
+                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                                         new java.util.Date(),
+                                                                         note,
+                                                                         Constants.EVENT_DELETED_EVENT,
+                                                                         true);
                             domsItem.appendEvent(newDeleteDomsEvent);
-                        } else if ("STOP".equals(event.getButton().getId())) {
-                            DomsEvent newDeleteDomsEvent = new DomsEvent("manualcontrol", new java.util.Date(),
-                                    "Adding an Event to force a roundtrip to be manually stopped", "Manually_stopped", true);
+                        } else if (EventAdminWindow.STOP_BUTTON.equals(event.getButton().getId())) {
+                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                                         new java.util.Date(),
+                                                                         "Adding an Event to force a roundtrip to be manually stopped",
+                                                                         Constants.STOPPED_EVENT,
+                                                                         true);
                             domsItem.appendEvent(newDeleteDomsEvent);
+                        } else if (EventAdminWindow.APPROVE_BUTTON.equals(event.getButton().getId())){
+                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                                         new java.util.Date(),
+                                                                         "Approving Roundtrip by: "+model.getInitials(),
+                                                                         Constants.APPROVED_EVENT,
+                                                                         true);
+                            domsItem.appendEvent(newDeleteDomsEvent);
+    
                         }
+                    //    TODO reload view here
                     }
                 });
 

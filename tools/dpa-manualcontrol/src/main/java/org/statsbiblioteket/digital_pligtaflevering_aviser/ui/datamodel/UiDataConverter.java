@@ -12,12 +12,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent.ValidationState.*;
 
 /**
  * Converter utilities between deliveryDTO's and DTO's suitable for the UI
@@ -78,19 +75,6 @@ public class UiDataConverter {
         return titleComponentList;
     }
 
-    /**
-     * Check the state of the newest delivery of a specific EventID
-     * @param events
-     * @param eventID
-     * @return
-     */
-    public static ValidationState eventlistToValidationstate(List<Event> events, String eventID) {
-        Optional<Event> max = events.stream().filter(event -> eventID.equals(event.getEventID())).max((a, b) -> a.getDate().compareTo(b.getDate()));
-        if(!max.isPresent()) {
-            return PROGRESS;
-        }
-        return max.get().isSuccess() ? SUCCES :FAIL;
-    }
 
     /**
      * Iterate through all Events and return SUCCES if they have all been validated
@@ -98,19 +82,17 @@ public class UiDataConverter {
      * @return
      */
     public static ValidationState validateEventCollection(List<Event> events) {
-        ValidationState finalEventState = SUCCES;
-        for(String event : Settings.expectedEvents) {
-            ValidationState eventState = eventlistToValidationstate(events, event);
-            switch(eventState) {
-                case FAIL:
-                    return FAIL;
-                case PROGRESS:
-                    finalEventState = PROGRESS;
-                case SUCCES:
-                    break;
-            }
+        if (events.stream().anyMatch(event -> event.getEventID().equals(Constants.APPROVED_EVENT))) {
+            return ValidationState.APPROVED;
         }
-        return finalEventState;
+        if (events.stream().anyMatch(event -> event.getEventID().equals(Constants.MANUAL_QA_COMPLETE_EVENT)) ){
+            return ValidationState.MANUAL_QA_COMPLETE;
+        }
+        if (events.stream().anyMatch(event -> !event.isSuccess())){
+            return ValidationState.FAIL;
+        } else {
+            return ValidationState.PROGRESS;
+        }
     }
 
     public static List<EventDTO> convertList(List<Event> events) {
