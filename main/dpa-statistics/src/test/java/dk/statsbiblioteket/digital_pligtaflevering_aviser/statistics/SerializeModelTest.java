@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -73,6 +74,17 @@ public class SerializeModelTest {
         Pair<String, Document> result = objectToXml(deliveryStatistics);
         String xmlResult = result.getLeft();
         Document doc = result.getRight();
+
+
+        /*Assert.assertEquals(xmlResult,"dl_213232",
+                XPATH.selectString(doc,
+                        "/ns:deliveryStatistics/@deliveryName"));*/
+
+        NodeList nl = XPATH.selectNodeList(doc,
+                "/ns:deliveryStatistics/ns:titles/ns:title[count(ns:pages/ns:page) > 0]/@titleName");
+
+        Assert.assertEquals(nl.getLength(), 2);
+
 
         Assert.assertEquals(xmlResult,"dl_213232",
                             XPATH.selectString(doc,
