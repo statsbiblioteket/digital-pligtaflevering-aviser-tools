@@ -129,7 +129,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                         switch (event.getButton().getId()) {
                             case EventAdminWindow.OVERRIDE_BUTTON:
                                 //First we break out if you try to override an event that are already succesful
-                                if (!selectedDomsEvent.isSuccess()){
+                                if (selectedDomsEvent.isSuccess()){
                                     Notification.show("You can only override events that have failed ("+selectedDomsEvent.toString()+")",
                                                       Notification.Type.HUMANIZED_MESSAGE);
                                     return;
