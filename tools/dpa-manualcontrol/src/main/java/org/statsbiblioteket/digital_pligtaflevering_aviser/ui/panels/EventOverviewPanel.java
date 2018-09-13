@@ -124,46 +124,73 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                               Notification.Type.HUMANIZED_MESSAGE);
                             return;
                         }
-                        if (EventAdminWindow.OVERRIDE_BUTTON.equals(event.getButton().getId())) {
-                            EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
-                            DomsEvent overrideDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
-                                                                        new java.util.Date(),
-                                                                        "override by " + model.getInitials(),
-                                                                        selectedDomsEvent.getEventID(),
-                                                                        true);
-                            domsItem.appendEvent(overrideDomsEvent);
-                        } else if (EventAdminWindow.DELETE_BUTTON.equals(event.getButton().getId())) {
-                            EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
-                            int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
-                            String note = "Deleted " + noOfEvents + " instances of "
-                                          + selectedDomsEvent.getEventID() +
-                                          (selectedDomsEvent.getDetails() == null ? "" :
-                                                   "\n" +
-                                                   "\nReason: "
-                                                   + selectedDomsEvent.getEventID()
-                                                   + "\nBy: " + model.getInitials());
-                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
-                                                                         new java.util.Date(),
-                                                                         note,
-                                                                         Constants.EVENT_DELETED_EVENT,
-                                                                         true);
-                            domsItem.appendEvent(newDeleteDomsEvent);
-                        } else if (EventAdminWindow.STOP_BUTTON.equals(event.getButton().getId())) {
-                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
-                                                                         new java.util.Date(),
-                                                                         "Adding an Event to force a roundtrip to be manually stopped",
-                                                                         Constants.STOPPED_EVENT,
-                                                                         true);
-                            domsItem.appendEvent(newDeleteDomsEvent);
-                        } else if (EventAdminWindow.APPROVE_BUTTON.equals(event.getButton().getId())){
-                            DomsEvent newDeleteDomsEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
-                                                                         new java.util.Date(),
-                                                                         "Approving Roundtrip by: "+model.getInitials(),
-                                                                         Constants.APPROVED_EVENT,
-                                                                         true);
-                            domsItem.appendEvent(newDeleteDomsEvent);
-    
+                        EventDTO selectedDomsEvent = (EventDTO) eventPanel.getSelection();
+                        DomsEvent newEvent = null;
+                        switch (event.getButton().getId()) {
+                            case EventAdminWindow.OVERRIDE_BUTTON:
+                                //First we break out if you try to override an event that are already succesful
+                                if (!selectedDomsEvent.isSuccess()){
+                                    Notification.show("You can only override events that have failed ("+selectedDomsEvent.toString()+")",
+                                                      Notification.Type.HUMANIZED_MESSAGE);
+                                    return;
+                                }
+                                
+                                //Then we add an event to show that we have overridden something. This can be used by the GUI to show such modified deliveries
+                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                         new java.util.Date(),
+                                                         model.getInitials()+" have overridden "+selectedDomsEvent.getEventID(),
+                                                         "Override_event",
+                                                         true);
+                                domsItem.appendEvent(newEvent);
+        
+                                //Then we add a new event with the overridden ID and a higher date, now with outcome success
+                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                         new java.util.Date(),
+                                                         "override by " + model.getInitials(),
+                                                         selectedDomsEvent.getEventID(),
+                                                         true);
+                                break;
+        
+                            case EventAdminWindow.DELETE_BUTTON:
+                                int noOfEvents = domsItem.removeEvents(selectedDomsEvent.getEventID());
+                                String note = "Deleted " + noOfEvents + " instances of "
+                                              + selectedDomsEvent.getEventID() +
+                                              (selectedDomsEvent.getDetails() == null ? "" :
+                                                       "\n" +
+                                                       "\nReason: "
+                                                       + selectedDomsEvent.getEventID()
+                                                       + "\nBy: " + model.getInitials());
+                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                         new java.util.Date(),
+                                                         note,
+                                                         Constants.EVENT_DELETED_EVENT,
+                                                         true);
+                                break;
+        
+                            case EventAdminWindow.STOP_BUTTON:
+                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                         new java.util.Date(),
+                                                         "Adding an Event to force a roundtrip to be manually stopped",
+                                                         Constants.STOPPED_EVENT,
+                                                         true);
+                                break;
+        
+                            case EventAdminWindow.APPROVE_BUTTON:
+                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                                         new java.util.Date(),
+                                                         "Approving Roundtrip by: "
+                                                         + model.getInitials(),
+                                                         Constants.APPROVED_EVENT,
+                                                         true);
+                                break;
+        
                         }
+                        if (newEvent != null) {
+                            domsItem.appendEvent(newEvent);
+        
+                        }
+                        
+                        
                     //    TODO reload view here
                     }
                 });
@@ -244,7 +271,14 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
         List<DeliveryInformationComponent> deliveryInformationList = new ArrayList<DeliveryInformationComponent>();
         for(String item : model.getInitiatedDeliveries()) {
             DomsItem domsItem = model.getDeliveryFromName(item);
-            deliveryInformationList.add(new DeliveryInformationComponent(item, UiDataConverter.validateEventCollection(domsItem.getOriginalEvents())));
+            List<dk.statsbiblioteket.medieplatform.autonomous.Event> originalEvents = domsItem.getOriginalEvents();
+            DeliveryInformationComponent.ValidationState validationState = UiDataConverter.validateEventCollection(
+                    originalEvents);
+            boolean overridden = UiDataConverter.isEventOverridden(originalEvents);
+            
+            DeliveryInformationComponent deliveryInformationComponent = new DeliveryInformationComponent(item, validationState, overridden);
+            
+            deliveryInformationList.add(deliveryInformationComponent);
         }
         datePanel.setInfo(deliveryInformationList);
     }

@@ -190,7 +190,10 @@ public class EventDatePanel extends VerticalLayout {
                     for(DeliveryInformationComponent deliveryComponent : componentList) {
                         String name = deliveryComponent.getDeliveryName();
                         ValidationState state = deliveryComponent.getValidationState();
-
+                        if (deliveryComponent.isOverridden()){
+                            name = name+" *";
+                        }
+                        
                         ThemeResource themeRecourse = null;
                         Button expectationButton = null;
                         switch(state) {
@@ -203,6 +206,13 @@ public class EventDatePanel extends VerticalLayout {
                                 break;
                             case PROGRESS:
                                 themeRecourse = new ThemeResource("icons/events/progress.png");
+                                expectationButton = new Button(name, themeRecourse);
+                                expectationButton.setId(name);
+                                expectationButton.addClickListener(buttonListener);
+                                vl.addComponent(expectationButton);
+                                break;
+                            case STOPPED:
+                                themeRecourse = new ThemeResource("icons/events/stopped.png");
                                 expectationButton = new Button(name, themeRecourse);
                                 expectationButton.setId(name);
                                 expectationButton.addClickListener(buttonListener);

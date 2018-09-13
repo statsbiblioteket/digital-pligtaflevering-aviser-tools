@@ -82,19 +82,40 @@ public class UiDataConverter {
      * @return
      */
     public static ValidationState validateEventCollection(List<Event> events) {
-        if (events.stream().anyMatch(event -> event.getEventID().equals(Constants.APPROVED_EVENT))) {
+        //Only get the latest event for each ID
+        Map<String, Event> eventMap = events.stream()
+                                            .collect(Collectors.toMap(
+                                                    event -> event.getEventID(), //keymapper
+                                                    event -> event, //valuemapper
+                                                    (event1, event2) -> { //merge function if the keys are equal
+                                                        if (event1.getDate()
+                                                                  .compareTo(event2.getDate()) >= 0) {
+                                                            return event1;
+                                                        } else {
+                                                            return event2;
+                                                        }
+                                                    }));
+        
+        if (eventMap.get(Constants.APPROVED_EVENT) != null){
             return ValidationState.APPROVED;
         }
-        if (events.stream().anyMatch(event -> event.getEventID().equals(Constants.MANUAL_QA_COMPLETE_EVENT)) ){
+        if (eventMap.get(Constants.MANUAL_QA_COMPLETE_EVENT) != null){
             return ValidationState.MANUAL_QA_COMPLETE;
         }
-        if (events.stream().anyMatch(event -> !event.isSuccess())){
+        if (eventMap.get(Constants.STOPPED_EVENT) != null){
+            return ValidationState.STOPPED;
+        }
+        if (eventMap.values().stream().anyMatch(event -> !event.isSuccess())){
             return ValidationState.FAIL;
         } else {
             return ValidationState.PROGRESS;
         }
     }
-
+    
+    public static boolean isEventOverridden(List<Event> originalEvents) {
+        return originalEvents.stream().anyMatch(event -> Constants.STOPPED_EVENT.equals(event.getEventID()));
+    }
+    
     public static List<EventDTO> convertList(List<Event> events) {
         List<EventDTO> returnEventList = new ArrayList<EventDTO>();
         for(Event event : events) {
