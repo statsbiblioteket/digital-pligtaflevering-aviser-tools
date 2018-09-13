@@ -188,52 +188,53 @@ public class EventDatePanel extends VerticalLayout {
                     vl.addComponent(expectationButton);
                 } else {
                     for(DeliveryInformationComponent deliveryComponent : componentList) {
-                        String name = deliveryComponent.getDeliveryName();
-                        ValidationState state = deliveryComponent.getValidationState();
+                        String id = deliveryComponent.getDeliveryName();
+                        String name = id;
                         if (deliveryComponent.isOverridden()){
                             name = name+" *";
                         }
-                        
-                        ThemeResource themeRecourse = null;
-                        Button expectationButton = null;
+                        ValidationState state = deliveryComponent.getValidationState();
+    
+                        ThemeResource themeRecourse;
+                        Button expectationButton;
                         switch(state) {
                             case FAIL:
                                 themeRecourse = new ThemeResource("icons/events/fail.png");
                                 expectationButton = new Button(name, themeRecourse);
-                                expectationButton.setId(name);
+                                expectationButton.setId(id);
                                 expectationButton.addClickListener(buttonListener);
                                 vl.addComponent(expectationButton);
                                 break;
                             case PROGRESS:
                                 themeRecourse = new ThemeResource("icons/events/progress.png");
                                 expectationButton = new Button(name, themeRecourse);
-                                expectationButton.setId(name);
+                                expectationButton.setId(id);
                                 expectationButton.addClickListener(buttonListener);
                                 vl.addComponent(expectationButton);
                                 break;
                             case STOPPED:
                                 themeRecourse = new ThemeResource("icons/events/stopped.png");
                                 expectationButton = new Button(name, themeRecourse);
-                                expectationButton.setId(name);
+                                expectationButton.setId(id);
                                 expectationButton.addClickListener(buttonListener);
                                 vl.addComponent(expectationButton);
                                 break;
                             case MANUAL_QA_COMPLETE:
                                 themeRecourse = new ThemeResource("icons/events/manualQA.png");
                                 expectationButton = new Button(name, themeRecourse);
-                                expectationButton.setId(name);
+                                expectationButton.setId(id);
                                 expectationButton.addClickListener(buttonListener);
                                 vl.addComponent(expectationButton);
                                 break;
                             case APPROVED:
                                 themeRecourse = new ThemeResource("icons/events/approved.png");
                                 expectationButton = new Button(name, themeRecourse);
-                                expectationButton.setId(name);
+                                expectationButton.setId(id);
                                 expectationButton.addClickListener(buttonListener);
                                 vl.addComponent(expectationButton);
                                 break;
                             case DATE:
-                                vl.addComponent(new Label(name));
+                                vl.addComponent(new Label(id));
                                 break;
                         }
                     }
