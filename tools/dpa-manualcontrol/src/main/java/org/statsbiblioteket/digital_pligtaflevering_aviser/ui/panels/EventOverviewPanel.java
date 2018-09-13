@@ -139,7 +139,7 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                 newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
                                                          new java.util.Date(),
                                                          model.getInitials()+" have overridden "+selectedDomsEvent.getEventID(),
-                                                         "Override_event",
+                                                         Constants.OVERRIDE_EVENT,
                                                          true);
                                 domsItem.appendEvent(newEvent);
         

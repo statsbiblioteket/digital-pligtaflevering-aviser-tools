@@ -12,4 +12,5 @@ public class Constants {
     public static final String DS_NEWSPAPERWEEKDAY = "NEWSPAPERWEEKDAY";
     public static final String DS_DELIVERYSTATISTICS = "DELIVERYSTATISTICS";
     public static final String AGENT_IDENTIFIER_VALUE = "manualcontrol";
+    public static final String OVERRIDE_EVENT = "Override_event";
 }

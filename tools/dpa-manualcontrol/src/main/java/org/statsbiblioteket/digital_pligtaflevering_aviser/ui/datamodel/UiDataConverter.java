@@ -113,7 +113,7 @@ public class UiDataConverter {
     }
     
     public static boolean isEventOverridden(List<Event> originalEvents) {
-        return originalEvents.stream().anyMatch(event -> Constants.STOPPED_EVENT.equals(event.getEventID()));
+        return originalEvents.stream().anyMatch(event -> Constants.OVERRIDE_EVENT.equals(event.getEventID()));
     }
     
     public static List<EventDTO> convertList(List<Event> events) {
