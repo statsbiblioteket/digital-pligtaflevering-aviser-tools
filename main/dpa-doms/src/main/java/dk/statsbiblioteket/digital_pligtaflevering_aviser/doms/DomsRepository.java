@@ -1,6 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Repository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -40,6 +41,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
@@ -76,6 +78,15 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         this.recordBase = recordBase;
     }
 
+    public DomsItem getItemFromPath(String path){
+        try {
+            List<String> ids = efedora.findObjectFromDCIdentifier("path:" + path);
+            return ids.stream().findFirst().map( id -> lookup(new DomsId(id))).get();
+        } catch (BackendInvalidCredsException | BackendMethodFailedException e) {
+            throw new RuntimeException("could not lookup objects for path " + path, e);
+        }
+    }
+    
     @Override
     public Stream<DomsItem> query(QuerySpecification querySpecification) {
         return query(querySpecification, true);
@@ -319,7 +330,25 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         );
         return premisObject;
     }
-
+    
+    public void deleteItem(DomsItem domsItem, String logmessage) {
+        String pid = domsItem.getDomsId().id();
+        try {
+            efedora.deleteObject(pid, logmessage);
+        } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+            throw new RuntimeException("cannot delete pid " + pid, e);
+        }
+    }
+    
+    public void removeRelation(DomsItem domsItem, String predicate, String target, String comment){
+        String pid = domsItem.getDomsId().id();
+        try {
+            efedora.deleteRelation(pid, pid, predicate, target, false, comment);
+        } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+            throw new RuntimeException("cannot delete relation '"+predicate+"' from pid '" + pid+"' to '"+target+"'", e);
+        }
+    }
+    
     @Override
     public void close() throws Exception {
         // nothing yet.

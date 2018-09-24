@@ -29,11 +29,39 @@ public class DomsDatastream {
     public String getUrl() {
         return datastreamProfile.getUrl();
     }
-
+    
+    public String getState() {
+        return datastreamProfile.getState();
+    }
+    
+    public String getChecksum() {
+        return datastreamProfile.getChecksum();
+    }
+    
+    public String getChecksumType() {
+        return datastreamProfile.getChecksumType();
+    }
+    
+    public long getCreated() {
+        return datastreamProfile.getCreated();
+    }
+    
+    public String getFormatURI() {
+        return datastreamProfile.getFormatURI();
+    }
+    
     public String getId() {
         return datastreamProfile.getID();
     }
-
+    
+    public String getID() {
+        return datastreamProfile.getID();
+    }
+    
+    public String getLabel() {
+        return datastreamProfile.getLabel();
+    }
+    
     public String getDatastreamAsString() {
         return domsRepository.getDataStreamAsString(domsItem.getDomsId().id(), getId());
     }

@@ -37,7 +37,8 @@ import static antlr.build.ANTLR.root;
  * @noinspection WeakerAccess
  */
 public class DomsItem implements RepositoryItem<DomsEvent> {
-
+    
+    public static final String HAS_PART = "info:fedora/fedora-system:def/relations-external#hasPart";
     public Logger log = LoggerFactory.getLogger(getClass());
 
     public DomsId getDomsId() {
@@ -249,7 +250,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
                 String predicate = tuple[1].substring(1, tuple[1].length() - ">".length());
                 String child = tuple[2].substring("<info:fedora/".length(), tuple[2].length() - ">".length());
 
-                if (predicate.equals("info:fedora/fedora-system:def/relations-external#hasPart")) {
+                if (predicate.equals(HAS_PART)) {
                     children.add(itemFor(child));
                 }
             }
@@ -308,6 +309,14 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
     // BACKPORT - DomsEventStorage.getPremisForItem() is private so adapted from that.
     public PremisManipulator<Item> getPremis() {
         return domsRepository.getPremisFor(domsId.id(), DomsEventStorageFactory.EVENTS);
+    }
+    
+    public void delete(String logmessage){
+        domsRepository.deleteItem(this,logmessage);
+    }
+    
+    public void unlinkChild(DomsItem child, String logmessage){
+        domsRepository.removeRelation(this,HAS_PART,child.domsId.id(),logmessage);
     }
 
 }
