@@ -35,7 +35,8 @@ public class JettyRunner {
         System.setProperty ("javax.net.ssl.trustStorePassword", "changeit");
 
         // Create Jetty Server
-        Server server = new Server(8080);
+        int port = 8080;
+        Server server = new Server(port);
 
         Path xmlPath = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "dpa-manualcontrol_jetty.xml");
 
@@ -60,6 +61,9 @@ public class JettyRunner {
             String paramValue = nl.item(i).getAttributes().getNamedItem("value").getTextContent();
             webapp.setInitParameter(paramName, paramValue);
         }
+        String hostname = System.getenv("HOSTNAME");
+        webapp.setInitParameter("serverName", hostname);
+        webapp.setInitParameter("service", "http://" + hostname + ":" + port + webapp.getContextPath());
 
         Path path = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
         webapp.setInitParameter("dpa.manualcontrol.configpath", path.getParent().toString());
