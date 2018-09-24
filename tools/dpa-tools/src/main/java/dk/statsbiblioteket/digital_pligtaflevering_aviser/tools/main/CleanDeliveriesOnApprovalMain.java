@@ -3,7 +3,6 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import dk.kb.stream.StreamTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -12,11 +11,11 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.DomsItemTuple;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
-import dk.statsbiblioteket.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +30,11 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,6 +82,7 @@ public class CleanDeliveriesOnApprovalMain {
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
                          DefaultToolMXBean mxBean,
+                         @Named("autonomous.pastSuccessfulEvents") String approveEvent,
                          @Named("approve-delete.doms.commit.comment")
                                  String commitComment,
                          @Named("approve-delete.doms.batch.to.roundtrip.relation")
@@ -102,7 +101,7 @@ public class CleanDeliveriesOnApprovalMain {
             
             final String agent = CleanDeliveriesOnApprovalMain.class.getSimpleName();
             
-            List<DomsItem> result = new ArrayList<>();
+            List<String> result = new ArrayList<>();
             
             
             Tool tool = () -> {
@@ -112,80 +111,103 @@ public class CleanDeliveriesOnApprovalMain {
                                                       .peek(o -> log.trace("Query returned: {}", o))
                                                       .collect(toList());
                 for (DomsItem approvedRoundtrip : roundtripItems) {
-    
-                    DomsItem deliveryItem;
-                    String approved_roundtrip_date = approvedRoundtrip.getPath().split("_")[1];
+                    
                     try {
+                        DomsItem deliveryItem;
+                        String approved_roundtrip_date = approvedRoundtrip.getPath().split("_")[1];
+                        try {
+        
+                            deliveryItem = domsRepository.getItemFromPath("dl_" + approved_roundtrip_date);
+                        } catch (NoSuchElementException e) {
+                            throw new RuntimeException("Roundtrip item " + approvedRoundtrip + " have no delivery item",
+                                                       e);
+                        }
+    
+                        log.info("Found batch object, pid: '{}'", deliveryItem);
                         
-                        deliveryItem = domsRepository.getItemFromPath("dl_" + approved_roundtrip_date);
-                    } catch (NoSuchElementException e){
-                        throw new RuntimeException("Roundtrip item "+approvedRoundtrip+" have no delivery item",e);
+                        //Remove linked roundtrips that no longer exists
+                        deliveryItem.children().forEach(item -> {try {item.getPath();} catch (RuntimeException e){
+                            deliveryItem.unlinkChild(item,commitComment);
+                            
+                        }});
+    
+                        List<DomsItem> allRoundTripsForThisDelivery = deliveryItem.children()
+                                                                                  .sorted(Comparator.comparing(DomsItem::getPath))
+                                                                                  .collect(Collectors.toList());
+    
+                        log.info("All roundtrips for batch '{}': '{}'",
+                                 deliveryItem.getPath(),
+                                 allRoundTripsForThisDelivery);
+    
+                        List<DomsItem> oldRoundtrips =
+                                allRoundTripsForThisDelivery.stream()
+                                        .filter(roundTrip -> !roundTrip.equals(approvedRoundtrip))
+                                        .filter(roundTrip -> {
+                                            if (roundTrip.getOriginalEvents()
+                                                         .stream()
+                                                         .anyMatch(Event -> Event.getEventID()
+                                                                                 .equals(approveEvent))) {
+                                                log.error(
+                                                        "Duplicate approval: {} and {} are both approved",
+                                                        approvedRoundtrip.getPath(),
+                                                        roundTrip.getPath());
+                                                return false;
+                                            }
+                                            return true;
+                                        })
+                                        .filter(roundTrip -> {
+                                            if (roundTrip.getPath()
+                                                         .compareTo(approvedRoundtrip.getPath())
+                                                > 0) {
+                                                log.error(
+                                                        "A roundtrip '{}' with a higher roundtrip number than '{}' exists! It will not be cleaned.",
+                                                        roundTrip,
+                                                        approvedRoundtrip);
+                                                return false;
+                                            }
+                                            return true;
+                                        })
+                                        .collect(Collectors.toList());
+    
+    
+                        log.info("Old roundtrips up for cleaning: '{}'", oldRoundtrips);
+                        for (DomsItem roundtrip : oldRoundtrips) {
+    
+                            //Save this before delete, as we cannot retrieve it afterwards
+                            String roundtripPath = roundtrip.getPath();
+                            String roundtripPid = roundtrip.getDomsId().id();
+                            log.info("Starting cleaning of roundtrip: '{}'", roundtripPath);
+                            Collection<String> files = deleteRoundTrip(roundtrip, deliveryItem, commitComment);
+                            log.info("Finished cleaning of roundtrip: '{}'", roundtripPath);
+                            log.warn("Requesting deletion of files {}",files);
+        
+                            reportFiles(roundtripPath,
+                                        approvedRoundtrip,
+                                        files,
+                                        mailer,
+                                        emailSubjectPattern,
+                                        emailBodyPattern,
+                                        emailRecipients);
+        
+                            result.add(roundtripPath);
+                        }
+                        String deleted_roundtrips = String.join(",", result);
+    
+                        approvedRoundtrip.appendEvent(new DomsEvent(agent,
+                                                                    new Date(),
+                                                                    "deleted roundtrips " + deleted_roundtrips,
+                                                                    eventName,
+                                                                    true));
+    
+                    } catch (Exception e) {
+                        log.error("Caught Exception",e);
+                        approvedRoundtrip.appendEvent(new DomsEvent(agent,
+                                                                    new Date(),
+                                                                    DomsItemTuple.stacktraceFor(e),
+                                                                    eventName,
+                                                                    false));
+    
                     }
-                    
-                    log.info("Found batch object, pid: '{}'", deliveryItem);
-                    Stream<DomsItem> allRoundTripsForThisDelivery = deliveryItem.children();
-                    
-                    log.info("All roundtrips for batch '{}': '{}'",
-                              deliveryItem.getPath(),
-                              allRoundTripsForThisDelivery);
-                    
-                    List<DomsItem> oldRoundtrips =
-                            allRoundTripsForThisDelivery
-                                    .filter(roundTrip -> !roundTrip.equals(approvedRoundtrip))
-                                    .filter(roundTrip -> {
-                                        //TODO read the event name from config
-                                        if (roundTrip.events()
-                                                     .stream()
-                                                     .anyMatch(Event -> Event.getEventType()
-                                                                             .equals("Roundtrip_approved"))) {
-                                            log.error(
-                                                    "Duplicate approval: {} and {} are both approved",
-                                                    approvedRoundtrip.getPath(),
-                                                    roundTrip.getPath());
-                                            return false;
-                                        }
-                                        return true;
-                                    })
-                                    .filter(roundTrip -> {
-                                        if (roundTrip.getPath()
-                                                     .compareTo(approvedRoundtrip.getPath())
-                                            > 0) {
-                                            log.error(
-                                                    "A roundtrip '{}' with a higher roundtrip number than '{}' exists! It will not be cleaned.",
-                                                    roundTrip,
-                                                    approvedRoundtrip);
-                                            return false;
-                                        }
-                                        return true;
-                                    })
-                                    .collect(Collectors.toList());
-                    
-                    
-                    log.info("Old roundtrips up for cleaning: '{}'", oldRoundtrips);
-                    for (DomsItem roundtrip : oldRoundtrips) {
-                        
-                        log.info("Starting cleaning of roundtrip: '{}'", roundtrip);
-                        Collection<String> files = deleteRoundTrip(roundtrip, deliveryItem, commitComment);
-                        log.info("Finished cleaning of roundtrip: '{}'", roundtrip);
-
-                        reportFiles(roundtrip,
-                                    approvedRoundtrip,
-                                    files,
-                                    mailer, emailSubjectPattern,
-                                    emailBodyPattern,
-                                    emailRecipients);
-                        
-                        result.add(roundtrip);
-                    }
-                    String deleted_roundtrips = oldRoundtrips.stream().map(domsItem -> domsItem.getPath()).collect(
-                            Collectors.joining(","));
-                    
-                    //TODO what about exceptions here?
-                    approvedRoundtrip.appendEvent(new DomsEvent(agent,
-                                                                new Date(),
-                                                                "deleted roundtrips " + deleted_roundtrips,
-                                                                eventName,
-                                                                true));
                     
                 }
                 return result;
@@ -193,18 +215,6 @@ public class CleanDeliveriesOnApprovalMain {
             
             return tool;
         }
-        
-        
-        private static Pair<Integer, Integer> getNumbers(DomsItem roundTrip) {
-            Pattern pattern = Pattern.compile("dl_([\\d]{8})_rt(\\d+)$");
-            Matcher matcher = pattern.matcher(roundTrip.getPath());
-            if (!matcher.matches()) {
-                return null;
-            } else {
-                return new Pair<>(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)));
-            }
-        }
-        
         
         /**
          * Send a mail to the recipients about the approval of the approved_roundtrip and the resulting deletion of the older approved_roundtrip
@@ -219,7 +229,7 @@ public class CleanDeliveriesOnApprovalMain {
          * @throws MessagingException if sending the mail failed
          *                            dk.statsbiblioteket.medieplatform.autonomous.Batch)
          */
-        protected void reportFiles(DomsItem roundTrip,
+        protected void reportFiles(String roundTrip,
                                    DomsItem approved_roundtrip,
                                    Collection<String> files,
                                    SimpleMailer mailer,
@@ -229,15 +239,7 @@ public class CleanDeliveriesOnApprovalMain {
                 throws MessagingException {
             if (!files.isEmpty()) {
                 String subject = formatSubject(emailSubjectPattern, roundTrip, approved_roundtrip);
-                log.trace("Mail subject cleaning of approved_roundtrip '{}' with pid '{}': '{}'",
-                          roundTrip.getPath(),
-                          roundTrip.getDomsId(),
-                          subject);
                 String body = formatBody(emailBodyPattern, roundTrip, approved_roundtrip, files);
-                log.trace("Mail body cleaning of approved_roundtrip '{}' with pid '{}': '{}'",
-                          roundTrip.getPath(),
-                          roundTrip.getDomsId(),
-                          body);
                 mailer.sendMail(Arrays.asList(emailRecipients.split(",")), subject, body);
             }
         }
@@ -260,7 +262,6 @@ public class CleanDeliveriesOnApprovalMain {
                      })
                      .forEach(domsItem -> domsItem.delete(deleteComment));
             
-            roundtrip.delete(deleteComment);
             delivery.unlinkChild(roundtrip, deleteComment);
             
             
@@ -279,11 +280,11 @@ public class CleanDeliveriesOnApprovalMain {
          * @see #formatFiles(java.util.Collection)
          */
         protected String formatBody(String fileDeletionBody,
-                                    DomsItem roundtrip,
+                                    String roundtrip,
                                     DomsItem approved_roundtrip,
                                     Collection<String> files) {
-            String approved_roundtrip_id = approved_roundtrip.getPath().split(":")[1].split("/")[0];
-            String roundtrip_id = roundtrip.getPath().split(":")[1].split("/")[0];
+            String approved_roundtrip_id = approved_roundtrip.getPath();
+            String roundtrip_id = roundtrip;
             return MessageFormat.format(
                     fileDeletionBody,
                     approved_roundtrip_id,
@@ -303,7 +304,7 @@ public class CleanDeliveriesOnApprovalMain {
             StringBuilder result = new StringBuilder();
             for (String file : files) {
                 log.trace("Adding file '{}' to mail", file);
-                result.append("\n").append(file.replaceAll("/", "_"));
+                result.append("\n").append(file);
             }
             return result.toString();
         }
@@ -317,10 +318,10 @@ public class CleanDeliveriesOnApprovalMain {
          * @return the subject as a string
          */
         protected String formatSubject(String fileDeletionSubject,
-                                       DomsItem roundtrip,
+                                       String roundtrip,
                                        DomsItem approved_roundtrip) {
-            String approved_roundtrip_id = approved_roundtrip.getPath().split(":")[1].split("/")[0];
-            String roundtrip_id = roundtrip.getPath().split(":")[1].split("/")[0];
+            String approved_roundtrip_id = approved_roundtrip.getPath();
+            String roundtrip_id = roundtrip;
             
             return MessageFormat.format(
                     fileDeletionSubject,

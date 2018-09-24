@@ -1,7 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.doms;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Repository;
 import dk.statsbiblioteket.doms.central.connectors.BackendInvalidCredsException;
@@ -41,7 +40,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants.AUTONOMOUS_SBOI_URL;
@@ -146,7 +144,10 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
             return resultIds.stream()
                     .map(DomsId::new)
-                    .map(this::lookup);
+                    .map(this::lookup)
+                    //Ignore items that fail on getPath, as they are artifacts of a deletion that have not reached sboi yet.
+                    .filter(item -> {try {item.getPath(); return true; } catch (RuntimeException e){return false;}});
+            
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -305,7 +306,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         if (cr.getStatus() < 300) {
             return cr.getEntityInputStream();
         } else {
-            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ": status= " + cr.getStatus());
+            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ", status= " + cr.getStatus());
         }
     }
 

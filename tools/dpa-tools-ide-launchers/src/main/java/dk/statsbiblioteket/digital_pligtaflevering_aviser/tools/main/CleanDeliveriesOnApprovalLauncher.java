@@ -1,9 +1,6 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
-import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 
-import java.nio.file.Path;
 
 /**
  * Launcher suitable for invoking IngesterMain from within an IDE using the delivery-samples folder.
