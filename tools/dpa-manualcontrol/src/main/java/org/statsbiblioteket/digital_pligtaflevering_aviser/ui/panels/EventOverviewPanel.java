@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The EventOverviewPanel
@@ -117,10 +119,15 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                     @Override
                     public void buttonClick(Button.ClickEvent event) {
                         UI.getCurrent().removeWindow(dialog);
-
-                        if(Arrays.stream(Settings.trustedUsers)
-                                 .noneMatch(initials -> initials.equals(model.getInitials()))) {
-                            Notification.show("You are not added to the list of trusted users ("+Arrays.toString(Settings.trustedUsers)+")",
+    
+                        Set<String> trustedUsers = Arrays.stream(Settings.trustedUsers)
+                                                   .map(String::trim)
+                                                   .filter(initials -> !initials.isEmpty())
+                                                   .collect(Collectors.toSet());
+                        if (!trustedUsers.isEmpty() && !trustedUsers.contains(model.getInitials())) {
+                            Notification.show("You are not added to the list of trusted users ("
+                                              + Arrays.toString(Settings.trustedUsers)
+                                              + ")",
                                               Notification.Type.HUMANIZED_MESSAGE);
                             return;
                         }
