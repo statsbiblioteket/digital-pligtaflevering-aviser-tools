@@ -33,6 +33,18 @@ Der åbnes en dialog hvor der er målighed for at se hvilke informationer der er
 Når der klikkes "Ok" bliver informationen gemt, og systemet har derefter registreret at denne enhed er kontrolleret.
 
 
+
+Overvågning af events i autonome komponenter
+---
+
+Der er lavet en brugerflade til at overvåge fremdriften for autonome komponenter på et delivery.
+Denne brugerflade kan tilgåes på nedenstående link:
+http://localhost:8080/dpa-manualcontrol/?events=CREATEDONLY#!EVENTOVERVIEW
+
+Det er her muligt at stoppe fremdriften på enkelte deliveries, eller at slette resultatet af et check på et delivery, 
+og det er muligt at override et fejlet delivery, så applikationen opfatter det som "ikke fejlet".
+
+
 Ekstra info
 ---
 
