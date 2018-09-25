@@ -4,6 +4,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.CommunicationException;
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorageFactory;
+import dk.statsbiblioteket.medieplatform.autonomous.Event;
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -103,7 +104,7 @@ public class CreateDelivery {
         //Fedora can not handle ore than one event on the same object at the same time, for this reason Date is not delivered as a parameter
         //It would not fail with the same parameter anyway since there is only written one event
 
-        boolean currentIsNewest = true;
+        boolean acceptCurrent = true;
 
         String message = "";
 
@@ -126,7 +127,7 @@ public class CreateDelivery {
             if (other.getRoundTripNumber() > current.getRoundTripNumber()) {
                 //We already have higher-number roundtrip than the one we just received
                 
-                currentIsNewest = false;
+                acceptCurrent = false;
         
                 domsEventClient.appendEventToItem(current,
                                                   premisAgent,
@@ -143,25 +144,52 @@ public class CreateDelivery {
             }
             
             if (current.getRoundTripNumber() > other.getRoundTripNumber()){
-                //We already have another lower roundtrip, so stop that. The current roundtrip should take over now
-                domsEventClient.appendEventToItem(other,
-                                                  premisAgent,
-                                                  new Date(),
-                                                  "Newer roundtrip (" + current.getFullID()
-                                                  + ") has just been received, so this roundtrip should be stopped",
-                                                  dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE,
-                                                  true);
-                log.warn("Stopping processing of delivery '{}' because a newer roundtrip '{}' was received",
-                         other.getFullID(),
-                         current.getFullID());
+                //The current roundtrip is newer than a previous roundtrip
+                
+                //Check that the other roundtrip have not already been approved
+                boolean otherIsApproved = false;
+                for (Event event : other.getEventList()) {
+                    if (dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.APPROVED_STATE.equals(event.getEventID()) && event.isSuccess()){
+                        //Other older roundtrip was already approved
+                        //We assume that the first succesfull approve event is final. I do not believe people would override it
+                        otherIsApproved = true;
+                        break;
+                    }
+                }
+                if (otherIsApproved){
+                    //The other roundtrip have already been approved, so the current should NOT proceed
+                    acceptCurrent = false;
+                    domsEventClient.appendEventToItem(current,
+                                                      premisAgent,
+                                                      new Date(),
+                                                      "Older roundtrip (" + other.getFullID()
+                                                      + ") has already been approved, so this roundtrip should be stopped",
+                                                      dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE,
+                                                      true);
+    
+                } else {
+                    //We already have another lower roundtrip, so stop that. The current roundtrip should take over now
+                    domsEventClient.appendEventToItem(other,
+                                                      premisAgent,
+                                                      new Date(),
+                                                      "Newer roundtrip (" + current.getFullID()
+                                                      + ") has just been received, so this roundtrip should be stopped",
+                                                      dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE,
+                                                      true);
+                    log.warn("Stopping processing of delivery '{}' because a newer roundtrip '{}' was received",
+                             other.getFullID(),
+                             current.getFullID());
+                }
             }
             
         }
     
         if (Delivery.DeliveryType.STDDELIVERY.equals(current.getDeliveryType())) {
-            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message, "Data_Received", currentIsNewest);
+            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message,
+                                              dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.DATA_RECEIVED, true);
         } else if (Delivery.DeliveryType.MUTATION.equals(current.getDeliveryType())) {
-            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message, "Mutation_Received", currentIsNewest);
+            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message,
+                                              dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.MUTATION_RECEIVED, true);
         }
     
     
