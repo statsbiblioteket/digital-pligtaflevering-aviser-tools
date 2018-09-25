@@ -183,12 +183,20 @@ public class EventOverviewPanel extends VerticalLayout implements StatisticsPane
                                 break;
         
                             case EventAdminWindow.APPROVE_BUTTON:
-                                newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
-                                                         new java.util.Date(),
-                                                         "Approving Roundtrip by: "
-                                                         + model.getInitials(),
-                                                         Constants.APPROVED_EVENT,
-                                                         true);
+
+                                if(selectedDomsEvent == null ||
+                                        !Constants.MANUAL_QA_COMPLETE_EVENT.equals(selectedDomsEvent.getEventID())) {
+                                    Notification.show("Select the following event when approving : " + Constants.MANUAL_QA_COMPLETE_EVENT,
+                                            Notification.Type.HUMANIZED_MESSAGE);
+                                } else {
+                                    newEvent = new DomsEvent(Constants.AGENT_IDENTIFIER_VALUE,
+                                            new java.util.Date(),
+                                            "Approving Roundtrip by: "
+                                                    + model.getInitials(),
+                                            Constants.APPROVED_EVENT,
+                                            true);
+                                }
+
                                 break;
         
                         }
