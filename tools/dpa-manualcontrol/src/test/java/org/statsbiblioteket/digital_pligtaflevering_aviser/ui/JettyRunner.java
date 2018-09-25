@@ -65,7 +65,7 @@ public class JettyRunner {
         webapp.setInitParameter("serverName", hostname);
         webapp.setInitParameter("service", "http://" + hostname + ":" + port + webapp.getContextPath());*/
     
-        webapp.setInitParameter("dpa.manualcontrol.truetedUsers", System.getenv("USER"));
+//        webapp.setInitParameter("dpa.manualcontrol.truetedUsers", System.getenv("USER"));
     
         Path path = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
         webapp.setInitParameter("dpa.manualcontrol.configpath", path.getParent().toString());

@@ -41,10 +41,11 @@ public class NewspaperUI extends UI {
         if (request.getUserPrincipal() != null) {
             String initials = request.getUserPrincipal().getName();
             model.setInitials(initials);
-        } else {
-            //HACK? Set the initials to the user running the webserver, if you are not logged in...
-            model.setInitials(System.getenv("USER"));
         }
+//        else {
+//            //HACK? Set the initials to the user running the webserver, if you are not logged in...
+//            model.setInitials(System.getenv("USER"));
+//        }
 
         String screenwidth = request.getParameter("screenwidth");
         if(screenwidth!=null) {
