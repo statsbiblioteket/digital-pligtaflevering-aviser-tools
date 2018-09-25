@@ -2,6 +2,7 @@ package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
+import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
@@ -15,6 +16,7 @@ import java.util.Date;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -80,8 +82,24 @@ public class CreateDeliveryTest {
 
         CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
-                                                      contains("Roundtrip (2) is newer than this roundtrip (1)"), eq("Data_Received"), eq(false));
+        InOrder inorder = inOrder(domsStorage);
+        inorder.verify(domsStorage)
+                        .appendEventToItem(
+                                eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)),
+                                eq("premisAgent"),
+                                Matchers.<Date>any(),
+                                contains("Newer roundtrip (1234_rt2) has already been received, so this roundtrip should be stopped"),
+                                eq("Manually_stopped"),
+                                eq(true));
+    
+        inorder.verify(domsStorage)
+                .appendEventToItem(
+                        eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)),
+                        eq("premisAgent"),
+                        Matchers.<Date>any(),
+                        eq(""),
+                        eq("Data_Received"),
+                        eq(false));
         verifyNoMoreInteractions(domsStorage);
     }
 

@@ -68,7 +68,6 @@ public class CreateDelivery {
 
             //deliveryPatterMatcher
             Pattern deliveryPattern = Pattern.compile("^dl_+([\\d]{8}+)$");
-            Matcher matcher = deliveryPattern.matcher(deliveryId);
 
             //mutationPatterMatcher
             Pattern mutationPattern = Pattern.compile("^mt_+([\\d]{8})+_no([0-9]+)$");
@@ -95,47 +94,77 @@ public class CreateDelivery {
      * This will fail if a later roundtrip exists, and also it will stop earlier roundtrips from processing,
      * should they exist.
      *
-     * @param delivery        The batch to register
+     * @param current        The batch to register
      * @param premisAgent     The string used as premis agent id
      * @param domsEventClient The doms event client used for registering events.
      * @throws CommunicationException On trouble registering event.
      */
-    public static void doWork(Delivery delivery, String premisAgent, DeliveryDomsEventStorage domsEventClient) throws CommunicationException {
+    public static void doWork(Delivery current, String premisAgent, DeliveryDomsEventStorage domsEventClient) throws CommunicationException {
         //Fedora can not handle ore than one event on the same object at the same time, for this reason Date is not delivered as a parameter
         //It would not fail with the same parameter anyway since there is only written one event
-        boolean newerRoundTripAlreadyReceived = false;
+
+        boolean currentIsNewest = true;
 
         String message = "";
 
-        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(delivery.getDeliveryID());
+        List<Delivery> roundtrips = domsEventClient.getAllRoundTrips(current.getDeliveryID());
         if (roundtrips == null) {
             roundtrips = Collections.emptyList();
         }
-        for (Delivery roundtrip : roundtrips) {
+        
+        //Current is not created until first event is added, so it might not be in the roundtrip list.
+        //This is ok, as we add the first event to it later on.
+        
+        
+        for (Delivery other : roundtrips) {
             //Make sure that roundtrips which does not have the newest roundtrip-id goes into failed state
-            if (roundtrip.getRoundTripNumber() > delivery.getRoundTripNumber()) {
-                message += "Roundtrip (" + roundtrip.getRoundTripNumber() + ") is newer than this roundtrip (" + delivery.getRoundTripNumber() + "), so this roundtrip will not be triggered here\n";
-                log.warn("Not adding new delivery '{}' because a newer roundtrip {} exists", delivery.getFullID(), roundtrip.getRoundTripNumber());
-                newerRoundTripAlreadyReceived = true;
+
+            if (other.getFullID().equals(current.getFullID())) {
+                continue; //skip the current roundtrip, of course
             }
-        }
-
-
-        if (Delivery.DeliveryType.STDDELIVERY.equals(delivery.getDeliveryType())) {
-            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Data_Received", !newerRoundTripAlreadyReceived);
-        } else if (Delivery.DeliveryType.MUTATION.equals(delivery.getDeliveryType())) {
-            domsEventClient.appendEventToItem(delivery, premisAgent, new Date(), message, "Mutation_Received", !newerRoundTripAlreadyReceived);
-        }
-
-        if (!newerRoundTripAlreadyReceived) {
-            for (Delivery roundtrip : roundtrips) {
-                if (!roundtrip.getRoundTripNumber().equals(delivery.getRoundTripNumber())) {
-                    domsEventClient.appendEventToItem(roundtrip, premisAgent, new Date(),
-                            "Newer roundtrip (" + roundtrip.getRoundTripNumber()
-                                    + ") has been received, so this batch should be stopped", dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE, true);
-                    log.warn("Stopping processing of batch '{}' because a newer roundtrip '{}' was received", roundtrip.getFullID(), roundtrip.getFullID());
-                }
+    
+            if (other.getRoundTripNumber() > current.getRoundTripNumber()) {
+                //We already have higher-number roundtrip than the one we just received
+                
+                currentIsNewest = false;
+        
+                domsEventClient.appendEventToItem(current,
+                                                  premisAgent,
+                                                  new Date(),
+                                                  "Newer roundtrip (" + other.getFullID()
+                                                  + ") has already been received, so this roundtrip should be stopped",
+                                                  dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE,
+                                                  true);
+                
+                log.warn("Stopping processing of new delivery '{}' because a higher roundtrip '{}' was already in the system",
+                         other.getFullID(),
+                         current.getFullID());
+        
             }
+            
+            if (current.getRoundTripNumber() > other.getRoundTripNumber()){
+                //We already have another lower roundtrip, so stop that. The current roundtrip should take over now
+                domsEventClient.appendEventToItem(other,
+                                                  premisAgent,
+                                                  new Date(),
+                                                  "Newer roundtrip (" + current.getFullID()
+                                                  + ") has just been received, so this roundtrip should be stopped",
+                                                  dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE,
+                                                  true);
+                log.warn("Stopping processing of delivery '{}' because a newer roundtrip '{}' was received",
+                         other.getFullID(),
+                         current.getFullID());
+            }
+            
         }
+    
+        if (Delivery.DeliveryType.STDDELIVERY.equals(current.getDeliveryType())) {
+            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message, "Data_Received", currentIsNewest);
+        } else if (Delivery.DeliveryType.MUTATION.equals(current.getDeliveryType())) {
+            domsEventClient.appendEventToItem(current, premisAgent, new Date(), message, "Mutation_Received", currentIsNewest);
+        }
+    
+    
+    
     }
 }
