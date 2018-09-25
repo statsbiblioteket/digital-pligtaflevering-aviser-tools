@@ -61,9 +61,9 @@ public class JettyRunner {
             String paramValue = nl.item(i).getAttributes().getNamedItem("value").getTextContent();
             webapp.setInitParameter(paramName, paramValue);
         }
-        String hostname = System.getenv("HOSTNAME");
+        /*String hostname = System.getenv("HOSTNAME");
         webapp.setInitParameter("serverName", hostname);
-        webapp.setInitParameter("service", "http://" + hostname + ":" + port + webapp.getContextPath());
+        webapp.setInitParameter("service", "http://" + hostname + ":" + port + webapp.getContextPath());*/
 
         Path path = MavenProjectsHelper.getRequiredPathTowardsRoot(NewspaperUI.class, "DeliveryPattern.xml");
         webapp.setInitParameter("dpa.manualcontrol.configpath", path.getParent().toString());
