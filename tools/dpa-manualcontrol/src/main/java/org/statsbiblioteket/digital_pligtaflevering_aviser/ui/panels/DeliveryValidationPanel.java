@@ -1,18 +1,8 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.event.ItemClickEvent;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryConfirmPanel;
-import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.StoreResultWindow;
 
 import java.util.List;
 
@@ -24,7 +14,7 @@ import java.util.List;
 public class DeliveryValidationPanel extends DeliveryPanel {
 
     private DeliveryListPanel deliveryListPanel = new DeliveryListPanel();
-    private Button doneDeliveryButton = new Button("Done del");
+
 
     public DeliveryValidationPanel(DataModel model) {
         super(model);
@@ -58,13 +48,6 @@ public class DeliveryValidationPanel extends DeliveryPanel {
         tablesLayoutTop.setExpandRatio(deliveryListPanel, 0.1f);
         super.initialLayout();
 
-        doneDeliveryButton.addClickListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                setDone();
-            }
-        });
-        buttonLayout.addComponent(doneDeliveryButton);
     }
 
     /**
@@ -77,49 +60,7 @@ public class DeliveryValidationPanel extends DeliveryPanel {
         deliveryListPanel.setValues(model.getInitiatedDeliveries());
     }
 
-    /**
-     * Show the dialog for adding the event "manualDeliveryValidation" to a delivery
-     */
-    public void setDone() {
 
-        if (!deliveryPanel.isAllChecked()) {
-            Notification.show("The delivery can not be confirmed until all titles is confirmed");
-            return;
-        }
-
-        String selectedDelivery = model.getSelectedDelivery();
-        final StoreResultWindow dialog = new StoreResultWindow(selectedDelivery);
-        DeliveryConfirmPanel storePanel = new DeliveryConfirmPanel();
-
-        dialog.setDialogContent(storePanel);
-        dialog.setModal(true);
-
-        UI.getCurrent().addWindow(dialog);
-        dialog.setListener(new Button.ClickListener() {
-            @Override
-            public void buttonClick(Button.ClickEvent event) {
-                //TODO where is this used. It overlaps severely with ManualQA Completer
-                UI.getCurrent().removeWindow(dialog);
-                if ("OKBUTTON".equals(event.getButton().getId())) {
-                    DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
-                    item.appendEvent(
-                            new DomsEvent(NewspaperUI.class.getSimpleName(),
-                                          new java.util.Date(),
-                                          "Validation of manual delivery",
-                                          NewspaperContextListener.manualCheckEventname,
-                                          true));
-                }
-            }
-        });
-
-        dialog.addCloseListener(new Window.CloseListener() {
-            // inline close-listener
-            @Override
-            public void windowClose(Window.CloseEvent e) {
-                UI.getCurrent().removeWindow(dialog);
-            }
-        });
-    }
 
     @Override
     public void viewIsEntered() {

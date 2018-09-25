@@ -99,11 +99,11 @@ public class UiDataConverter {
         if (eventMap.get(Constants.APPROVED_EVENT) != null){
             return ValidationState.APPROVED;
         }
-        if (eventMap.get(Constants.MANUAL_QA_COMPLETE_EVENT) != null){
-            return ValidationState.MANUAL_QA_COMPLETE;
-        }
         if (eventMap.get(Constants.STOPPED_EVENT) != null){
             return ValidationState.STOPPED;
+        }
+        if (eventMap.get(Constants.MANUAL_QA_COMPLETE_EVENT) != null){
+            return ValidationState.MANUAL_QA_COMPLETE;
         }
         if (eventMap.values().stream().anyMatch(event -> !event.isSuccess())){
             return ValidationState.FAIL;
