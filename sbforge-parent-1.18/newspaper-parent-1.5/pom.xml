@@ -183,7 +183,6 @@
                 </executions>
                 <configuration>
                   <excludedGroups>integrationTest,standAloneTest,externalTest,testDataTest</excludedGroups>
-                    <forkCount>${surefire.forkCount}</forkCount>
                 </configuration>
             </plugin>
             <plugin>
