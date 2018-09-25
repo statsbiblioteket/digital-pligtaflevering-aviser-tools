@@ -8,6 +8,7 @@ import com.vaadin.ui.Window;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
+import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperUI;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DataModel;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryTitleInfo;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.windows.DeliveryConfirmPanel;
@@ -97,10 +98,16 @@ public class DeliveryValidationPanel extends DeliveryPanel {
         dialog.setListener(new Button.ClickListener() {
             @Override
             public void buttonClick(Button.ClickEvent event) {
+                //TODO where is this used. It overlaps severely with ManualQA Completer
                 UI.getCurrent().removeWindow(dialog);
                 if ("OKBUTTON".equals(event.getButton().getId())) {
                     DomsItem item = model.getDeliveryFromName(model.getSelectedDelivery());
-                    item.appendEvent(new DomsEvent(NewspaperContextListener.manualCheckEventname, new java.util.Date(), "Validation of manual delivery", NewspaperContextListener.manualCheckEventname, true));
+                    item.appendEvent(
+                            new DomsEvent(NewspaperUI.class.getSimpleName(),
+                                          new java.util.Date(),
+                                          "Validation of manual delivery",
+                                          NewspaperContextListener.manualCheckEventname,
+                                          true));
                 }
             }
         });
