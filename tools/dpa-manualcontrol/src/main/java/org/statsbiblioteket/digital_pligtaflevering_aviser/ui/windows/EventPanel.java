@@ -67,6 +67,7 @@ public class EventPanel extends VerticalLayout {
         for (EventDTO o : items) {
             articleBeans.addBean(o);
         }
+        eventTable.sort(new String[]{"date"}, new boolean[]{Boolean.FALSE});
     }
 
     public Object getSelection() {

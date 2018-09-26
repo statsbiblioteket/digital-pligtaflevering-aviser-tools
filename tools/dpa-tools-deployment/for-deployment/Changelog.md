@@ -1,4 +1,4 @@
-XXXXXX
+2018-09-26
 ======
 
 dpa-create-delivery
@@ -20,6 +20,8 @@ in `Context.xml`. Added special handling so the empty string here will disable t
 * Oerride criteria now disallows override of successfull events
 
 * Overridding an event creates a new event, so we can see that something have been overridden. This is shown as a * in the gui.
+
+* Sorting eventdialog with the newest in top.
 
 
 (NEW AUTONOMOUS COMPONENT) approve-cleaner
