@@ -76,6 +76,15 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         this.recordBase = recordBase;
     }
 
+    public DomsItem getItemFromPath(String path){
+        try {
+            List<String> ids = efedora.findObjectFromDCIdentifier("path:" + path);
+            return ids.stream().findFirst().map( id -> lookup(new DomsId(id))).get();
+        } catch (BackendInvalidCredsException | BackendMethodFailedException e) {
+            throw new RuntimeException("could not lookup objects for path " + path, e);
+        }
+    }
+    
     @Override
     public Stream<DomsItem> query(QuerySpecification querySpecification) {
         return query(querySpecification, true);
@@ -135,7 +144,10 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
 
             return resultIds.stream()
                     .map(DomsId::new)
-                    .map(this::lookup);
+                    .map(this::lookup)
+                    //Ignore items that fail on getPath, as they are artifacts of a deletion that have not reached sboi yet.
+                    .filter(item -> {try {item.getPath(); return true; } catch (RuntimeException e){return false;}});
+            
 
         } catch (RuntimeException e) {
             Throwable cause = e.getCause();
@@ -294,7 +306,7 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         if (cr.getStatus() < 300) {
             return cr.getEntityInputStream();
         } else {
-            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ": status= " + cr.getStatus());
+            throw new RuntimeException("domsId=" + domsId + ", dataStreamId=" + datastreamId + ", status= " + cr.getStatus());
         }
     }
 
@@ -319,7 +331,25 @@ public class DomsRepository implements Repository<DomsId, DomsEvent, QuerySpecif
         );
         return premisObject;
     }
-
+    
+    public void deleteItem(DomsItem domsItem, String logmessage) {
+        String pid = domsItem.getDomsId().id();
+        try {
+            efedora.deleteObject(pid, logmessage);
+        } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+            throw new RuntimeException("cannot delete pid " + pid, e);
+        }
+    }
+    
+    public void removeRelation(DomsItem domsItem, String predicate, String target, String comment){
+        String pid = domsItem.getDomsId().id();
+        try {
+            efedora.deleteRelation(pid, pid, predicate, target, false, comment);
+        } catch (BackendInvalidCredsException | BackendMethodFailedException | BackendInvalidResourceException e) {
+            throw new RuntimeException("cannot delete relation '"+predicate+"' from pid '" + pid+"' to '"+target+"'", e);
+        }
+    }
+    
     @Override
     public void close() throws Exception {
         // nothing yet.

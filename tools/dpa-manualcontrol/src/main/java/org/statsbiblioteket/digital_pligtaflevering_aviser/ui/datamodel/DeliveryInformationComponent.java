@@ -7,12 +7,19 @@ public class DeliveryInformationComponent {
 
     private String deliveryName = "";
     private ValidationState validationState;
+    private boolean overridden = false;
 
     public DeliveryInformationComponent(String deliveryName, ValidationState validationState) {
         this.deliveryName = deliveryName;
         this.validationState = validationState;
     }
-
+    
+    public DeliveryInformationComponent(String deliveryName, ValidationState validationState, boolean overridden) {
+        this(deliveryName, validationState);
+        this.overridden = overridden;
+    }
+    
+    
     public String getDeliveryName() {
         return deliveryName;
     }
@@ -20,8 +27,12 @@ public class DeliveryInformationComponent {
     public ValidationState getValidationState() {
         return validationState;
     }
-
+    
+    public boolean isOverridden() {
+        return overridden;
+    }
+    
     public enum ValidationState {
-        FAIL, PROGRESS, SUCCES, DATE;
+        FAIL, PROGRESS, MANUAL_QA_COMPLETE, APPROVED, STOPPED, DATE;
     }
 }

@@ -12,12 +12,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.statsbiblioteket.digital_pligtaflevering_aviser.ui.datamodel.DeliveryInformationComponent.ValidationState.*;
 
 /**
  * Converter utilities between deliveryDTO's and DTO's suitable for the UI
@@ -78,19 +75,6 @@ public class UiDataConverter {
         return titleComponentList;
     }
 
-    /**
-     * Check the state of the newest delivery of a specific EventID
-     * @param events
-     * @param eventID
-     * @return
-     */
-    public static ValidationState eventlistToValidationstate(List<Event> events, String eventID) {
-        Optional<Event> max = events.stream().filter(event -> eventID.equals(event.getEventID())).max((a, b) -> a.getDate().compareTo(b.getDate()));
-        if(!max.isPresent()) {
-            return PROGRESS;
-        }
-        return max.get().isSuccess() ? SUCCES :FAIL;
-    }
 
     /**
      * Iterate through all Events and return SUCCES if they have all been validated
@@ -98,21 +82,40 @@ public class UiDataConverter {
      * @return
      */
     public static ValidationState validateEventCollection(List<Event> events) {
-        ValidationState finalEventState = SUCCES;
-        for(String event : Settings.expectedEvents) {
-            ValidationState eventState = eventlistToValidationstate(events, event);
-            switch(eventState) {
-                case FAIL:
-                    return FAIL;
-                case PROGRESS:
-                    finalEventState = PROGRESS;
-                case SUCCES:
-                    break;
-            }
+        //Only get the latest event for each ID
+        Map<String, Event> eventMap = events.stream()
+                                            .collect(Collectors.toMap(
+                                                    event -> event.getEventID(), //keymapper
+                                                    event -> event, //valuemapper
+                                                    (event1, event2) -> { //merge function if the keys are equal
+                                                        if (event1.getDate()
+                                                                  .compareTo(event2.getDate()) >= 0) {
+                                                            return event1;
+                                                        } else {
+                                                            return event2;
+                                                        }
+                                                    }));
+        
+        if (eventMap.get(Constants.APPROVED_EVENT) != null){
+            return ValidationState.APPROVED;
         }
-        return finalEventState;
+        if (eventMap.get(Constants.STOPPED_EVENT) != null){
+            return ValidationState.STOPPED;
+        }
+        if (eventMap.get(Constants.MANUAL_QA_COMPLETE_EVENT) != null){
+            return ValidationState.MANUAL_QA_COMPLETE;
+        }
+        if (eventMap.values().stream().anyMatch(event -> !event.isSuccess())){
+            return ValidationState.FAIL;
+        } else {
+            return ValidationState.PROGRESS;
+        }
     }
-
+    
+    public static boolean isEventOverridden(List<Event> originalEvents) {
+        return originalEvents.stream().anyMatch(event -> Constants.OVERRIDE_EVENT.equals(event.getEventID()));
+    }
+    
     public static List<EventDTO> convertList(List<Event> events) {
         List<EventDTO> returnEventList = new ArrayList<EventDTO>();
         for(Event event : events) {

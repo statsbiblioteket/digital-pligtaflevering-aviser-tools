@@ -1,4 +1,38 @@
+2018-09-26
+======
 
+dpa-create-delivery
+-------------------
+* Manually stops incoming roundtrips if an approved roundtrip is already in the system 
+* Manually stops incoming roundtrips if a newer roundtrip is already in the system
+
+
+Manualcontrol web ui (VAADIN)
+-----------------------------
+* If nobody is in trusted users, everybody is. See parameter
+`<Parameter name="dpa.manualcontrol.truetedUsers" value="nieb,mmj,abr"/>`
+in `Context.xml`. Added special handling so the empty string here will disable the check.
+
+* Make sure deliveries can not be approved before QA is complete
+
+* Better icons in the Event overview
+
+* Oerride criteria now disallows override of successfull events
+
+* Overridding an event creates a new event, so we can see that something have been overridden. This is shown as a * in the gui.
+
+* Sorting eventdialog with the newest in top.
+
+
+(NEW AUTONOMOUS COMPONENT) approve-cleaner
+--------------
+* When a roundtrip is approved (through the VAADIN GUI), this component triggers and cleans older roundtrips from DOMS. Furthermore, it mails bitrepo people about the deletion of files.
+
+
+(NEW AUTONOMOUS COMPONENT)  manualQA-completer
+------------------
+* This component checks roundtrips to see if the ManualQA guys have finished the manual QA. If so, it marks the
+roundtrip as ready for approval.
 
 2018-09-05
 =============

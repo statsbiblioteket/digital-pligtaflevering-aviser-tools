@@ -2,6 +2,7 @@ package dk.statsbiblioteket.medieplatform.autonomous.newspaper;
 
 import dk.statsbiblioteket.medieplatform.autonomous.Delivery;
 import dk.statsbiblioteket.medieplatform.autonomous.DeliveryDomsEventStorage;
+import org.mockito.InOrder;
 import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
@@ -12,9 +13,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.APPROVED_STATE;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.DATA_RECEIVED;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.MUTATION_RECEIVED;
+import static dk.statsbiblioteket.digital_pligtaflevering_aviser.model.Event.STOPPED_STATE;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.contains;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +49,7 @@ public class CreateDeliveryTest {
         CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
-                                                      anyString(), eq("Data_Received"), eq(true));
+                                                      anyString(), eq(DATA_RECEIVED), eq(true));
         verifyNoMoreInteractions(domsStorage);
     }
 
@@ -62,6 +68,27 @@ public class CreateDeliveryTest {
         when(domsStorage.getAllRoundTrips("1234")).thenReturn(Arrays.asList(delivery1));
 
         CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
+    
+        verify(domsStorage, times(1)).getAllRoundTrips("1234");
+        verify(domsStorage)
+               .appendEventToItem(
+                       eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)),
+                       eq("premisAgent"),
+                       Matchers.<Date>any(),
+                       contains("Newer roundtrip (1234_rt2) has just been received, so this roundtrip should be stopped"),
+                       eq(STOPPED_STATE),
+                       eq(true));
+    
+        verify(domsStorage)
+               .appendEventToItem(
+                       eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)),
+                       eq("premisAgent"),
+                       Matchers.<Date>any(),
+                       eq(""),
+                       eq(DATA_RECEIVED),
+                       eq(true));
+        verifyNoMoreInteractions(domsStorage);
+    
     }
 
     /**
@@ -80,8 +107,24 @@ public class CreateDeliveryTest {
 
         CreateDelivery.doWork(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
-                                                      contains("Roundtrip (2) is newer than this roundtrip (1)"), eq("Data_Received"), eq(false));
+        InOrder inorder = inOrder(domsStorage);
+        inorder.verify(domsStorage)
+                        .appendEventToItem(
+                                eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)),
+                                eq("premisAgent"),
+                                Matchers.<Date>any(),
+                                contains("Newer roundtrip (1234_rt2) has already been received, so this roundtrip should be stopped"),
+                                eq(STOPPED_STATE),
+                                eq(true));
+    
+        inorder.verify(domsStorage)
+                .appendEventToItem(
+                        eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)),
+                        eq("premisAgent"),
+                        Matchers.<Date>any(),
+                        eq(""),
+                        eq(DATA_RECEIVED),
+                        eq(true));
         verifyNoMoreInteractions(domsStorage);
     }
 
@@ -93,7 +136,7 @@ public class CreateDeliveryTest {
     public void testDoWorkRT2whereRT1Approved() throws Exception {
         Delivery delivery1 = new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY);
         Event event = new Event();
-        event.setEventID("Roundtrip_Approved");
+        event.setEventID(APPROVED_STATE);
         event.setSuccess(true);
         delivery1.setEventList(Arrays.asList(event));
         Delivery delivery2 = new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY);
@@ -105,9 +148,10 @@ public class CreateDeliveryTest {
         CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
-                anyString(), eq("Data_Received"), eq(true));
+                                                        anyString(), eq(DATA_RECEIVED), eq(true));
         //Text containing "Newer roundtrip" means that fedora has identifid that it has already been added
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Newer roundtrip"), eq("Manually_stopped"), eq(true));
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Older roundtrip (1234_rt1) has already been approved, so this roundtrip should be stopped"), eq(
+                STOPPED_STATE), eq(true));
         verifyNoMoreInteractions(domsStorage);
     }
 
@@ -131,9 +175,10 @@ public class CreateDeliveryTest {
         CreateDelivery.doWork(new Delivery("1234", 2, Delivery.DeliveryType.MUTATION), "premisAgent", domsStorage);
         verify(domsStorage, times(1)).getAllRoundTrips("1234");
         verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 2, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(),
-                anyString(), eq("Mutation_Received"), eq(true));
+                                                        anyString(), eq(MUTATION_RECEIVED), eq(true));
         //Text containing "Newer roundtrip" means that fedora has identifid that it has already been added
-        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Newer roundtrip"), eq("Manually_stopped"), eq(true));
+        verify(domsStorage, times(1)).appendEventToItem(eq(new Delivery("1234", 1, Delivery.DeliveryType.STDDELIVERY)), eq("premisAgent"), Matchers.<Date>any(), contains("Newer roundtrip"), eq(
+                STOPPED_STATE), eq(true));
         verifyNoMoreInteractions(domsStorage);
     }
 }

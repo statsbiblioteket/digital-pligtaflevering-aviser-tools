@@ -106,6 +106,7 @@ public class DeliveryFedoraCommunication {
      * @return
      */
     public Stream<DomsItem> getCreatedOnly(String deliveryFilter) {
+        //FIXME performance hog: this filter should happen in the query, not on the results.
         return repository.query(domsModule.providesWorkToDoQuerySpecification(
                 "Data_Received", "", "", itemType), false)
                 .filter(ts -> ts.getPath().contains(deliveryFilter));

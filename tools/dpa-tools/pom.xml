@@ -80,7 +80,8 @@
         </dependency>
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>
-            <artifactId>dpa-statistics</artifactId><version>master-SNAPSHOT</version>
+            <artifactId>dpa-statistics</artifactId>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <!-- to give @Produces -->
         <dependency>
