@@ -26,6 +26,16 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.xml.bind.DatatypeConverter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +92,8 @@ public class CleanDeliveriesOnApprovalMain {
                          QuerySpecification workToDoQuery,
                          DomsRepository domsRepository,
                          DefaultToolMXBean mxBean,
-                         @Named("autonomous.pastSuccessfulEvents") String approveEvent,
+                         @Named("autonomous.pastSuccessfulEvents")
+                                 String approveEvent,
                          @Named("approve-delete.doms.commit.comment")
                                  String commitComment,
                          @Named("approve-delete.doms.batch.to.roundtrip.relation")
@@ -90,10 +101,14 @@ public class CleanDeliveriesOnApprovalMain {
                          SimpleMailer mailer,
                          @Named("approve-delete.email.body.pattern")
                                  String emailBodyPattern,
-                         @Named("approve-delete.email.addresses") String emailRecipients,
+                         @Named("approve-delete.email.addresses")
+                                 String emailRecipients,
                          @Named("approve-delete.email.subject.pattern")
-                                 String emailSubjectPattern
-        ) {
+                                 String emailSubjectPattern,
+                         @Named("approve-delete.email.storeFolder")
+                                 Path storeFolder,
+                         @Named("approve-delete.email.urlPrefix")
+                                 String urlPrefix) {
             
             //approve-delete.email.subject.pattern=Delivery dl_{0}_rt{1,number,integer} approved, please delete files from dl_{0}_rt{2,number,integer}
             //approve-delete.email.subject.pattern=Delivery dl_{0}_rt{1,number,integer} approved, please delete files from dl_{0}_rt{2,number,integer}
@@ -187,7 +202,9 @@ public class CleanDeliveriesOnApprovalMain {
                                         mailer,
                                         emailSubjectPattern,
                                         emailBodyPattern,
-                                        emailRecipients);
+                                        emailRecipients,
+                                        storeFolder,
+                                        urlPrefix);
         
                             result.add(roundtripPath);
                         }
@@ -226,6 +243,8 @@ public class CleanDeliveriesOnApprovalMain {
          * @param emailSubjectPattern
          * @param emailBodyPattern
          * @param emailRecipients
+         * @param storeFolder
+         * @param urlPrefix
          * @throws MessagingException if sending the mail failed
          *                            dk.statsbiblioteket.medieplatform.autonomous.Batch)
          */
@@ -235,16 +254,44 @@ public class CleanDeliveriesOnApprovalMain {
                                    SimpleMailer mailer,
                                    String emailSubjectPattern,
                                    String emailBodyPattern,
-                                   String emailRecipients)
-                throws MessagingException {
+                                   String emailRecipients, Path storeFolder, String urlPrefix)
+                throws MessagingException, IOException {
             if (!files.isEmpty()) {
                 String subject = formatSubject(emailSubjectPattern, roundTrip, approved_roundtrip);
-                String body = formatBody(emailBodyPattern, roundTrip, approved_roundtrip, files);
+                Path filelistFile = generateFilelistFile(storeFolder, roundTrip);
+                log.info("Storing files to delete from {} in '{}'",roundTrip,filelistFile);
+                String checksum = storeFileList(filelistFile, files);
+                log.info("Stored {} files. The file list file '{}' have the checksum {}",files.size(),filelistFile,checksum);
+                URL filelistURL = getFilelistURL(filelistFile, storeFolder, urlPrefix);
+                String body = formatBody(emailBodyPattern, roundTrip, approved_roundtrip, files.size(), filelistURL, checksum);
                 mailer.sendMail(Arrays.asList(emailRecipients.split(",")), subject, body);
             }
         }
-        
-        
+    
+        private Path generateFilelistFile(Path storeFolder, String roundTrip) {
+            return storeFolder.resolve(roundTrip+".files");
+        }
+    
+        private String storeFileList(Path filelistFile, Collection<String> files)
+                throws IOException {
+            Path file = Files.write(filelistFile, files, StandardOpenOption.CREATE_NEW);
+            
+            //Better to write the file out and checksum afterwards, as this ensures that the checksum is of the actual bytes
+            byte[] b = Files.readAllBytes(file); //It's not THAT large
+            try {
+                byte[] hash = MessageDigest.getInstance("MD5").digest(b);
+                String checksum = DatatypeConverter.printHexBinary(hash);
+                return checksum;
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("MD5 not known");
+            }
+        }
+    
+        private URL getFilelistURL(Path filelistFile, Path storeFolder, String urlPrefix) throws MalformedURLException {
+            Path relativePath = storeFolder.relativize(filelistFile);
+            return new URL(urlPrefix+relativePath);
+        }
+
         private Collection<String> deleteRoundTrip(DomsItem roundtrip,
                                                    DomsItem delivery,
                                                    String deleteComment) {
@@ -256,6 +303,7 @@ public class CleanDeliveriesOnApprovalMain {
                          try {
                              String bitRepoFileId = domsItem.datastream("CONTENTS").getLabel();
                              bitRepoFiles.add(bitRepoFileId);
+                             log.info("Marking '{}' for deletion", bitRepoFileId);
                          } catch (NoSuchElementException e) {
                              //So no Contents Datastream. This is ok.
                          }
@@ -277,36 +325,22 @@ public class CleanDeliveriesOnApprovalMain {
          * @param approved_roundtrip the approved_roundtrip that have been approved
          * @param files              the files in the old approved_roundtrip which should be deleted
          * @return the body as a string
-         * @see #formatFiles(java.util.Collection)
          */
         protected String formatBody(String fileDeletionBody,
                                     String roundtrip,
                                     DomsItem approved_roundtrip,
-                                    Collection<String> files) {
+                                    int files,
+                                    URL fileListURL,
+                                    String checksum) {
             String approved_roundtrip_id = approved_roundtrip.getPath();
             String roundtrip_id = roundtrip;
             return MessageFormat.format(
                     fileDeletionBody,
                     approved_roundtrip_id,
                     roundtrip_id,
-                    formatFiles(files));
-            //TODO this set is BIG, does it work??
-        }
-        
-        /**
-         * Format the set to of files as a string. Will perform the "/" to "_" nessesary when working with the
-         * bitrepository
-         *
-         * @param files the files
-         * @return the set of files as a string
-         */
-        protected String formatFiles(Collection<String> files) {
-            StringBuilder result = new StringBuilder();
-            for (String file : files) {
-                log.trace("Adding file '{}' to mail", file);
-                result.append("\n").append(file);
-            }
-            return result.toString();
+                    files,
+                    fileListURL,
+                    checksum);
         }
         
         /**
@@ -334,6 +368,8 @@ public class CleanDeliveriesOnApprovalMain {
         ItemFactory<Item> provideItemFactory() {
             return id -> new Item();
         }
+        
+        
         
         @Provides
         @javax.enterprise.inject.Produces
@@ -372,9 +408,22 @@ public class CleanDeliveriesOnApprovalMain {
         String provideBodyPattern(ConfigurationMap map) {
             return map.getRequired("approve-delete.email.body.pattern");
         }
-        
-        
+    
         @Provides
+        @javax.enterprise.inject.Produces
+        @Named("approve-delete.email.storeFolder")
+        Path provideStoreFolder(ConfigurationMap map) {
+            return Paths.get(map.getRequired("approve-delete.email.storeFolder"));
+        }
+    
+        @Provides
+        @javax.enterprise.inject.Produces
+        @Named("approve-delete.email.urlPrefix")
+        String provideUrlPrefix(ConfigurationMap map) {
+            return map.getRequired("approve-delete.email.urlPrefix");
+        }
+        
+            @Provides
         @javax.enterprise.inject.Produces
         @Named("smtp.port")
         String provideSMTPPort(ConfigurationMap map) {
