@@ -54,6 +54,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -386,7 +387,7 @@ public class IngesterMain {
         @Provides
         public Function<Path, Stream<Path>> provideDeliveriesForAbsolutePath() {
             return absolutePath -> Try.of(()
-                    -> Files.walk(absolutePath, 1)
+                    -> Files.walk(absolutePath, 1, FileVisitOption.FOLLOW_LINKS)
                     .filter(Files::isRegularFile)
                     .sorted()
             ).get();

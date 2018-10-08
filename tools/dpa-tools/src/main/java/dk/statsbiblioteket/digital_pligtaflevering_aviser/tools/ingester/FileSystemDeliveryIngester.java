@@ -430,7 +430,7 @@ public class FileSystemDeliveryIngester implements BiFunction<DomsItem, Path, Ei
         // a RDF ("DIRECTORYOBJECT" "HasPart" "CHILDOBJECT")-relation on "DIRECTORYOBJECT". This will work because the subdirectories are processed first.
         List<String> childDirectoryObjectIds = null;
         try {
-            childDirectoryObjectIds = Files.walk(absoluteFileSystemPath, 1)
+            childDirectoryObjectIds = Files.walk(absoluteFileSystemPath, 1, FileVisitOption.FOLLOW_LINKS)
                     .filter(Files::isDirectory)
                     .skip(1) // Skip the parent directory itself.  FIXME:  Ensure well-definedness
                     .sorted() // Unscramble order
