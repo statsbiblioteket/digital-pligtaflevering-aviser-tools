@@ -167,16 +167,16 @@ public class VeraPDFOutputValidation {
             case "6.6.2":
             case "6.9":
                 return SeverenessLevel.INVALID;
-            case "6.1.7":
             case "6.1.11":
             case "6.2.6":
             case "6.3.4":
-            case "6.3.5":
-            case "6.3.3.1":
-            case "6.3.6":
-            case "6.2.10":
             case "6.3.2":
                 return SeverenessLevel.MANUAL_INSPECTION;
+            case "6.1.7":
+            case "6.3.6":
+            case "6.3.5":
+            case "6.3.3.1":
+            case "6.2.10":
             case "6.1.2":
             case "6.1.4":
             case "6.1.6":
