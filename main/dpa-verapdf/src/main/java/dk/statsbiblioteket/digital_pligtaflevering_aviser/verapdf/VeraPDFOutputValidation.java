@@ -159,7 +159,10 @@ public class VeraPDFOutputValidation {
         return rulesBroken;
     }
 
+
     public static SeverenessLevel severenessFor(String sectionId) {
+        //Errorcases has been updated according ti this document:
+        //https://sbprojects.statsbiblioteket.dk/pages/viewpage.action?pageId=15993274
         switch (sectionId) {
             case "6.1.3":
             case "6.5.2":
