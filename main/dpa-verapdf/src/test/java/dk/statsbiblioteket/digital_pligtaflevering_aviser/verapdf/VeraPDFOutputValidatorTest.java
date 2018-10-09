@@ -54,7 +54,7 @@ public class VeraPDFOutputValidatorTest {
         List<String> ids = rulo.extractRejected(getClass().getResourceAsStream("/ManyImportantBrokenRules.xml"));
         ValidationResults validationResults = rulo.validateResult(ids);
         assertEquals("Unexpected validation", SeverenessLevel.INVALID, validationResults.getWorstBrokenRule());
-        assertEquals("Unexpected validation", 6, validationResults.getRulesBroken().size());
+        assertEquals("Unexpected validation", 5, validationResults.getRulesBroken().size());
         int invalid = 0;
         int unknown = 0;
         int manual = 0;
@@ -71,7 +71,7 @@ public class VeraPDFOutputValidatorTest {
         }
         assertEquals("Unexpected validation", 3, invalid);
         assertEquals("Unexpected validation", 1, unknown);
-        assertEquals("Unexpected validation", 2, manual);
+        assertEquals("Unexpected validation", 1, manual);
     }
 
     /**

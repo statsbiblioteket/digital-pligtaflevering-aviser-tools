@@ -18,6 +18,7 @@ import javax.inject.Provider;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -145,7 +146,7 @@ public class CreateDeliveryMain {
          */
         @Provides
         Stream<Path> provideDeliveriesToCreate(@Named(ITERATOR_FILESYSTEM_BATCHES_FOLDER) String deliveryFolderName) {
-            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName), 1)
+            return Try.of(() -> Files.walk(Paths.get(deliveryFolderName), 1, FileVisitOption.FOLLOW_LINKS)
                     .filter(Files::isDirectory)
                     // FIXME: Log those that failed.
                     .filter(p -> Files.exists(p.resolve(TRANSFER_COMPLETE)))
