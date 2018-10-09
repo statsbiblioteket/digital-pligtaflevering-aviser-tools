@@ -1,0 +1,2 @@
+This file only exists so that you can get test resources location with
+new File(Thread.currentThread().getContextClassLoader().getResource("testResourcesPlaceholder").toURI()).toPath()
