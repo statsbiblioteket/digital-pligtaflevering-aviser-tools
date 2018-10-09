@@ -1,3 +1,23 @@
+2018-10-09
+======
+
+dpa-Ingest-delivery
+-------------------
+* The system can now handle sym-links
+
+
+dpa-approve-cleaner
+-----------------------------
+* Delete command is now placing the request for cleaning files on the filesystem instead of as an e-mail.
+There is still send an e-mail as info
+
+
+dpv-verapdf-analyze
+--------------
+* The criteria of when pdf-files is set for manual inspection has been lowered
+
+
+
 2018-09-26
 ======
 
