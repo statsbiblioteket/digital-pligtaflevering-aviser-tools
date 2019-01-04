@@ -217,7 +217,7 @@ public class DeliveryFedoraCommunication {
                     DeliveryTitleInfo dsDeliveryTitleInfo = new DeliveryTitleInfo(delivery,
                                                                                   titleItem,
                                                                                   title.getNoOfArticles(),
-                                                                                  title.getNoOfArticles());
+                                                                                  title.getNoOfPages());
     
                     currentlySelectedTitleHiearachy.addDeliveryToTitle(dsDeliveryTitleInfo);
                 }

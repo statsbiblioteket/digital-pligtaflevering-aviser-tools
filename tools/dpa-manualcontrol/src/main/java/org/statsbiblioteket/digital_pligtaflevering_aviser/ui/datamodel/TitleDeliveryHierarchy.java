@@ -29,6 +29,9 @@ public class TitleDeliveryHierarchy {
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
         if (!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
             deliveryStructure.add(ds);
+        } else {
+            //Set the number of pages from the original number of pages
+            getDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName()).setNoOfPages(ds.getNoOfPages());
         }
     }
 
