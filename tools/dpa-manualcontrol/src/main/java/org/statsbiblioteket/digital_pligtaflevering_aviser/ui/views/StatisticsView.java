@@ -301,6 +301,9 @@ public class StatisticsView extends VerticalLayout implements View {
         currentSelectedArticle = null;
 
         pdfComponent.setVisible(true);
+        if(currentSelectedPage.get(0)==null) {
+            return;
+        }
         DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
         DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
         String urlString = pdfStream.getUrl();
