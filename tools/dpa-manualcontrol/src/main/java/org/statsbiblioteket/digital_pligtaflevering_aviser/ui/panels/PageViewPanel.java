@@ -2,7 +2,7 @@ package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Notification;
 import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
@@ -27,19 +27,26 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 
 /**
  * panel for viewing pdf-pages
+ * The panel allocates space for 4X4 pages
  */
-public class PageViewPanel extends HorizontalLayout {
+public class PageViewPanel extends GridLayout {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
     private List<Embedded> pdfComponents;
 
     public PageViewPanel() {
-
+        super(4,4);
     }
 
     public void initiate(String... urls) {
         if (pdfComponents == null) {
             pdfComponents = new ArrayList<Embedded>();
+        }
+        int counting = 0;
+
+        if(pdfComponents.size() != urls.length) {
+            this.removeAllComponents();
+            pdfComponents.clear();
         }
         while (pdfComponents.size() < urls.length) {
             Embedded embeddedComponent = new Embedded(null, null);
@@ -48,7 +55,15 @@ public class PageViewPanel extends HorizontalLayout {
             embeddedComponent.setWidth(100, Unit.PERCENTAGE);
             embeddedComponent.setHeight(100, Unit.PERCENTAGE);
             pdfComponents.add(embeddedComponent);
-            addComponent(embeddedComponent);
+            if(urls.length == 1) {
+                addComponent(embeddedComponent,0,0,3,3);
+            } else if(urls.length <= 4) {
+                addComponent(embeddedComponent,counting%4,counting/4,(counting%4)+1,(counting/4)+1);
+                counting+=2;
+            } else if(urls.length <= 16) {
+                addComponent(embeddedComponent,counting%4,counting/4,(counting%4),(counting/4));
+                counting++;
+            }
         }
 
         int count = 0;
@@ -57,11 +72,6 @@ public class PageViewPanel extends HorizontalLayout {
             pdfComponents.get(count).setWidth(100, Unit.PERCENTAGE);
             pdfComponents.get(count).setVisible(true);
             count++;
-        }
-        if(pdfComponents.size() > urls.length) {
-            for(int i=urls.length;i <pdfComponents.size(); i++) {
-                pdfComponents.get(i).setVisible(false);
-            }
         }
     }
 
