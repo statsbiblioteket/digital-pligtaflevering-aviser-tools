@@ -42,7 +42,7 @@ public class PageViewPanel extends GridLayout {
         if (pdfComponents == null) {
             pdfComponents = new ArrayList<Embedded>();
         }
-        int counting = 0;
+        int componentCreateIndex = 0;
 
         if(pdfComponents.size() != urls.length) {
             this.removeAllComponents();
@@ -58,20 +58,22 @@ public class PageViewPanel extends GridLayout {
             if(urls.length == 1) {
                 addComponent(embeddedComponent,0,0,3,3);
             } else if(urls.length <= 4) {
-                addComponent(embeddedComponent,counting%4,counting/4,(counting%4)+1,(counting/4)+1);
-                counting+=2;
+                int col = (componentCreateIndex%2)*2;
+                int row = (componentCreateIndex/2)*2;
+                addComponent(embeddedComponent, col, row,col+1,row+1);
+                componentCreateIndex++;
             } else if(urls.length <= 16) {
-                addComponent(embeddedComponent,counting%4,counting/4,(counting%4),(counting/4));
-                counting++;
+                addComponent(embeddedComponent,componentCreateIndex%4,componentCreateIndex/4,(componentCreateIndex%4),(componentCreateIndex/4));
+                componentCreateIndex++;
             }
         }
 
-        int count = 0;
-        for (String url : urls) {
-            pdfComponents.get(count).setSource(createStreamResource(url));
-            pdfComponents.get(count).setWidth(100, Unit.PERCENTAGE);
-            pdfComponents.get(count).setVisible(true);
-            count++;
+        int urlIndex = 0;
+        for (Embedded pdfComponent : pdfComponents) {
+            pdfComponent.setSource(createStreamResource(urls[urlIndex]));
+            pdfComponent.setWidth(100, Unit.PERCENTAGE);
+            pdfComponent.setVisible(true);
+            urlIndex++;
         }
     }
 
