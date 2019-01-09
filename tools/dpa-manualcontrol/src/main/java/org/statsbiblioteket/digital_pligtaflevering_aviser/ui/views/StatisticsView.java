@@ -297,13 +297,15 @@ public class StatisticsView extends VerticalLayout implements View {
 
     private void viewPage(Page pageElement) {
         currentSelectedPage.clear();
-        currentSelectedPage.add(pageElement);
+        if(pageElement!=null) {
+            currentSelectedPage.add(pageElement);
+        }
+        if(currentSelectedPage.size()==0) {
+            return;
+        }
         currentSelectedArticle = null;
 
         pdfComponent.setVisible(true);
-        if(currentSelectedPage.get(0)==null) {
-            return;
-        }
         DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
         DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
         String urlString = pdfStream.getUrl();
