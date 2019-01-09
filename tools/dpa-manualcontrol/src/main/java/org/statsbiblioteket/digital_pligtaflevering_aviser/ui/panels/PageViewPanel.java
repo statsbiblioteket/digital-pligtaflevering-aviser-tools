@@ -1,7 +1,7 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Embedded;
+import com.vaadin.ui.BrowserFrame;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Notification;
 import org.apache.commons.codec.CharEncoding;
@@ -32,26 +32,25 @@ import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepositor
 public class PageViewPanel extends GridLayout {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
-    private List<Embedded> pdfComponents;
+    private List<BrowserFrame> pdfComponents = new ArrayList<BrowserFrame>();
 
     public PageViewPanel() {
         super(4,4);
     }
 
+    /**
+     * Initiate pdf-viewers to be viewed in the UI
+     * @param urls
+     */
     public void initiate(String... urls) {
-        if (pdfComponents == null) {
-            pdfComponents = new ArrayList<Embedded>();
-        }
-        int componentCreateIndex = 0;
 
-        if(pdfComponents.size() != urls.length) {
-            this.removeAllComponents();
-            pdfComponents.clear();
-        }
+        //Cleanup all embedded pdf-components to make sure that the application can handle changes on how many pdf-files to view
+        cleanupsEmbeddedPdfComponents();
+
+        int componentCreateIndex = 0;
         while (pdfComponents.size() < urls.length) {
-            Embedded embeddedComponent = new Embedded(null, null);
-            embeddedComponent.setMimeType("application/pdf");
-            embeddedComponent.setType(Embedded.TYPE_BROWSER);
+            //No caption for the pdf-view is wanted
+            BrowserFrame embeddedComponent = new BrowserFrame(null, createStreamResource(urls[componentCreateIndex]));
             embeddedComponent.setWidth(100, Unit.PERCENTAGE);
             embeddedComponent.setHeight(100, Unit.PERCENTAGE);
             pdfComponents.add(embeddedComponent);
@@ -61,20 +60,30 @@ public class PageViewPanel extends GridLayout {
                 int col = (componentCreateIndex%2)*2;
                 int row = (componentCreateIndex/2)*2;
                 addComponent(embeddedComponent, col, row,col+1,row+1);
-                componentCreateIndex++;
             } else if(urls.length <= 16) {
-                addComponent(embeddedComponent,componentCreateIndex%4,componentCreateIndex/4,(componentCreateIndex%4),(componentCreateIndex/4));
-                componentCreateIndex++;
+                addComponent(embeddedComponent,componentCreateIndex%4,componentCreateIndex/4, componentCreateIndex%4, componentCreateIndex/4);
+            }
+            componentCreateIndex++;
+        }
+    }
+
+    /**
+     * Remove all pdf-viewers an cleanup after them
+     */
+    private void cleanupsEmbeddedPdfComponents() {
+        //Make sure all streams in pdf-viewer is closed before pdf-viewers is removed
+        //Not actually sure if this is necessary but better safe then sorry
+        for(BrowserFrame embeddedComp : pdfComponents) {
+            try {
+                ((StreamResource)embeddedComp.getSource()).getStreamSource().getStream().close();
+            } catch (IOException e) {
+                log.error("Error closing stream", e);
             }
         }
-
-        int urlIndex = 0;
-        for (Embedded pdfComponent : pdfComponents) {
-            pdfComponent.setSource(createStreamResource(urls[urlIndex]));
-            pdfComponent.setWidth(100, Unit.PERCENTAGE);
-            pdfComponent.setVisible(true);
-            urlIndex++;
-        }
+        pdfComponents.clear();
+        //Removing all the pdf-components in the UI
+        super.removeAllComponents();
+        pdfComponents.clear();
     }
 
 
