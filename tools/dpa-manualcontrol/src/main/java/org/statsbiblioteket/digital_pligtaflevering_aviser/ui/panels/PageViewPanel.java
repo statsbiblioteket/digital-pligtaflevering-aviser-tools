@@ -1,10 +1,12 @@
 package org.statsbiblioteket.digital_pligtaflevering_aviser.ui.panels;
 
 import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.BrowserFrame;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Notification;
 import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.statsbiblioteket.digital_pligtaflevering_aviser.ui.NewspaperContextListener;
@@ -19,50 +21,69 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 import static dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT;
 import static dk.statsbiblioteket.medieplatform.autonomous.iterator.bitrepository.IngesterConfiguration.BITMAG_BASEURL_PROPERTY;
 
 /**
  * panel for viewing pdf-pages
+ * The panel allocates space for 4X4 pages
  */
-public class PageViewPanel extends HorizontalLayout {
+public class PageViewPanel extends GridLayout {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
-    private List<Embedded> pdfComponents;
 
     public PageViewPanel() {
-
+        super(4,4);
     }
 
+    /**
+     * Initiate pdf-viewers to be viewed in the UI
+     * @param urls
+     */
     public void initiate(String... urls) {
-        if (pdfComponents == null) {
-            pdfComponents = new ArrayList<Embedded>();
-        }
-        while (pdfComponents.size() < urls.length) {
-            Embedded embeddedComponent = new Embedded(null, null);
-            embeddedComponent.setMimeType("application/pdf");
-            embeddedComponent.setType(Embedded.TYPE_BROWSER);
+
+        //Cleanup all embedded pdf-components to make sure that the application can handle changes on how many pdf-files to view
+        cleanupsEmbeddedPdfComponents();
+
+        int componentCreateIndex = 0;
+        for (String url : urls) {
+            //No caption for the pdf-view is wanted
+            BrowserFrame embeddedComponent = new BrowserFrame(null, createStreamResource(urls[componentCreateIndex]));
             embeddedComponent.setWidth(100, Unit.PERCENTAGE);
             embeddedComponent.setHeight(100, Unit.PERCENTAGE);
-            pdfComponents.add(embeddedComponent);
-            addComponent(embeddedComponent);
-        }
-
-        int count = 0;
-        for (String url : urls) {
-            pdfComponents.get(count).setSource(createStreamResource(url));
-            pdfComponents.get(count).setWidth(100, Unit.PERCENTAGE);
-            pdfComponents.get(count).setVisible(true);
-            count++;
-        }
-        if(pdfComponents.size() > urls.length) {
-            for(int i=urls.length;i <pdfComponents.size(); i++) {
-                pdfComponents.get(i).setVisible(false);
+            //pdfComponents.add(embeddedComponent);
+            if(urls.length == 1) {
+                addComponent(embeddedComponent,0,0,3,3);
+            } else if(urls.length <= 4) {
+                int col = (componentCreateIndex%2)*2;
+                int row = (componentCreateIndex/2)*2;
+                addComponent(embeddedComponent, col, row,col+1,row+1);
+            } else if(urls.length <= 16) {
+                addComponent(embeddedComponent,componentCreateIndex%4,componentCreateIndex/4, componentCreateIndex%4, componentCreateIndex/4);
+            } else {
+                //It is decided that it is very unlikely to have more then 16 frontpages
+                Notification.show("The application can not show so many frontpages", Notification.Type.WARNING_MESSAGE);
             }
+
+            componentCreateIndex++;
         }
+    }
+
+    /**
+     * Remove all pdf-viewers an cleanup after them
+     */
+    private void cleanupsEmbeddedPdfComponents() {
+        //Make sure all streams in pdf-viewer is closed before pdf-viewers is removed
+        //Not actually sure if this is necessary but better safe then sorry
+        Iterator<Component> componentIterator = super.iterator();
+        while(componentIterator.hasNext()) {
+            BrowserFrame pdfViewComponent = (BrowserFrame)componentIterator.next();
+            IOUtils.closeQuietly(((StreamResource)pdfViewComponent.getSource()).getStreamSource().getStream());
+        }
+        //Removing all the pdf-components in the UI
+        super.removeAllComponents();
     }
 
 

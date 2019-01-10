@@ -23,12 +23,15 @@ public class TitleDeliveryHierarchy {
     private ArrayList<DeliveryTitleInfo> deliveryStructure = new ArrayList<DeliveryTitleInfo>();
 
     /**
-     * Add DeliveryTitleInfo to list, if it allready exists return without adding
+     * Add DeliveryTitleInfo to list, if it already exists return without adding
      * @param ds
      */
     public void addDeliveryToTitle(DeliveryTitleInfo ds) {
         if (!hasDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName())) {
             deliveryStructure.add(ds);
+        } else {
+            //Set the number of pages from the metadata on the delivery into the metadata if the newspaper in the delivery
+            getDeliveryTitleCheckStatus(ds.getNewspaperTitle(), ds.getDeliveryName()).setNoOfPages(ds.getNoOfPages());
         }
     }
 
