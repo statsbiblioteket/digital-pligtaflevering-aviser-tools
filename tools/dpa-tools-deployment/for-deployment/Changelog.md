@@ -1,3 +1,12 @@
+2019-01-10
+======
+
+Manualcontrol web ui (VAADIN)
+-------------------
+* improve viewing of pdf-files
+* Fix problem with number of pages in newspaper-tables
+
+
 2018-10-09
 ======
 
