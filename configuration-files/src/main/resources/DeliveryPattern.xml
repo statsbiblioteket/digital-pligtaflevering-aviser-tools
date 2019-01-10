@@ -1182,7 +1182,7 @@
                     </entry>
                     <entry>
                         <key>SATURDAY</key>
-                        <value>true</value>
+                        <value>false</value>
                     </entry>
                     <entry>
                         <key>SUNDAY</key>
