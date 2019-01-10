@@ -299,20 +299,17 @@ public class StatisticsView extends VerticalLayout implements View {
         currentSelectedPage.clear();
         if(pageElement!=null) {
             currentSelectedPage.add(pageElement);
-        }
-        if(currentSelectedPage.size()==0) {
-            return;
-        }
-        currentSelectedArticle = null;
+            currentSelectedArticle = null;
 
-        pdfComponent.setVisible(true);
-        DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
-        DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
-        String urlString = pdfStream.getUrl();
-        pdfComponent.initiate(urlString);
-        Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
-        metadatalink.setResource(resource);
-        metadatalink.setDescription("Link to Second Page");
+            pdfComponent.setVisible(true);
+            DomsItem domsItem = model.getItemFromUuid(currentSelectedPage.get(0).getId()).children().findFirst().get();
+            DomsDatastream pdfStream = domsItem.datastreams().stream().filter(pp -> "CONTENTS".equals(pp.getId())).findFirst().get();
+            String urlString = pdfStream.getUrl();
+            pdfComponent.initiate(urlString);
+            Resource resource = new ExternalResource(NewspaperContextListener.fedoraPath + currentSelectedPage.get(0).getId() + "/datastreams/XML/content");
+            metadatalink.setResource(resource);
+            metadatalink.setDescription("Link to Second Page");
+        }
     }
 
 
