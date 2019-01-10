@@ -1921,7 +1921,7 @@
                     </entry>
                     <entry>
                         <key>SUNDAY</key>
-                        <value>true</value>
+                        <value>false</value>
                     </entry>
                 </weekDayList>
             </value>

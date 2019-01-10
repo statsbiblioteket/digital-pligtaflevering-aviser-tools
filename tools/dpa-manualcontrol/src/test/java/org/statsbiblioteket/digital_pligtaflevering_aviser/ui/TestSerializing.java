@@ -90,7 +90,7 @@ public class TestSerializing {
         deliveryTitleInfos.addDeliveryPattern("kristeligtdagblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
         deliveryTitleInfos.addDeliveryPattern("lemvigfolkeblad", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
         deliveryTitleInfos.addDeliveryPattern("licitationen", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
-        deliveryTitleInfos.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
+        deliveryTitleInfos.addDeliveryPattern("lollandfalstersfolketidende", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
         deliveryTitleInfos.addDeliveryPattern("metroxpressoest", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
         deliveryTitleInfos.addDeliveryPattern("metroxpressvest", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE));
         deliveryTitleInfos.addDeliveryPattern("midtjyllandsavis1857", new WeekPattern(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE));
