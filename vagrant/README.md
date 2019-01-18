@@ -138,3 +138,12 @@ If for some reason Solr or Fedora is not running or responding, restart it insid
 
     ~/7880-doms/bin/doms.sh restart
 
+
+VeraPdf in vagrant:
+===
+VeraPdf is running inside the vagrant image, but it often needs to get restarted
+
+First kill running verapdf
+
+vagrant@vagrant:~$ export JAVA_HOME=/usr/lib/jvm/zulu-8-amd64
+vagrant@vagrant:~$ /vagrant/run-verapdf-rest.sh 

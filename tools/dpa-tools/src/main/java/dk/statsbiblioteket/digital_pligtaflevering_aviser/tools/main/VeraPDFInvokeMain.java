@@ -60,7 +60,8 @@ import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Unfinished
+ * 'VeraPDFInvokeMain' runs verPdf of each pdf-file in a delivery and validate against pdfa-1b.
+ * The result is written into each doms-item that contains a pdf-file
  */
 public class VeraPDFInvokeMain {
     protected static final Logger log = LoggerFactory.getLogger(VeraPDFInvokeMain.class);
