@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>LATEST</version>
+            <version>2.0.13</version>
         </dependency>
 
         <!-- FIXME: TEMPORARY HACK TO MAKE DOMSINGESTERMAIN WORK -->
