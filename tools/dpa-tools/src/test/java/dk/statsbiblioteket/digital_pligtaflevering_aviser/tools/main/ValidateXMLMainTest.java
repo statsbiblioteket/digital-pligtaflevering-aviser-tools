@@ -1,7 +1,5 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbList;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.maven.MavenProjectsHelper;
 import org.junit.Before;
 import org.xml.sax.InputSource;
@@ -13,7 +11,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,29 +41,6 @@ public class ValidateXMLMainTest {
     public void runBeforeTestMethod() {
         xmlValidatorModule = new ValidateXMLMain.ValidateXMLModule();
     }
-
-
-    @org.junit.Test
-    public void analyzeXmlForFileList() throws Exception {
-
-        ArrayList<String> files = new ArrayList<String>();
-        files.add("embeddedFile1");
-        files.add("embeddedFile2");
-        JaxbList jaxbList = new JaxbList(files);
-
-        byte[] yy = PdfContentDelegate.processListOfEmbeddedFilesToBytestream().apply(jaxbList);
-
-        String jaxbStream = PdfContentDelegate.marshallListOfEmbeddedFilesInfo(jaxbList).toString();
-
-        JaxbList newJaxbList = PdfContentDelegate.getListOfEmbeddedFilesFromXml(jaxbStream);
-
-
-        assertEquals("Failed Files : ", "embeddedFile1", newJaxbList.getList().get(0));
-        assertEquals("Failed Files : ", "embeddedFile2", newJaxbList.getList().get(1));
-
-
-    }
-
 
     // @org.junit.Test
     // FIXME:  This test assumes that all deliveries in source tree are _valid_.  Fails if adding more.  FIX by making an integration test.
