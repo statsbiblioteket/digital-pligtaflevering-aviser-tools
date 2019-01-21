@@ -143,7 +143,15 @@ VeraPdf in vagrant:
 ===
 VeraPdf is running inside the vagrant image, but it often needs to get restarted
 
-First kill running verapdf
+First login to running vagrant:
+vagrant ssh
 
+Then find running verapdf-process:
+vagrant@vagrant:~$ ps aux | grep verapdf
+
+Then kill the running process:
+vagrant@vagrant:~$ kill <id>
+
+Then start it again:
 vagrant@vagrant:~$ export JAVA_HOME=/usr/lib/jvm/zulu-8-amd64
 vagrant@vagrant:~$ /vagrant/run-verapdf-rest.sh 
