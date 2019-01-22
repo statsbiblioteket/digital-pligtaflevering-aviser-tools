@@ -51,6 +51,11 @@ public class VeraPDFOutputValidation {
         }
     }
 
+    /**
+     * Get report of pdf-failures, it does not take the embedded files into account
+     * @param xmlDocument
+     * @return
+     */
     public static String getReportFor(Document xmlDocument) {
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = null;
@@ -91,7 +96,7 @@ public class VeraPDFOutputValidation {
                                         "concat(ruleId/clause/text(), ': ', message/text(), ' [ ', location/context/text(), ' ]')"
                                 ).evaluate(node, XPathConstants.STRING)).replaceAll(REMOVE_NEWLINES_REGEX, " ")
                         )).get())
-                .collect(groupingBy(st -> severenessFor(st.left()), mapping(st -> st, toList())));
+                .collect(groupingBy(st -> severenessFor(st.left(), null), mapping(st -> st, toList())));
 
         Optional<SeverenessLevel> worstOutcome = outcomes.keySet().stream().max(Comparator.naturalOrder());
 
@@ -143,7 +148,7 @@ public class VeraPDFOutputValidation {
 
     /**
      * Validate the results of paragraphs in a pdf, the broken rules is delivered in a set
-     * The first time
+     * The first time, this function does not take embedded files into account
      *
      * @return ValidationResults indication the result of validating output from VeraPDF
      */
@@ -152,7 +157,7 @@ public class VeraPDFOutputValidation {
         ValidationResults rulesBroken = new ValidationResults();
 
         new HashSet<>(l).stream()
-                .map(item -> new ValidationResult(item, severenessFor(item)))
+                .map(item -> new ValidationResult(item, severenessFor(item, null)))
                 .filter(vr -> vr.getValidationEnum() != SeverenessLevel.ACCEPTABLE)
                 .forEach(vr -> rulesBroken.add(vr));
 
@@ -160,8 +165,8 @@ public class VeraPDFOutputValidation {
     }
 
 
-    public static SeverenessLevel severenessFor(String sectionId) {
-        //Errorcases has been updated according ti this document:
+    public static SeverenessLevel severenessFor(String sectionId, List<String> embeddedFiles) {
+        //Errorcases has been updated according to this document:
         //https://sbprojects.statsbiblioteket.dk/pages/viewpage.action?pageId=15993274
         switch (sectionId) {
             case "6.1.3":
@@ -171,6 +176,9 @@ public class VeraPDFOutputValidation {
             case "6.9":
                 return SeverenessLevel.INVALID;
             case "6.1.11":
+                if(embeddedFiles!= null && embeddedFiles.stream().filter(embeddedFile -> embeddedFile.contains(".joboptions")).count()>0) {
+                    return SeverenessLevel.ACCEPTIGNORE;
+                }
             case "6.2.6":
             case "6.3.4":
             case "6.3.2":

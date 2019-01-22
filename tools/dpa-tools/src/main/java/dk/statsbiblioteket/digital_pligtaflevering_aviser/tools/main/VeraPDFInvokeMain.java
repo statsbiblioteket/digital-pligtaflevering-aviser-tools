@@ -177,7 +177,7 @@ public class VeraPDFInvokeMain {
             return false;
         }
 
-        public URL getUrlForBitrepositoryItemPossiblyLocallyAvailable(DomsItem domsItem, String bitrepositoryURLPrefix, String bitrepositoryMountpoint, String itemURL) {
+        public static URL getUrlForBitrepositoryItemPossiblyLocallyAvailable(DomsItem domsItem, String bitrepositoryURLPrefix, String bitrepositoryMountpoint, String itemURL) {
             if (itemURL.startsWith(bitrepositoryURLPrefix)) {
                 final String resourceName;
                 resourceName = itemURL.substring(bitrepositoryURLPrefix.length());
@@ -212,7 +212,7 @@ public class VeraPDFInvokeMain {
             return query -> sboiEventIndexSearch(query, index).stream();
         }
 
-        private List<DomsId> sboiEventIndexSearch(EventQuerySpecification query, SBOIEventIndex<Item> index) {
+        protected static List<DomsId> sboiEventIndexSearch(EventQuerySpecification query, SBOIEventIndex<Item> index) {
             Iterator<Item> iterator;
             try {
                 EventTrigger.Query<Item> q = new EventTrigger.Query<>();

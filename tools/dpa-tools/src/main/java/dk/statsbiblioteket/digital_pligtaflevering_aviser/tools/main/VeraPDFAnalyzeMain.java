@@ -4,7 +4,6 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.kb.stream.StreamTuple;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -13,6 +12,8 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbList;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -30,6 +31,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.inject.Named;
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,6 +42,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -56,7 +59,8 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Unfinished
+ * 'VeraPDFAnalyzeMain' analyses the result from veraPdf, it generates a report about the significancy of each rule,
+ * that does not correspond to the metadata written by 'VeraPDFInvokeModule'
  */
 public class VeraPDFAnalyzeMain {
     protected static final Logger log = LoggerFactory.getLogger(VeraPDFAnalyzeMain.class);
@@ -87,6 +91,21 @@ public class VeraPDFAnalyzeMain {
         return IntStream.range(0, nodeList.getLength())
                 .mapToObj(nodeList::item);
     }
+
+    /**
+     * TODO - describe something here
+     * @param xml
+     * @return
+     */
+    public static List<String> getListOfEmbeddedFilesFromXml(String xml) {
+        try {
+            return PdfContentDelegate.getListOfEmbeddedFilesFromXml(xml).getList();
+        } catch (JAXBException e) {
+            log.error("Error parsing embedded files", e);
+            return new ArrayList<String>();
+        }
+    }
+
 
     /**
      * @noinspection WeakerAccess
@@ -163,96 +182,119 @@ public class VeraPDFAnalyzeMain {
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
                     .map(StreamTuple::create)
-                    .map(st -> st.map((DomsItem roundtripItem) -> {
-                        log.info("Start collecting veraPDF-results for the rondtrip: " + roundtripItem.getPath());
-                        List<StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>>> pathSeverenessProblemsList = roundtripItem.allChildren()
-                                        .peek(i -> mxBean.currentId = String.valueOf(i))
-                                        .peek(i -> mxBean.idsProcessed++)
-                                        .map(i -> new StreamTuple<>(i.getPath(), i))
-                                        .flatMap(stx -> stx.flatMap((DomsItem child) -> child.datastreams().stream()
-                                                // only look at items with a verapdf datastream
-                                                .filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME))
-                                                .map(DomsDatastream::getDatastreamAsString) // VeraPDF XML output
-                                                .map(xml -> {
-                                                    log.info("Collecting result from the delivery: " + child.getPath());
-                                                    Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, xml)
-                                                            .map(node -> Try.of(() -> new StreamTuple<>(
-                                                                    leftXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " "),
-                                                                    rightXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " ")
-                                                            )).get())
-                                                            .peek((StreamTuple<String, String> s) -> {
-                                                            })
-                                                            // map: severenesslevel -> list<problems>
-                                                            .collect(groupingBy(st3 -> severenessFor(st3.left()), mapping(st3 -> st3, toList())));
-
-                                                    String fullChildReport = groupedBySevereness.entrySet().stream()
-                                                            .sorted(Comparator.comparing(Map.Entry::getKey))
-                                                            .map(entry -> entry.getKey() + "\n"
-                                                                    + "------------------------------------------\n"
-                                                                    + entry.getValue().stream()
-                                                                    .map(st0 -> st0.left() + ": " + st0.right())
-                                                                    .sorted()
-                                                                    .collect(joining("\n")))
-                                                            .collect(joining("\n\n"));
-
-                                                    if (fullChildReport.length() == 0) {
-                                                        fullChildReport = "VeraPDF did not report any problems.";
-                                                    }
-                                                    child.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, fullChildReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
-
-                                                    // Only keep the bad ones
-                                                    groupedBySevereness.entrySet().removeIf(e -> e.getKey().isBad() == false);
-
-                                                    return groupedBySevereness;
-                                                })
-                                                .peek((Map<SeverenessLevel, List<StreamTuple<String, String>>> o) -> {
-                                                })
-                                        ))
-                                        .sorted(Comparator.comparing(e -> e.left())) // path name
-                                        .collect(toList());
-
-                                long[] badLines = new long[1];
-
-                                // Create report for roundtripItem of all bad items.
-                                String roundtripItemReport = pathSeverenessProblemsList.stream()
-                                        .peek((StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>> o) -> {
-                                        })
-                                        .map(stx -> stx.left() + "\n==============\n" + stx.right().entrySet().stream()
-                                                .sorted(Comparator.comparing(Map.Entry::getKey))
-                                                .map(entry -> entry.getKey() + "\n"
-                                                        + "------------------------------------------\n"
-                                                        + entry.getValue().stream()
-                                                        .map(st0 -> st0.left() + ": " + st0.right())
-                                                        .sorted()
-                                                        .peek(s -> {badLines[0]++; })
-                                                        .collect(joining("\n")))
-                                                .collect(joining("\n\n")))
-                                        .collect(joining("\n\n"));
-
-
-                                String actualRoundtripItemReport = badLines[0] > 0 ? roundtripItemReport : "Nothing non-acceptable reported by VeraPDF";
-
-                                roundtripItem.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, actualRoundtripItemReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
-
-
-                                // "foo.pdf: INVALID 1, MANUAL_INTERVENTION 2"
-                                List<String> toolReportLine = pathSeverenessProblemsList.stream()
-                                        .map(stx -> stx.left() + ": " + stx.right().entrySet().stream()
-                                                .sorted(Comparator.comparing(Map.Entry::getKey))
-                                                .map(e -> e.getKey() + " " + e.getValue().size())
-                                                .collect(joining(", "))
-                                        ).collect(toList());
-
-                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "Processed: \n" + toolReportLine, eventName,  badLines[0] == 0));
-
-                                return toolReportLine;
-                            }
+                    .map(st -> st.map((DomsItem roundtripItem) -> handleVerapdfResults(eventName, mxBean, agent, failedXPath, leftXPath, rightXPath, roundtripItem)
                     ))
                     .peek((StreamTuple<DomsItem, List<String>> o) -> {
                     })
                     .collect(toList()); // Results:  X ["foo.pdf: INVALID 1, MANUAL_INTERVENTION 2", "bar.pdf: INVALID 2"]
 
             return f;
+        }
+
+        /**
+         *
+         * @param eventName
+         * @param mxBean
+         * @param agent
+         * @param failedXPath
+         * @param leftXPath
+         * @param rightXPath
+         * @param roundtripItem
+         * @return
+         */
+        private List<String> handleVerapdfResults(@Named(AUTONOMOUS_THIS_EVENT) String eventName, DefaultToolMXBean mxBean, String agent, XPathExpression failedXPath, XPathExpression leftXPath, XPathExpression rightXPath, DomsItem roundtripItem) {
+            log.info("Start collecting veraPDF-results for the roundtrip: " + roundtripItem.getPath());
+            List<StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>>> pathSeverenessProblemsList = roundtripItem.allChildren()
+                    .peek(i -> mxBean.currentId = String.valueOf(i))
+                    .peek(i -> mxBean.idsProcessed++)
+                    .map(item -> new StreamTuple<>(item.getPath(), item))
+                    .filter(item -> item.left().endsWith(".pdf"))
+                    .map(stx -> stx.map((DomsItem child) -> getSeverenessLevel(failedXPath, leftXPath, rightXPath, child)))
+                    .peek((StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>> o) -> {})
+                    .sorted(Comparator.comparing(e -> e.left())) // path name
+                    .collect(toList());
+
+            long[] badLines = new long[1];
+
+            // Create report for roundtripItem of all bad items.
+            String roundtripItemReport = pathSeverenessProblemsList.stream()
+                    .peek((StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>> o) -> {
+                    })
+                    .map(stx -> stx.left() + "\n==============\n" + stx.right().entrySet().stream()
+                            .sorted(Comparator.comparing(Map.Entry::getKey))
+                            .map(entry -> entry.getKey() + "\n"
+                                    + "------------------------------------------\n"
+                                    + entry.getValue().stream()
+                                    .map(st0 -> st0.left() + ": " + st0.right())
+                                    .sorted()
+                                    .peek(s -> {
+                                        badLines[0]++;
+                                    })
+                                    .collect(joining("\n")))
+                            .collect(joining("\n\n")))
+                    .collect(joining("\n\n"));
+
+
+            String actualRoundtripItemReport = badLines[0] > 0 ? roundtripItemReport : "Nothing non-acceptable reported by VeraPDF";
+
+            roundtripItem.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, actualRoundtripItemReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
+
+
+            // "foo.pdf: INVALID 1, MANUAL_INTERVENTION 2"
+            List<String> toolReportLine = pathSeverenessProblemsList.stream()
+                    .map(stx -> stx.left() + ": " + stx.right().entrySet().stream()
+                            .sorted(Comparator.comparing(Map.Entry::getKey))
+                            .map(e -> e.getKey() + " " + e.getValue().size())
+                            .collect(joining(", "))
+                    ).collect(toList());
+
+            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "Processed: \n" + toolReportLine, eventName, badLines[0] == 0));
+
+            return toolReportLine;
+        }
+
+        private Map<SeverenessLevel, List<StreamTuple<String, String>>> getSeverenessLevel(XPathExpression failedXPath,
+                                                                                           XPathExpression leftXPath,
+                                                                                           XPathExpression rightXPath,
+                                                                                           DomsItem child) {
+            //Get the stream of pdf-failures accoring to pdfa standard
+            String verapdf_xml = child.datastream(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME).getDatastreamAsString();
+
+            //Get the stream of xml containing list of embedded files
+            String embeddedFiles_xml = child.datastream(PDFContentMain.PDF_CONTENT_NAME).getDatastreamAsString();
+
+
+            log.info("Collecting result from the delivery: " + child.getPath());
+            Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, verapdf_xml)
+                    .map(node -> Try.of(() -> new StreamTuple<>(
+                            leftXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " "),
+                            rightXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " ")
+                    )).get())
+                    .peek((StreamTuple<String, String> s) -> {
+                    })
+                    // map: severenesslevel -> list<problems>
+                    .collect(groupingBy(st3 -> severenessFor(st3.left(), getListOfEmbeddedFilesFromXml(embeddedFiles_xml)), mapping(st3 -> st3, toList())));
+
+            String fullChildReport = groupedBySevereness.entrySet().stream()
+                    .sorted(Comparator.comparing(Map.Entry::getKey))
+                    .map(entry -> entry.getKey() + "\n"
+                            + "------------------------------------------\n"
+                            + entry.getValue().stream()
+                            .map(st0 -> st0.left() + ": " + st0.right())
+                            .sorted()
+                            .collect(joining("\n")))
+                    .collect(joining("\n\n"));
+
+            if (fullChildReport.length() == 0) {
+                fullChildReport = "VeraPDF did not report any problems.";
+            }
+            child.modifyDatastreamByValue(VERAPDFREPORT_DATASTREAM, null, null, fullChildReport.getBytes(StandardCharsets.UTF_8), null, "text/plain", null, new Date().getTime());
+
+            // Only keep the bad ones
+            groupedBySevereness.entrySet().removeIf(e -> e.getKey().isBad() == false);
+
+
+            return groupedBySevereness;
         }
 
         @Provides

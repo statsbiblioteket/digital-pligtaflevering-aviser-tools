@@ -9,7 +9,7 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
  * Approved: The document is ok
  */
 public enum SeverenessLevel {
-    INVALID(true), UNKNOWN(true), MANUAL_INSPECTION(true), ACCEPTABLE(false);
+    INVALID(true), UNKNOWN(true), MANUAL_INSPECTION(true), ACCEPTABLE(false), ACCEPTIGNORE(false);
 
     private final boolean bad;
 
