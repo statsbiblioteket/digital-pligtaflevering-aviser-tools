@@ -98,7 +98,6 @@ public class PDFContentMain {
      */
     @Module
     public static class PDFContentModule {
-        public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
         /**
          * @noinspection PointlessBooleanExpression
@@ -140,7 +139,7 @@ public class PDFContentMain {
                                     long nodes = streamFor(leftXPathm, veraresult).count();
 
                                     if (nodes > 0) {
-                                        URL urlObj = getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, url);
+                                        URL urlObj = VeraPDFInvokeMain.VeraPDFInvokeModule.getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, url);
 
                                         try {
                                             List<String> a = PdfContentDelegate.getListOfEmbeddedFilesFromPdf(urlObj);
@@ -149,16 +148,13 @@ public class PDFContentMain {
                                             child.modifyDatastreamByValue(PDF_CONTENT_NAME, null, null, pdfContentStream, null, "text/xml", "URL: " + url, null);
                                         } catch (IOException e) {
                                             log.error("ContentExtractionError", e);
+                                            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "failed" + urlObj.getPath(), eventName, true));
+                                            return false;
                                         }
                                     }
                                 }
-
-
-                        //TODO - what to do here
-                            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), " processed", eventName, true));
-
-                        //TODO - what to do here
-                        return new ArrayList<String>();
+                                roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "processing done", eventName, true));
+                                return true;
                             }
                     ))
 
@@ -167,59 +163,9 @@ public class PDFContentMain {
             return f;
         }
 
-
-        public URL getUrlForBitrepositoryItemPossiblyLocallyAvailable(DomsItem domsItem, String bitrepositoryURLPrefix, String bitrepositoryMountpoint, String itemURL) {
-            if (itemURL.startsWith(bitrepositoryURLPrefix)) {
-                final String resourceName;
-                resourceName = itemURL.substring(bitrepositoryURLPrefix.length());
-                final File file;
-                try {
-                    Path path = Paths.get(bitrepositoryMountpoint, URLDecoder.decode(resourceName, CharEncoding.UTF_8));
-                    file = path.toFile();
-                    //This check is only done when the link is to a file in the filesystem, which is how it is used in production
-                    if (!file.exists()) {
-                        log.error("Unknown link to file " + path.toString());
-                        throw new RuntimeException("Unknown link to file " + path.toString());
-                    }
-
-                    log.trace("pdf expected to be in:  {}", file.getAbsolutePath());
-                    return file.toURI().toURL();
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(domsItem + " '" + resourceName + "' could not get decoded", e);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(domsItem + " '" + resourceName + "' not found", e);
-                }
-            } else {
-                try {
-                    return new URL(itemURL);
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(domsItem + " url '" + itemURL + " fails", e);
-                }
-            }
-        }
-
         @Provides
         protected Function<EventQuerySpecification, Stream<DomsId>> sboiEventIndexSearch(SBOIEventIndex<Item> index) {
-            return query -> sboiEventIndexSearch(query, index).stream();
-        }
-
-        private List<DomsId> sboiEventIndexSearch(EventQuerySpecification query, SBOIEventIndex<Item> index) {
-            Iterator<Item> iterator;
-            try {
-                EventTrigger.Query<Item> q = new EventTrigger.Query<>();
-                q.getPastSuccessfulEvents().addAll(query.getPastSuccessfulEvents());
-                q.getOldEvents().addAll(query.getOldEvents());
-                q.getFutureEvents().addAll(query.getFutureEvents());
-                q.getTypes().addAll(query.getTypes());
-                iterator = index.search(false, q);
-            } catch (CommunicationException e) {
-                throw new RuntimeException("sboiEventIndexSearch()", e);
-            }
-            // http://stackoverflow.com/a/28491752/53897
-            // To keep this simple we simply read in the whole result in a list.
-            List<DomsId> l = new ArrayList<>();
-            iterator.forEachRemaining(item -> l.add(new DomsId(item.getDomsID())));
-            return l;
+            return query -> VeraPDFInvokeMain.VeraPDFInvokeModule.sboiEventIndexSearch(query, index).stream();
         }
 
         @Provides
