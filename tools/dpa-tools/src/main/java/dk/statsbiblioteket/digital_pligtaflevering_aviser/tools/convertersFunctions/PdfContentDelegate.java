@@ -81,19 +81,23 @@ public class PdfContentDelegate {
         };
     }
 
-
+    /**
+     * Get a list of embedded files inside a pdf-file
+     * @param pathToPdf
+     * @return
+     * @throws IOException
+     */
     public static List<String> getListOfEmbeddedFilesFromPdf(URL pathToPdf) throws IOException {
         try (final PDDocument document = PDDocument.load(pathToPdf.openStream())) {
             PDDocumentNameDictionary namesDictionary = new PDDocumentNameDictionary(document.getDocumentCatalog());
 
             PDEmbeddedFilesNameTreeNode efTree = namesDictionary.getEmbeddedFiles();
             ArrayList<String> returnList = new ArrayList<String>();
-            if(efTree==null) {
-                return returnList;
-            }
-            List<PDNameTreeNode<PDComplexFileSpecification>> tt = efTree.getKids();//PDEmbeddedFilesNameTreeNode
-            for(PDNameTreeNode node : tt) {
-                returnList.addAll(node.getNames().keySet());
+            if(efTree!=null) {
+                List<PDNameTreeNode<PDComplexFileSpecification>> tt = efTree.getKids();//PDEmbeddedFilesNameTreeNode
+                for(PDNameTreeNode node : tt) {
+                    returnList.addAll(node.getNames().keySet());
+                }
             }
             return returnList;
         }

@@ -4,6 +4,7 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.kb.stream.StreamTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsId;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -22,33 +23,29 @@ import dk.statsbiblioteket.medieplatform.autonomous.EventTrigger;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIEventIndex;
+import dk.statsbiblioteket.util.xml.DOM;
 import org.apache.commons.codec.CharEncoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.inject.Named;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -67,8 +64,7 @@ import static java.util.stream.Collectors.toList;
 public class PDFContentMain {
     protected static final Logger log = LoggerFactory.getLogger(PDFContentMain.class);
 
-    public static final String VERAPDF_DATASTREAM_NAME = "VERAPDF";
-    public static final String DPA_VERAPDF_URL = "dpa.verapdf.url";
+    public static final String PDF_CONTENT_NAME = "PDFCONTENT";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -83,17 +79,12 @@ public class PDFContentMain {
 
     }
 
-    interface PDFContentInvoker extends Function<URL, String> {
-    }
-
     public static Stream<Node> streamFor(XPathExpression xpath, String xml) {
         NodeList nodeList = null;
         try {
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            Document xmlDocument = builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+            Document xmlDocument = DOM.stringToDOM(xml);
             nodeList = (NodeList) xpath.evaluate(xmlDocument, XPathConstants.NODESET);
-        } catch (XPathExpressionException | ParserConfigurationException | IOException | SAXException e) {
+        } catch (XPathExpressionException e) {
             throw new RuntimeException("Failed to process " + xml, e);
         }
         // https://stackoverflow.com/a/23361853/53897
@@ -117,8 +108,7 @@ public class PDFContentMain {
                                    QuerySpecification workToDoQuery,
                                    DomsRepository domsRepository,
                                    @Named(BITMAG_BASEURL_PROPERTY) String bitrepositoryURLPrefix,
-                                   @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint,
-                                   @Named(DPA_VERAPDF_REUSEEXISTINGDATASTREAM) boolean reuseExistingDatastream) {
+                                   @Named(BitRepositoryModule.BITREPOSITORY_SBPILLAR_MOUNTPOINT) String bitrepositoryMountpoint) {
 
             final String agent = getClass().getSimpleName();
 
@@ -145,7 +135,7 @@ public class PDFContentMain {
                                 for (DomsItem child : listOfPdfFiles) {
 
                                     String url = child.datastreams().stream().filter(datastream -> datastream.getMimeType().equals("application/pdf")).findAny().get().getUrl();
-                                    String veraresult = child.datastreams().stream().filter(ds -> ds.getId().equals(VERAPDF_DATASTREAM_NAME)).findAny().get().getDatastreamAsString();
+                                    String veraresult = child.datastreams().stream().filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME)).findAny().get().getDatastreamAsString();
 
                                     long nodes = streamFor(leftXPathm, veraresult).count();
 
@@ -156,13 +146,19 @@ public class PDFContentMain {
                                             List<String> a = PdfContentDelegate.getListOfEmbeddedFilesFromPdf(urlObj);
                                             JaxbList streamableList = new JaxbList(a);
                                             byte[] pdfContentStream = PdfContentDelegate.processListOfEmbeddedFilesToBytestream().apply(streamableList);
-                                            child.modifyDatastreamByValue("contentResult", null, null, pdfContentStream, null, "text/xml", "comment", null);
+                                            child.modifyDatastreamByValue(PDF_CONTENT_NAME, null, null, pdfContentStream, null, "text/xml", "URL: " + url, null);
                                         } catch (IOException e) {
-                                            e.printStackTrace();
+                                            log.error("ContentExtractionError", e);
                                         }
                                     }
                                 }
-                                return new ArrayList<String>();
+
+
+                        //TODO - what to do here
+                            roundtripItem.appendEvent(new DomsEvent(agent, new Date(), " processed", eventName, true));
+
+                        //TODO - what to do here
+                        return new ArrayList<String>();
                             }
                     ))
 
@@ -231,16 +227,5 @@ public class PDFContentMain {
             return id -> new Item();
         }
 
-        @Provides
-        @Named(DPA_VERAPDF_URL)
-        String provideVerapdfURL(ConfigurationMap map) {
-            return map.getRequired(DPA_VERAPDF_URL);
-        }
-
-        @Provides
-        @Named(DPA_VERAPDF_REUSEEXISTINGDATASTREAM)
-        boolean provideReuseExistingDatastream(ConfigurationMap map) {
-            return Boolean.valueOf(map.getDefault(DPA_VERAPDF_REUSEEXISTINGDATASTREAM, "false"));
-        }
     }
 }
