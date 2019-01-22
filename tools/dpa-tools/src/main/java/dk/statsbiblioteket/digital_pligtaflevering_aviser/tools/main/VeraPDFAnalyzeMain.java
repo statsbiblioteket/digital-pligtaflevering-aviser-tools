@@ -4,6 +4,7 @@ import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import dk.kb.stream.StreamTuple;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsDatastream;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsEvent;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsItem;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.doms.DomsRepository;
@@ -12,7 +13,6 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbList;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
@@ -93,13 +93,16 @@ public class VeraPDFAnalyzeMain {
     }
 
     /**
-     * TODO - describe something here
+     * Parse the XML-content into a list of files
      * @param xml
-     * @return
+     * @return If xml is null return an empty list
      */
-    public static List<String> getListOfEmbeddedFilesFromXml(String xml) {
+    public static List<String> getListOfEmbeddedFilesFromXml(DomsDatastream xml) {
         try {
-            return PdfContentDelegate.getListOfEmbeddedFilesFromXml(xml).getList();
+            if(xml==null) {
+                return new ArrayList<String>();
+            }
+            return PdfContentDelegate.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
         } catch (JAXBException e) {
             log.error("Error parsing embedded files", e);
             return new ArrayList<String>();
@@ -112,9 +115,6 @@ public class VeraPDFAnalyzeMain {
      */
     @Module
     public static class VeraPDFAnalyzeModule {
-        public static final String VERAPDF_INVOKED = "VeraPDF_Invoked";
-        public static final String DPA_VERAPDF_FLAVOR = "dpa.verapdf.flavor";
-        public static final String DPA_VERAPDF_REUSEEXISTINGDATASTREAM = "dpa.verapdf.reuseexistingdatastream";
 
         public static final String VERAPDFREPORT_DATASTREAM = "VERAPDFREPORT";
 
@@ -261,8 +261,7 @@ public class VeraPDFAnalyzeMain {
             String verapdf_xml = child.datastream(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME).getDatastreamAsString();
 
             //Get the stream of xml containing list of embedded files
-            String embeddedFiles_xml = child.datastream(PDFContentMain.PDF_CONTENT_NAME).getDatastreamAsString();
-
+            DomsDatastream embeddedFiles_xml = child.datastream(PDFContentMain.PDF_CONTENT_NAME);
 
             log.info("Collecting result from the delivery: " + child.getPath());
             Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, verapdf_xml)
