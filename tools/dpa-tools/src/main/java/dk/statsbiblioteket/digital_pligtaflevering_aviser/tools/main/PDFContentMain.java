@@ -36,17 +36,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -79,17 +71,14 @@ public class PDFContentMain {
 
     }
 
-    public static Stream<Node> streamFor(XPathExpression xpath, String xml) {
-        NodeList nodeList = null;
+    public static boolean streamForHasContent(XPathExpression xpath, String xml) {
         try {
             Document xmlDocument = DOM.stringToDOM(xml);
-            nodeList = (NodeList) xpath.evaluate(xmlDocument, XPathConstants.NODESET);
+            NodeList nodeList = (NodeList) xpath.evaluate(xmlDocument, XPathConstants.NODESET);
+            return nodeList.getLength()>0;
         } catch (XPathExpressionException e) {
             throw new RuntimeException("Failed to process " + xml, e);
         }
-        // https://stackoverflow.com/a/23361853/53897
-        return IntStream.range(0, nodeList.getLength())
-                .mapToObj(nodeList::item);
     }
 
 
@@ -113,7 +102,7 @@ public class PDFContentMain {
 
             // pre-compile
             final XPathExpression leftXPathm;
-            final String leftExpressionm = "//ruleId/clause[text() = '6.1.11']";
+            final String leftExpressionm = "//testAssertions/ruleId/clause[text() = '6.1.11']";
             try {
                 leftXPathm = XPathFactory.newInstance().newXPath().compile(leftExpressionm);
             } catch (XPathExpressionException e) {
@@ -136,9 +125,7 @@ public class PDFContentMain {
                                     String url = child.datastreams().stream().filter(datastream -> datastream.getMimeType().equals("application/pdf")).findAny().get().getUrl();
                                     String veraresult = child.datastreams().stream().filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME)).findAny().get().getDatastreamAsString();
 
-                                    long nodes = streamFor(leftXPathm, veraresult).count();
-
-                                    if (nodes > 0) {
+                                    if (streamForHasContent(leftXPathm, veraresult)) {
                                         URL urlObj = VeraPDFInvokeMain.VeraPDFInvokeModule.getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, url);
 
                                         try {
