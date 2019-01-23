@@ -13,7 +13,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.DefaultToolMXBean;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentUtils;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -102,7 +102,7 @@ public class VeraPDFAnalyzeMain {
             if(xml==null) {
                 return new ArrayList<String>();
             }
-            return PdfContentDelegate.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
+            return PdfContentUtils.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
         } catch (JAXBException e) {
             log.error("Error parsing embedded files", e);
             return new ArrayList<String>();

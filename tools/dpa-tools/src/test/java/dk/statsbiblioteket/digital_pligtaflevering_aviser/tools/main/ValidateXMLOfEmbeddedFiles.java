@@ -1,7 +1,7 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main;
 
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbList;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentUtils;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
@@ -21,8 +21,8 @@ public class ValidateXMLOfEmbeddedFiles {
         files.add("embeddedFile2");
         JaxbList jaxbList = new JaxbList(files);
 
-        String jaxbStream = PdfContentDelegate.marshallListOfEmbeddedFilesInfo(jaxbList).toString();
-        JaxbList newJaxbList = PdfContentDelegate.getListOfEmbeddedFilesFromXml(jaxbStream);
+        String jaxbStream = PdfContentUtils.marshallListOfEmbeddedFilesInfo(jaxbList).toString();
+        JaxbList newJaxbList = PdfContentUtils.getListOfEmbeddedFilesFromXml(jaxbStream);
 
         assertEquals("Failed Files : ", "embeddedFile1", newJaxbList.getList().get(0));
         assertEquals("Failed Files : ", "embeddedFile2", newJaxbList.getList().get(1));

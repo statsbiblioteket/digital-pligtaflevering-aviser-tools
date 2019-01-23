@@ -14,7 +14,7 @@ import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.AutonomousPres
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.ConfigurationMap;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.harness.Tool;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.JaxbList;
-import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentDelegate;
+import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions.PdfContentUtils;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.BitRepositoryModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.CommonModule;
 import dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.modules.DomsModule;
@@ -124,9 +124,9 @@ public class PDFContentMain {
                                         URL urlObj = VeraPDFInvokeMain.VeraPDFInvokeModule.getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, url);
 
                                         try {
-                                            List<String> a = PdfContentDelegate.getListOfEmbeddedFilesFromPdf(urlObj);
+                                            List<String> a = PdfContentUtils.getListOfEmbeddedFilesFromPdf(urlObj);
                                             JaxbList streamableList = new JaxbList(a);
-                                            byte[] pdfContentStream = PdfContentDelegate.processListOfEmbeddedFilesToBytestream().apply(streamableList);
+                                            byte[] pdfContentStream = PdfContentUtils.processListOfEmbeddedFilesToBytestream().apply(streamableList);
                                             child.modifyDatastreamByValue(PDF_CONTENT_NAME, null, null, pdfContentStream, null, "text/xml", "URL: " + url, null);
                                         } catch (IOException e) {
                                             log.error("ContentExtractionError", e);

@@ -23,13 +23,13 @@ import java.util.function.Function;
 /**
  * MarshallerFunctions is a list of static functions which converts between objects .......
  */
-public class PdfContentDelegate {
+public class PdfContentUtils {
     //XML example
     //<ns2:fileList xmlns:ns2="kb.dk/dpa/embeddedfiles">
     //<EmbeddedItems xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">NewspaperAds_1v4.joboptions</EmbeddedItems>
     //</ns2:fileList>
     
-    protected static Logger log = LoggerFactory.getLogger(PdfContentDelegate.class);
+    protected static Logger log = LoggerFactory.getLogger(PdfContentUtils.class);
     public final static JAXBContext jaxbContext;
     
     static {
@@ -47,7 +47,7 @@ public class PdfContentDelegate {
      *
      * @throws JAXBException
      */
-    public static JaxbList getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
+    public static synchronized JaxbList getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
         StringReader reader = new StringReader(xml);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         JaxbList deserializedObject = (JaxbList) jaxbUnmarshaller.unmarshal(reader);
@@ -60,7 +60,7 @@ public class PdfContentDelegate {
      * @return
      * @throws JAXBException
      */
-    public static ByteArrayOutputStream marshallListOfEmbeddedFilesInfo(JaxbList jaxbList) throws JAXBException {
+    public static synchronized ByteArrayOutputStream marshallListOfEmbeddedFilesInfo(JaxbList jaxbList) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
@@ -74,7 +74,7 @@ public class PdfContentDelegate {
      * Return function for the xml-bytestream from the serializable jaxbList
      * @return
      */
-    public static Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
+    public static synchronized Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
         return deliveryStatistics -> {
             try (ByteArrayOutputStream deliveryArrayStream = new ByteArrayOutputStream()){
                 Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
