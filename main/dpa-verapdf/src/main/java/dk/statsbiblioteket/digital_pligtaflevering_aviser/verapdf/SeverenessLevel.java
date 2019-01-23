@@ -19,7 +19,7 @@ public enum SeverenessLevel {
     private final boolean bad;
 
     /**
-     * If this parameter is true the file is registered as incabable for preservation
+     * If this parameter is true the file is registered as incapable for preservation
      * @return
      */
     public boolean isBad() {

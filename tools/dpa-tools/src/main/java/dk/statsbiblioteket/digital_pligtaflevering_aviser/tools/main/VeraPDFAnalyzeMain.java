@@ -192,7 +192,8 @@ public class VeraPDFAnalyzeMain {
         }
 
         /**
-         *
+         * Get a report of failed paragraphs in a delivery.
+         * The report is split up into one file at a time
          * @param eventName
          * @param mxBean
          * @param agent
@@ -200,9 +201,15 @@ public class VeraPDFAnalyzeMain {
          * @param leftXPath
          * @param rightXPath
          * @param roundtripItem
-         * @return
+         * @return '// Results:  X ["foo.pdf: INVALID 1, MANUAL_INTERVENTION 2", "bar.pdf: INVALID 2"]'
          */
-        private List<String> handleVerapdfResults(@Named(AUTONOMOUS_THIS_EVENT) String eventName, DefaultToolMXBean mxBean, String agent, XPathExpression failedXPath, XPathExpression leftXPath, XPathExpression rightXPath, DomsItem roundtripItem) {
+        private List<String> handleVerapdfResults(@Named(AUTONOMOUS_THIS_EVENT) String eventName,
+                                                  DefaultToolMXBean mxBean,
+                                                  String agent,
+                                                  XPathExpression failedXPath,
+                                                  XPathExpression leftXPath,
+                                                  XPathExpression rightXPath,
+                                                  DomsItem roundtripItem) {
             log.info("Start collecting veraPDF-results for the roundtrip: " + roundtripItem.getPath());
             List<StreamTuple<String, Map<SeverenessLevel, List<StreamTuple<String, String>>>>> pathSeverenessProblemsList = roundtripItem.allChildren()
                     .peek(i -> mxBean.currentId = String.valueOf(i))
@@ -253,6 +260,15 @@ public class VeraPDFAnalyzeMain {
             return toolReportLine;
         }
 
+        /**
+         * Get a list af failed pdf-paragraphs in the DomsItem, the result is returned sorted into severenesslevel
+         * Only failed paragraphs that is considered 'bad' in SeverenessLevel is returned
+         * @param failedXPath
+         * @param leftXPath
+         * @param rightXPath
+         * @param child
+         * @return
+         */
         private Map<SeverenessLevel, List<StreamTuple<String, String>>> getSeverenessLevel(XPathExpression failedXPath,
                                                                                            XPathExpression leftXPath,
                                                                                            XPathExpression rightXPath,
