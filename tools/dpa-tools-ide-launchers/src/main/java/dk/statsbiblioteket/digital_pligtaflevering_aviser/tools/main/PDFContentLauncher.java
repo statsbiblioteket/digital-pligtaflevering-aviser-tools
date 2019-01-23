@@ -18,7 +18,7 @@ public class PDFContentLauncher {
         Path bitrepoPath = MavenProjectsHelper.getRequiredPathTowardsRoot(PDFContentLauncher.class, "bitrepositorystub-storage");
 
         PDFContentMain.main(new String[]{
-                "verapdf-content.properties",
+                "pdf-content.properties",
                 BITREPOSITORY_SBPILLAR_MOUNTPOINT + "=" + bitrepoPath.toAbsolutePath(),
                 URL_TO_BATCH_DIR_PROPERTY + "=" + batchPath.toAbsolutePath()
         });
