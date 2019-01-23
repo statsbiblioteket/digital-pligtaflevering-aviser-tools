@@ -9,10 +9,19 @@ package dk.statsbiblioteket.digital_pligtaflevering_aviser.verapdf;
  * Approved: The document is ok
  */
 public enum SeverenessLevel {
+    //INAVLID - indicates that the pdf-file breaks a paragraph that is in no way accepable
+    //UNKNOWN - indicates that the pdf-file breaks a paragraph that is unknown by the system
+    //MANUAL_INSPECTION - indicates that the pdf-file breaks a paragraph that makes it nessesary to manually inspect the file
+    //ACCEPTABLE - indicates that the pdf-file breaks a paragraph that we consider unproblematic
+    //ACCEPTIGNORE - indicates that the pdf-file breaks a paragraph that under the given circumstances is decided to accept
     INVALID(true), UNKNOWN(true), MANUAL_INSPECTION(true), ACCEPTABLE(false), ACCEPTIGNORE(false);
 
     private final boolean bad;
 
+    /**
+     * If this parameter is true the file is registered as incabable for preservation
+     * @return
+     */
     public boolean isBad() {
         return bad;
     }
