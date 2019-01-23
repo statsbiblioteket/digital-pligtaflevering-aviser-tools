@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 public class PDFContentMain {
     protected static final Logger log = LoggerFactory.getLogger(PDFContentMain.class);
 
-    public static final String PDF_CONTENT_NAME = "PDFCONTENT";
+    public static final String PDF_CONTENT_NAME = "PDFCONTENTINFO";
 
     public static void main(String[] args) {
         AutonomousPreservationToolHelper.execute(
@@ -129,7 +129,7 @@ public class PDFContentMain {
                                             byte[] pdfContentStream = PdfContentUtils.processListOfEmbeddedFilesToBytestream().apply(streamableList);
                                             child.modifyDatastreamByValue(PDF_CONTENT_NAME, null, null, pdfContentStream, null, "text/xml", "URL: " + url, null);
                                         } catch (IOException e) {
-                                            log.error("ContentExtractionError", e);
+                                            log.error("ContentExtractionError: " + urlObj.getPath(), e);
                                             roundtripItem.appendEvent(new DomsEvent(agent, new Date(), "failed" + urlObj.getPath(), eventName, true));
                                             return false;
                                         }
