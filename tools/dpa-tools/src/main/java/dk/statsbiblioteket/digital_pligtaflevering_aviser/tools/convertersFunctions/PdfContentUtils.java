@@ -47,7 +47,7 @@ public class PdfContentUtils {
      *
      * @throws JAXBException
      */
-    public static synchronized JaxbList getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
+    public static JaxbList getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
         StringReader reader = new StringReader(xml);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         JaxbList deserializedObject = (JaxbList) jaxbUnmarshaller.unmarshal(reader);
@@ -60,7 +60,7 @@ public class PdfContentUtils {
      * @return
      * @throws JAXBException
      */
-    public static synchronized ByteArrayOutputStream marshallListOfEmbeddedFilesInfo(JaxbList jaxbList) throws JAXBException {
+    public static ByteArrayOutputStream marshallListOfEmbeddedFilesInfo(JaxbList jaxbList) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
@@ -74,7 +74,7 @@ public class PdfContentUtils {
      * Return function for the xml-bytestream from the serializable jaxbList
      * @return
      */
-    public static synchronized Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
+    public static Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
         return deliveryStatistics -> {
             try (ByteArrayOutputStream deliveryArrayStream = new ByteArrayOutputStream()){
                 Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
