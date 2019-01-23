@@ -24,9 +24,12 @@ import java.util.function.Function;
  * MarshallerFunctions is a list of static functions which converts between objects .......
  */
 public class PdfContentDelegate {
+    //XML example
+    //<ns2:fileList xmlns:ns2="kb.dk/dpa/embeddedfiles">
+    //<EmbeddedItems xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:string">NewspaperAds_1v4.joboptions</EmbeddedItems>
+    //</ns2:fileList>
     
     protected static Logger log = LoggerFactory.getLogger(PdfContentDelegate.class);
-
     public final static JAXBContext jaxbContext;
     
     static {
@@ -38,8 +41,7 @@ public class PdfContentDelegate {
     }
     
     /**
-     *
-     *
+     * Get the serializable JaxbList from xml
      * @param xml
      * @return
      *
@@ -52,7 +54,12 @@ public class PdfContentDelegate {
         return deserializedObject;
     }
 
-    
+    /**
+     * Get the xml-bytestream from the serializable jaxbList
+     * @param jaxbList
+     * @return
+     * @throws JAXBException
+     */
     public static ByteArrayOutputStream marshallListOfEmbeddedFilesInfo(JaxbList jaxbList) throws JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -64,7 +71,7 @@ public class PdfContentDelegate {
 
 
     /**
-     *
+     * Return function for the xml-bytestream from the serializable jaxbList
      * @return
      */
     public static Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
