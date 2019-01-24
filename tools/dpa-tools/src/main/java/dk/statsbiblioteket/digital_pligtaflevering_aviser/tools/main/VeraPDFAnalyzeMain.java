@@ -100,12 +100,12 @@ public class VeraPDFAnalyzeMain {
     public static List<String> getListOfEmbeddedFilesFromXml(DomsDatastream xml) {
         try {
             if(xml==null) {
-                return new ArrayList<String>();
+                return new ArrayList<>();
             }
             return PdfContentUtils.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
         } catch (JAXBException e) {
             log.error("Error parsing embedded files", e);
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
     }
 
@@ -279,6 +279,9 @@ public class VeraPDFAnalyzeMain {
             //Get the stream of xml containing list of embedded files
             DomsDatastream embeddedFiles_xml = child.datastream(PDFContentMain.PDF_CONTENT_NAME);
 
+            //TODO exception here
+            List<String> listOfEmbeddedFilesFromXml = getListOfEmbeddedFilesFromXml(embeddedFiles_xml);
+
             log.info("Collecting result from the delivery: " + child.getPath());
             Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, verapdf_xml)
                     .map(node -> Try.of(() -> new StreamTuple<>(
@@ -288,7 +291,7 @@ public class VeraPDFAnalyzeMain {
                     .peek((StreamTuple<String, String> s) -> {
                     })
                     // map: severenesslevel -> list<problems>
-                    .collect(groupingBy(st3 -> severenessFor(st3.left(), getListOfEmbeddedFilesFromXml(embeddedFiles_xml)), mapping(st3 -> st3, toList())));
+                    .collect(groupingBy(st3 -> severenessFor(st3.left(), listOfEmbeddedFilesFromXml), mapping(st3 -> st3, toList())));
 
             String fullChildReport = groupedBySevereness.entrySet().stream()
                     .sorted(Comparator.comparing(Map.Entry::getKey))

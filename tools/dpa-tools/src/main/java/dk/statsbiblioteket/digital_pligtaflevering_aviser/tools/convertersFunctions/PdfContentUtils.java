@@ -47,11 +47,12 @@ public class PdfContentUtils {
      *
      * @throws JAXBException
      */
-    public static JaxbList getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
-        StringReader reader = new StringReader(xml);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        JaxbList deserializedObject = (JaxbList) jaxbUnmarshaller.unmarshal(reader);
-        return deserializedObject;
+    public static JaxbList<String> getListOfEmbeddedFilesFromXml(String xml) throws JAXBException {
+        try (StringReader reader = new StringReader(xml)) {
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            JaxbList<String> deserializedObject = (JaxbList<String>) jaxbUnmarshaller.unmarshal(reader);
+            return deserializedObject;
+        }
     }
 
     /**
@@ -76,12 +77,8 @@ public class PdfContentUtils {
      */
     public static Function<JaxbList, byte[]> processListOfEmbeddedFilesToBytestream() {
         return deliveryStatistics -> {
-            try (ByteArrayOutputStream deliveryArrayStream = new ByteArrayOutputStream()){
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.FALSE);
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                jaxbMarshaller.marshal(deliveryStatistics, deliveryArrayStream);
-                return deliveryArrayStream.toByteArray();
+            try {
+                return marshallListOfEmbeddedFilesInfo(deliveryStatistics).toByteArray();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to transform xml",e);
             }

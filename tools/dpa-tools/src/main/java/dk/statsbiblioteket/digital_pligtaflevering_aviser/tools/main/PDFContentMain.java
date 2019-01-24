@@ -66,14 +66,13 @@ public class PDFContentMain {
 
     }
 
-    public static boolean streamForHasContent(XPathExpression xpath, String xml) {
-        try {
-            Document xmlDocument = DOM.stringToDOM(xml);
-            NodeList nodeList = (NodeList) xpath.evaluate(xmlDocument, XPathConstants.NODESET);
+    public static boolean streamForHasContent(String xpath, String xml) {
+
+        NodeList nodeList = DOM.createXPathSelector().selectNodeList(DOM.stringToDOM(xml),xpath);
+            if (nodeList == null){
+                throw new RuntimeException("Failed to process " + xml);
+            }
             return nodeList.getLength()>0;
-        } catch (XPathExpressionException e) {
-            throw new RuntimeException("Failed to process " + xml, e);
-        }
     }
 
 
@@ -95,16 +94,6 @@ public class PDFContentMain {
 
             final String agent = getClass().getSimpleName();
 
-            // pre-compile
-            final XPathExpression leftXPathm;
-            final String leftExpressionm = "//testAssertions/ruleId/clause[text() = '6.1.11']";
-            try {
-                leftXPathm = XPathFactory.newInstance().newXPath().compile(leftExpressionm);
-            } catch (XPathExpressionException e) {
-                throw new RuntimeException(leftExpressionm, e);
-            }
-
-
             Tool f = () -> Stream.of(workToDoQuery)
                     .flatMap(domsRepository::query)
                     .peek(o -> log.trace("Query returned: {}", o))
@@ -120,7 +109,7 @@ public class PDFContentMain {
                                     String url = child.datastreams().stream().filter(datastream -> datastream.getMimeType().equals("application/pdf")).findAny().get().getUrl();
                                     String veraresult = child.datastreams().stream().filter(ds -> ds.getId().equals(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME)).findAny().get().getDatastreamAsString();
 
-                                    if (streamForHasContent(leftXPathm, veraresult)) {
+                                    if (streamForHasContent("//testAssertions/ruleId/clause[text() = '6.1.11']", veraresult)) {
                                         URL urlObj = VeraPDFInvokeMain.VeraPDFInvokeModule.getUrlForBitrepositoryItemPossiblyLocallyAvailable(child, bitrepositoryURLPrefix, bitrepositoryMountpoint, url);
 
                                         try {
