@@ -97,6 +97,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
 
     /**
      * Retrieve the specific datastream for further processing.
+     * Return null is the datastream can not be found
      * <p>
      * FIXME:  Currently the underlying DatastreamProfile class leaks through.  When we know what we need, hide it.
      */
@@ -106,7 +107,7 @@ public class DomsItem implements RepositoryItem<DomsEvent> {
         return objectProfile.getDatastreams().stream()
                 .filter(datastream -> datastream.getID().equals(datastreamId))
                 .map(datastream -> new DomsDatastream(datastream, this,domsRepository))
-                .findAny().get();
+                .findAny().orElse(null);
     }
 
     /**

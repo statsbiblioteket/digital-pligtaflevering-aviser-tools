@@ -1,7 +1,9 @@
 package dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.convertersFunctions;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.List;
 
+@JsonPropertyOrder({ "missingTitles", "extraTitles", "foundTitles", "expectedTitles", "weekday" })
 public class WeekdayResult {
     
     

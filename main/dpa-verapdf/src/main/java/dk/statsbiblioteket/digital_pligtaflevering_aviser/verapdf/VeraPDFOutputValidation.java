@@ -51,6 +51,11 @@ public class VeraPDFOutputValidation {
         }
     }
 
+    /**
+     * Get report of pdf-failures. It does not take the embedded files into account
+     * @param xmlDocument
+     * @return
+     */
     public static String getReportFor(Document xmlDocument) {
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = null;
@@ -142,8 +147,7 @@ public class VeraPDFOutputValidation {
     }
 
     /**
-     * Validate the results of paragraphs in a pdf, the broken rules is delivered in a set
-     * The first time
+     * Take a list of broken rules in a pdf-file, and return a list af the rules that is "bad" according to 'SeverenessLevel'
      *
      * @return ValidationResults indication the result of validating output from VeraPDF
      */
@@ -159,9 +163,20 @@ public class VeraPDFOutputValidation {
         return rulesBroken;
     }
 
+    public static SeverenessLevel severenessFor(String sectionId, List<String> embeddedFiles) {
+        if("6.1.11".equals(sectionId) && embeddedFiles!=null
+                && embeddedFiles.stream().filter(embeddedFile -> embeddedFile.contains(".joboptions")).count()>0) {
+            //Information always deliveres pdf-files with embedded files named@@@@@@.joboptions.
+            //We have decided to accept thease file, and we hereby ignores 6.1.11 when they contains this file
+            return SeverenessLevel.ACCEPTIGNORE;
+        } else {
+            return severenessFor(sectionId);
+        }
+    }
+
 
     public static SeverenessLevel severenessFor(String sectionId) {
-        //Errorcases has been updated according ti this document:
+        //Errorcases has been updated according to this document:
         //https://sbprojects.statsbiblioteket.dk/pages/viewpage.action?pageId=15993274
         switch (sectionId) {
             case "6.1.3":

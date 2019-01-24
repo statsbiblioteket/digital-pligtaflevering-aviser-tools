@@ -1,3 +1,15 @@
+2019-01-24
+======
+
+(NEW AUTONOMOUS COMPONENT) pdf-content
+--------------
+* A new step has been added, this step finds embedded files in pdf-files
+
+dpv-verapdf-analyze
+--------------
+* The analyze of content in pdf-files now take into account if the pdf-files contains files whish is named something about ****.joboptions
+
+
 2019-01-10
 ======
 
