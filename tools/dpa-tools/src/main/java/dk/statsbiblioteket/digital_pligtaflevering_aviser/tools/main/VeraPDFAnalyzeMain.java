@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -97,16 +98,11 @@ public class VeraPDFAnalyzeMain {
      * @param xml
      * @return If xml is null return an empty list
      */
-    public static List<String> getListOfEmbeddedFilesFromXml(DomsDatastream xml) {
-        try {
-            if(xml==null) {
-                return new ArrayList<>();
-            }
-            return PdfContentUtils.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
-        } catch (JAXBException e) {
-            log.error("Error parsing embedded files", e);
+    public static List<String> getListOfEmbeddedFilesFromXml(DomsDatastream xml) throws JAXBException {
+        if(xml==null) {
             return new ArrayList<>();
         }
+        return PdfContentUtils.getListOfEmbeddedFilesFromXml(xml.getDatastreamAsString()).getList();
     }
 
 
@@ -273,17 +269,20 @@ public class VeraPDFAnalyzeMain {
                                                                                            XPathExpression leftXPath,
                                                                                            XPathExpression rightXPath,
                                                                                            DomsItem child) {
+            Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = null;
             //Get the stream of pdf-failures accoring to pdfa standard
             String verapdf_xml = child.datastream(VeraPDFInvokeMain.VERAPDF_DATASTREAM_NAME).getDatastreamAsString();
 
             //Get the stream of xml containing list of embedded files
             DomsDatastream embeddedFiles_xml = child.datastream(PDFContentMain.PDF_CONTENT_NAME);
 
-            //TODO exception here
-            List<String> listOfEmbeddedFilesFromXml = getListOfEmbeddedFilesFromXml(embeddedFiles_xml);
+            List<String> listOfEmbeddedFilesFromXml;
+            try {
+                listOfEmbeddedFilesFromXml = getListOfEmbeddedFilesFromXml(embeddedFiles_xml);
+
 
             log.info("Collecting result from the delivery: " + child.getPath());
-            Map<SeverenessLevel, List<StreamTuple<String, String>>> groupedBySevereness = streamFor(failedXPath, verapdf_xml)
+            groupedBySevereness = streamFor(failedXPath, verapdf_xml)
                     .map(node -> Try.of(() -> new StreamTuple<>(
                             leftXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " "),
                             rightXPath.evaluate(node).replaceAll(REMOVE_NEWLINES_REGEX, " ")
@@ -311,6 +310,15 @@ public class VeraPDFAnalyzeMain {
             // Only keep the bad ones
             groupedBySevereness.entrySet().removeIf(e -> e.getKey().isBad() == false);
 
+            } catch (JAXBException e) {
+                log.error("Error parsing embedded files", e);
+                StreamTuple ss = new StreamTuple("Unparsable content", "Embedded files could not get parsed");
+                ArrayList arl = new ArrayList<StreamTuple<String, String>>();
+                arl.add(ss);
+
+                groupedBySevereness = new HashMap<SeverenessLevel, List<StreamTuple<String, String>>>();
+                groupedBySevereness.put(SeverenessLevel.UNKNOWN, arl);
+            }
 
             return groupedBySevereness;
         }
