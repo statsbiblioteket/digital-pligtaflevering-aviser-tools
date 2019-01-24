@@ -40,6 +40,12 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+
         <!-- FIXME: TEMPORARY HACK TO MAKE DOMSINGESTERMAIN WORK -->
         <dependency>
             <groupId>dk.statsbiblioteket.digital_pligtaflevering_aviser</groupId>

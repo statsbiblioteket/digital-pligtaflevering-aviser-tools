@@ -242,6 +242,12 @@
                                 </program>
                                 <program>
                                     <mainClass>
+                                        dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.PDFContentMain
+                                    </mainClass>
+                                    <id>pdfcontent-invoke</id>
+                                </program>
+                                <program>
+                                    <mainClass>
                                         dk.statsbiblioteket.digital_pligtaflevering_aviser.tools.main.VeraPDFAnalyzeMain
                                     </mainClass>
                                     <id>verapdf-analyze</id>
