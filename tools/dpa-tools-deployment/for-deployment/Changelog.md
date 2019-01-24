@@ -10,6 +10,15 @@ dpv-verapdf-analyze
 * The analyze of content in pdf-files now take into account if the pdf-files contains files whish is named something about ****.joboptions
 
 
+2019-01-10
+======
+
+Manualcontrol web ui (VAADIN)
+-------------------
+* improve viewing of pdf-files
+* Fix problem with number of pages in newspaper-tables
+
+
 2018-10-09
 ======
 
